@@ -75,6 +75,12 @@ export default function App() {
     setArmedCatId(null);
   };
 
+  // header "sign in to sync": open Settings with the email field focused
+  const openSignIn = () => {
+    changeView("settings");
+    requestAnimationFrame(() => document.getElementById("cadence-email")?.focus());
+  };
+
   // week 2 becomes week 1, and the view jumps back to it
   const onAdvance = () => {
     actions.advanceWeek();
@@ -98,7 +104,12 @@ export default function App() {
   return (
     <div style={S.root}>
       <style>{FONT_IMPORT}</style>
-      <Header view={view} setView={changeView} syncStatus={sync.configured && sync.session ? sync.status : null} />
+      <Header
+        view={view}
+        setView={changeView}
+        syncStatus={sync.configured && sync.session ? sync.status : null}
+        onSignIn={sync.configured && sync.ready && !sync.session ? openSignIn : null}
+      />
       {view === "calendar" && sync.conflict && (
         <div style={S.conflictBanner}>
           <span>This device and your account both have a schedule.</span>

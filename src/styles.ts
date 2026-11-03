@@ -119,6 +119,18 @@ export const S = {
     textTransform: "uppercase",
     letterSpacing: "0.08em"
   },
+  signInBtn: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    padding: "6px 12px",
+    border: `1.5px dashed ${ink}`,
+    background: "transparent",
+    color: ink,
+    cursor: "pointer",
+    borderRadius: 2
+  },
   syncDot: {
     width: 6,
     height: 6,

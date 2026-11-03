@@ -9,11 +9,14 @@ export default function Header({
   view,
   setView,
   syncStatus,
+  onSignIn,
 }: {
   view: View;
   setView: (v: View) => void;
   /** set only when sync is configured and signed in; null hides the status line */
   syncStatus: SyncStatus | null;
+  /** set only when sync is configured and signed out; shows a "sign in to sync" link */
+  onSignIn: (() => void) | null;
 }) {
   const badge = syncStatus ? statusBadge(syncStatus) : null;
   const nav = (
@@ -37,6 +40,13 @@ export default function Header({
           <button style={S.syncStatus} onClick={() => setView("settings")}>
             <span style={{ ...S.syncDot, background: badge.dot }} />
             {badge.label}
+          </button>
+        </div>
+      ) : onSignIn ? (
+        <div style={S.navStack}>
+          {nav}
+          <button style={S.signInBtn} onClick={onSignIn}>
+            sign in to sync
           </button>
         </div>
       ) : (
