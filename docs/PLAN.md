@@ -53,5 +53,16 @@ Per SPEC "Phone layout": day strip, single column, 40px rows, swipe, default day
 Verify: mobile emulation screenshots; desktop unchanged.
 Depends: 8.
 
-## Phase 4 — Sync
+## Phase 4 — Sync (see SPEC "Phase 4 design")
+
+### [ ] 10. Sync engine + schema + setup guide — Careful
+`supabase/schema.sql`, `.env.example`, Supabase client (null when env missing), `cadence:meta` handling and edit-time bumping, pure sync decision functions with tests, a `useSync` hook exposing status/session/actions (sendCode, verifyCode, signOut, resolveConflict), workflow env vars, and `docs/SUPABASE_SETUP.md` click-through guide for the user.
+Verify: unit tests with a fake client; build/lint; app still runs local-only without env.
+Depends: Phase 3.
+
+### [ ] 11. Sync UI — Medium
+Header status, Settings "Account & sync" (signed out / code entry / signed in), conflict card + calendar banner, per SPEC "UI".
+Verify: browser with a faked sync state; real end-to-end once the user's project exists.
+Depends: 10.
+
 ## Phase 5 — Handoff

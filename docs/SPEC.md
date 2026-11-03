@@ -147,6 +147,46 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 - `touch-action: manipulation` on html/body (kills double-tap zoom, keeps pinch zoom).
 - On `(pointer: coarse)`, all inputs/textarea `font-size: 16px` (prevents iOS focus zoom).
 
+## Phase 4 design: sync (approved scope from brief)
+
+### Backend (Supabase, free tier)
+- Table `public.cadence_state (user_id uuid primary key references auth.users on delete cascade, data jsonb not null, updated_at timestamptz not null)`. RLS enabled; policies: select/insert/update only where `user_id = auth.uid()`. No delete policy.
+- `updated_at` is the CLIENT's last-edit time of the document (not `now()`), so last-write-wins compares edit times across devices.
+- Writes go through `public.push_state(p_data jsonb, p_updated_at timestamptz) returns table(data jsonb, updated_at timestamptz)`, `security invoker`: insert the caller's row, or update it only if the stored `updated_at` is older than `p_updated_at`; always returns the row that is now stored (ours if we won, the newer server one if we lost). Atomic LWW, so an offline device can't overwrite a newer copy.
+- SQL lives in `supabase/schema.sql` (idempotent: `create table if not exists`, `create or replace function`, `drop policy if exists` + create).
+- `data` = `{ schemaVersion: 1, cats, weeks, templates, history, streaks }` (same as the export envelope's data plus schemaVersion). Anything pulled goes through `normalizeData`.
+
+### Auth
+- Supabase email OTP via `signInWithOtp({ email, options: { emailRedirectTo: <app url>, shouldCreateUser: true } })`.
+- iOS caveat: a home-screen PWA does not share storage with Safari, so a magic LINK opened from Mail signs in Safari, not the installed app. Therefore the email contains BOTH the link and a 6-digit code (custom email template using `{{ .Token }}`), and the app offers a code field (`verifyOtp({ email, token, type: "email" })`). The link still works on desktop/when opened in the same browser (`detectSessionInUrl`).
+- Session persisted by supabase-js in localStorage (key prefix `sb-`), auto refresh on.
+- Env: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (the project's public anon / publishable key — designed to be public; RLS protects data). `.env.example` lists them; `.env.local` (gitignored) holds them for dev; GitHub repository VARIABLES feed the Pages build. If either is missing, the app runs local-only and hides all account UI.
+
+### Local metadata
+- New key `cadence:meta` = `{ updatedAt: number /*ms, last local edit*/, syncedAt: number | null /*updatedAt value last confirmed equal to the server*/, userId: string | null }`.
+- Every user edit bumps `updatedAt = Date.now()`. Loading from storage and applying a pulled server copy do NOT bump it (applying sets `updatedAt = syncedAt = server updated_at`).
+- "Dirty" = `syncedAt !== updatedAt`.
+
+### Sync rules (pure decision functions, unit-tested)
+- Signed out: local-only, nothing else changes.
+- Push: when signed in and dirty, debounce 1.5s after the last edit, call `push_state(local, updatedAt)`. If the returned `updated_at` equals ours → `syncedAt = updatedAt`. If it is newer → the server won: apply the returned copy.
+- Pull: on launch (after session restore), on `visibilitychange` to visible, on `online`, and right after sign-in: select own row. Decide:
+  - no row → push local (first upload).
+  - server.updated_at > local.updatedAt → apply server.
+  - server.updated_at < local.updatedAt → push (we're newer).
+  - equal → mark synced.
+- First sign-in on a device (meta.userId !== session user id) with a server row: if local data is "empty" (no blocks in either week, no templates, no history, no streaks, cats equal to defaults) → apply server silently; if server and local content are deep-equal → mark synced; otherwise ASK (see UI). Then store `meta.userId`.
+- Signing in as a different user than meta.userId: same as first sign-in.
+- Sign out: keep local data on the device, clear session, `meta.userId = null`, `syncedAt = null`.
+- Errors/offline: keep data local, status "offline" (navigator.onLine false or fetch failure), retry on next trigger (online, visibility, next edit). Never lose local edits.
+
+### UI
+- Header status (only when sync is configured AND signed in): under the nav, right-aligned, `Spline Sans Mono` 10px, color `#9a8d7d`, uppercase letter-spacing 0.08em, a 6px dot before the text: `synced` (dot #1FA98A), `syncing…` (dot #C9A227), `offline` (dot #cabfb2), `sync error` (dot #b54). Clicking it opens Settings. On phones it wraps under the nav.
+- Settings → new section under "Your data", same styles: `h2` "Account & sync".
+  - Signed out: intro `S.catIntro` "Sign in with your email to keep your weeks in sync between your phone and computer. No password." An email input (`S.tplNameInput` style, type email, autocomplete email) + button "Send me a code" (`S.catAdd` style). After sending: text "Check your email. Tap the link, or type the 6-digit code here:" + code input (inputmode numeric, autocomplete one-time-code, maxlength 6) + "Sign in" (`S.resetConfirm` style with background #1FA98A) + small "Use a different email" text button. Errors in `#b54` italic 13px ("That code didn't work. Try again or ask for a new one.").
+  - Signed in: "Signed in as <email>." + the current status line ("Everything's synced." / "Saving changes…" / "Offline. Changes are saved on this device and will sync later.") + "Sign out" (`S.resetCancel` style).
+  - Conflict prompt (first sign-in, both sides have different data): card in `S.streakCard` colours left-aligned: "This device and your account both have a schedule." then two summary lines using the import summary sentence for each side ("On this device: …" / "In your account: …"), then buttons "Keep this device's" (`S.resetConfirm` with #1FA98A) and "Use my account's" (`S.resetCancel`). Until chosen, no push/pull happens. The prompt also shows as a banner at the top of the calendar view ("Choose which schedule to keep →" link to Settings) so it isn't missed.
+
 ## Phases
 1. Port + export/import + unit tests (this file's sections above).
 2. PWA + deploy: manifest, icons (incl. 180×180 apple-touch-icon, replace the emoji favicon), iOS meta tags, `viewport-fit=cover` + safe-area padding, service worker app-shell cache, self-hosted fonts, GitHub Pages workflow.
