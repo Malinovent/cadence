@@ -55,7 +55,7 @@ Depends: 8.
 
 ## Phase 4 — Sync (see SPEC "Phase 4 design")
 
-### [ ] 10. Sync engine + schema + setup guide — Careful
+### [x] 10. Sync engine + schema + setup guide — Careful
 `supabase/schema.sql`, `.env.example`, Supabase client (null when env missing), `cadence:meta` handling and edit-time bumping, pure sync decision functions with tests, a `useSync` hook exposing status/session/actions (sendCode, verifyCode, signOut, resolveConflict), workflow env vars, and `docs/SUPABASE_SETUP.md` click-through guide for the user.
 Verify: unit tests with a fake client; build/lint; app still runs local-only without env.
 Depends: Phase 3.

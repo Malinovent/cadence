@@ -5,6 +5,9 @@
 - `docs/BRIEF.md` — original request from the user
 - `docs/SPEC.md` — spec: architecture, data model, behaviour, designs
 - `docs/PLAN.md` — task list and status
+- `docs/SUPABASE_SETUP.md` — click-through guide for the user: Supabase project, schema, auth emails, GitHub variables
+- `supabase/schema.sql` — sync backend: `cadence_state` table, RLS policies, `push_state` LWW function (idempotent; pasted into the Supabase SQL editor)
+- `.env.example` — env keys (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`); copy to `.env.local` (gitignored) for dev
 - `legacy/cadence.html` — original single-file app; read-only reference
 - `package.json` — npm scripts and dependencies (`npm run icons` regenerates `public/` icons)
 - `index.html` — Vite entry HTML (title, favicons, apple-touch-icon, iOS/PWA meta tags, `viewport-fit=cover`, root div)
@@ -15,7 +18,8 @@
 - `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json` — TypeScript project configs
 - `eslint.config.js` — ESLint flat config
 - `src/main.tsx` — imports self-hosted fonts (@fontsource), mounts `<App/>` in StrictMode
-- `src/App.tsx` — header + view switch; owns UI state (view, active week, stats range, editing id, phone selected day); picks phone vs desktop grid props
+- `src/vite-env.d.ts` — Vite client types + typed `import.meta.env` sync vars
+- `src/App.tsx` — header + view switch; owns UI state (view, active week, stats range, editing id, phone selected day); picks phone vs desktop grid props; starts `useSync`
 - `src/styles.ts` — `S.*` style objects and tokens
 - `src/lib/` — pure business logic and its unit tests (`*.test.ts` next to each module)
 - `src/lib/constants.ts` — grid constants (`ROW_H` desktop, `ROW_H_PHONE`), `DEFAULT_CATEGORIES`, `PALETTE`
@@ -24,6 +28,8 @@
 - `src/lib/placement.ts` — `freeGaps`, `resolvePlacement`, `resizeBlock`
 - `src/lib/model.ts` — data types, `defaultData`, migrations, `normalizeData`
 - `src/lib/storage.ts` — localStorage load/save of the five `cadence:*` keys
+- `src/lib/meta.ts` — `cadence:meta` sync bookkeeping (`updatedAt`, `syncedAt`, `userId`): load/save, defaults, `isDirty`, `nextEditTime`
+- `src/lib/syncLogic.ts` — pure sync decisions: `decideAfterPull`, `decideAfterPush`, `isEmptyData`, `contentEqual` / `jsonEqual` (key-order-insensitive), `winningUpdatedAt`
 - `src/lib/transfer.ts` — export envelope/filename, `parseImport`
 - `src/lib/format.ts` — UI sentence formatting: import summary line, skipped-entries line
 - `src/lib/download.ts` — browser-only `downloadText` (Blob + object URL + `<a download>`)
@@ -32,8 +38,13 @@
 - `src/lib/gesture.ts` — pure gesture maths for the interaction engine: thresholds, y→slot start (row height as a parameter), `hitTest` on measured rects, autoscroll speed, touch grip sizing, `resolveDrop` / `dropPreview`, `withAlpha`
 - `src/lib/dayview.ts` — phone day view maths: `defaultDay`, `swipeDay`, `daysWithBlocks`; row-height-scaled block text thresholds (`tallerThan`, `blockText`)
 - `src/lib/__fixtures__/legacy.ts` — legacy-app data fixture for tests
-- `src/state/useCadence.ts` — `useCadence` hook: data, per-key persistence, bound actions
+- `src/state/store.ts` — `createCadenceStore`: framework-free holder of data + meta; per-key persistence; `edit` (user edit, bumps `updatedAt`), `applyRemote` (no bump), `setMeta`
+- `src/state/useCadence.ts` — `useCadence` hook: renders from the store (`useSyncExternalStore`); data, meta, bound user actions, `store`
 - `src/state/useIsPhone.ts` — `useIsPhone()`: matchMedia `(max-width: 899px)`, live, SSR default false
+- `src/sync/client.ts` — Supabase client from env, or `null` (local-only)
+- `src/sync/supabaseClient.ts` — `SyncClient` adapter over supabase-js (OTP auth, row select, `push_state` RPC, error mapping); `syncClient` (null when unconfigured)
+- `src/sync/engine.ts` — framework-free sync orchestration over an injected `SyncClient` + store: session, pull triggers, debounced single-flight push, status, conflict; `engine.test.ts` (fake backend, fake timers)
+- `src/sync/useSync.ts` — React hook: one engine per mount, DOM triggers (visibility, online/offline), state + actions for the UI
 - `src/interaction/engine.ts` — Pointer Events engine (framework-free): press → long-press / 4px → drag → drop, edge resizes, autoscroll, scroll lock, click suppression; `engine.test.ts` (jsdom)
 - `src/interaction/dom.ts` — browser side of the engine: grid measuring (`data-row-h` / `data-day` / `data-block-id` contract), drag ghost, click swallowing, coarse-pointer query
 - `src/interaction/useInteraction.ts` — React hook: one engine for tray + grid, mirrors its state

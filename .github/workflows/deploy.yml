@@ -26,8 +26,11 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run lint
-      # Phase 4 will add VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY as repository variables passed via env: to this build step.
+      # Supabase sync config comes from repository Variables (public values). Unset → local-only build.
       - run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

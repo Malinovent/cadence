@@ -14,10 +14,13 @@ import type { Block, CadenceData } from "./lib/model";
 import type { StatsRange } from "./lib/stats";
 import { useCadence } from "./state/useCadence";
 import { useIsPhone } from "./state/useIsPhone";
+import { useSync } from "./sync/useSync";
 import { FONT_IMPORT, S } from "./styles";
 
 export default function App() {
-  const { data, actions } = useCadence();
+  const { data, actions, store } = useCadence();
+  // Supabase sync (no-op when not configured); its status and account actions get UI in task 11
+  useSync(store);
   const [view, setView] = useState<View>("calendar");
   const [activeWeek, setActiveWeek] = useState<WeekIndex>(0); // 0 = this week, 1 = next week
   const [statsRange, setStatsRange] = useState<StatsRange>("month");

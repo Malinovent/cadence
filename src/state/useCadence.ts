@@ -1,17 +1,19 @@
-import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import * as A from "../lib/actions";
+import type { SyncMeta } from "../lib/meta";
 import type { CadenceData } from "../lib/model";
-import { loadData, saveKey, STORAGE_KEYS } from "../lib/storage";
+import { createCadenceStore, type CadenceStore } from "./store";
 
-// wrap a pure action so it runs inside a state updater: (data, ...args) -> (...args)
+// wrap a pure action as a user edit: (data, ...args) -> (...args). The store applies it
+// synchronously and bumps meta.updatedAt once (no React updater, so StrictMode can't double it).
 const bindAction =
-  (setData: Dispatch<SetStateAction<CadenceData>>) =>
+  (store: CadenceStore) =>
   <Args extends unknown[]>(fn: (d: CadenceData, ...args: Args) => CadenceData) =>
   (...args: Args): void =>
-    setData((d) => fn(d, ...args));
+    store.edit((d) => fn(d, ...args));
 
-const makeActions = (setData: Dispatch<SetStateAction<CadenceData>>) => {
-  const b = bindAction(setData);
+const makeActions = (store: CadenceStore) => {
+  const b = bindAction(store);
   return {
     placeBlock: b(A.placeBlock),
     moveBlock: b(A.moveBlock),
@@ -35,27 +37,10 @@ const makeActions = (setData: Dispatch<SetStateAction<CadenceData>>) => {
 
 export type CadenceActions = ReturnType<typeof makeActions>;
 
-export function useCadence(): { data: CadenceData; actions: CadenceActions } {
-  const [data, setData] = useState<CadenceData>(() => loadData());
-  // slices still identical to what was loaded are not rewritten on mount
-  const loaded = useRef(data);
-
-  useEffect(() => {
-    if (data.cats !== loaded.current.cats) saveKey(STORAGE_KEYS.cats, data.cats);
-  }, [data.cats]);
-  useEffect(() => {
-    if (data.weeks !== loaded.current.weeks) saveKey(STORAGE_KEYS.weeks, data.weeks);
-  }, [data.weeks]);
-  useEffect(() => {
-    if (data.templates !== loaded.current.templates) saveKey(STORAGE_KEYS.templates, data.templates);
-  }, [data.templates]);
-  useEffect(() => {
-    if (data.history !== loaded.current.history) saveKey(STORAGE_KEYS.history, data.history);
-  }, [data.history]);
-  useEffect(() => {
-    if (data.streaks !== loaded.current.streaks) saveKey(STORAGE_KEYS.streaks, data.streaks);
-  }, [data.streaks]);
-
-  const actions = useMemo(() => makeActions(setData), []);
-  return { data, actions };
+// data + per-key persistence (in the store) + bound user actions; `store` is for useSync
+export function useCadence(): { data: CadenceData; meta: SyncMeta; actions: CadenceActions; store: CadenceStore } {
+  const [store] = useState(() => createCadenceStore());
+  const snap = useSyncExternalStore(store.subscribe, store.getSnapshot);
+  const actions = useMemo(() => makeActions(store), [store]);
+  return { data: snap.data, meta: snap.meta, actions, store };
 }
