@@ -7,6 +7,8 @@ export const FONT_IMPORT = `
 * { box-sizing: border-box; }
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-thumb { background: #cabfb2; border-radius: 4px; }
+/* narrow screens: controls stack above the calendar */
+@media (max-width: 899px) { .cadence-body { grid-template-columns: minmax(0, 1fr) !important; } }
 `;
 export const ink = "#2b2622";
 export const paper = "#f4ede1";
@@ -47,7 +49,8 @@ export const S = {
   },
   nav: {
     display: "flex",
-    gap: 6
+    gap: 6,
+    flexWrap: "wrap"
   },
   navBtn: {
     fontFamily: "'Spline Sans Mono', monospace",

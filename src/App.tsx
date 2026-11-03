@@ -38,7 +38,7 @@ export default function App() {
       <style>{FONT_IMPORT}</style>
       <Header view={view} setView={setView} />
       {view === "calendar" && (
-        <div style={S.body}>
+        <div className="cadence-body" style={S.body}>
           <Sidebar
             data={data}
             week={activeWeek}
