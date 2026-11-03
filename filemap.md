@@ -14,6 +14,15 @@
 - `src/main.tsx` — mounts `<App/>` in StrictMode
 - `src/App.tsx` — header + nav + view switch
 - `src/styles.ts` — `S.*` style objects and tokens
-- `src/lib/` — pure business logic and its unit tests
+- `src/lib/` — pure business logic and its unit tests (`*.test.ts` next to each module)
+- `src/lib/constants.ts` — grid constants, `DEFAULT_CATEGORIES`, `PALETTE`
+- `src/lib/uid.ts` — `uid()`
+- `src/lib/time.ts` — `fmtTime`, `fmtDur`
+- `src/lib/placement.ts` — `freeGaps`, `resolvePlacement`, `resizeBlock`
+- `src/lib/model.ts` — data types, `defaultData`, migrations, `normalizeData`
+- `src/lib/storage.ts` — localStorage load/save of the five `cadence:*` keys
+- `src/lib/transfer.ts` — export envelope/filename, `parseImport`
+- `src/lib/actions.ts` — pure state transitions on `CadenceData`
+- `src/lib/__fixtures__/legacy.ts` — legacy-app data fixture for tests
 - `src/state/` — `useCadence` hook: data, persistence, actions
 - `src/components/` — React view components

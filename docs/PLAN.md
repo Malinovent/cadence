@@ -9,7 +9,7 @@ Create the Vite + React 18 + TypeScript (strict) project in the repo root, follo
 Verify: `npm run build`, `npm test` (one trivial test), `npm run lint` all pass.
 Depends: none.
 
-### [ ] 2. Core logic + tests — Careful
+### [x] 2. Core logic + tests — Careful
 Port the pure logic from `legacy/cadence.html` into `src/lib/` per SPEC "Architecture" and "Data model": constants, `fmtTime`/`fmtDur`, `freeGaps`/`resolvePlacement` (verbatim semantics), a new pure `resizeBlock` extracted from the legacy resize handler, types, `migrateBlocks`/`migrateTemplates`/`normalizeData`, `storage.ts` (five keys, defaults), `transfer.ts` (export envelope + import parse/validate per SPEC "Export / import"), and `actions.ts` with every state transition the UI needs (placeBlock, moveBlock, resize, addTag, removeTag, updateBlock, removeBlock, toggleDone, saveTemplate, applyTemplate, deleteTemplate, advanceWeek, resetStats, updateCat, addCat, removeCat, replaceAll). Actions take `CadenceData` (plus args, plus `activeWeek` where the legacy code uses it) and return new `CadenceData`, never mutating input. `uid` and `Date.now` are injectable for tests. Unit tests per SPEC "Definition of done".
 Verify: `npm test` green, `npm run lint`, `npm run build`.
 Depends: 1.
