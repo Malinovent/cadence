@@ -6,3 +6,14 @@
 - `docs/SPEC.md` — spec: architecture, data model, behaviour, designs
 - `docs/PLAN.md` — task list and status
 - `legacy/cadence.html` — original single-file app; read-only reference
+- `package.json` — npm scripts and dependencies
+- `index.html` — Vite entry HTML (title, favicon, root div)
+- `vite.config.ts` — Vite + Vitest config (`base: "/cadence/"`)
+- `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json` — TypeScript project configs
+- `eslint.config.js` — ESLint flat config
+- `src/main.tsx` — mounts `<App/>` in StrictMode
+- `src/App.tsx` — header + nav + view switch
+- `src/styles.ts` — `S.*` style objects and tokens
+- `src/lib/` — pure business logic and its unit tests
+- `src/state/` — `useCadence` hook: data, persistence, actions
+- `src/components/` — React view components

@@ -4,7 +4,7 @@ Status legend: [ ] todo · [~] in progress · [x] accepted. Each phase stops for
 
 ## Phase 1 — Port
 
-### [ ] 1. Scaffold — Light
+### [x] 1. Scaffold — Light
 Create the Vite + React 18 + TypeScript (strict) project in the repo root, following SPEC "Stack" and the `src/` layout in SPEC "Architecture" (empty placeholder modules are fine). Add Vitest and ESLint 9 flat config (typescript-eslint, eslint-plugin-react-hooks). npm scripts: `dev`, `build` (`tsc -b && vite build`), `preview`, `test` (`vitest run`), `test:watch`, `lint`. `index.html`: title "Cadence — Weekly Time Balancer", `html, body { margin:0; padding:0; background:#f4ede1 }`, `#root { min-height:100vh }`, the legacy emoji favicon for now. `main.tsx` renders a placeholder in `<React.StrictMode>`. Set `base: "/cadence/"` in `vite.config.ts`. Update `filemap.md`.
 Verify: `npm run build`, `npm test` (one trivial test), `npm run lint` all pass.
 Depends: none.
