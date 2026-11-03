@@ -4,7 +4,6 @@ import type React from "react";
 //  STYLES — warm paper / editorial aesthetic (ported verbatim from legacy)
 // ============================================================
 export const FONT_IMPORT = `
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,900&family=Spline+Sans+Mono:wght@400;500&display=swap');
 * { box-sizing: border-box; }
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-thumb { background: #cabfb2; border-radius: 4px; }
@@ -15,11 +14,11 @@ export const paper2 = "#ece2d2";
 export const line = "#d8cbb8";
 export const S = {
   root: {
-    fontFamily: "'Fraunces', Georgia, serif",
+    fontFamily: "'Fraunces Variable', 'Fraunces', Georgia, serif",
     background: paper,
     color: ink,
     minHeight: "100%",
-    padding: 20,
+    padding: "max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left))",
     backgroundImage: "radial-gradient(#e6dcc9 0.5px, transparent 0.5px)",
     backgroundSize: "14px 14px"
   },
@@ -89,7 +88,7 @@ export const S = {
     padding: "10px 0",
     border: "none",
     background: "transparent",
-    fontFamily: "'Fraunces', serif",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
     fontWeight: 600,
     fontSize: 15,
     cursor: "pointer",
@@ -198,7 +197,7 @@ export const S = {
     background: "transparent",
     cursor: "pointer",
     borderRadius: 3,
-    fontFamily: "'Fraunces', serif",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
     fontWeight: 500,
     color: ink
   },
@@ -212,7 +211,7 @@ export const S = {
     padding: "7px 8px",
     border: `1.5px solid ${ink}`,
     borderRadius: 3,
-    fontFamily: "'Fraunces', serif",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
     fontSize: 13,
     background: "#fff",
     color: ink,
@@ -271,7 +270,7 @@ export const S = {
     color: "#fff",
     borderRadius: 4,
     cursor: "pointer",
-    fontFamily: "'Fraunces', serif",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
     fontWeight: 600,
     fontSize: 13,
     boxShadow: "2px 2px 0 rgba(0,0,0,0.18)"
@@ -431,7 +430,7 @@ export const S = {
     border: "none",
     borderBottom: "1px solid",
     outline: "none",
-    fontFamily: "'Fraunces', serif",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
     fontStyle: "italic",
     fontSize: 12,
     padding: "1px 0",
@@ -443,7 +442,7 @@ export const S = {
     border: "1px solid",
     borderRadius: 3,
     outline: "none",
-    fontFamily: "'Fraunces', serif",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
     fontSize: 11,
     padding: "4px 5px",
     resize: "vertical",
@@ -636,7 +635,7 @@ export const S = {
     color: "#fff",
     borderRadius: 3,
     cursor: "pointer",
-    fontFamily: "'Fraunces', serif",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
     fontWeight: 600,
     fontSize: 13
   },
@@ -647,7 +646,7 @@ export const S = {
     color: ink,
     borderRadius: 3,
     cursor: "pointer",
-    fontFamily: "'Fraunces', serif",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
     fontSize: 13
   },
   catBody: {
@@ -675,7 +674,7 @@ export const S = {
   },
   catNameInput: {
     flex: "1 1 140px",
-    fontFamily: "'Fraunces', serif",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
     fontSize: 16,
     fontWeight: 600,
     border: "none",
@@ -725,7 +724,7 @@ export const S = {
     background: "transparent",
     cursor: "pointer",
     borderRadius: 4,
-    fontFamily: "'Fraunces', serif",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
     fontWeight: 500,
     fontSize: 14,
     color: ink

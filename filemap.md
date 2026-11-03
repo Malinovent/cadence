@@ -6,12 +6,15 @@
 - `docs/SPEC.md` — spec: architecture, data model, behaviour, designs
 - `docs/PLAN.md` — task list and status
 - `legacy/cadence.html` — original single-file app; read-only reference
-- `package.json` — npm scripts and dependencies
-- `index.html` — Vite entry HTML (title, favicon, root div)
-- `vite.config.ts` — Vite + Vitest config (`base: "/cadence/"`)
+- `package.json` — npm scripts and dependencies (`npm run icons` regenerates `public/` icons)
+- `index.html` — Vite entry HTML (title, favicons, apple-touch-icon, iOS/PWA meta tags, `viewport-fit=cover`, root div)
+- `vite.config.ts` — Vite + Vitest + `vite-plugin-pwa` config (`base: "/cadence/"`, web manifest, Workbox generateSW precache)
+- `assets/icon.svg` — app icon source art (180×180, opaque); edit this, then run `npm run icons`
+- `scripts/icons.mjs` — renders `assets/icon.svg` into the icons in `public/` (sharp)
+- `public/` — generated, committed icons copied as-is into the build: `favicon.ico`, `favicon.svg`, `apple-touch-icon-180x180.png`, `pwa-192x192.png`, `pwa-512x512.png`, `maskable-icon-512x512.png`
 - `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json` — TypeScript project configs
 - `eslint.config.js` — ESLint flat config
-- `src/main.tsx` — mounts `<App/>` in StrictMode
+- `src/main.tsx` — imports self-hosted fonts (@fontsource), mounts `<App/>` in StrictMode
 - `src/App.tsx` — header + view switch; owns UI state (view, active week, stats range, editing id)
 - `src/styles.ts` — `S.*` style objects and tokens
 - `src/lib/` — pure business logic and its unit tests (`*.test.ts` next to each module)
@@ -38,3 +41,4 @@
 - `src/components/CategoriesView.tsx` — category editor
 - `src/components/SettingsView.tsx` — "Your data": export / import with summary + confirm
 - `src/components/drag.ts` — `DragInfo` type shared by tray and grid
+- `.github/workflows/deploy.yml` — CI: test, lint, build, deploy to GitHub Pages

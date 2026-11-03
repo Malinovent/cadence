@@ -24,7 +24,23 @@ Implement `SettingsView` exactly per SPEC "Settings view", using `transfer.ts` a
 Verify: export, edit something, import the file, data restored; import a flat legacy-keys file; import garbage shows the error.
 Depends: 3.
 
-## Phase 2 — PWA + deploy (planned after Phase 1 approval)
+## Phase 2 — PWA + deploy
+
+### [x] 5. PWA setup — Careful
+vite-plugin-pwa (generateSW, autoUpdate, app-shell precache, navigateFallback), manifest per SPEC Phase 2, self-hosted fonts via @fontsource (replacing the Google Fonts @import), iOS meta tags, viewport-fit=cover, safe-area padding on the root, icon pipeline from `assets/icon.svg` (placeholder until task 7).
+Verify: build, lint, tests; `vite preview` shows SW registered, manifest valid, app loads offline.
+Depends: Phase 1.
+
+### [x] 6. GitHub Pages workflow — Light
+`.github/workflows/deploy.yml`: on push to main, npm ci, test, build, deploy `dist` with the official Pages actions.
+Verify: YAML lint-clean; build command matches package.json.
+Depends: Phase 1.
+
+### [x] 7. Final icons — dropped: user picked design A, which is the placeholder art (no text), so task 5's icons are final
+Replace the placeholder `assets/icon.svg` with the design the user picked (text converted to paths), regenerate all icon sizes.
+Verify: PNGs render correctly at 180, 192, 512 and favicon sizes.
+Depends: 5, user's icon choice.
+
 ## Phase 3 — Mobile (design mockups first)
 ## Phase 4 — Sync
 ## Phase 5 — Handoff
