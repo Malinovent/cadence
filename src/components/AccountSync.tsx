@@ -113,7 +113,6 @@ export default function AccountSync(p: AccountSyncProps) {
           <form style={{ ...row, marginTop: 16 }} onSubmit={onSend} noValidate>
             <input
               style={input}
-              id="cadence-email"
               type="email"
               autoComplete="email"
               placeholder="you@example.com"
