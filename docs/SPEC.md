@@ -131,7 +131,7 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 
 ### Tap-to-place
 - Tap (no long-press, no drag) on a tray item arms it: item shows filled (background category colour, text `#fff`, solid border); the "Drag into the grid" label reads "Tap a slot to place · tap again to cancel". Tapping it again, another tray item (switches), Escape, or changing view/week disarms.
-- While armed, tapping an empty spot in a day column places a block there (start from tap y, `placeBlock` rules). Tapping an existing block while armed adds the tag. After placing, the tray stays armed? No: one placement then disarm.
+- While armed, tapping an empty spot in a day column places a block there (start from tap y, `placeBlock` rules). Tapping an existing block while armed adds the tag. One placement, then the tray disarms.
 - Works on desktop too (click to arm), harmless.
 
 ### Resize
