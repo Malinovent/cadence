@@ -7,6 +7,7 @@ import Sidebar from "./components/Sidebar";
 import StatsView from "./components/StatsView";
 import WeekGrid from "./components/WeekGrid";
 import type { WeekIndex } from "./lib/actions";
+import type { CadenceData } from "./lib/model";
 import type { StatsRange } from "./lib/stats";
 import { useCadence } from "./state/useCadence";
 import { FONT_IMPORT, S } from "./styles";
@@ -22,6 +23,13 @@ export default function App() {
   // week 2 becomes week 1, and the view jumps back to it
   const onAdvance = () => {
     actions.advanceWeek();
+    setActiveWeek(0);
+  };
+
+  // an import replaces everything; drop UI state that may point at old blocks
+  const onReplace = (next: CadenceData) => {
+    actions.replaceAll(next);
+    setEditingId(null);
     setActiveWeek(0);
   };
 
@@ -54,7 +62,7 @@ export default function App() {
         <StatsView data={data} range={statsRange} setRange={setStatsRange} resetStats={actions.resetStats} />
       )}
       {view === "categories" && <CategoriesView cats={data.cats} actions={actions} />}
-      {view === "settings" && <SettingsView />}
+      {view === "settings" && <SettingsView data={data} onReplace={onReplace} />}
     </div>
   );
 }

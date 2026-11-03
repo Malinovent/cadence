@@ -19,7 +19,7 @@ Depends: 1.
 Verify: build, lint, tests; side-by-side with `legacy/cadence.html` in a browser.
 Depends: 2.
 
-### [ ] 4. Settings: export / import — Medium
+### [x] 4. Settings: export / import — Medium
 Implement `SettingsView` exactly per SPEC "Settings view", using `transfer.ts` and the `replaceAll` action.
 Verify: export, edit something, import the file, data restored; import a flat legacy-keys file; import garbage shows the error.
 Depends: 3.

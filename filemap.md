@@ -22,6 +22,8 @@
 - `src/lib/model.ts` — data types, `defaultData`, migrations, `normalizeData`
 - `src/lib/storage.ts` — localStorage load/save of the five `cadence:*` keys
 - `src/lib/transfer.ts` — export envelope/filename, `parseImport`
+- `src/lib/format.ts` — UI sentence formatting: import summary line, skipped-entries line
+- `src/lib/download.ts` — browser-only `downloadText` (Blob + object URL + `<a download>`)
 - `src/lib/actions.ts` — pure state transitions on `CadenceData`
 - `src/lib/stats.ts` — derived numbers: `quotaStatus`, `completion`, `statsByCat`, `maxHours`, hour→minute conversions
 - `src/lib/__fixtures__/legacy.ts` — legacy-app data fixture for tests
@@ -34,5 +36,5 @@
 - `src/components/BlockEditor.tsx` — inline title/description/tags editor
 - `src/components/StatsView.tsx` — streaks, hours chart, reset
 - `src/components/CategoriesView.tsx` — category editor
-- `src/components/SettingsView.tsx` — "Your data" (placeholder until task 4)
+- `src/components/SettingsView.tsx` — "Your data": export / import with summary + confirm
 - `src/components/drag.ts` — `DragInfo` type shared by tray and grid
