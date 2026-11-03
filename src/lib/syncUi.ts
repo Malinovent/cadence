@@ -48,8 +48,8 @@ export const authErrorMessage = (reason: AuthFailure): string => {
 // basic shape check only: something@something.tld, no spaces
 export const isValidEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
-// the 6-digit code from the email
-export const isValidCode = (code: string): boolean => /^\d{6}$/.test(code.trim());
+// the numeric code from the email (Supabase sends 6–10 digits depending on project settings)
+export const isValidCode = (code: string): boolean => /^\d{6,10}$/.test(code.trim());
 
 // A data change that left the document clean came from the server (store.applyRemote), not a user edit:
 // user edits always bump meta.updatedAt past syncedAt.

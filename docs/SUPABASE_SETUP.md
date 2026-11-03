@@ -40,7 +40,7 @@ You need two values: the **Project URL** and the **public key**. Both are safe t
 
 ## Part 4 — Email sign-in
 
-Cadence signs you in with your email, with no password. Each email has a sign-in link **and** a 6-digit code. The code matters on iPhone: an app saved to the home screen can't receive links from Mail (they open in Safari instead), so there you type the code.
+Cadence signs you in with your email, with no password. Each email has a sign-in link **and** a numeric code (6 to 8 digits, depending on your project). The code matters on iPhone: an app saved to the home screen can't receive links from Mail (they open in Safari instead), so there you type the code.
 
 12. In the left sidebar, open **Authentication**.
 13. Open **Sign In / Providers** (on older dashboards: **Providers**) and click **Email**:
@@ -55,6 +55,15 @@ Cadence signs you in with your email, with no password. Each email has a sign-in
       - `http://localhost:5173/cadence/**`
     - Click **Save**.
 15. Open **Emails** (on older dashboards: **Email Templates**), then the **Templates** tab if there is one.
+    - **If it says you need custom SMTP to edit templates:** on the free plan, Supabase only lets you change the email text once the emails go out through your own mail account. The simplest free option is your Gmail:
+      1. In your Google Account, turn on **2-Step Verification** (Security → 2-Step Verification) if it isn't already on.
+      2. Go to **https://myaccount.google.com/apppasswords**, create an app password named `Cadence`, and copy the 16-character password it shows.
+      3. In Supabase: **Authentication → Emails → SMTP Settings**, turn on **Enable custom SMTP**, and fill in:
+         - **Sender email**: your Gmail address. **Sender name**: `Cadence`
+         - **Host**: `smtp.gmail.com`. **Port**: `465`
+         - **Username**: your full Gmail address. **Password**: the 16-character app password (no spaces)
+      4. Click **Save**. The **Templates** tab is now editable. Sign-in emails will come from your Gmail address.
+      5. Optional: under **Authentication → Rate Limits**, the email limit can be raised (for example to 30 per hour) now that your own account sends them.
 16. Open the **Magic Link** template.
     - **Subject**: `Your Cadence sign-in`
     - Replace the whole **body** (switch to the source/HTML view if you see one) with:
@@ -105,7 +114,7 @@ The live app is built by GitHub, so GitHub needs the two values from Part 2.
 ## How to check it worked
 
 - **Database:** in Supabase, open **Table Editor**. You should see a table named `cadence_state`, marked as protected by RLS (Row Level Security). It stays empty until you sign in for the first time.
-- **Sign-in:** open https://malinovent.github.io/cadence/, go to **Settings** → **Account & sync**, enter your email, and tap **Send me a code**. Within a minute you get an email with a link and a 6-digit code. Typing the code signs you in, and the header shows **synced**. (The account screen ships in the next Cadence update. Until then, the site looks the same as before.)
+- **Sign-in:** open https://malinovent.github.io/cadence/, go to **Settings** → **Account & sync**, enter your email, and tap **Send me a code**. Within a minute you get an email with a link and a code. Typing the code signs you in, and the header shows **synced**. (The account screen ships in the next Cadence update. Until then, the site looks the same as before.)
 - **Data arrived:** back in **Table Editor** → `cadence_state`, there's now one row: your schedule.
 - **Second device:** sign in on your phone with the same email. Your week appears. If the phone already had a different schedule, Cadence asks which one to keep.
 - **Something's off?**

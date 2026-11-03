@@ -4,9 +4,9 @@ import { createSyncEngine, type AuthResult, type ConflictChoice, type SyncClient
 import { syncClient } from "./supabaseClient";
 
 export type SyncActions = {
-  /** Emails a sign-in link + 6-digit code. */
+  /** Emails a sign-in link + numeric code. */
   sendCode(email: string): Promise<AuthResult>;
-  /** Signs in with the 6-digit code from the email. */
+  /** Signs in with the numeric code from the email. */
   verifyCode(email: string, code: string): Promise<AuthResult>;
   /** Signs this device out; local data stays. */
   signOut(): Promise<void>;

@@ -48,7 +48,7 @@ export default function AccountSync(p: AccountSyncProps) {
   const onVerify = async (e: FormEvent) => {
     e.preventDefault();
     if (busy || step.kind !== "code") return;
-    if (!isValidCode(code)) return; // the button stays disabled until six digits are typed
+    if (!isValidCode(code)) return; // the button stays disabled until a full code is typed
     setError(null);
     setBusy("verify");
     const r = await p.verifyCode(step.email, code.trim());
@@ -132,14 +132,14 @@ export default function AccountSync(p: AccountSyncProps) {
         </>
       ) : (
         <>
-          <div style={S.catIntro}>Check your email. Tap the link, or type the 6-digit code here:</div>
+          <div style={S.catIntro}>Check your email. Tap the link, or type the code here:</div>
           <form style={{ ...row, marginTop: 16 }} onSubmit={onVerify} noValidate>
             <input
               style={{ ...input, flex: "0 1 140px", fontFamily: "'Spline Sans Mono', monospace", letterSpacing: "0.2em" }}
               inputMode="numeric"
               autoComplete="one-time-code"
-              maxLength={6}
-              aria-label="6-digit code"
+              maxLength={10}
+              aria-label="Sign-in code"
               value={code}
               onChange={(e) => setCode(e.target.value)}
               disabled={busy !== null}

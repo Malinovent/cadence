@@ -43,10 +43,12 @@ describe("isValidEmail", () => {
 });
 
 describe("isValidCode", () => {
-  it("wants exactly six digits", () => {
+  it("wants 6 to 10 digits", () => {
     expect(isValidCode("123456")).toBe(true);
     expect(isValidCode(" 123456 ")).toBe(true);
+    expect(isValidCode("12345678")).toBe(true);
     expect(isValidCode("12345")).toBe(false);
+    expect(isValidCode("12345678901")).toBe(false);
     expect(isValidCode("12345a")).toBe(false);
   });
 });
