@@ -34,7 +34,7 @@ export default function Sidebar({ data, week, setWeek, dragRef, actions, onAdvan
   };
 
   return (
-    <aside style={S.sidebar}>
+    <aside className="cadence-side" style={S.sidebar}>
       <div style={S.weekToggle}>
         {(["Week 1", "Week 2"] as const).map((w, i) => (
           <button
@@ -48,7 +48,7 @@ export default function Sidebar({ data, week, setWeek, dragRef, actions, onAdvan
       </div>
 
       <div style={S.panelLabel}>Drag into the grid</div>
-      <div style={S.tray}>
+      <div className="cadence-tray" style={S.tray}>
         {data.cats.map((c) => (
           <div
             key={c.id}
@@ -65,8 +65,8 @@ export default function Sidebar({ data, week, setWeek, dragRef, actions, onAdvan
         ))}
       </div>
 
-      <div style={S.panelLabel}>This week's time targets</div>
-      <div style={S.quotaList}>
+      <div className="cadence-after" style={S.panelLabel}>This week's time targets</div>
+      <div className="cadence-after" style={S.quotaList}>
         {quotas.map((q) => (
           <div key={q.cat.id} style={S.quotaRow}>
             <span style={{ ...S.dot, background: q.cat.color }} />
@@ -88,14 +88,14 @@ export default function Sidebar({ data, week, setWeek, dragRef, actions, onAdvan
         ))}
       </div>
 
-      <div style={S.completionCard}>
+      <div className="cadence-after" style={S.completionCard}>
         <div style={S.completionPct}>{done.pct}%</div>
         <div style={S.completionLabel}>
           sessions done this week ({done.done}/{done.total})
         </div>
       </div>
 
-      <div style={S.tplSection}>
+      <div className="cadence-after" style={S.tplSection}>
         <div style={S.panelLabel}>Templates</div>
         {namingTemplate ? (
           <div style={S.tplNameRow}>
@@ -144,7 +144,7 @@ export default function Sidebar({ data, week, setWeek, dragRef, actions, onAdvan
         ))}
       </div>
 
-      <button onClick={onAdvance} style={S.advanceBtn}>
+      <button className="cadence-after" onClick={onAdvance} style={S.advanceBtn}>
         ⟳ Roll forward → next week becomes Week 1
       </button>
     </aside>

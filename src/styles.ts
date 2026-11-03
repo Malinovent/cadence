@@ -7,8 +7,15 @@ export const FONT_IMPORT = `
 * { box-sizing: border-box; }
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-thumb { background: #cabfb2; border-radius: 4px; }
-/* narrow screens: controls stack above the calendar */
-@media (max-width: 899px) { .cadence-body { grid-template-columns: minmax(0, 1fr) !important; } }
+/* narrow screens: week toggle + tray right above the calendar, the rest below it */
+@media (max-width: 899px) {
+  .cadence-body { display: flex !important; flex-direction: column; align-items: stretch !important; gap: 12px !important; }
+  .cadence-side { display: contents !important; }
+  .cadence-body > :last-child { order: 1; }
+  .cadence-after { order: 2; }
+  .cadence-tray { flex-direction: row !important; flex-wrap: wrap; }
+  .cadence-tray > * { flex: 1 1 calc(50% - 6px); }
+}
 `;
 export const ink = "#2b2622";
 export const paper = "#f4ede1";

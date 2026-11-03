@@ -105,7 +105,7 @@ Fourth nav button `settings` after `categories`, same `navBtn` style. Body uses 
 ## Phases
 1. Port + export/import + unit tests (this file's sections above).
 2. PWA + deploy: manifest, icons (incl. 180×180 apple-touch-icon, replace the emoji favicon), iOS meta tags, `viewport-fit=cover` + safe-area padding, service worker app-shell cache, self-hosted fonts, GitHub Pages workflow.
-3. Mobile: Pointer Events drag/move/resize with long-press pickup on touch, tap-to-place, ≥44 px targets, no zoom on double-tap/focus, phone layout (one day + Mon–Sun strip, compact quota summary). User decision (after testing on Android): on narrow screens the controls (week toggle, tray, targets, templates) sit ABOVE the calendar, not in a bottom sheet; shipped as a stopgap below 900px in Phase 2. Design mockups shown before build.
+3. Mobile: Pointer Events drag/move/resize with long-press pickup on touch, tap-to-place, ≥44 px targets, no zoom on double-tap/focus, phone layout (one day + Mon–Sun strip, compact quota summary). User decisions (after testing on Android): on narrow screens the week toggle and the tray (compact 2-column grid) sit directly ABOVE the calendar so drags are short; targets, completion, templates and roll forward go BELOW the calendar. No bottom sheet. Shipped below 900px in Phase 2 (CSS order in styles.ts FONT_IMPORT). Note: HTML5 drag already works by long-press in Android Chrome. Design mockups shown before build.
 4. Sync: Supabase magic link, `cadence_state` table with RLS, local-first debounced push, pull on launch/visibility, last-write-wins on whole doc, sync status + sign-out, first-sign-in merge choice. User click-through guide.
 5. Handoff: `cadence-export.html`, README, iPhone install note.
 
