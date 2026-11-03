@@ -189,6 +189,26 @@ describe("templates", () => {
     expect(out.weeks[1][0].catIds).not.toBe(withTpl.templates[0].blocks[0].catIds);
     expect(applyTemplate(withTpl, 1, "nope")).toBe(withTpl);
   });
+  it("strips tags of categories deleted after the save and drops untagged blocks", () => {
+    const d = deepFreeze(
+      base({
+        templates: [
+          {
+            id: "t1",
+            name: "T",
+            blocks: [
+              { catIds: ["work", "learn"], day: 0, start: 540, mins: 60, label: "", desc: "" },
+              { catIds: ["learn"], day: 1, start: 540, mins: 60, label: "x", desc: "" },
+              { catIds: ["play"], day: 2, start: 600, mins: 30, label: "", desc: "" },
+            ],
+          },
+        ],
+      }),
+    );
+    const noLearn = deepFreeze({ ...d, cats: d.cats.filter((c) => c.id !== "learn") });
+    const out = applyTemplate(noLearn, 0, "t1", { uid: seq() });
+    expect(out.weeks[0]).toEqual([blk("n1"), blk("n2", { day: 2, start: 600, mins: 30, catIds: ["play"] })]);
+  });
   it("deletes a template", () => {
     const withTpl = deepFreeze(saveTemplate(base(), 0, "T", { uid: () => "t1" }));
     expect(deleteTemplate(withTpl, "t1").templates).toEqual([]);

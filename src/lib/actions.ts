@@ -140,16 +140,19 @@ export const saveTemplate = (data: CadenceData, week: WeekIndex, name?: string, 
   return { ...data, templates: [...data.templates, tpl] };
 };
 
-// replaces the week with fresh, not-done copies of the template's blocks
+// replaces the week with fresh, not-done copies of the template's blocks;
+// tags of categories deleted since the save are stripped, untagged blocks dropped
 export const applyTemplate = (data: CadenceData, week: WeekIndex, templateId: string, deps: Deps = {}): CadenceData => {
   const tpl = data.templates.find((t) => t.id === templateId);
   if (!tpl) return data;
   const makeId = deps.uid ?? defaultUid;
-  return withWeek(
-    data,
-    week,
-    tpl.blocks.map((b) => ({ ...b, catIds: [...b.catIds], id: makeId(), done: false })),
-  );
+  const known = new Set(data.cats.map((c) => c.id));
+  const blocks: Block[] = [];
+  for (const b of tpl.blocks) {
+    const catIds = b.catIds.filter((c) => known.has(c));
+    if (catIds.length) blocks.push({ ...b, catIds, id: makeId(), done: false });
+  }
+  return withWeek(data, week, blocks);
 };
 
 export const deleteTemplate = (data: CadenceData, id: string): CadenceData =>

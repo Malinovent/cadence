@@ -1,0 +1,87 @@
+import { describe, expect, it } from "vitest";
+import { defaultData, type Block, type CadenceData } from "./model";
+import { completion, hoursToBlockMins, hoursToTargetMins, maxHours, quotaStatus, statsByCat } from "./stats";
+
+const blk = (id: string, over: Partial<Block> = {}): Block => ({
+  id,
+  catIds: ["work"],
+  day: 0,
+  start: 540,
+  mins: 60,
+  label: "",
+  desc: "",
+  done: false,
+  ...over,
+});
+
+const withWeeks = (w0: Block[], w1: Block[] = []): CadenceData => ({ ...defaultData(), weeks: [w0, w1] });
+
+describe("quotaStatus", () => {
+  it("counts multi-tag blocks fully toward each category and flags met targets", () => {
+    const d = withWeeks([
+      blk("a", { catIds: ["exercise", "learn"], mins: 120, done: true }),
+      blk("b", { catIds: ["exercise"], mins: 120, day: 1 }),
+    ]);
+    const q = quotaStatus(d, 0);
+    const ex = q.find((x) => x.cat.id === "exercise")!;
+    const le = q.find((x) => x.cat.id === "learn")!;
+    expect(ex).toMatchObject({ placedMins: 240, doneMins: 120, met: true });
+    expect(le).toMatchObject({ placedMins: 120, doneMins: 120, met: false });
+    expect(q.map((x) => x.cat.id)).toEqual(["exercise", "work", "learn", "play"]);
+  });
+
+  it("only looks at the requested week", () => {
+    const d = withWeeks([], [blk("a", { mins: 90 })]);
+    expect(quotaStatus(d, 0).find((x) => x.cat.id === "work")!.placedMins).toBe(0);
+    expect(quotaStatus(d, 1).find((x) => x.cat.id === "work")!.placedMins).toBe(90);
+  });
+});
+
+describe("completion", () => {
+  it("is 0% for an empty week", () => {
+    expect(completion(withWeeks([]), 0)).toEqual({ done: 0, total: 0, pct: 0 });
+  });
+  it("rounds done/total", () => {
+    const d = withWeeks([blk("a", { done: true }), blk("b", { day: 1 }), blk("c", { day: 2 })]);
+    expect(completion(d, 0)).toEqual({ done: 1, total: 3, pct: 33 });
+  });
+});
+
+describe("statsByCat", () => {
+  const now = 1_000 * 86400000;
+  const d: CadenceData = {
+    ...defaultData(),
+    history: [
+      { id: "a", catId: "work", mins: 90, date: now - 10 * 86400000 },
+      { id: "b", catId: "work", mins: 60, date: now - 60 * 86400000 },
+      { id: "c", catId: "learn", mins: 30, date: now - 200 * 86400000 },
+    ],
+  };
+  it("filters by range and formats hours to one decimal", () => {
+    const m = statsByCat(d, "month", now);
+    expect(m.find((s) => s.cat.id === "work")).toMatchObject({ sessions: 1, hours: "1.5" });
+    expect(m.find((s) => s.cat.id === "learn")).toMatchObject({ sessions: 0, hours: "0.0" });
+    const q = statsByCat(d, "quarter", now);
+    expect(q.find((s) => s.cat.id === "work")).toMatchObject({ sessions: 2, hours: "2.5" });
+    const y = statsByCat(d, "year", now);
+    expect(y.find((s) => s.cat.id === "learn")).toMatchObject({ sessions: 1, hours: "0.5" });
+  });
+  it("maxHours is at least 1", () => {
+    expect(maxHours(statsByCat(defaultData(), "month", now))).toBe(1);
+    expect(maxHours(statsByCat(d, "quarter", now))).toBe(2.5);
+  });
+});
+
+describe("hour -> minute conversions", () => {
+  it("target rounds to the minute", () => {
+    expect(hoursToTargetMins(2.5)).toBe(150);
+    expect(hoursToTargetMins(0)).toBe(0);
+    expect(hoursToTargetMins(1.01)).toBe(61);
+  });
+  it("block snaps to 30 minutes, at least 30", () => {
+    expect(hoursToBlockMins(1.5)).toBe(90);
+    expect(hoursToBlockMins(1.2)).toBe(60);
+    expect(hoursToBlockMins(0)).toBe(30);
+    expect(hoursToBlockMins(0.1)).toBe(30);
+  });
+});

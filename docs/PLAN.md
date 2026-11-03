@@ -14,7 +14,7 @@ Port the pure logic from `legacy/cadence.html` into `src/lib/` per SPEC "Archite
 Verify: `npm test` green, `npm run lint`, `npm run build`.
 Depends: 1.
 
-### [ ] 3. UI port — Careful
+### [x] 3. UI port — Careful
 `src/styles.ts` (verbatim port of `S`, tokens, `FONT_IMPORT`), `useCadence` hook (load via storage, persist each key on change, expose actions from task 2), and the components in SPEC "Architecture" reproducing legacy rendering exactly (block states: dashed/solid/filled, multi-tag gradient ring with mask-composite, pips, desc/time visibility thresholds, editor). Interactions stay on the HTML5 drag API and mouse events for now (Phase 3 replaces them), but the resize must call `resizeBlock`. Adds the `settings` nav button routed to an empty `SettingsView` (task 4 fills it).
 Verify: build, lint, tests; side-by-side with `legacy/cadence.html` in a browser.
 Depends: 2.

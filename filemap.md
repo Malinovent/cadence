@@ -12,7 +12,7 @@
 - `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json` — TypeScript project configs
 - `eslint.config.js` — ESLint flat config
 - `src/main.tsx` — mounts `<App/>` in StrictMode
-- `src/App.tsx` — header + nav + view switch
+- `src/App.tsx` — header + view switch; owns UI state (view, active week, stats range, editing id)
 - `src/styles.ts` — `S.*` style objects and tokens
 - `src/lib/` — pure business logic and its unit tests (`*.test.ts` next to each module)
 - `src/lib/constants.ts` — grid constants, `DEFAULT_CATEGORIES`, `PALETTE`
@@ -23,6 +23,16 @@
 - `src/lib/storage.ts` — localStorage load/save of the five `cadence:*` keys
 - `src/lib/transfer.ts` — export envelope/filename, `parseImport`
 - `src/lib/actions.ts` — pure state transitions on `CadenceData`
+- `src/lib/stats.ts` — derived numbers: `quotaStatus`, `completion`, `statsByCat`, `maxHours`, hour→minute conversions
 - `src/lib/__fixtures__/legacy.ts` — legacy-app data fixture for tests
-- `src/state/` — `useCadence` hook: data, persistence, actions
+- `src/state/useCadence.ts` — `useCadence` hook: data, per-key persistence, bound actions
 - `src/components/` — React view components
+- `src/components/Header.tsx` — logo, tagline, nav buttons (`View` type)
+- `src/components/Sidebar.tsx` — week toggle, tray, quotas, completion, templates, roll forward
+- `src/components/WeekGrid.tsx` — day grid, column drops, resize listeners
+- `src/components/Block.tsx` — one placed block (states, gradient ring, drag/drop, handles)
+- `src/components/BlockEditor.tsx` — inline title/description/tags editor
+- `src/components/StatsView.tsx` — streaks, hours chart, reset
+- `src/components/CategoriesView.tsx` — category editor
+- `src/components/SettingsView.tsx` — "Your data" (placeholder until task 4)
+- `src/components/drag.ts` — `DragInfo` type shared by tray and grid
