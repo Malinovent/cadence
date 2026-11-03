@@ -1,5 +1,6 @@
 import type React from "react";
 import type { InteractionEngine } from "../interaction/engine";
+import { blockText } from "../lib/dayview";
 import { blockBox, GRIP_MIN_WIDTH, GRIP_SPAN, gripZones } from "../lib/gesture";
 import type { Block as BlockT, Category } from "../lib/model";
 import { fmtDur, fmtTime } from "../lib/time";
@@ -113,10 +114,11 @@ export default function Block({
       />
     );
   }
-  // 30-min row = 26px, so a 1h block is ~48px. Show description
-  // once there's room beneath the title row, time last.
-  const showDesc = !isEditing && p.desc && height > 44;
-  const showTime = !isEditing && height > (p.desc ? 74 : 46);
+  // Show description once there's room beneath the title row, time last. Thresholds are
+  // the legacy px values for 26px rows, compared in rows so they scale with rowH.
+  const text = blockText(height, rowH, !!p.desc);
+  const showDesc = !isEditing && text.desc;
+  const showTime = !isEditing && text.time;
 
   // mouse: invisible 7px edge handles (hidden on coarse pointers, see styles.ts)
   const edgeHandle = (edge: ResizeEdge) => (
@@ -231,7 +233,7 @@ export default function Block({
           <>
             {p.label && <div style={S.placedLabel}>{p.label}</div>}
             {showDesc && (
-              <div style={{ ...S.placedDesc, opacity: solidFill ? 0.85 : 0.75, WebkitLineClamp: height > 78 ? 2 : 1 }}>
+              <div style={{ ...S.placedDesc, opacity: solidFill ? 0.85 : 0.75, WebkitLineClamp: text.descLines }}>
                 {p.desc}
               </div>
             )}

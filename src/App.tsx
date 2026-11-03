@@ -6,11 +6,14 @@ import Sidebar from "./components/Sidebar";
 import StatsView from "./components/StatsView";
 import WeekGrid from "./components/WeekGrid";
 import { useInteraction } from "./interaction/useInteraction";
-import type { WeekIndex } from "./lib/actions";
+import { moveBlock, type WeekIndex } from "./lib/actions";
+import { ROW_H_PHONE } from "./lib/constants";
+import { defaultDay } from "./lib/dayview";
 import { resolveDrop } from "./lib/gesture";
-import type { CadenceData } from "./lib/model";
+import type { Block, CadenceData } from "./lib/model";
 import type { StatsRange } from "./lib/stats";
 import { useCadence } from "./state/useCadence";
+import { useIsPhone } from "./state/useIsPhone";
 import { FONT_IMPORT, S } from "./styles";
 
 export default function App() {
@@ -20,6 +23,8 @@ export default function App() {
   const [statsRange, setStatsRange] = useState<StatsRange>("month");
   const [editingId, setEditingId] = useState<string | null>(null); // block open in the inline editor
   const [armedCatId, setArmedCatId] = useState<string | null>(null); // tap-to-place: armed tray category
+  const [phoneDay, setPhoneDay] = useState(() => defaultDay(0, new Date())); // phone: the one day shown, Mon = 0
+  const isPhone = useIsPhone();
 
   // drag-and-drop and resize for the tray and the grid (Pointer Events, see src/interaction)
   const interaction = useInteraction({
@@ -59,6 +64,13 @@ export default function App() {
     changeWeek(0);
   };
 
+  // editor day chips: move the block; on phone the view follows it, if it actually moved
+  const onMoveToDay = (p: Block, day: number) => {
+    const moved = moveBlock(data, activeWeek, p.id, day, p.start) !== data;
+    actions.moveBlock(activeWeek, p.id, day, p.start);
+    if (isPhone && moved && p.day !== day) setPhoneDay(day);
+  };
+
   // an import replaces everything; drop UI state that may point at old blocks
   const onReplace = (next: CadenceData) => {
     actions.replaceAll(next);
@@ -92,6 +104,8 @@ export default function App() {
             armedCatId={armedCatId}
             onPlaced={() => setArmedCatId(null)}
             actions={actions}
+            onMoveToDay={onMoveToDay}
+            {...(isPhone ? { rowH: ROW_H_PHONE, days: [phoneDay], phone: { day: phoneDay, setDay: setPhoneDay } } : {})}
           />
         </div>
       )}

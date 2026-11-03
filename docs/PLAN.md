@@ -48,7 +48,7 @@ Replace HTML5 drag and mouse resize with a Pointer Events engine per SPEC "Inter
 Verify: unit tests for pure gesture maths; build/lint/tests; browser at desktop width (mouse) and mobile emulation (touch): pickup, move, tray drop, tag drop, tap-to-place, resize, autoscroll, cancel.
 Depends: Phase 2.
 
-### [ ] 9. Phone day view — Medium
+### [x] 9. Phone day view — Medium
 Per SPEC "Phone layout": day strip, single column, 40px rows, swipe, default day; editor day chips follow the block.
 Verify: mobile emulation screenshots; desktop unchanged.
 Depends: 8.

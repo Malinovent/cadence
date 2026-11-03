@@ -333,6 +333,33 @@ export const S = {
     borderRight: `1px solid ${line}`,
     fontSize: 14
   },
+  // Phase 3: phone day strip, replaces headRow (SPEC "Phone layout")
+  dayStrip: {
+    display: "grid",
+    gridTemplateColumns: "repeat(7, 1fr)",
+    borderBottom: `1.5px solid ${ink}`
+  },
+  dayStripBtn: {
+    minHeight: 44,
+    padding: "6px 0",
+    border: "none",
+    background: "transparent",
+    color: ink,
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 600,
+    fontSize: "clamp(11px, 3.5vw, 14px)",
+    cursor: "pointer",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 3
+  },
+  dayDot: {
+    width: 4,
+    height: 4,
+    borderRadius: "50%"
+  },
   timeColWrap: {
     borderRight: `1px solid ${line}`
   },
