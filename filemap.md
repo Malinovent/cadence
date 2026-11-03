@@ -1,5 +1,6 @@
 # File map
 
+- `README.md` — project overview, commands, deploy
 - `CLAUDE.md` — agent rules and commands
 - `filemap.md` — this index
 - `docs/BRIEF.md` — original request from the user
@@ -9,6 +10,7 @@
 - `supabase/schema.sql` — sync backend: `cadence_state` table, RLS policies, `push_state` LWW function (idempotent; pasted into the Supabase SQL editor)
 - `.env.example` — env keys (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`); copy to `.env.local` (gitignored) for dev
 - `legacy/cadence.html` — original single-file app; read-only reference
+- `handoff/cadence-export.html` — migration file: byte copy of `legacy/cadence.html` plus one marked block (`<!-- cadence-export:start/end -->`) adding an "↓ Export my data" button that downloads the five `cadence:*` keys as the export envelope; tested by `src/lib/legacyExport.test.ts`
 - `package.json` — npm scripts and dependencies (`npm run icons` regenerates `public/` icons)
 - `index.html` — Vite entry HTML (title, favicons, apple-touch-icon, iOS/PWA meta tags, `viewport-fit=cover`, root div)
 - `vite.config.ts` — Vite + Vitest + `vite-plugin-pwa` config (`base: "/cadence/"`, web manifest, Workbox generateSW precache)
@@ -60,3 +62,4 @@
 - `src/components/SettingsView.tsx` — "Your data": export / import with summary + confirm; hosts "Account & sync" when sync is configured
 - `src/components/AccountSync.tsx` — Settings "Account & sync": conflict card, signed-out email form → code entry, signed-in email + status + sign out
 - `.github/workflows/deploy.yml` — CI: test, lint, build, deploy to GitHub Pages
+- `handoff/INSTALL-IPHONE.md` — one-page install + sign-in note for the end user

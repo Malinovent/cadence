@@ -66,3 +66,12 @@ Verify: browser with a faked sync state; real end-to-end once the user's project
 Depends: 10.
 
 ## Phase 5 — Handoff
+
+### [x] 12. Migration file — Medium
+`handoff/cadence-export.html`: a copy of `legacy/cadence.html` with only an "Export my data" button added; downloads the same envelope as `buildExport` from the five localStorage keys.
+Verify: seeded legacy data exports, and the file imports into the new app with zero skipped entries.
+Depends: Phase 4.
+
+### [x] 13. README + install note — Light
+`README.md` and `handoff/INSTALL-IPHONE.md` (one page for the user's friend).
+Depends: Phase 4.
