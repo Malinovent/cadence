@@ -19,7 +19,7 @@
 - `eslint.config.js` — ESLint flat config
 - `src/main.tsx` — imports self-hosted fonts (@fontsource), mounts `<App/>` in StrictMode
 - `src/vite-env.d.ts` — Vite client types + typed `import.meta.env` sync vars
-- `src/App.tsx` — header + view switch; owns UI state (view, active week, stats range, editing id, phone selected day); picks phone vs desktop grid props; starts `useSync`
+- `src/App.tsx` — header + view switch; owns UI state (view, active week, stats range, editing id, phone selected day); picks phone vs desktop grid props; starts `useSync` and wires its state to the header, Settings and the conflict banner; closes the editor / disarms tap-to-place when a server copy is applied
 - `src/styles.ts` — `S.*` style objects and tokens
 - `src/lib/` — pure business logic and its unit tests (`*.test.ts` next to each module)
 - `src/lib/constants.ts` — grid constants (`ROW_H` desktop, `ROW_H_PHONE`), `DEFAULT_CATEGORIES`, `PALETTE`
@@ -32,6 +32,7 @@
 - `src/lib/syncLogic.ts` — pure sync decisions: `decideAfterPull`, `decideAfterPush`, `isEmptyData`, `contentEqual` / `jsonEqual` (key-order-insensitive), `winningUpdatedAt`
 - `src/lib/transfer.ts` — export envelope/filename, `parseImport`
 - `src/lib/format.ts` — UI sentence formatting: import summary line, skipped-entries line
+- `src/lib/syncUi.ts` — sync UI wording: header status label + dot colour, Settings status sentence, auth error messages, email / 6-digit code checks, `isRemoteApply` (data changed by a server copy)
 - `src/lib/download.ts` — browser-only `downloadText` (Blob + object URL + `<a download>`)
 - `src/lib/actions.ts` — pure state transitions on `CadenceData`
 - `src/lib/stats.ts` — derived numbers: `quotaStatus`, `completion`, `statsByCat`, `maxHours`, hour→minute conversions
@@ -49,12 +50,13 @@
 - `src/interaction/dom.ts` — browser side of the engine: grid measuring (`data-row-h` / `data-day` / `data-block-id` contract), drag ghost, click swallowing, coarse-pointer query
 - `src/interaction/useInteraction.ts` — React hook: one engine for tray + grid, mirrors its state
 - `src/components/` — React view components
-- `src/components/Header.tsx` — logo, tagline, nav buttons (`View` type)
+- `src/components/Header.tsx` — logo, tagline, nav buttons (`View` type); sync status line under the nav when signed in (opens Settings)
 - `src/components/Sidebar.tsx` — week toggle, tray (drag source, press/hold feedback, tap-to-place arming), quotas, completion, templates, roll forward
 - `src/components/WeekGrid.tsx` — day grid (`rowH` and `days` props; `phone` prop: Mon–Sun day strip instead of the head row, 52px time column, swipe to change day), drop preview / tag highlight, tap-to-place, block taps and right-click
 - `src/components/Block.tsx` — one placed block (states, gradient ring, press/lift/tag-target looks, mouse edge handles, touch grips)
 - `src/components/BlockEditor.tsx` — inline title/description/tags editor; touch-only day chips and delete
 - `src/components/StatsView.tsx` — streaks, hours chart, reset
 - `src/components/CategoriesView.tsx` — category editor
-- `src/components/SettingsView.tsx` — "Your data": export / import with summary + confirm
+- `src/components/SettingsView.tsx` — "Your data": export / import with summary + confirm; hosts "Account & sync" when sync is configured
+- `src/components/AccountSync.tsx` — Settings "Account & sync": conflict card, signed-out email form → code entry, signed-in email + status + sign out
 - `.github/workflows/deploy.yml` — CI: test, lint, build, deploy to GitHub Pages

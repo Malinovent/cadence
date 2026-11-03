@@ -1,4 +1,5 @@
 import { useRef, useState, type ChangeEvent } from "react";
+import AccountSync, { type AccountSyncProps } from "./AccountSync";
 import { downloadText } from "../lib/download";
 import { droppedLine, importSummaryLine } from "../lib/format";
 import type { CadenceData } from "../lib/model";
@@ -14,7 +15,16 @@ type Status =
 const row = { display: "flex", gap: 10, flexWrap: "wrap" } as const;
 const note = { fontStyle: "italic", fontSize: 13 } as const;
 
-export default function SettingsView({ data, onReplace }: { data: CadenceData; onReplace: (next: CadenceData) => void }) {
+export default function SettingsView({
+  data,
+  onReplace,
+  sync,
+}: {
+  data: CadenceData;
+  onReplace: (next: CadenceData) => void;
+  /** null when sync is not configured: the "Account & sync" section is hidden */
+  sync: AccountSyncProps | null;
+}) {
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -85,6 +95,8 @@ export default function SettingsView({ data, onReplace }: { data: CadenceData; o
       {status.kind === "success" && (
         <div style={{ ...note, color: "#1FA98A", marginTop: 12 }}>Imported. Your week is back.</div>
       )}
+
+      {sync && <AccountSync {...sync} />}
     </div>
   );
 }

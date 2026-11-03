@@ -10,6 +10,7 @@ import { moveBlock, type WeekIndex } from "./lib/actions";
 import { ROW_H_PHONE } from "./lib/constants";
 import { defaultDay } from "./lib/dayview";
 import { resolveDrop } from "./lib/gesture";
+import { isRemoteApply } from "./lib/syncUi";
 import type { Block, CadenceData } from "./lib/model";
 import type { StatsRange } from "./lib/stats";
 import { useCadence } from "./state/useCadence";
@@ -19,8 +20,8 @@ import { FONT_IMPORT, S } from "./styles";
 
 export default function App() {
   const { data, actions, store } = useCadence();
-  // Supabase sync (no-op when not configured); its status and account actions get UI in task 11
-  useSync(store);
+  // Supabase sync (no-op when not configured): header status, Settings "Account & sync", conflict banner
+  const sync = useSync(store);
   const [view, setView] = useState<View>("calendar");
   const [activeWeek, setActiveWeek] = useState<WeekIndex>(0); // 0 = this week, 1 = next week
   const [statsRange, setStatsRange] = useState<StatsRange>("month");
@@ -40,6 +41,19 @@ export default function App() {
     onResize: (id, edge, origStart, origMins, deltaSlots) =>
       actions.resize(activeWeek, id, edge, origStart, origMins, deltaSlots),
   });
+
+  // a server copy replaced the data: the open editor and an armed tray item may point at stale ids
+  useEffect(() => {
+    let prev = store.getSnapshot().data;
+    return store.subscribe(() => {
+      const { data: next, meta } = store.getSnapshot();
+      const remote = isRemoteApply(prev, next, meta);
+      prev = next;
+      if (!remote) return;
+      setEditingId(null);
+      setArmedCatId(null);
+    });
+  }, [store]);
 
   // Escape disarms tap-to-place
   useEffect(() => {
@@ -84,7 +98,15 @@ export default function App() {
   return (
     <div style={S.root}>
       <style>{FONT_IMPORT}</style>
-      <Header view={view} setView={changeView} />
+      <Header view={view} setView={changeView} syncStatus={sync.configured && sync.session ? sync.status : null} />
+      {view === "calendar" && sync.conflict && (
+        <div style={S.conflictBanner}>
+          <span>This device and your account both have a schedule.</span>
+          <button style={S.textBtn} onClick={() => changeView("settings")}>
+            Choose which to keep →
+          </button>
+        </div>
+      )}
       {view === "calendar" && (
         <div className="cadence-body" style={S.body}>
           <Sidebar
@@ -116,7 +138,7 @@ export default function App() {
         <StatsView data={data} range={statsRange} setRange={setStatsRange} resetStats={actions.resetStats} />
       )}
       {view === "categories" && <CategoriesView cats={data.cats} actions={actions} />}
-      {view === "settings" && <SettingsView data={data} onReplace={onReplace} />}
+      {view === "settings" && <SettingsView data={data} onReplace={onReplace} sync={sync.configured ? sync : null} />}
     </div>
   );
 }

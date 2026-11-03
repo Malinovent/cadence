@@ -60,7 +60,7 @@ Depends: 8.
 Verify: unit tests with a fake client; build/lint; app still runs local-only without env.
 Depends: Phase 3.
 
-### [ ] 11. Sync UI — Medium
+### [x] 11. Sync UI — Medium
 Header status, Settings "Account & sync" (signed out / code entry / signed in), conflict card + calendar banner, per SPEC "UI".
 Verify: browser with a faked sync state; real end-to-end once the user's project exists.
 Depends: 10.

@@ -98,6 +98,59 @@ export const S = {
     background: ink,
     color: paper
   },
+  // Phase 4: nav with the sync status line under it, right-aligned (SPEC "Phase 4 design: sync" → "UI")
+  navStack: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-end",
+    gap: 6
+  },
+  syncStatus: {
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    padding: 0,
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 10,
+    color: "#9a8d7d",
+    textTransform: "uppercase",
+    letterSpacing: "0.08em"
+  },
+  syncDot: {
+    width: 6,
+    height: 6,
+    borderRadius: "50%",
+    flexShrink: 0
+  },
+  // Phase 4: first-sign-in conflict strip above the calendar body
+  conflictBanner: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    gap: 8,
+    background: paper2,
+    border: `1.5px solid ${ink}`,
+    borderRadius: 4,
+    padding: "10px 14px",
+    marginBottom: 20,
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontSize: 14
+  },
+  // Phase 4: borderless text button ("Use a different email", "Choose which to keep →")
+  textBtn: {
+    padding: 0,
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    color: ink,
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontSize: 14,
+    fontWeight: 600
+  },
   body: {
     display: "grid",
     gridTemplateColumns: "300px 1fr",
