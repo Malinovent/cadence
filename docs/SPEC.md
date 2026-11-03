@@ -102,6 +102,51 @@ Fourth nav button `settings` after `categories`, same `navBtn` style. Body uses 
 - Success: italic `#1FA98A` line "Imported. Your week is back." which clears on the next action.
 - Phase 4 will add an "Account & sync" section under this one.
 
+## Phase 3 design (approved)
+Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS). Touch-specific affordances key off `(pointer: coarse)` / `pointerType === "touch"`, not width.
+
+### Phone layout
+- Order: week toggle → tray (2×2) → calendar → targets, completion, templates, roll forward (already shipped via CSS order).
+- Calendar shows ONE day. The head row becomes a Mon–Sun strip: 7 equal buttons, Fraunces 600 11–14px, active = ink background / paper text, others transparent; a 4px dot (`#9a8d7d`, paper on active) under days that have blocks in the active week. Strip sits inside `S.gridWrap`, bottom border `1.5px solid ink`.
+- Body: time column 52px + one day column (no `minWidth: 700`). Row height on phone `ROW_H_PHONE = 40` (desktop stays 26). All y→slot maths take the row height as a parameter.
+- Switch day: tap the strip, or horizontal swipe on the grid body (|dx| > 50px and |dx| > 1.5·|dy|, not during a drag/resize).
+- Default day: today's weekday (Mon=0) when Week 1 is active, Mon for Week 2. Switching weeks keeps the chosen day.
+
+### Interaction engine (Pointer Events, all devices; replaces HTML5 drag + mouse resize)
+- Sources: tray item (new block), placed block (move), tray item dropped onto a block (add tag), resize grips.
+- Mouse/pen: drag starts after 4px of movement (no delay). Touch: long-press 350ms with < 8px movement starts the drag; moving earlier cancels it and lets the page scroll. Once dragging, a non-passive `touchmove` listener calls `preventDefault` so iOS does not scroll; released on end/cancel.
+- While dragging: a ghost (copy of the item, `box-shadow: 3px 3px 0 rgba(0,0,0,0.2)`, `rotate(-1.5deg)`, opacity 0.95, pointer-events none) follows the pointer; for moves the original stays in place at opacity 0.35. A drop preview (dashed `1.5px ink` outline, radius 4) shows the exact `resolvePlacement` result under the pointer; hidden when the result is null or the pointer is outside the grid. Hovering a block with a tray item highlights that block (outline `2px solid` category colour) instead of showing a preview: dropping adds the tag.
+- Auto-scroll the window when the pointer is within 60px of the viewport top/bottom (speed proportional to depth, max ~16px/frame).
+- Drop outside the grid or `pointercancel` = no change. Escape cancels on desktop.
+- Haptic: `navigator.vibrate?.(10)` on long-press pickup.
+- Long-press must not trigger the context menu, text selection or iOS callout on blocks/tray (`-webkit-touch-callout: none`, `user-select: none`, `contextmenu` preventDefault while a press is active). Desktop right-click on a block still deletes it.
+- A tap (no drag) on a block opens the editor as today; a tap on the done toggle toggles done.
+
+### Press / hover feedback on tray items (user request)
+- Hover (mouse only, `(hover: hover)`): background = category colour at ~10% alpha (hex + `1a`), cursor `grab`.
+- Press (any pointer, on pointerdown): `transform: scale(0.97)`, background colour at ~15% (`26`), transition 120ms.
+- Touch hold progress: during the 350ms long-press a fill (category colour at ~25%, `40`) grows left→right inside the item (absolute layer, `transform: scaleX(0→1)`, origin left, linear 350ms). Cancelled → resets instantly.
+- Picked up: item returns to normal, the ghost appears, vibrate.
+- Same press feedback on placed blocks: pointerdown `scale(0.98)`; on pickup the original fades to 0.35.
+
+### Tap-to-place
+- Tap (no long-press, no drag) on a tray item arms it: item shows filled (background category colour, text `#fff`, solid border); the "Drag into the grid" label reads "Tap a slot to place · tap again to cancel". Tapping it again, another tray item (switches), Escape, or changing view/week disarms.
+- While armed, tapping an empty spot in a day column places a block there (start from tap y, `placeBlock` rules). Tapping an existing block while armed adds the tag. After placing, the tray stays armed? No: one placement then disarm.
+- Works on desktop too (click to arm), harmless.
+
+### Resize
+- Touch (`pointer: coarse`): visible grips on every block: 22×4px rounded bar in the block's base colour (white on filled blocks), centred on the top and bottom edges. Hit area 44px tall centred on the edge (22px outside the block), above the block body in z-order; for blocks shorter than 88px the inner half of each hit area is reduced so at least the middle 40% of the block stays free for tap/hold.
+- Mouse: the existing invisible 7px edge handles with `ns-resize` cursor.
+- Resizing uses pointer capture, `resizeBlock` with the current row height, and starts immediately on touch (no long-press) because grips are explicit targets.
+
+### Editor additions (touch only, `(pointer: coarse)`)
+- A "delete" button (`S.editDone` shape, background `#b54`) to the left of "done"; deletes the block (`removeBlock`).
+- A day row: 7 small chips (`S.chip` style, ink border; current day filled ink) "Mon"…"Sun"; tapping moves the block to that day at the same start via `moveBlock` (may shrink/shift to fit; no-op if full). On phone, the view follows the block to the new day.
+
+### No zoom
+- `touch-action: manipulation` on html/body (kills double-tap zoom, keeps pinch zoom).
+- On `(pointer: coarse)`, all inputs/textarea `font-size: 16px` (prevents iOS focus zoom).
+
 ## Phases
 1. Port + export/import + unit tests (this file's sections above).
 2. PWA + deploy: manifest, icons (incl. 180×180 apple-touch-icon, replace the emoji favicon), iOS meta tags, `viewport-fit=cover` + safe-area padding, service worker app-shell cache, self-hosted fonts, GitHub Pages workflow.

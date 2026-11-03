@@ -41,6 +41,17 @@ Replace the placeholder `assets/icon.svg` with the design the user picked (text 
 Verify: PNGs render correctly at 180, 192, 512 and favicon sizes.
 Depends: 5, user's icon choice.
 
-## Phase 3 — Mobile (design mockups first)
+## Phase 3 — Mobile (design approved, see SPEC "Phase 3 design")
+
+### [ ] 8. Touch interaction engine — Heavy
+Replace HTML5 drag and mouse resize with a Pointer Events engine per SPEC "Interaction engine", "Press / hover feedback", "Tap-to-place", "Resize", "Editor additions", "No zoom". Works in the current 7-column grid on all widths.
+Verify: unit tests for pure gesture maths; build/lint/tests; browser at desktop width (mouse) and mobile emulation (touch): pickup, move, tray drop, tag drop, tap-to-place, resize, autoscroll, cancel.
+Depends: Phase 2.
+
+### [ ] 9. Phone day view — Medium
+Per SPEC "Phone layout": day strip, single column, 40px rows, swipe, default day; editor day chips follow the block.
+Verify: mobile emulation screenshots; desktop unchanged.
+Depends: 8.
+
 ## Phase 4 — Sync
 ## Phase 5 — Handoff
