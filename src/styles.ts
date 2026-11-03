@@ -16,6 +16,29 @@ export const FONT_IMPORT = `
   .cadence-tray { flex-direction: row !important; flex-wrap: wrap; }
   .cadence-tray > * { flex: 1 1 calc(50% - 6px); }
 }
+/* no double-tap zoom (pinch zoom stays) */
+html, body { touch-action: manipulation; }
+/* drag sources: long-press must not select text or open the iOS callout; vertical/horizontal pan still scrolls */
+.cadence-src { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: manipulation; }
+.cadence-dragging, .cadence-dragging * { -webkit-user-select: none !important; user-select: none !important; }
+/* tray item: press feedback and the touch hold-progress fill (colours come from --cadence-* set inline) */
+.cadence-tray-item { position: relative; isolation: isolate; overflow: hidden; transition: transform 120ms, background-color 120ms; }
+.cadence-tray-item[data-press] { transform: scale(0.97); }
+.cadence-tray-item[data-press]:not([data-armed]) { background-color: var(--cadence-press) !important; }
+.cadence-hold-fill { position: absolute; inset: 0; z-index: -1; pointer-events: none; background: var(--cadence-hold); transform: scaleX(0); transform-origin: left center; }
+.cadence-tray-item[data-holding] > .cadence-hold-fill { transform: scaleX(1); transition: transform 350ms linear; }
+.cadence-block[data-press] { transform: scale(0.98); }
+@media (hover: hover) {
+  .cadence-tray-item:not([data-armed]):not([data-press]):hover { background-color: var(--cadence-hover) !important; }
+}
+/* touch: visible resize grips instead of the invisible mouse edges; 16px inputs so iOS does not zoom on focus */
+@media (pointer: coarse) {
+  .cadence-edge { display: none !important; }
+  input, textarea { font-size: 16px !important; }
+}
+@media not all and (pointer: coarse) {
+  .cadence-grip, .cadence-coarse-only { display: none !important; }
+}
 `;
 export const ink = "#2b2622";
 export const paper = "#f4ede1";
@@ -356,6 +379,36 @@ export const S = {
     cursor: "ns-resize",
     zIndex: 3
   },
+  // Phase 3: where a drag would land (SPEC "Interaction engine")
+  dropPreview: {
+    position: "absolute",
+    left: 3,
+    right: 3,
+    border: `1.5px dashed ${ink}`,
+    borderRadius: 4,
+    pointerEvents: "none",
+    zIndex: 4
+  },
+  // Phase 3: touch resize grip, the part of the hit area outside the block (below other blocks);
+  // centred on the block, width set in Block.tsx from the grip span
+  gripZone: {
+    position: "absolute",
+    left: "50%",
+    transform: "translateX(-50%)",
+    zIndex: 1,
+    touchAction: "none"
+  },
+  // Phase 3: visible touch grip, centred on a block edge
+  gripBar: {
+    position: "absolute",
+    left: "50%",
+    width: 22,
+    height: 4,
+    marginLeft: -11,
+    borderRadius: 2,
+    pointerEvents: "none",
+    zIndex: 3
+  },
   placedTop: {
     display: "flex",
     justifyContent: "space-between",
@@ -472,6 +525,12 @@ export const S = {
     border: "1.5px solid",
     cursor: "pointer",
     lineHeight: 1.4
+  },
+  // Phase 3: right-aligned row holding (touch-only) "delete" and "done"
+  editActions: {
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: 5
   },
   editDone: {
     alignSelf: "flex-end",

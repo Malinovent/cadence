@@ -1,22 +1,35 @@
+import type React from "react";
 import { useState } from "react";
+import type { Interaction } from "../interaction/useInteraction";
 import type { WeekIndex } from "../lib/actions";
+import { withAlpha } from "../lib/gesture";
 import type { CadenceData } from "../lib/model";
 import { completion, quotaStatus } from "../lib/stats";
 import { fmtDur } from "../lib/time";
 import type { CadenceActions } from "../state/useCadence";
 import { S } from "../styles";
-import type { DragRef } from "./drag";
 
 type Props = {
   data: CadenceData;
   week: WeekIndex;
   setWeek: (w: WeekIndex) => void;
-  dragRef: DragRef;
+  interaction: Interaction;
+  armedCatId: string | null; // tap-to-place: the tray category waiting for a slot tap
+  onArm: (catId: string | null) => void;
   actions: Pick<CadenceActions, "saveTemplate" | "applyTemplate" | "deleteTemplate">;
   onAdvance: () => void;
 };
 
-export default function Sidebar({ data, week, setWeek, dragRef, actions, onAdvance }: Props) {
+// hover / press / hold-progress colours for the tray item CSS (styles.ts FONT_IMPORT)
+const trayVars = (color: string) =>
+  ({
+    "--cadence-hover": withAlpha(color, "1a"),
+    "--cadence-press": withAlpha(color, "26"),
+    "--cadence-hold": withAlpha(color, "40"),
+  }) as React.CSSProperties;
+
+export default function Sidebar({ data, week, setWeek, interaction, armedCatId, onArm, actions, onAdvance }: Props) {
+  const { engine, state } = interaction;
   const [namingTemplate, setNamingTemplate] = useState(false);
   const [templateName, setTemplateName] = useState("");
   const blocks = data.weeks[week];
@@ -47,22 +60,39 @@ export default function Sidebar({ data, week, setWeek, dragRef, actions, onAdvan
         ))}
       </div>
 
-      <div style={S.panelLabel}>Drag into the grid</div>
+      <div style={S.panelLabel}>{armedCatId ? "Tap a slot to place · tap again to cancel" : "Drag into the grid"}</div>
       <div className="cadence-tray" style={S.tray}>
-        {data.cats.map((c) => (
-          <div
-            key={c.id}
-            draggable
-            onDragStart={(e) => {
-              dragRef.current = { type: "tray", catId: c.id };
-              e.dataTransfer.effectAllowed = "copy";
-            }}
-            style={{ ...S.trayBlock, border: `1.5px dashed ${c.color}`, color: c.color }}
-          >
-            <span>{c.name}</span>
-            <span style={{ ...S.trayMins, color: c.color }}>{fmtDur(c.blockMins)}</span>
-          </div>
-        ))}
+        {data.cats.map((c) => {
+          const armed = armedCatId === c.id;
+          const press = state.press;
+          const pressed = press?.source.kind === "tray" && press.source.catId === c.id;
+          return (
+            <div
+              key={c.id}
+              className="cadence-src cadence-tray-item"
+              data-press={pressed ? "" : undefined}
+              data-holding={pressed && press.hold ? "" : undefined}
+              data-armed={armed ? "" : undefined}
+              onPointerDown={(e) => engine.pressSource(e, e.currentTarget, { kind: "tray", catId: c.id }, { hold: true })}
+              // a tap (no drag) arms tap-to-place; tapping the armed item again disarms
+              onClick={() => onArm(armed ? null : c.id)}
+              onContextMenu={(e) => {
+                if (engine.blocksContextMenu()) e.preventDefault();
+              }}
+              style={{
+                ...S.trayBlock,
+                border: `1.5px ${armed ? "solid" : "dashed"} ${c.color}`,
+                color: armed ? "#fff" : c.color,
+                ...(armed ? { background: c.color } : null),
+                ...trayVars(c.color),
+              }}
+            >
+              <span className="cadence-hold-fill" aria-hidden="true" />
+              <span>{c.name}</span>
+              <span style={{ ...S.trayMins, color: armed ? "#fff" : c.color }}>{fmtDur(c.blockMins)}</span>
+            </div>
+          );
+        })}
       </div>
 
       <div className="cadence-after" style={S.panelLabel}>This week's time targets</div>

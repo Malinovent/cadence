@@ -1,17 +1,20 @@
 import { useEffect, useRef } from "react";
+import { DAYS } from "../lib/constants";
 import type { Block, Category } from "../lib/model";
 import type { CadenceActions } from "../state/useCadence";
-import { S } from "../styles";
+import { ink, paper, S } from "../styles";
 
 type Props = {
   block: Block;
   cats: Category[];
   baseColor: string;
   onClose: () => void;
+  onDelete: () => void; // touch only: there is no right-click
+  onMoveToDay: (day: number) => void; // touch only: day chips
   actions: Pick<CadenceActions, "updateBlock" | "addTag" | "removeTag">;
 };
 
-export default function BlockEditor({ block: p, cats, baseColor, onClose, actions }: Props) {
+export default function BlockEditor({ block: p, cats, baseColor, onClose, onDelete, onMoveToDay, actions }: Props) {
   const editorRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef(onClose);
   useEffect(() => {
@@ -72,9 +75,29 @@ export default function BlockEditor({ block: p, cats, baseColor, onClose, action
           );
         })}
       </div>
-      <button onClick={onClose} style={S.editDone}>
-        done
-      </button>
+      {/* touch only (cadence-coarse-only): move to another day at the same start */}
+      <div className="cadence-coarse-only" style={S.chipRow}>
+        {DAYS.map((d, i) => {
+          const on = p.day === i;
+          return (
+            <button
+              key={d}
+              onClick={() => onMoveToDay(i)}
+              style={{ ...S.chip, borderColor: ink, background: on ? ink : "transparent", color: on ? paper : ink }}
+            >
+              {d}
+            </button>
+          );
+        })}
+      </div>
+      <div style={S.editActions}>
+        <button className="cadence-coarse-only" onClick={onDelete} style={{ ...S.editDone, background: "#b54" }}>
+          delete
+        </button>
+        <button onClick={onClose} style={S.editDone}>
+          done
+        </button>
+      </div>
     </div>
   );
 }

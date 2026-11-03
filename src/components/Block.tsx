@@ -1,11 +1,11 @@
 import type React from "react";
-import { DAY_START, STEP, ROW_H } from "../lib/constants";
+import type { InteractionEngine } from "../interaction/engine";
+import { blockBox, GRIP_MIN_WIDTH, GRIP_SPAN, gripZones } from "../lib/gesture";
 import type { Block as BlockT, Category } from "../lib/model";
 import { fmtDur, fmtTime } from "../lib/time";
 import type { CadenceActions } from "../state/useCadence";
 import { S } from "../styles";
 import BlockEditor from "./BlockEditor";
-import type { DragRef } from "./drag";
 
 export type ResizeEdge = "top" | "bottom";
 
@@ -14,11 +14,23 @@ type Props = {
   cats: Category[];
   isEditing: boolean;
   setEditingId: (id: string | null) => void;
-  dragRef: DragRef;
-  startResize: (e: React.MouseEvent, p: BlockT, edge: ResizeEdge) => void;
+  engine: InteractionEngine;
+  rowH: number; // px per 30-min row
+  colHeight: number; // px height of the day column (grips never reach outside it)
+  pressed: boolean; // pointer is down on it (press feedback)
+  lifted: boolean; // being moved: the original stays in place, faded
+  tagColor: string | null; // a tray category is hovering it: dropping adds that tag
+  onTap: (p: BlockT) => void; // a click/tap that was not a drag
+  onContextMenu: (e: React.MouseEvent, p: BlockT) => void;
   onToggleDone: (id: string) => void;
+  onMoveToDay: (p: BlockT, day: number) => void;
   actions: Pick<CadenceActions, "addTag" | "removeTag" | "updateBlock" | "removeBlock">;
 };
+
+// Width of the touch grip strips outside a block, in its day column (the block is inset 3px
+// each side): the middle GRIP_SPAN of the block, at least GRIP_MIN_WIDTH, never wider than the
+// block. Same rule as gripSpan() in lib/gesture.ts, which the inside part uses.
+const GRIP_ZONE_WIDTH = `min(calc(100% - 6px), max(${GRIP_MIN_WIDTH}px, calc((100% - 6px) * ${GRIP_SPAN})))`;
 
 // Soft blend of the tagged category colors. Each color sits at a single stop
 // and CSS interpolates between them; stops are inset (15%..85%) so each color
@@ -31,11 +43,26 @@ const blendGradient = (colors: string[]): string =>
     })
     .join(", ")})`;
 
-export default function Block({ block: p, cats: allCats, isEditing, setEditingId, dragRef, startResize, onToggleDone, actions }: Props) {
+export default function Block({
+  block: p,
+  cats: allCats,
+  isEditing,
+  setEditingId,
+  engine,
+  rowH,
+  colHeight,
+  pressed,
+  lifted,
+  tagColor,
+  onTap,
+  onContextMenu,
+  onToggleDone,
+  onMoveToDay,
+  actions,
+}: Props) {
   const cats = p.catIds.map((id) => allCats.find((c) => c.id === id)).filter((c): c is Category => !!c);
   const colors = cats.length ? cats.map((c) => c.color) : ["#999"];
-  const top = ((p.start - DAY_START) / STEP) * ROW_H;
-  const height = (p.mins / STEP) * ROW_H - 4;
+  const { top, height } = blockBox(p.start, p.mins, rowH);
   const named = !!p.label;
   const baseColor = colors[0];
   const multi = colors.length > 1;
@@ -91,106 +118,140 @@ export default function Block({ block: p, cats: allCats, isEditing, setEditingId
   const showDesc = !isEditing && p.desc && height > 44;
   const showTime = !isEditing && height > (p.desc ? 74 : 46);
 
-  return (
+  // mouse: invisible 7px edge handles (hidden on coarse pointers, see styles.ts)
+  const edgeHandle = (edge: ResizeEdge) => (
     <div
-      draggable={!isEditing}
-      onDragStart={(e) => {
-        dragRef.current = { type: "move", id: p.id };
-        e.dataTransfer.effectAllowed = "move";
+      className="cadence-edge"
+      style={edge === "top" ? S.resizeHandle : { ...S.resizeHandle, top: "auto", bottom: 0 }}
+      onPointerDown={(e) => {
+        if (e.pointerType === "mouse" && e.button !== 0) return;
+        e.preventDefault();
         e.stopPropagation();
+        engine.startResize(e, e.currentTarget, p, edge, { capture: true });
       }}
-      onDragOver={(e) => {
-        if (dragRef.current?.type === "tray") {
-          e.preventDefault();
+      onClick={(e) => e.stopPropagation()}
+    />
+  );
+
+  // touch (coarse pointers only, see styles.ts): the visible grips, and the part of their
+  // hit area outside the block. The part inside is handled by engine.pressBlock. These are
+  // siblings of the block in the day column so they can reach past its clipped edges.
+  const zones = gripZones(top, height, colHeight);
+  const gripColor = solidFill ? "#fff" : baseColor;
+  const gripFade = lifted ? 0.35 : undefined;
+  const outsideZone = (edge: ResizeEdge) => {
+    const h = edge === "top" ? zones.outsideTop : zones.outsideBottom;
+    if (h <= 0) return null;
+    return (
+      <div
+        className="cadence-grip"
+        style={{ ...S.gripZone, top: edge === "top" ? top - h : top + height, height: h, width: GRIP_ZONE_WIDTH }}
+        onPointerDown={(e) => {
           e.stopPropagation();
-        }
-      }}
-      // drop a tray category directly ONTO a block -> adds a second type
-      onDrop={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const d = dragRef.current;
-        if (d && d.type === "tray") actions.addTag(p.id, d.catId);
-        dragRef.current = null;
-      }}
-      onClick={() => {
-        if (!isEditing) setEditingId(p.id);
-      }}
-      onContextMenu={(e) => {
-        e.preventDefault();
-        actions.removeBlock(p.id);
-      }}
-      title="Click to edit · drag a category onto me to add a type · right-click to delete"
-      style={{
-        ...S.placedBlock,
-        top,
-        height,
-        ...blockStyle,
-        // keep text inset identical whether the ring is a real border or the masked overlay
-        padding: multi && !solidFill ? "6.5px 8.5px" : "5px 7px",
-        color: onColor,
-        cursor: isEditing ? "default" : "grab",
-        zIndex: isEditing ? 20 : 2,
-        overflow: isEditing ? "visible" : "hidden",
-      }}
-    >
-      {ringOverlay}
-      {!isEditing && (
-        <div style={S.resizeHandle} onMouseDown={(e) => startResize(e, p, "top")} onClick={(e) => e.stopPropagation()} />
-      )}
-      <div style={S.placedTop}>
-        <span style={S.placedNameWrap}>
-          {multi && (
-            <span style={S.pipRow}>
-              {colors.map((col, i) => (
-                <span key={i} style={{ ...S.pip, background: col }} />
-              ))}
-            </span>
-          )}
-          <span style={S.placedName}>{cats.map((c) => c.name).join(" + ") || "?"}</span>
-        </span>
-        <div style={S.placedTopRight}>
-          <span style={{ ...S.placedDur, color: solidFill ? "rgba(255,255,255,0.85)" : baseColor }}>{fmtDur(p.mins)}</span>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleDone(p.id);
-            }}
-            style={{
-              ...S.doneToggle,
-              background: solidFill ? "rgba(255,255,255,0.25)" : "transparent",
-              borderColor: solidFill ? "transparent" : baseColor,
-              color: solidFill ? "#fff" : baseColor,
-            }}
-          >
-            {p.done ? "✓" : "○"}
-          </button>
+          engine.startResize(e, e.currentTarget, p, edge, { capture: true });
+        }}
+      />
+    );
+  };
+
+  return (
+    <>
+      <div
+        data-block-id={p.id}
+        className={isEditing ? "cadence-block" : "cadence-src cadence-block"}
+        data-press={pressed ? "" : undefined}
+        onPointerDown={(e) => {
+          // the open editor's own controls must never pick the block up
+          if (!isEditing) engine.pressBlock(e, e.currentTarget, p);
+        }}
+        onClick={() => onTap(p)}
+        onContextMenu={(e) => onContextMenu(e, p)}
+        title="Click to edit · drag a category onto me to add a type · right-click to delete"
+        style={{
+          ...S.placedBlock,
+          top,
+          height,
+          ...blockStyle,
+          // keep text inset identical whether the ring is a real border or the masked overlay
+          padding: multi && !solidFill ? "6.5px 8.5px" : "5px 7px",
+          color: onColor,
+          cursor: isEditing ? "default" : "grab",
+          zIndex: isEditing ? 20 : 2,
+          overflow: isEditing ? "visible" : "hidden",
+          transition: "background 0.15s, transform 0.12s, opacity 0.12s",
+          opacity: lifted ? 0.35 : undefined,
+          outline: tagColor ? `2px solid ${tagColor}` : undefined,
+        }}
+      >
+        {ringOverlay}
+        {!isEditing && edgeHandle("top")}
+        <div style={S.placedTop}>
+          <span style={S.placedNameWrap}>
+            {multi && (
+              <span style={S.pipRow}>
+                {colors.map((col, i) => (
+                  <span key={i} style={{ ...S.pip, background: col }} />
+                ))}
+              </span>
+            )}
+            <span style={S.placedName}>{cats.map((c) => c.name).join(" + ") || "?"}</span>
+          </span>
+          <div style={S.placedTopRight}>
+            <span style={{ ...S.placedDur, color: solidFill ? "rgba(255,255,255,0.85)" : baseColor }}>{fmtDur(p.mins)}</span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleDone(p.id);
+              }}
+              style={{
+                ...S.doneToggle,
+                background: solidFill ? "rgba(255,255,255,0.25)" : "transparent",
+                borderColor: solidFill ? "transparent" : baseColor,
+                color: solidFill ? "#fff" : baseColor,
+              }}
+            >
+              {p.done ? "✓" : "○"}
+            </button>
+          </div>
         </div>
+        {isEditing ? (
+          <BlockEditor
+            block={p}
+            cats={allCats}
+            baseColor={baseColor}
+            onClose={() => setEditingId(null)}
+            onDelete={() => {
+              actions.removeBlock(p.id);
+              setEditingId(null);
+            }}
+            onMoveToDay={(day) => onMoveToDay(p, day)}
+            actions={actions}
+          />
+        ) : (
+          <>
+            {p.label && <div style={S.placedLabel}>{p.label}</div>}
+            {showDesc && (
+              <div style={{ ...S.placedDesc, opacity: solidFill ? 0.85 : 0.75, WebkitLineClamp: height > 78 ? 2 : 1 }}>
+                {p.desc}
+              </div>
+            )}
+            {showTime && (
+              <div style={{ ...S.placedTime, opacity: solidFill ? 0.8 : 0.65 }}>
+                {fmtTime(p.start)}–{fmtTime(p.start + p.mins)}
+              </div>
+            )}
+          </>
+        )}
+        {!isEditing && edgeHandle("bottom")}
       </div>
-      {isEditing ? (
-        <BlockEditor block={p} cats={allCats} baseColor={baseColor} onClose={() => setEditingId(null)} actions={actions} />
-      ) : (
+      {!isEditing && (
         <>
-          {p.label && <div style={S.placedLabel}>{p.label}</div>}
-          {showDesc && (
-            <div style={{ ...S.placedDesc, opacity: solidFill ? 0.85 : 0.75, WebkitLineClamp: height > 78 ? 2 : 1 }}>
-              {p.desc}
-            </div>
-          )}
-          {showTime && (
-            <div style={{ ...S.placedTime, opacity: solidFill ? 0.8 : 0.65 }}>
-              {fmtTime(p.start)}–{fmtTime(p.start + p.mins)}
-            </div>
-          )}
+          {outsideZone("top")}
+          {outsideZone("bottom")}
+          <div className="cadence-grip" style={{ ...S.gripBar, top: top - 2, background: gripColor, opacity: gripFade }} />
+          <div className="cadence-grip" style={{ ...S.gripBar, top: top + height - 2, background: gripColor, opacity: gripFade }} />
         </>
       )}
-      {!isEditing && (
-        <div
-          style={{ ...S.resizeHandle, top: "auto", bottom: 0 }}
-          onMouseDown={(e) => startResize(e, p, "bottom")}
-          onClick={(e) => e.stopPropagation()}
-        />
-      )}
-    </div>
+    </>
   );
 }

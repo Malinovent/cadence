@@ -1,18 +1,18 @@
 import type React from "react";
-import { useCallback, useEffect, useRef } from "react";
+import type { Interaction } from "../interaction/useInteraction";
 import type { WeekIndex } from "../lib/actions";
 import { DAY_END, DAY_START, DAYS, ROW_H, STEP } from "../lib/constants";
+import { blockBox, dropPreview, resolveDrop, slotStartAt } from "../lib/gesture";
 import type { Block as BlockT, Category } from "../lib/model";
 import { fmtTime } from "../lib/time";
 import type { CadenceActions } from "../state/useCadence";
 import { line, paper2, S } from "../styles";
-import Block, { type ResizeEdge } from "./Block";
-import type { DragRef } from "./drag";
+import Block from "./Block";
 
 const SLOTS: number[] = [];
 for (let t = DAY_START; t < DAY_END; t += STEP) SLOTS.push(t);
 
-const COLS = `64px repeat(7, 1fr)`;
+const ALL_DAYS = DAYS.map((_, i) => i);
 
 type Props = {
   week: WeekIndex;
@@ -20,97 +20,102 @@ type Props = {
   cats: Category[];
   editingId: string | null;
   setEditingId: (id: string | null) => void;
-  dragRef: DragRef;
+  interaction: Interaction;
+  armedCatId: string | null; // tap-to-place: tray category waiting for a slot tap
+  onPlaced: () => void; // tap-to-place used its one placement
   actions: Pick<
     CadenceActions,
-    "placeBlock" | "moveBlock" | "resize" | "addTag" | "removeTag" | "updateBlock" | "removeBlock" | "toggleDone"
+    "placeBlock" | "moveBlock" | "addTag" | "removeTag" | "updateBlock" | "removeBlock" | "toggleDone"
   >;
+  rowH?: number; // px per 30-min row (desktop ROW_H)
+  days?: readonly number[]; // day indexes shown as columns, Mon = 0 (desktop: all seven)
 };
 
-type Listeners = { move: (e: MouseEvent) => void; up: () => void };
+export default function WeekGrid({
+  week,
+  blocks,
+  cats,
+  editingId,
+  setEditingId,
+  interaction,
+  armedCatId,
+  onPlaced,
+  actions,
+  rowH = ROW_H,
+  days = ALL_DAYS,
+}: Props) {
+  const { engine, state } = interaction;
+  const cols = `64px repeat(${days.length}, 1fr)`;
+  const colHeight = SLOTS.length * rowH;
 
-export default function WeekGrid({ week, blocks, cats, editingId, setEditingId, dragRef, actions }: Props) {
-  // ---- resize by dragging top/bottom edge ----
-  // refs keep the window listeners on the current week and let us remove the exact same functions
-  const weekRef = useRef(week);
-  const resizeFn = useRef(actions.resize);
-  useEffect(() => {
-    weekRef.current = week;
-    resizeFn.current = actions.resize;
-  }, [week, actions.resize]);
-  const listeners = useRef<Listeners | null>(null);
-
-  const stopResize = useCallback(() => {
-    const l = listeners.current;
-    if (!l) return;
-    window.removeEventListener("mousemove", l.move);
-    window.removeEventListener("mouseup", l.up);
-    listeners.current = null;
-  }, []);
-  useEffect(() => stopResize, [stopResize]);
-
-  const startResize = (e: React.MouseEvent, p: BlockT, edge: ResizeEdge) => {
-    e.preventDefault();
-    e.stopPropagation();
-    stopResize();
-    const r = { id: p.id, edge, startY: e.clientY, origStart: p.start, origMins: p.mins };
-    const move = (ev: MouseEvent) => {
-      const deltaSlots = Math.round((ev.clientY - r.startY) / ROW_H);
-      resizeFn.current(weekRef.current, r.id, r.edge, r.origStart, r.origMins, deltaSlots);
-    };
-    listeners.current = { move, up: stopResize };
-    window.addEventListener("mousemove", move);
-    window.addEventListener("mouseup", stopResize);
-  };
-
-  // drop onto a day column — derive start time from cursor Y within the column
-  const onDropColumn = (e: React.DragEvent<HTMLDivElement>, day: number) => {
-    e.preventDefault();
-    const d = dragRef.current;
-    if (!d) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const y = e.clientY - rect.top;
-    const slotIdx = Math.max(0, Math.min(SLOTS.length - 1, Math.floor(y / ROW_H)));
-    const start = DAY_START + slotIdx * STEP;
-    if (d.type === "tray") actions.placeBlock(week, d.catId, day, start);
-    else if (d.type === "move") actions.moveBlock(week, d.id, day, start);
-    dragRef.current = null;
-  };
+  // what the current drag would do: outline the landing spot, or highlight the block to tag
+  const drag = state.drag;
+  const intent = drag?.hit ? resolveDrop(drag.source, drag.hit) : null;
+  const preview = intent ? dropPreview(blocks, cats, intent) : null;
+  const tagTargetId = intent?.kind === "tag" ? intent.blockId : null;
+  const dragCatId = drag?.source.kind === "tray" ? drag.source.catId : null;
+  const tagColor = cats.find((c) => c.id === dragCatId)?.color ?? null;
+  const liftedId = drag?.source.kind === "move" ? drag.source.id : null;
+  const pressedId = state.press?.source.kind === "move" ? state.press.source.id : null;
 
   const onToggleDone = (id: string) => actions.toggleDone(week, id);
 
+  // tap-to-place: a tap on an empty spot places the armed category there
+  const onColumnClick = (e: React.MouseEvent<HTMLDivElement>, day: number) => {
+    if (!armedCatId) return;
+    if ((e.target as Element).closest("[data-block-id]")) return; // the block handles its own tap
+    const start = slotStartAt(e.clientY - e.currentTarget.getBoundingClientRect().top, rowH);
+    // a full day places nothing; stay armed so another slot can be tried
+    if (!dropPreview(blocks, cats, { kind: "place", catId: armedCatId, day, start })) return;
+    actions.placeBlock(week, armedCatId, day, start);
+    onPlaced();
+  };
+
+  // a tap on a block: adds the armed category, otherwise opens the editor
+  const onBlockTap = (p: BlockT) => {
+    if (armedCatId) {
+      actions.addTag(p.id, armedCatId);
+      onPlaced();
+    } else if (editingId !== p.id) setEditingId(p.id);
+  };
+
+  // desktop right-click deletes; a touch long-press must not
+  const onBlockContextMenu = (e: React.MouseEvent, p: BlockT) => {
+    e.preventDefault();
+    if (engine.lastPointerType !== "mouse") return;
+    engine.cancel();
+    actions.removeBlock(p.id);
+  };
+
+  const onMoveToDay = (p: BlockT, day: number) => actions.moveBlock(week, p.id, day, p.start);
+
   return (
-    <div style={S.gridWrap}>
-      <div style={{ ...S.headRow, gridTemplateColumns: COLS }}>
+    <div ref={engine.setGrid} data-row-h={rowH} style={S.gridWrap}>
+      <div style={{ ...S.headRow, gridTemplateColumns: cols }}>
         <div style={S.corner} />
-        {DAYS.map((d) => (
+        {days.map((d) => (
           <div key={d} style={S.dayHead}>
-            {d}
+            {DAYS[d]}
           </div>
         ))}
       </div>
-      <div style={{ ...S.bodyRow, gridTemplateColumns: COLS }}>
+      <div style={{ ...S.bodyRow, gridTemplateColumns: cols }}>
         <div style={S.timeColWrap}>
           {SLOTS.map((t) => (
-            <div key={t} style={{ ...S.timeLabel, height: ROW_H, opacity: t % 60 === 0 ? 1 : 0 }}>
+            <div key={t} style={{ ...S.timeLabel, height: rowH, opacity: t % 60 === 0 ? 1 : 0 }}>
               {t % 60 === 0 ? fmtTime(t) : ""}
             </div>
           ))}
         </div>
-        {DAYS.map((_, di) => (
-          <div
-            key={di}
-            style={{ ...S.dayCol, height: SLOTS.length * ROW_H }}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => onDropColumn(e, di)}
-          >
+        {days.map((di) => (
+          <div key={di} data-day={di} style={{ ...S.dayCol, height: colHeight }} onClick={(e) => onColumnClick(e, di)}>
             {SLOTS.map((t, si) => (
               <div
                 key={t}
                 style={{
                   ...S.slotLine,
-                  top: si * ROW_H,
-                  height: ROW_H,
+                  top: si * rowH,
+                  height: rowH,
                   borderBottomColor: t % 60 === 30 ? line : paper2,
                 }}
               />
@@ -124,12 +129,20 @@ export default function WeekGrid({ week, blocks, cats, editingId, setEditingId, 
                   cats={cats}
                   isEditing={editingId === p.id}
                   setEditingId={setEditingId}
-                  dragRef={dragRef}
-                  startResize={startResize}
+                  engine={engine}
+                  rowH={rowH}
+                  colHeight={colHeight}
+                  pressed={pressedId === p.id}
+                  lifted={liftedId === p.id}
+                  tagColor={tagTargetId === p.id ? tagColor : null}
+                  onTap={onBlockTap}
+                  onContextMenu={onBlockContextMenu}
                   onToggleDone={onToggleDone}
+                  onMoveToDay={onMoveToDay}
                   actions={actions}
                 />
               ))}
+            {preview && preview.day === di && <div style={{ ...S.dropPreview, ...blockBox(preview.start, preview.mins, rowH) }} />}
           </div>
         ))}
       </div>

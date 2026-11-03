@@ -43,7 +43,7 @@ Depends: 5, user's icon choice.
 
 ## Phase 3 — Mobile (design approved, see SPEC "Phase 3 design")
 
-### [ ] 8. Touch interaction engine — Heavy
+### [x] 8. Touch interaction engine — Heavy
 Replace HTML5 drag and mouse resize with a Pointer Events engine per SPEC "Interaction engine", "Press / hover feedback", "Tap-to-place", "Resize", "Editor additions", "No zoom". Works in the current 7-column grid on all widths.
 Verify: unit tests for pure gesture maths; build/lint/tests; browser at desktop width (mouse) and mobile emulation (touch): pickup, move, tray drop, tag drop, tap-to-place, resize, autoscroll, cancel.
 Depends: Phase 2.

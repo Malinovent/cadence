@@ -29,16 +29,19 @@
 - `src/lib/download.ts` — browser-only `downloadText` (Blob + object URL + `<a download>`)
 - `src/lib/actions.ts` — pure state transitions on `CadenceData`
 - `src/lib/stats.ts` — derived numbers: `quotaStatus`, `completion`, `statsByCat`, `maxHours`, hour→minute conversions
+- `src/lib/gesture.ts` — pure gesture maths for the interaction engine: thresholds, y→slot start (row height as a parameter), `hitTest` on measured rects, autoscroll speed, touch grip sizing, `resolveDrop` / `dropPreview`, `withAlpha`
 - `src/lib/__fixtures__/legacy.ts` — legacy-app data fixture for tests
 - `src/state/useCadence.ts` — `useCadence` hook: data, per-key persistence, bound actions
+- `src/interaction/engine.ts` — Pointer Events engine (framework-free): press → long-press / 4px → drag → drop, edge resizes, autoscroll, scroll lock, click suppression; `engine.test.ts` (jsdom)
+- `src/interaction/dom.ts` — browser side of the engine: grid measuring (`data-row-h` / `data-day` / `data-block-id` contract), drag ghost, click swallowing, coarse-pointer query
+- `src/interaction/useInteraction.ts` — React hook: one engine for tray + grid, mirrors its state
 - `src/components/` — React view components
 - `src/components/Header.tsx` — logo, tagline, nav buttons (`View` type)
-- `src/components/Sidebar.tsx` — week toggle, tray, quotas, completion, templates, roll forward
-- `src/components/WeekGrid.tsx` — day grid, column drops, resize listeners
-- `src/components/Block.tsx` — one placed block (states, gradient ring, drag/drop, handles)
-- `src/components/BlockEditor.tsx` — inline title/description/tags editor
+- `src/components/Sidebar.tsx` — week toggle, tray (drag source, press/hold feedback, tap-to-place arming), quotas, completion, templates, roll forward
+- `src/components/WeekGrid.tsx` — day grid (`rowH` and `days` props), drop preview / tag highlight, tap-to-place, block taps and right-click
+- `src/components/Block.tsx` — one placed block (states, gradient ring, press/lift/tag-target looks, mouse edge handles, touch grips)
+- `src/components/BlockEditor.tsx` — inline title/description/tags editor; touch-only day chips and delete
 - `src/components/StatsView.tsx` — streaks, hours chart, reset
 - `src/components/CategoriesView.tsx` — category editor
 - `src/components/SettingsView.tsx` — "Your data": export / import with summary + confirm
-- `src/components/drag.ts` — `DragInfo` type shared by tray and grid
 - `.github/workflows/deploy.yml` — CI: test, lint, build, deploy to GitHub Pages

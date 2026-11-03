@@ -1,12 +1,13 @@
-import { useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import CategoriesView from "./components/CategoriesView";
-import type { DragInfo } from "./components/drag";
 import Header, { type View } from "./components/Header";
 import SettingsView from "./components/SettingsView";
 import Sidebar from "./components/Sidebar";
 import StatsView from "./components/StatsView";
 import WeekGrid from "./components/WeekGrid";
+import { useInteraction } from "./interaction/useInteraction";
 import type { WeekIndex } from "./lib/actions";
+import { resolveDrop } from "./lib/gesture";
 import type { CadenceData } from "./lib/model";
 import type { StatsRange } from "./lib/stats";
 import { useCadence } from "./state/useCadence";
@@ -18,32 +19,66 @@ export default function App() {
   const [activeWeek, setActiveWeek] = useState<WeekIndex>(0); // 0 = this week, 1 = next week
   const [statsRange, setStatsRange] = useState<StatsRange>("month");
   const [editingId, setEditingId] = useState<string | null>(null); // block open in the inline editor
-  const dragRef = useRef<DragInfo | null>(null);
+  const [armedCatId, setArmedCatId] = useState<string | null>(null); // tap-to-place: armed tray category
+
+  // drag-and-drop and resize for the tray and the grid (Pointer Events, see src/interaction)
+  const interaction = useInteraction({
+    onDrop: (source, hit) => {
+      const d = resolveDrop(source, hit);
+      if (d.kind === "tag") actions.addTag(d.blockId, d.catId);
+      else if (d.kind === "place") actions.placeBlock(activeWeek, d.catId, d.day, d.start);
+      else actions.moveBlock(activeWeek, d.id, d.day, d.start);
+    },
+    onResize: (id, edge, origStart, origMins, deltaSlots) =>
+      actions.resize(activeWeek, id, edge, origStart, origMins, deltaSlots),
+  });
+
+  // Escape disarms tap-to-place
+  useEffect(() => {
+    if (!armedCatId) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setArmedCatId(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [armedCatId]);
+
+  // changing view or week disarms tap-to-place
+  const changeView = (v: View) => {
+    setView(v);
+    setArmedCatId(null);
+  };
+  const changeWeek = (w: WeekIndex) => {
+    setActiveWeek(w);
+    setArmedCatId(null);
+  };
 
   // week 2 becomes week 1, and the view jumps back to it
   const onAdvance = () => {
     actions.advanceWeek();
-    setActiveWeek(0);
+    changeWeek(0);
   };
 
   // an import replaces everything; drop UI state that may point at old blocks
   const onReplace = (next: CadenceData) => {
     actions.replaceAll(next);
     setEditingId(null);
-    setActiveWeek(0);
+    changeWeek(0);
   };
 
   return (
     <div style={S.root}>
       <style>{FONT_IMPORT}</style>
-      <Header view={view} setView={setView} />
+      <Header view={view} setView={changeView} />
       {view === "calendar" && (
         <div className="cadence-body" style={S.body}>
           <Sidebar
             data={data}
             week={activeWeek}
-            setWeek={setActiveWeek}
-            dragRef={dragRef}
+            setWeek={changeWeek}
+            interaction={interaction}
+            armedCatId={armedCatId}
+            onArm={setArmedCatId}
             actions={actions}
             onAdvance={onAdvance}
           />
@@ -53,7 +88,9 @@ export default function App() {
             cats={data.cats}
             editingId={editingId}
             setEditingId={setEditingId}
-            dragRef={dragRef}
+            interaction={interaction}
+            armedCatId={armedCatId}
+            onPlaced={() => setArmedCatId(null)}
             actions={actions}
           />
         </div>
