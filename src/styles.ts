@@ -7,15 +7,10 @@ export const FONT_IMPORT = `
 * { box-sizing: border-box; }
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-thumb { background: #cabfb2; border-radius: 4px; }
-/* narrow screens: week toggle + tray right above the calendar, the rest below it */
-@media (max-width: 899px) {
-  .cadence-body { display: flex !important; flex-direction: column; align-items: stretch !important; gap: 12px !important; }
-  .cadence-side { display: contents !important; }
-  .cadence-body > :last-child { order: 1; }
-  .cadence-after { order: 2; }
-  .cadence-tray { flex-direction: row !important; flex-wrap: wrap; }
-  .cadence-tray > * { flex: 1 1 calc(50% - 6px); }
-}
+/* the panel hide/show text button: hover underline + 44px touch target on coarse pointers */
+.cadence-tray-toggle { padding: 9px 0 9px 12px; margin: -9px 0; }
+.cadence-tray-toggle:hover { text-decoration: underline; }
+@media (pointer: coarse) { .cadence-tray-toggle { padding: 15px 0 15px 16px; margin: -15px 0; } }
 /* no double-tap zoom (pinch zoom stays) */
 html, body { touch-action: manipulation; }
 /* drag sources: long-press must not select text or open the iOS callout; vertical/horizontal pan still scrolls */
@@ -1102,7 +1097,220 @@ export const S = {
     fontSize: 14,
     color: ink
   },
-  // ---- tasks tab ----
+  // ---- S1.4 one panel for areas and tasks ----
+  bodySolo: {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr)",
+    gap: 12,
+    alignItems: "start"
+  },
+  mainCol: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+    minWidth: 0
+  },
+  panelHead: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+    color: "#9a8d7d",
+    marginTop: 4,
+    display: "flex",
+    alignItems: "center",
+    gap: 8
+  },
+  panelToggle: {
+    fontFamily: "inherit",
+    fontSize: "inherit",
+    textTransform: "inherit",
+    letterSpacing: "inherit",
+    color: "inherit",
+    lineHeight: "14px",
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    flexShrink: 0
+  },
+  areaList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 12
+  },
+  areaBalance: {
+    marginTop: 5,
+    padding: "0 2px"
+  },
+  trayName: {
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    minWidth: 0
+  },
+  panelSection: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+    borderTop: `1px dashed ${line}`,
+    paddingTop: 12
+  },
+  panelTaskAdd: {
+    display: "flex",
+    gap: 6,
+    alignItems: "center"
+  },
+  panelTaskList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
+    marginTop: 8
+  },
+  panelTaskRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    background: "#fbf6ec",
+    padding: "6px 8px",
+    borderRadius: 3
+  },
+  panelTaskCheck: {
+    width: 18,
+    height: 18,
+    fontSize: 11
+  },
+  panelTaskName: {
+    fontSize: 14
+  },
+  weekBar: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "stretch",
+    gap: 12
+  },
+  weekBarLeft: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    gap: 8,
+    flex: "1 1 220px",
+    maxWidth: 320
+  },
+  weekBarCard: {
+    flex: "1 1 280px"
+  },
+  showPanelBtn: {
+    alignSelf: "flex-start",
+    padding: 0,
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+    color: "#9a8d7d"
+  },
+  seasonCardCompact: {
+    padding: "10px 14px",
+    height: "100%"
+  },
+  seasonNumCompact: {
+    fontSize: 32
+  },
+  weekFooter: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "flex-start",
+    gap: 16
+  },
+  weekFooterTpl: {
+    flex: "1 1 280px",
+    maxWidth: 420
+  },
+  weekFooterAdvance: {
+    flex: "0 1 auto",
+    marginTop: 12
+  },
+  // phone dock: fixed to the bottom, Areas and Tasks tabs, folds to a slim bar
+  dock: {
+    position: "fixed",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 20,
+    background: paper,
+    borderTop: `1.5px solid ${ink}`,
+    boxShadow: "0 -2px 0 rgba(0,0,0,0.06)",
+    paddingBottom: "env(safe-area-inset-bottom)"
+  },
+  dockBar: {
+    display: "block",
+    width: "100%",
+    minHeight: 44,
+    padding: "12px 16px",
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 12,
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+    color: ink,
+    textAlign: "center"
+  },
+  dockHead: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    padding: "8px 12px 0"
+  },
+  dockTabs: {
+    display: "flex",
+    flex: 1,
+    border: `1.5px solid ${ink}`,
+    borderRadius: 3,
+    overflow: "hidden"
+  },
+  dockTab: {
+    flex: 1,
+    minHeight: 40,
+    border: "none",
+    background: "transparent",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 600,
+    fontSize: 15,
+    cursor: "pointer",
+    color: ink
+  },
+  dockTabActive: {
+    background: ink,
+    color: paper
+  },
+  dockFold: {
+    minHeight: 44,
+    minWidth: 44,
+    padding: "0 4px",
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+    color: "#9a8d7d"
+  },
+  dockBody: {
+    maxHeight: "30vh",
+    overflowY: "auto",
+    padding: "10px 12px 12px"
+  },
+  dockAreas: {
+    display: "grid",
+    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    gap: 10
+  },
+  // ---- tasks (S1.4: inside the panel) ----
   taskAddRow: {
     display: "flex",
     gap: 10,

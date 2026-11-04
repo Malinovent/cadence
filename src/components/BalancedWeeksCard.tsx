@@ -20,13 +20,13 @@ const WORD: Record<WeekMark, string> = {
 const fmtMonday = (key: string) =>
   new Date(`${key}T12:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 
-/** S1.3: "5 balanced weeks this season", with a square per week. */
-export default function BalancedWeeksCard({ season, footnote }: { season: Season; footnote?: string }) {
+/** S1.3: "5 balanced weeks this season", with a square per week. Compact above the grid (S1.4). */
+export default function BalancedWeeksCard({ season, footnote, compact }: { season: Season; footnote?: string; compact?: boolean }) {
   const n = season.balancedCount;
   const hasGrace = season.weeks.some((w) => w.mark === "grace");
   return (
-    <div className="cadence-after" style={S.seasonCard}>
-      <div style={S.seasonNum}>{n}</div>
+    <div style={{ ...S.seasonCard, ...(compact ? S.seasonCardCompact : {}) }}>
+      <div style={{ ...S.seasonNum, ...(compact ? S.seasonNumCompact : {}) }}>{n}</div>
       <div>
         <div style={S.seasonLabel}>{n === 1 ? "balanced week this season" : "balanced weeks this season"}</div>
         <div style={S.seasonSquares} role="list" aria-label="This season's weeks">

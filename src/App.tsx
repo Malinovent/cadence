@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import CategoriesView from "./components/CategoriesView";
 import Header, { type View } from "./components/Header";
 import SettingsView from "./components/SettingsView";
-import Sidebar from "./components/Sidebar";
 import StatsView from "./components/StatsView";
-import TasksView from "./components/TasksView";
+import AreasPanel from "./components/AreasPanel";
+import PhoneDock from "./components/PhoneDock";
+import WeekBar from "./components/WeekBar";
+import WeekFooter from "./components/WeekFooter";
 import WeekGrid from "./components/WeekGrid";
 import { useInteraction } from "./interaction/useInteraction";
 import { moveBlock, type WeekIndex } from "./lib/actions";
@@ -13,7 +15,11 @@ import { defaultDay } from "./lib/dayview";
 import { resolveDrop } from "./lib/gesture";
 import { isRemoteApply } from "./lib/syncUi";
 import type { Block, CadenceData } from "./lib/model";
-import type { StatsRange } from "./lib/stats";
+import { completion, type StatsRange } from "./lib/stats";
+import { season } from "./lib/balancedWeeks";
+import { panelAreas, panelNotes } from "./lib/panel";
+import { readBalanceRules } from "./state/balanceRules";
+import { readPanelHidden, writePanelHidden } from "./state/panelPrefs";
 import { useCadence } from "./state/useCadence";
 import { useIsPhone } from "./state/useIsPhone";
 import { useSync } from "./sync/useSync";
@@ -30,6 +36,13 @@ export default function App() {
   const [armedCatId, setArmedCatId] = useState<string | null>(null); // tap-to-place: armed tray category
   const [phoneDay, setPhoneDay] = useState(() => defaultDay(0, new Date())); // phone: the one day shown, Mon = 0
   const isPhone = useIsPhone();
+  // S1.4: the areas-and-tasks panel hidden (desktop) or folded (phone); remembered on this device
+  const [panelHidden, setPanelHidden] = useState(readPanelHidden);
+  const setHidden = (hidden: boolean) => {
+    setPanelHidden(hidden);
+    writePanelHidden(hidden);
+    if (hidden) setArmedCatId(null);
+  };
 
   // drag-and-drop and resize for the tray and the grid (Pointer Events, see src/interaction)
   const interaction = useInteraction({
@@ -96,6 +109,20 @@ export default function App() {
     changeWeek(0);
   };
 
+  // calendar view: the panel's content (desktop side panel or phone dock) and the bars around the grid
+  const done = completion(data, activeWeek);
+  const panel = {
+    areas: panelAreas(data, activeWeek),
+    notes: panelNotes(data, activeWeek),
+    tasks: data.tasks,
+    interaction,
+    armedCatId,
+    onArm: setArmedCatId,
+    onHide: () => setHidden(true),
+    actions,
+  };
+  const showSide = !isPhone && !panelHidden;
+
   return (
     <div style={S.root}>
       <style>{FONT_IMPORT}</style>
@@ -109,36 +136,45 @@ export default function App() {
         </div>
       )}
       {view === "calendar" && (
-        <div className="cadence-body" style={S.body}>
-          <Sidebar
-            data={data}
-            week={activeWeek}
-            setWeek={changeWeek}
-            interaction={interaction}
-            armedCatId={armedCatId}
-            onArm={setArmedCatId}
-            actions={actions}
-            onAdvance={onAdvance}
-          />
-          <WeekGrid
-            week={activeWeek}
-            blocks={data.weeks[activeWeek]}
-            cats={data.cats}
-            editingId={editingId}
-            setEditingId={setEditingId}
-            interaction={interaction}
-            armedCatId={armedCatId}
-            onPlaced={() => setArmedCatId(null)}
-            actions={actions}
-            onMoveToDay={onMoveToDay}
-            {...(isPhone ? { rowH: ROW_H_PHONE, days: [phoneDay], phone: { day: phoneDay, setDay: setPhoneDay } } : {})}
-          />
-        </div>
+        <>
+          <div style={showSide ? S.body : S.bodySolo}>
+            {showSide && <AreasPanel {...panel} />}
+            <main style={S.mainCol}>
+              <WeekBar
+                week={activeWeek}
+                setWeek={changeWeek}
+                season={season(data.cats, data.history, new Date(), readBalanceRules())}
+                footnote={`${done.done} of ${done.total} ${done.total === 1 ? "block" : "blocks"} ticked this week`}
+                onShowPanel={!isPhone && panelHidden ? () => setHidden(false) : null}
+              />
+              <WeekGrid
+                week={activeWeek}
+                blocks={data.weeks[activeWeek]}
+                cats={data.cats}
+                editingId={editingId}
+                setEditingId={setEditingId}
+                interaction={interaction}
+                armedCatId={armedCatId}
+                onPlaced={() => setArmedCatId(null)}
+                actions={actions}
+                onMoveToDay={onMoveToDay}
+                {...(isPhone
+                  ? {
+                      rowH: ROW_H_PHONE,
+                      days: [phoneDay],
+                      phone: { day: phoneDay, setDay: setPhoneDay },
+                    }
+                  : {})}
+              />
+              <WeekFooter data={data} week={activeWeek} actions={actions} onAdvance={onAdvance} />
+            </main>
+          </div>
+          {isPhone && <PhoneDock {...panel} folded={panelHidden} onShow={() => setHidden(false)} />}
+        </>
       )}
       {view === "stats" && (
         <StatsView data={data} range={statsRange} setRange={setStatsRange} resetStats={actions.resetStats} />
       )}
-      {view === "tasks" && <TasksView tasks={data.tasks} actions={actions} />}
       {view === "categories" && <CategoriesView cats={data.cats} actions={actions} />}
       {view === "settings" && <SettingsView data={data} onReplace={onReplace} sync={sync.configured ? sync : null} />}
     </div>

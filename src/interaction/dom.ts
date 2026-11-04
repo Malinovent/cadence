@@ -116,3 +116,12 @@ export const suppressNextClick = (win: Window, ms = 400): void => {
 };
 
 export const isCoarsePointer = (win: Window): boolean => win.matchMedia?.("(pointer: coarse)").matches ?? false;
+
+// S1.4: the phone dock (areas and tasks tray) is fixed to the bottom and covers the grid there.
+// Its top is the bottom of what the user can drop on; innerHeight when there is no dock.
+export const DOCK_ATTR = "data-cadence-dock";
+export const dockTop = (win: Window): number => {
+  const dock = win.document.querySelector(`[${DOCK_ATTR}]`);
+  const top = dock?.getBoundingClientRect().top;
+  return top !== undefined && top > 0 && top < win.innerHeight ? top : win.innerHeight;
+};

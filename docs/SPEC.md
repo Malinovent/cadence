@@ -40,7 +40,7 @@ src/
   state/
     useCadence.ts       React hook: holds CadenceData, persists it, exposes actions
   components/
-    Header.tsx, Sidebar.tsx (tray, quotas, completion, templates, roll forward),
+    Header.tsx, AreasPanel.tsx + PhoneDock.tsx (areas and tasks; S1.4), WeekBar.tsx, WeekFooter.tsx,
     WeekGrid.tsx, Block.tsx, BlockEditor.tsx,
     StatsView.tsx, CategoriesView.tsx, SettingsView.tsx
 ```
@@ -234,6 +234,14 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 - Marks: balanced (filled square), grace (dashed: an unbalanced finished week with no other grace week among the three before it), not balanced (faint outline), this week (outline, still open; becomes filled as soon as it's balanced). Count = balanced squares, including this week once balanced.
 - Card (`BalancedWeeksCard`): ink card, big number, "balanced weeks this season", the squares (each with an aria-label/title "Week of Nov 16: balanced"), "Dashed square: a grace week" when one shows. Sidebar: replaces the sessions-done card, with "2 of 6 blocks ticked this week" as its footnote. Stats: replaces the per-category streak cards. No flames, no broken-streak message, no red.
 - `streaks` keeps its legacy shape and is still updated by Roll forward, but is no longer shown.
+
+### S1.4 One panel for areas and tasks
+- Replaces the sidebar, the phone stacking CSS and the Tasks view (nav is now calendar, stats, categories, settings). Task data and actions are unchanged; tasks get areas in S1.5.
+- Calendar view: a main column with, in order, the week bar (`WeekBar`: Week 1 / Week 2 switch and a compact balanced-weeks card with the "N of M blocks ticked this week" footnote), the grid, and the week footer (`WeekFooter`: templates, "＋ Save current week", roll forward).
+- Desktop (≥ 900px): the left panel (`AreasPanel`, 300px) lists each area as its drag handle (`AreaChip`: drag into the grid, or tap then tap a slot) with this week's balance under it (`BalanceBar`: kind, "7 of 10 h", the guardrail bar), then the buffer chip, the calm notes, and a Tasks section (`TaskList`: add, tick, dismiss; insertion order). Its head row reads "Areas · Drag into the grid" (the tap hint while armed) and has a "hide" button. Hidden: the grid takes the full width and the week bar shows "◂ Show areas and tasks".
+- Phone (< 900px): areas and tasks share a tray docked at the bottom (`PhoneDock`, fixed, paper with an ink top rule, safe-area padding) with Areas and Tasks tabs ("Tasks · 3" when 3 are open) and a "▾ hide" button. Areas tab: chips in two columns, each with its bar and count; the tap hint only while armed; the notes below, reached by scrolling the tray (body capped at 30vh). One tap on "hide" folds it to a slim "▴ Show areas and tasks" bar. A spacer as tall as the dock keeps the end of the page reachable. This supersedes the Phase 3 "tray above the calendar, no bottom sheet" layout, per the sprint 1 brief.
+- The dock covers the grid where it sits: while dragging, a pointer over the dock is no hit and no drop, and autoscroll uses the dock's top as the bottom edge (no autoscroll while over the dock). The engine reads it through `EngineEnv.viewBottom` (`dockTop` in `interaction/dom.ts`, the element with `data-cadence-dock`).
+- Hidden/folded is one per-device choice, not synced: `cadence:ui:trayHidden` = "1" (the old tray "hide" key, so an earlier choice carries over). Hiding disarms tap-to-place.
 
 ## Phases
 1. Port + export/import + unit tests (this file's sections above).

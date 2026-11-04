@@ -36,6 +36,7 @@ let ghost: { moveTo: ReturnType<typeof vi.fn>; remove: ReturnType<typeof vi.fn> 
 let makeGhost: ReturnType<typeof vi.fn>;
 let hitAt: (x: number, y: number, grabOffsetY: number | null) => GridHit | null;
 let coarse: boolean;
+let dock: number | null; // S1.4: top of the phone dock, null = no dock
 let engine: InteractionEngine;
 let el: HTMLElement;
 const last = () => states[states.length - 1] ?? IDLE;
@@ -50,6 +51,7 @@ beforeEach(() => {
   makeGhost = vi.fn(() => ghost);
   hitAt = (x, y, off) => ({ day: Math.floor(x / 100), start: 420 + Math.floor((y - (off ?? 0)) / 26) * 30, blockId: null });
   coarse = false;
+  dock = null;
   window.scrollBy = vi.fn();
   Object.defineProperty(window.navigator, "vibrate", { value: vi.fn(), configurable: true });
   const env: EngineEnv = {
@@ -61,6 +63,7 @@ beforeEach(() => {
     suppressClick,
     raf: (cb) => window.setTimeout(cb, 16),
     caf: (id) => window.clearTimeout(id),
+    viewBottom: () => dock ?? window.innerHeight,
   };
   engine = new InteractionEngine({ onChange: (s) => states.push(s), onDrop, onResize }, env);
   engine.mount();
@@ -312,5 +315,22 @@ describe("resize", () => {
     move(150, h - 5);
     frame();
     expect(window.scrollBy).toHaveBeenCalledWith(0, 15);
+  });
+
+  it("treats the phone dock as off the grid: no hit, no drop, no autoscroll over it", () => {
+    const h = window.innerHeight;
+    dock = h - 200;
+    pressTray(150, h - 100, "touch"); // the drag starts in the dock
+    vi.advanceTimersByTime(350);
+    expect(last().drag?.hit).toBeNull();
+    frame();
+    expect(window.scrollBy).not.toHaveBeenCalled();
+    move(150, h - 230, "touch"); // just above the dock: autoscroll down, and a hit
+    frame();
+    expect(window.scrollBy).toHaveBeenCalled();
+    expect(last().drag?.hit).not.toBeNull();
+    move(150, h - 50, "touch");
+    up(150, h - 50, "touch");
+    expect(onDrop).not.toHaveBeenCalled();
   });
 });

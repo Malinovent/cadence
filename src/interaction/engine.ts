@@ -24,7 +24,7 @@ import {
   type DragSource,
   type GridHit,
 } from "../lib/gesture";
-import { columnOf, createGhost, gridHitAt, isCoarsePointer, suppressNextClick, type Ghost } from "./dom";
+import { columnOf, createGhost, dockTop, gridHitAt, isCoarsePointer, suppressNextClick, type Ghost } from "./dom";
 
 export type ResizeEdge = "top" | "bottom";
 
@@ -63,6 +63,8 @@ export type EngineEnv = {
   suppressClick: () => void;
   raf: (cb: () => void) => number;
   caf: (id: number) => void;
+  /** S1.4: the visible bottom of the page above the phone dock (innerHeight when there is none) */
+  viewBottom?: () => number;
 };
 
 export const domEnv = (win: Window): EngineEnv => ({
@@ -74,6 +76,7 @@ export const domEnv = (win: Window): EngineEnv => ({
   suppressClick: () => suppressNextClick(win),
   raf: (cb) => (win.requestAnimationFrame ? win.requestAnimationFrame(cb) : win.setTimeout(cb, 16)),
   caf: (id) => (win.cancelAnimationFrame ? win.cancelAnimationFrame(id) : win.clearTimeout(id)),
+  viewBottom: () => dockTop(win),
 });
 
 type Press = {
@@ -294,10 +297,20 @@ export class InteractionEngine {
     this.startFrames();
   };
 
+  private bottom(): number {
+    return this.env.viewBottom?.() ?? this.env.win.innerHeight;
+  }
+
+  // the grid slot under the pointer; nothing while the pointer is over the phone dock (it covers the grid)
+  private hitHere(s: { x: number; y: number; grabOffsetY: number | null }): GridHit | null {
+    if (!this.grid || s.y > this.bottom()) return null;
+    return this.env.hitAt(this.grid, s.x, s.y, s.grabOffsetY);
+  }
+
   private updateHit(force = false) {
     const s = this.s;
     if (!s || s.type !== "drag") return;
-    const hit = this.grid ? this.env.hitAt(this.grid, s.x, s.y, s.grabOffsetY) : null;
+    const hit = this.hitHere(s);
     if (!force && sameHit(hit, s.hit)) return;
     s.hit = hit;
     this.set({ press: null, drag: { source: s.source, hit }, resize: null });
@@ -406,7 +419,7 @@ export class InteractionEngine {
     s.x = e.clientX;
     s.y = e.clientY;
     if (s.type === "drag") {
-      const hit = this.grid ? this.env.hitAt(this.grid, s.x, s.y, s.grabOffsetY) : null;
+      const hit = this.hitHere(s);
       const source = s.source;
       this.end();
       this.env.suppressClick();
@@ -465,7 +478,9 @@ export class InteractionEngine {
     const s = this.s;
     if (!s || (s.type !== "drag" && s.type !== "resize")) return;
     const { win } = this.env;
-    const v = autoscrollSpeed(s.y, win.innerHeight);
+    // over the phone dock: no autoscroll (the drag usually starts there)
+    const bottom = this.bottom();
+    const v = s.y > bottom ? 0 : autoscrollSpeed(s.y, bottom);
     if (v !== 0) {
       const before = win.scrollY;
       win.scrollBy(0, v);

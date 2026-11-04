@@ -2,8 +2,9 @@ import { statusBadge } from "../lib/syncUi";
 import type { SyncStatus } from "../sync/engine";
 import { S } from "../styles";
 
-export type View = "calendar" | "stats" | "tasks" | "categories" | "settings";
-const VIEWS: View[] = ["calendar", "stats", "tasks", "categories", "settings"];
+// S1.4: no Tasks view any more, tasks live in the areas-and-tasks panel beside the grid
+export type View = "calendar" | "stats" | "categories" | "settings";
+const VIEWS: View[] = ["calendar", "stats", "categories", "settings"];
 
 export default function Header({
   view,
