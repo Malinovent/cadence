@@ -113,8 +113,9 @@ Private view for JP: weekly visitors, signups, purchases by headline and source,
 Done (site repo): `scoreboard` function behind `SCOREBOARD_TOKEN` (counts only), `/scoreboard/` page in FR/EN, visits counted once per browser session; checked in the browser against sample data. Left: compare with the launch plan's scoreboard (not seen yet); live once JP runs SETUP.md.
 Depends: S0.3.
 
-### [ ] S0.6 Legal pages, French first — Medium
+### [~] S0.6 Legal pages, French first — Medium
 Terms, Privacy, Refunds, What lifetime means; drafts with `[SELLER]`, `[SYNC TERM]`, `[NOTICE]` placeholders for JP's review.
+Done (site repo): all four pages in FR (official) and EN, shared header/footer, EN pages link to the French first, tests for matching keys/tokens. Left: JP works through `docs/LEGAL-REVIEW.md` (placeholders, proposed refund terms, Law 25 commitments) and approves the copy.
 Depends: S0.1. Blocked for final copy on: JP's decisions (Nov 10) and review (Nov 14).
 
 ### [ ] S0.7 End-to-end check — Light
