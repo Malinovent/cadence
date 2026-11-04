@@ -84,3 +84,53 @@ Depends: none.
 ### [x] 15. Tasks tab — Careful
 Data model + storage + normalize + export/import + sync document + actions + TasksView + nav.
 Depends: none (runs alongside 14; does not touch Sidebar.tsx or Block.tsx).
+
+## Sprint 0 — Pre-sale page, due 2026-11-15 (see `docs/BRIEF-sprints-0-1.md`)
+
+Plan approved 2026-11-04. Site repo: `D:\Custom Apps\cadence-site` (local git, no remote yet; renamed `{{APP_NAME}}-site` once the name is picked).
+
+### [~] S0.1 Site repo scaffold + i18n — Medium
+`{{APP_NAME}}-site` repo: static Vite site (no React runtime needed), FR/EN pages with French default for Quebec, translation files, self-hosted fonts and clip placeholder, Pages workflow, custom domain once DNS exists.
+Done: Vite + TS site, build-time FR/EN render, root language redirect, self-hosted fonts, Pages workflow, tests for language/headline/source/waitlist/translations. Left: GitHub repo + custom domain.
+Depends: JP's OK. Blocked for the domain on: name + DNS (Nov 8).
+
+### [~] S0.2 Landing page — Medium
+Hero (A/B headline in session storage), how it works, offer, waitlist form, FAQ, footer, per `docs/wireframes/landing-*.png`. Reduced motion, Lighthouse a11y 90+, no third-party requests except checkout.
+Done: all sections from the wireframes in both languages, A/B headline, waitlist client checks. Left: wire waitlist (S0.3) and checkout (S0.4), real clip, Lighthouse run.
+Depends: S0.1.
+
+### [ ] S0.3 Supabase tables + `hits` + `waitlist` functions — Careful
+`purchases`, `entitlements`, `waitlist`, `hits` tables (RLS: no public reads), edge functions with input validation, `?src=` / referrer source logic as pure tested functions, tagged link list.
+Depends: JP's OK. Flag: Supabase region (Canada).
+
+### [ ] S0.4 Checkout adapter + webhook — Careful
+Thin provider adapter (Paddle or Lemon Squeezy), overlay checkout in visitor's language, webhook signature check, purchase + entitlement write, refund handling, thank-you page.
+Depends: S0.2, S0.3. Blocked on: merchant approval + test keys (Nov 5).
+
+### [ ] S0.5 Scoreboard — Medium
+Private view for JP: weekly visitors, signups, purchases by headline and source, plus rates. Aggregation as pure tested functions.
+Depends: S0.3.
+
+### [ ] S0.6 Legal pages, French first — Medium
+Terms, Privacy, Refunds, What lifetime means; drafts with `[SELLER]`, `[SYNC TERM]`, `[NOTICE]` placeholders for JP's review.
+Depends: S0.1. Blocked for final copy on: JP's decisions (Nov 10) and review (Nov 14).
+
+### [ ] S0.7 End-to-end check — Light
+Test-mode then live purchase + refund in FR and EN, waitlist signup, hit counts, scoreboard totals.
+Depends: all of the above; JP's live purchase (Nov 14).
+
+## Sprint 1 — No-regret features, 2026-11-16 to 2026-12-20 (see brief)
+
+Each ships to JP's friend as it lands, in this order. Every storage change: JSON export first, migration tested on real-shaped data.
+
+### [ ] S1.1 A tick on every block
+### [ ] S1.2 Guardrail quotas (floor / ceiling / range; quotas migrate to floors)
+### [ ] S1.3 Balanced weeks instead of daily streaks
+### [ ] S1.4 One panel for areas and tasks (desktop panel, phone tray with tabs)
+### [ ] S1.5 Tasks under areas (schema v2; migrates the current Tasks tab's area-less tasks)
+### [ ] S1.6 Click or tap empty time to add (check with JP: tap already places an armed block)
+### [ ] S1.7 Welcome back
+### [ ] S1.8 Starter templates
+### [ ] S1.9 French and English
+### [ ] S1.10 Neutral stats copy
+### [ ] S1.11 Early-bird badge

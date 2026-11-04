@@ -4,6 +4,8 @@
 - `CLAUDE.md` — agent rules and commands
 - `filemap.md` — this index
 - `docs/BRIEF.md` — original request from the user
+- `docs/BRIEF-sprints-0-1.md` — brief for sprint 0 (pre-sale page) and sprint 1 (no-regret app features)
+- `docs/wireframes/` — JP's target screens (landing, phone, desktop) as PNGs, with an index README
 - `docs/SPEC.md` — spec: architecture, data model, behaviour, designs
 - `docs/PLAN.md` — task list and status
 - `docs/SUPABASE_SETUP.md` — click-through guide for the user: Supabase project, schema, auth emails, GitHub variables
