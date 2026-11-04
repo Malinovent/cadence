@@ -1,7 +1,10 @@
 import { useState } from "react";
 import type { CadenceData } from "../lib/model";
 import { maxHours, statsByCat, type StatsRange } from "../lib/stats";
+import { season } from "../lib/balancedWeeks";
+import { readBalanceRules } from "../state/balanceRules";
 import { S } from "../styles";
+import BalancedWeeksCard from "./BalancedWeeksCard";
 
 type Props = {
   data: CadenceData;
@@ -30,17 +33,8 @@ export default function StatsView({ data, range, setRange, resetStats }: Props) 
         </div>
       </div>
 
-      <div style={S.streakRow}>
-        {data.cats.map((c) => {
-          const s = data.streaks[c.id]?.count || 0;
-          return (
-            <div key={c.id} style={S.streakCard}>
-              <div style={{ ...S.streakFlame, color: s > 0 ? c.color : "#cabfb2" }}>{s > 0 ? "🔥" : "·"}</div>
-              <div style={S.streakNum}>{s}</div>
-              <div style={S.streakName}>{c.name} streak</div>
-            </div>
-          );
-        })}
+      <div style={{ marginBottom: 20 }}>
+        <BalancedWeeksCard season={season(data.cats, data.history, new Date(), readBalanceRules())} />
       </div>
 
       <div style={S.barChart}>
@@ -57,12 +51,12 @@ export default function StatsView({ data, range, setRange, resetStats }: Props) 
         ))}
       </div>
 
-      <p style={S.statsNote}>Stats count sessions you marked done. Roll the week forward to bank streaks.</p>
+      <p style={S.statsNote}>Stats and balanced weeks count the blocks you tick. Every week starts fresh.</p>
 
       <div style={S.resetRow}>
         {confirmReset ? (
           <>
-            <span style={S.resetWarn}>Clear all tracked hours and streaks? This can't be undone.</span>
+            <span style={S.resetWarn}>Clear all tracked hours and balanced weeks? This can't be undone.</span>
             <button
               onClick={() => {
                 resetStats();

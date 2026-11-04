@@ -5,6 +5,8 @@ import { droppedLine, importSummaryLine } from "../lib/format";
 import type { CadenceData } from "../lib/model";
 import { loadPremigrationCopy, PREMIGRATION_KEYS } from "../lib/storage";
 import { buildExport, exportFilename, NOT_A_BACKUP, parseImport, type ImportResult } from "../lib/transfer";
+import { clampRules, DEFAULT_RULES, type BalanceRules } from "../lib/balancedWeeks";
+import { readBalanceRules, writeBalanceRules } from "../state/balanceRules";
 import { S } from "../styles";
 
 type Status =
@@ -110,7 +112,53 @@ export default function SettingsView({
         <div style={{ ...note, color: "#1FA98A", marginTop: 12 }}>Imported. Your week is back.</div>
       )}
 
+      <BalanceRulesSection />
+
       {sync && <AccountSync {...sync} />}
     </div>
   );
 }
+
+/** S1.3: when a week counts as balanced. Saved on this device only. */
+function BalanceRulesSection() {
+  const [rules, setRules] = useState(readBalanceRules);
+  const set = (patch: Partial<BalanceRules>) => {
+    const next = clampRules({ ...rules, ...patch });
+    setRules(next);
+    writeBalanceRules(next);
+  };
+  const changed = rules.floorPct !== DEFAULT_RULES.floorPct || rules.ceilingOverPct !== DEFAULT_RULES.ceilingOverPct;
+  return (
+    <div style={{ marginTop: 32 }}>
+      <h2 style={S.statsTitle}>Balanced weeks</h2>
+      <div style={S.catIntro}>
+        A week counts as balanced when every floor is met at least this much and no ceiling is passed by more than this.
+        Only ticked blocks count. Saved on this device.
+      </div>
+      <div style={{ ...row, marginTop: 12, alignItems: "flex-end" }}>
+        <label style={S.catField}>
+          <span>Floors met (%)</span>
+          <input type="number" min="0" max="100" step="5" value={rules.floorPct} onChange={(e) => set({ floorPct: +e.target.value })} style={S.catNum} />
+        </label>
+        <label style={S.catField}>
+          <span>Ceilings passed by (%)</span>
+          <input
+            type="number"
+            min="0"
+            max="100"
+            step="5"
+            value={rules.ceilingOverPct}
+            onChange={(e) => set({ ceilingOverPct: +e.target.value })}
+            style={S.catNum}
+          />
+        </label>
+        {changed && (
+          <button style={{ ...S.catDel, fontSize: 13, textDecoration: "underline" }} onClick={() => set(DEFAULT_RULES)}>
+            Back to 80% and 10%
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+

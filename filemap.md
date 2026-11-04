@@ -43,11 +43,13 @@
 - `src/lib/gesture.ts` — pure gesture maths for the interaction engine: thresholds, y→slot start (row height as a parameter), `hitTest` on measured rects, autoscroll speed, touch grip sizing, `resolveDrop` / `dropPreview`, `withAlpha`
 - `src/lib/guardrail.ts` — S1.2 guardrails: `Limit` type, `parseLimit`, `floorFromTarget`, `legacyTarget`, `changeKind`, `balance`, wording (`fmtH`, `limitLabel`, `balanceLabel`, `balanceNote`), `barGeometry`
 - `src/lib/buffer.test.ts` — tests for buffer blocks across actions, drops, stats and normalizeData
+- `src/lib/balancedWeeks.ts` — S1.3: calendar weeks and weather seasons, ticked minutes per week from history, `limitKept` / `weekBalanced` with `BalanceRules`, `season` (marks + count)
 - `src/lib/now.ts` — "now" on the grid: `nowPoint`, `isNowBlock`, `minutesLeft`, `fmtLeft`, `nowLineTop`, `fmtClock`, `msToNextMinute`
 - `src/lib/dayview.ts` — phone day view maths: `defaultDay`, `swipeDay`, `daysWithBlocks`; row-height-scaled block text thresholds (`tallerThan`, `blockText`)
 - `src/lib/__fixtures__/legacy.ts` — legacy-app data fixture for tests
 - `src/state/store.ts` — `createCadenceStore`: framework-free holder of data + meta; per-key persistence; `edit` (user edit, bumps `updatedAt`), `applyRemote` (no bump), `setMeta`
 - `src/state/useCadence.ts` — `useCadence` hook: renders from the store (`useSyncExternalStore`); data, meta, bound user actions, `store`
+- `src/state/balanceRules.ts` — read/write the per-device balanced-week rules (`cadence:ui:balanceRules`)
 - `src/state/useNow.ts` — `useNow()`: current time, refreshed each whole minute and when the page becomes visible
 - `src/state/useIsPhone.ts` — `useIsPhone()`: matchMedia `(max-width: 899px)`, live, SSR default false
 - `src/sync/client.ts` — Supabase client from env, or `null` (local-only)
@@ -59,15 +61,16 @@
 - `src/interaction/useInteraction.ts` — React hook: one engine for tray + grid, mirrors its state
 - `src/components/` — React view components
 - `src/components/Header.tsx` — logo, tagline, nav buttons (`View` type); sync status line under the nav when signed in (opens Settings)
-- `src/components/Sidebar.tsx` — week toggle, tray (drag source, press/hold feedback, tap-to-place arming), this week's balance, completion, templates, roll forward
+- `src/components/Sidebar.tsx` — week toggle, tray (drag source, press/hold feedback, tap-to-place arming), this week's balance, balanced weeks card, templates, roll forward
 - `src/components/WeekGrid.tsx` — day grid (`rowH` and `days` props; `phone` prop: Mon–Sun day strip instead of the head row, 52px time column, swipe to change day), drop preview / tag highlight, current-time line and clock tag, tap-to-place, block taps and right-click
 - `src/components/Block.tsx` — one placed block (states, gradient ring, round done tick, done tint, Now ring + minutes left, press/lift/tag-target looks, mouse edge handles, touch grips)
 - `src/components/BlockEditor.tsx` — inline title/description/tags editor; touch-only day chips and delete
 - `src/components/BalanceList.tsx` — sidebar "This week's balance": per-area guardrail bar, partial-credit label, calm notes
-- `src/components/StatsView.tsx` — streaks, hours chart, reset
+- `src/components/BalancedWeeksCard.tsx` — "N balanced weeks this season" card with a square per week
+- `src/components/StatsView.tsx` — balanced weeks card, hours chart, reset
 - `src/components/TasksView.tsx` — Tasks tab: add row, check / cross off, dismiss
 - `src/components/CategoriesView.tsx` — category editor: name, Floor/Ceiling/Range guardrail and its hours, block length, colour
-- `src/components/SettingsView.tsx` — "Your data": export / import with summary + confirm, download of the pre-guardrails copy; hosts "Account & sync" when sync is configured
+- `src/components/SettingsView.tsx` — "Your data": export / import with summary + confirm, download of the pre-guardrails copy, balanced-week rules; hosts "Account & sync" when sync is configured
 - `src/components/AccountSync.tsx` — Settings "Account & sync": conflict card, signed-out email form → code entry, signed-in email + status + sign out
 - `.github/workflows/deploy.yml` — CI: test, lint, build, deploy to GitHub Pages
 - `handoff/INSTALL-IPHONE.md` — one-page install + sign-in note for the end user

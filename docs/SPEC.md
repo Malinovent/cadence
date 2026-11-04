@@ -226,6 +226,15 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 - Buffer blocks (JP approved the design 2026-11-04): unassigned time that counts toward no area. The tray ends with a grey dashed "Buffer · 30m" item (`BUFFER_ID`, `BUFFER_MINS`, `BUFFER_COLOR`); drag or tap-to-place it like an area. Stored as `{ catIds: [], buffer: true }` (normal blocks get no `buffer` field). It shows "BUFFER" in the mono label style, dashed grey, no tick; it never counts in the balance or the sessions-done %. Dropped over a block it goes to the nearest free slot (never a tag); an area dropped or tap-placed on a buffer fills it (the buffer becomes that area's block). Moves, resizes, deletes, templates and removeCat keep it. An older copy of the app drops buffers it reads. Starter templates (S1.8) include one per day.
 - Streaks still use `targetMins` until S1.3 replaces them.
 
+### S1.3 Balanced weeks instead of daily streaks
+- JP's choices (2026-11-04): a week is judged on ticked time only, and the number is all balanced weeks this season (it never goes down); a grace week only changes how its square looks.
+- Source: `history` (one entry per area per ticked block, with the tick time), grouped into calendar weeks Monday–Sunday, local time. No new stored data, nothing new synced, no dependence on Roll forward. Unticking removes the entry, so the week is judged again.
+- A week is balanced when every area keeps its guardrail: floor (or range low end) at least `floorPct` met, ceiling (or range top) passed by at most `ceilingOverPct`. Defaults 80 and 10; changed in Settings → Balanced weeks, saved per device in `cadence:ui:balanceRules` (not synced), with "Back to 80% and 10%".
+- Season = weather season (winter Dec–Feb, spring Mar–May, summer Jun–Aug, fall Sep–Nov); a week belongs to the season its Monday is in. Weeks before the first tick ever are left out.
+- Marks: balanced (filled square), grace (dashed: an unbalanced finished week with no other grace week among the three before it), not balanced (faint outline), this week (outline, still open; becomes filled as soon as it's balanced). Count = balanced squares, including this week once balanced.
+- Card (`BalancedWeeksCard`): ink card, big number, "balanced weeks this season", the squares (each with an aria-label/title "Week of Nov 16: balanced"), "Dashed square: a grace week" when one shows. Sidebar: replaces the sessions-done card, with "2 of 6 blocks ticked this week" as its footnote. Stats: replaces the per-category streak cards. No flames, no broken-streak message, no red.
+- `streaks` keeps its legacy shape and is still updated by Roll forward, but is no longer shown.
+
 ## Phases
 1. Port + export/import + unit tests (this file's sections above).
 2. PWA + deploy: manifest, icons (incl. 180×180 apple-touch-icon, replace the emoji favicon), iOS meta tags, `viewport-fit=cover` + safe-area padding, service worker app-shell cache, self-hosted fonts, GitHub Pages workflow.

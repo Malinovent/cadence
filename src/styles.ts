@@ -361,6 +361,46 @@ export const S = {
     opacity: 0.8,
     marginTop: 4
   },
+  // S1.3 balanced weeks card: the season's count and one square per week
+  seasonCard: {
+    background: ink,
+    color: paper,
+    padding: "14px 16px",
+    borderRadius: 4,
+    display: "flex",
+    alignItems: "center",
+    gap: 14
+  },
+  seasonNum: {
+    fontSize: 44,
+    fontWeight: 900,
+    lineHeight: 1,
+    minWidth: 30,
+    textAlign: "center"
+  },
+  seasonLabel: {
+    fontSize: 14,
+    lineHeight: 1.25
+  },
+  seasonSquares: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 4,
+    margin: "6px 0 4px"
+  },
+  seasonSquare: {
+    width: 12,
+    height: 12,
+    borderRadius: 2,
+    boxSizing: "border-box"
+  },
+  seasonLegend: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 9,
+    letterSpacing: "0.06em",
+    textTransform: "uppercase",
+    opacity: 0.8
+  },
   tplSection: {
     display: "flex",
     flexDirection: "column",

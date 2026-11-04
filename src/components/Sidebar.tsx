@@ -10,6 +10,9 @@ import type { CadenceActions } from "../state/useCadence";
 import { BUFFER_COLOR, BUFFER_ID, BUFFER_MINS } from "../lib/constants";
 import { S } from "../styles";
 import BalanceList from "./BalanceList";
+import BalancedWeeksCard from "./BalancedWeeksCard";
+import { season } from "../lib/balancedWeeks";
+import { readBalanceRules } from "../state/balanceRules";
 
 type Props = {
   data: CadenceData;
@@ -196,12 +199,10 @@ export default function Sidebar({
       </div>
       <BalanceList rows={weekBalance(data, week)} />
 
-      <div className="cadence-after" style={S.completionCard}>
-        <div style={S.completionPct}>{done.pct}%</div>
-        <div style={S.completionLabel}>
-          sessions done this week ({done.done}/{done.total})
-        </div>
-      </div>
+      <BalancedWeeksCard
+        season={season(data.cats, data.history, new Date(), readBalanceRules())}
+        footnote={`${done.done} of ${done.total} ${done.total === 1 ? "block" : "blocks"} ticked this week`}
+      />
 
       <div className="cadence-after" style={S.tplSection}>
         <div style={S.panelLabel}>Templates</div>
