@@ -108,8 +108,9 @@ Depends: JP's OK. Flag: Supabase region (Canada).
 Thin provider adapter (Paddle or Lemon Squeezy), overlay checkout in visitor's language, webhook signature check, purchase + entitlement write, refund handling, thank-you page.
 Depends: S0.2, S0.3. Blocked on: merchant approval + test keys (Nov 5).
 
-### [ ] S0.5 Scoreboard — Medium
+### [~] S0.5 Scoreboard — Medium
 Private view for JP: weekly visitors, signups, purchases by headline and source, plus rates. Aggregation as pure tested functions.
+Done (site repo): `scoreboard` function behind `SCOREBOARD_TOKEN` (counts only), `/scoreboard/` page in FR/EN, visits counted once per browser session; checked in the browser against sample data. Left: compare with the launch plan's scoreboard (not seen yet); live once JP runs SETUP.md.
 Depends: S0.3.
 
 ### [ ] S0.6 Legal pages, French first — Medium
