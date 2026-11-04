@@ -130,7 +130,7 @@ Each ships to JP's friend as it lands, in this order. Every storage change: JSON
 Shipped to main 2026-11-04.
 Round tick on every block (bigger on touch), done = area tint, Now ring + minutes left, current-time line; SPEC "Sprint 1 changes". No stored-data change. Checked in the browser at desktop and phone sizes with emulated taps. Left: JP's OK, then real iPhone check after deploy.
 ### [~] S1.2 Guardrail quotas (floor / ceiling / range; quotas migrate to floors) — Careful
-Done on branch `s1-guardrails`: `limit` on categories with lossless migration and a pre-migration copy (Settings download), balance maths + wording (tested), sidebar balance, guardrail picker. Real backup checked. Left: the per-day buffer block in templates (question for JP), JP's OK, ship.
+Done on branch `s1-guardrails`: `limit` on categories with lossless migration and a pre-migration copy (Settings download), balance maths + wording (tested), sidebar balance, guardrail picker. Real backup checked. Shipped to main 2026-11-04. Buffer block done on branch `s1-buffer` (tray item, no area, fills when an area is dropped on it, kept by templates). Left: ship the buffer.
 ### [ ] S1.3 Balanced weeks instead of daily streaks
 ### [ ] S1.4 One panel for areas and tasks (desktop panel, phone tray with tabs)
 ### [ ] S1.5 Tasks under areas (schema v2; migrates the current Tasks tab's area-less tasks)

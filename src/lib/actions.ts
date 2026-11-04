@@ -1,7 +1,7 @@
 // Pure state transitions. Each takes CadenceData and returns new CadenceData,
 // or the same reference when nothing changes. Inputs are never mutated.
 import { legacyTarget } from "./guardrail";
-import { DAY_END, DAY_START, PALETTE, STEP } from "./constants";
+import { BUFFER_ID, BUFFER_MINS, DAY_END, DAY_START, PALETTE, STEP } from "./constants";
 import type { Block, CadenceData, Category, HistoryEntry, Streaks, Task, Template, Weeks } from "./model";
 import { resizeBlock, resolvePlacement } from "./placement";
 import { uid as defaultUid } from "./uid";
@@ -10,6 +10,12 @@ export type WeekIndex = 0 | 1;
 export type Deps = { uid?: () => string; now?: () => number };
 
 const BOUNDS = [DAY_START, DAY_END] as const;
+
+/** Default length when placing from the tray: the area's usual block, or BUFFER_MINS for a buffer. */
+export const placeMins = (cats: readonly Category[], catId: string): number | undefined =>
+  catId === BUFFER_ID ? BUFFER_MINS : cats.find((c) => c.id === catId)?.blockMins;
+
+export const isBuffer = (p: { buffer?: true }): boolean => p.buffer === true;
 
 const withWeek = (data: CadenceData, week: WeekIndex, blocks: Block[]): CadenceData => {
   const weeks: Weeks = [data.weeks[0], data.weeks[1]];
@@ -39,15 +45,16 @@ export const placeBlock = (
   mins?: number,
   deps: Deps = {},
 ): CadenceData => {
-  const dur = mins || data.cats.find((c) => c.id === catId)?.blockMins;
+  const dur = mins || placeMins(data.cats, catId);
   if (!dur) return data;
   const blocks = data.weeks[week];
   const r = resolvePlacement(blocks, day, start, dur, null, BOUNDS, STEP);
   if (!r) return data; // day full — nothing to do
   const id = (deps.uid ?? defaultUid)();
+  const base = { id, day, start: r.start, mins: r.mins, label: "", desc: "", done: false };
   return withWeek(data, week, [
     ...blocks,
-    { id, catIds: [catId], day, start: r.start, mins: r.mins, label: "", desc: "", done: false },
+    catId === BUFFER_ID ? { ...base, catIds: [], buffer: true as const } : { ...base, catIds: [catId] },
   ]);
 };
 
@@ -79,12 +86,20 @@ export const resize = (
   return withWeek(data, week, next);
 };
 
-// add a second (or third) category to an existing block
+// add a second (or third) category to an existing block; an area dropped on a buffer fills it
+// (the buffer becomes a block of that area); a buffer can't be added as a tag
 export const addTag = (data: CadenceData, id: string, catId: string): CadenceData =>
-  mapBlocks(data, (p) => {
-    if (p.id !== id || p.catIds.includes(catId)) return p; // already tagged
-    return { ...p, catIds: [...p.catIds, catId] };
-  });
+  catId === BUFFER_ID
+    ? data
+    : mapBlocks(data, (p) => {
+        if (p.id !== id || p.catIds.includes(catId)) return p; // already tagged
+        if (isBuffer(p)) {
+          const { buffer: _drop, ...rest } = p;
+          void _drop;
+          return { ...rest, catIds: [catId] };
+        }
+        return { ...p, catIds: [...p.catIds, catId] };
+      });
 
 export const removeTag = (data: CadenceData, id: string, catId: string): CadenceData =>
   mapBlocks(data, (p) => {
@@ -112,7 +127,7 @@ export const removeBlock = (data: CadenceData, id: string): CadenceData => {
 export const toggleDone = (data: CadenceData, week: WeekIndex, id: string, deps: Deps = {}): CadenceData => {
   const blocks = data.weeks[week];
   const p = blocks.find((x) => x.id === id);
-  if (!p) return data;
+  if (!p || isBuffer(p)) return data; // buffers have no tick
   const q = { ...p, done: !p.done };
   let history: HistoryEntry[];
   if (q.done) {
@@ -136,6 +151,7 @@ export const saveTemplate = (data: CadenceData, week: WeekIndex, name?: string, 
       mins: p.mins,
       label: p.label,
       desc: p.desc || "",
+      ...(isBuffer(p) ? { buffer: true as const } : {}),
     })),
   };
   return { ...data, templates: [...data.templates, tpl] };
@@ -150,6 +166,10 @@ export const applyTemplate = (data: CadenceData, week: WeekIndex, templateId: st
   const known = new Set(data.cats.map((c) => c.id));
   const blocks: Block[] = [];
   for (const b of tpl.blocks) {
+    if (isBuffer(b)) {
+      blocks.push({ ...b, catIds: [], id: makeId(), done: false });
+      continue;
+    }
     const catIds = b.catIds.filter((c) => known.has(c));
     if (catIds.length) blocks.push({ ...b, catIds, id: makeId(), done: false });
   }
@@ -213,7 +233,7 @@ export const removeCat = (data: CadenceData, id: string): CadenceData => {
     w.some((p) => p.catIds.includes(id))
       ? w
           .map((p) => (p.catIds.includes(id) ? { ...p, catIds: p.catIds.filter((x) => x !== id) } : p))
-          .filter((p) => p.catIds.length > 0)
+          .filter((p) => p.catIds.length > 0 || isBuffer(p))
       : w;
   const cats = data.cats.filter((c) => c.id !== id);
   const weeks: Weeks = [strip(data.weeks[0]), strip(data.weeks[1])];

@@ -615,6 +615,15 @@ export const S = {
     fontSize: 9,
     fontWeight: 500
   },
+  // S1.2 buffer blocks: "BUFFER" in the mono label style
+  bufferName: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontWeight: 500,
+    fontSize: 10,
+    letterSpacing: "0.1em",
+    textTransform: "uppercase",
+    color: "#7a6e5e"
+  },
   placedName: {
     fontWeight: 600,
     fontSize: 11,

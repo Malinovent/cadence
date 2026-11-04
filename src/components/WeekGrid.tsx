@@ -2,7 +2,7 @@ import type React from "react";
 import { useEffect, useRef } from "react";
 import type { Interaction } from "../interaction/useInteraction";
 import type { WeekIndex } from "../lib/actions";
-import { DAY_END, DAY_START, DAYS, ROW_H, STEP } from "../lib/constants";
+import { BUFFER_ID, DAY_END, DAY_START, DAYS, ROW_H, STEP } from "../lib/constants";
 import { daysWithBlocks, swipeDay } from "../lib/dayview";
 import { blockBox, dropPreview, resolveDrop, slotStartAt } from "../lib/gesture";
 import type { Block as BlockT, Category } from "../lib/model";
@@ -90,6 +90,7 @@ export default function WeekGrid({
 
   // a tap on a block: adds the armed category, otherwise opens the editor
   const onBlockTap = (p: BlockT) => {
+    if (armedCatId === BUFFER_ID) return; // a buffer isn't a tag: tap an empty slot to place it
     if (armedCatId) {
       actions.addTag(p.id, armedCatId);
       onPlaced();

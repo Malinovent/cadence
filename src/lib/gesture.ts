@@ -3,7 +3,7 @@
 // autoscroll speed, resize grip sizing, and what a drop means.
 // Nothing here touches the DOM; geometry is passed in, so the grid's row height
 // and column count are parameters (desktop: 7 columns of 26px rows).
-import { DAY_END, DAY_START, STEP } from "./constants";
+import { BUFFER_ID, BUFFER_MINS, DAY_END, DAY_START, STEP } from "./constants";
 import type { Block, Category } from "./model";
 import { resolvePlacement, type Bounds } from "./placement";
 
@@ -165,7 +165,8 @@ export const ghostOffset = (source: DragSource, startX: number, startY: number, 
 
 export const resolveDrop = (source: DragSource, hit: GridHit): DropIntent => {
   if (source.kind === "tray") {
-    if (hit.blockId) return { kind: "tag", blockId: hit.blockId, catId: source.catId };
+    // a buffer is never a tag: dropped over a block it goes in the nearest free spot instead
+    if (hit.blockId && source.catId !== BUFFER_ID) return { kind: "tag", blockId: hit.blockId, catId: source.catId };
     return { kind: "place", catId: source.catId, day: hit.day, start: hit.start };
   }
   // a moving block ignores blocks under the pointer: resolvePlacement finds the free spot
@@ -181,7 +182,7 @@ export const dropPreview = (
 ): { day: number; start: number; mins: number } | null => {
   if (intent.kind === "tag") return null;
   if (intent.kind === "place") {
-    const dur = cats.find((c) => c.id === intent.catId)?.blockMins;
+    const dur = intent.catId === BUFFER_ID ? BUFFER_MINS : cats.find((c) => c.id === intent.catId)?.blockMins;
     if (!dur) return null;
     const r = resolvePlacement(blocks, intent.day, intent.start, dur, null);
     return r && { day: intent.day, ...r };

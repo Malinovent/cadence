@@ -15,5 +15,11 @@ export const DEFAULT_CATEGORIES: readonly Category[] = [
   { id: "play", name: "Play", color: "#C9A227", targetMins: 240, blockMins: 120, limit: { kind: "floor", min: 240 } },
 ];
 
+// S1.2 buffer: a block that belongs to no area. BUFFER_ID stands in for a category id in the
+// tray, drags and tap-to-place only; a placed buffer is stored as { catIds: [], buffer: true }.
+export const BUFFER_ID = "__buffer";
+export const BUFFER_MINS = 30;
+export const BUFFER_COLOR = "#9a8d7d";
+
 // colours handed out (in order, cycling) to new categories
 export const PALETTE = ["#E8643C", "#3C6FE8", "#1FA98A", "#C9A227", "#9B4DCA", "#D6336C", "#0CA678"] as const;

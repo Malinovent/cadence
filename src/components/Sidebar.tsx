@@ -7,6 +7,7 @@ import type { CadenceData } from "../lib/model";
 import { completion, weekBalance } from "../lib/stats";
 import { fmtDur } from "../lib/time";
 import type { CadenceActions } from "../state/useCadence";
+import { BUFFER_COLOR, BUFFER_ID, BUFFER_MINS } from "../lib/constants";
 import { S } from "../styles";
 import BalanceList from "./BalanceList";
 
@@ -140,7 +141,11 @@ export default function Sidebar({
       </div>
       {!trayHidden && (
         <div className="cadence-tray" style={S.tray}>
-          {data.cats.map((c) => {
+          {[
+            ...data.cats.map((c) => ({ id: c.id, name: c.name, color: c.color, mins: c.blockMins })),
+            // S1.2: unassigned buffer time, placed like an area but counted toward none
+            { id: BUFFER_ID, name: "Buffer", color: BUFFER_COLOR, mins: BUFFER_MINS },
+          ].map((c) => {
             const armed = armedCatId === c.id;
             const press = state.press;
             const pressed =
@@ -178,7 +183,7 @@ export default function Sidebar({
                 <span
                   style={{ ...S.trayMins, color: armed ? "#fff" : c.color }}
                 >
-                  {fmtDur(c.blockMins)}
+                  {fmtDur(c.mins)}
                 </span>
               </div>
             );

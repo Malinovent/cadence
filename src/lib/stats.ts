@@ -31,8 +31,9 @@ export const weekBalance = (data: CadenceData, week: WeekIndex): AreaBalance[] =
   });
 };
 
+// buffers have no tick, so they don't count as sessions
 export const completion = (data: CadenceData, week: WeekIndex): { done: number; total: number; pct: number } => {
-  const blocks = data.weeks[week];
+  const blocks = data.weeks[week].filter((p) => !p.buffer);
   const done = blocks.filter((p) => p.done).length;
   return { done, total: blocks.length, pct: blocks.length ? Math.round((done / blocks.length) * 100) : 0 };
 };

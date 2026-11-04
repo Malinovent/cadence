@@ -6,6 +6,7 @@ import type { Block as BlockT, Category } from "../lib/model";
 import { fmtLeft } from "../lib/now";
 import { fmtDur, fmtTime } from "../lib/time";
 import type { CadenceActions } from "../state/useCadence";
+import { BUFFER_COLOR } from "../lib/constants";
 import { ink, nowRing, S } from "../styles";
 import BlockEditor from "./BlockEditor";
 
@@ -65,7 +66,8 @@ export default function Block({
   actions,
 }: Props) {
   const cats = p.catIds.map((id) => allCats.find((c) => c.id === id)).filter((c): c is Category => !!c);
-  const colors = cats.length ? cats.map((c) => c.color) : ["#999"];
+  const buffer = p.buffer === true; // S1.2: unassigned time, grey dashed, no tick
+  const colors = buffer ? [BUFFER_COLOR] : cats.length ? cats.map((c) => c.color) : ["#999"];
   const { top, height } = blockBox(p.start, p.mins, rowH);
   const named = !!p.label;
   const baseColor = colors[0];
@@ -87,7 +89,7 @@ export default function Block({
     blockStyle = {
       // tint over the grid colour, so slot lines never show through
       background: done ? `linear-gradient(${tint(baseColor)}, ${tint(baseColor)}), #fbf6ec` : "#fbf6ec",
-      border: done || named ? `1.5px solid ${baseColor}` : `1.5px dashed ${baseColor}`,
+      border: (done || named) && !buffer ? `1.5px solid ${baseColor}` : `1.5px dashed ${baseColor}`,
     };
   } else {
     // multi-type: gradient ring drawn by an overlay; done adds the blended tint inside
@@ -179,7 +181,11 @@ export default function Block({
         }}
         onClick={() => onTap(p)}
         onContextMenu={(e) => onContextMenu(e, p)}
-        title="Click to edit · drag a category onto me to add a type · right-click to delete"
+        title={
+          buffer
+            ? "Buffer time · drag an area onto me to fill it · right-click to delete"
+            : "Click to edit · drag a category onto me to add a type · right-click to delete"
+        }
         style={{
           ...S.placedBlock,
           top,
@@ -214,32 +220,38 @@ export default function Block({
                 ))}
               </span>
             )}
-            <span style={S.placedName}>{cats.map((c) => c.name).join(" + ") || "?"}</span>
+            {buffer ? (
+              <span style={{ ...S.placedName, ...S.bufferName }}>Buffer</span>
+            ) : (
+              <span style={S.placedName}>{cats.map((c) => c.name).join(" + ") || "?"}</span>
+            )}
           </span>
           <div style={S.placedTopRight}>
             <span style={{ ...S.placedDur, color: isNow ? ink : baseColor }}>
               {minsLeft !== null && !nowRoom ? `Now · ${fmtLeft(minsLeft)}` : fmtDur(p.mins)}
             </span>
-            <button
-              type="button"
-              className="cadence-tick cadence-hit44"
-              aria-pressed={done}
-              aria-label={done ? "Mark not done" : "Mark done"}
-              title={done ? "Done · click to undo" : "Mark done"}
-              // a tap on the tick never picks the block up or starts a resize
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleDone(p.id);
-              }}
-              style={{
-                ...S.doneToggle,
-                background: done ? ink : "transparent",
-                color: done ? "#fff" : ink,
-              }}
-            >
-              {done ? "✓" : ""}
-            </button>
+            {!buffer && (
+              <button
+                type="button"
+                className="cadence-tick cadence-hit44"
+                aria-pressed={done}
+                aria-label={done ? "Mark not done" : "Mark done"}
+                title={done ? "Done · click to undo" : "Mark done"}
+                // a tap on the tick never picks the block up or starts a resize
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleDone(p.id);
+                }}
+                style={{
+                  ...S.doneToggle,
+                  background: done ? ink : "transparent",
+                  color: done ? "#fff" : ink,
+                }}
+              >
+                {done ? "✓" : ""}
+              </button>
+            )}
           </div>
         </div>
         {isEditing ? (

@@ -14,6 +14,7 @@ export type Block = {
   label: string;
   desc: string;
   done: boolean;
+  buffer?: true; // S1.2: unassigned buffer time; catIds is [] and it never counts toward an area
 };
 export type TemplateBlock = Omit<Block, "id" | "done">;
 export type Template = { id: string; name: string; blocks: TemplateBlock[] };
@@ -57,7 +58,7 @@ const migrateList = (list: unknown): Migrated[] =>
   arr(list)
     .filter(isRec)
     .map(migrateBlock)
-    .filter((p) => p.catIds.length > 0);
+    .filter((p) => p.catIds.length > 0 || p.buffer === true); // S1.2 buffers have no area
 
 export const migrateBlocks = (weeksData: unknown): Migrated[][] =>
   (Array.isArray(weeksData) ? weeksData : [[], []]).map(migrateList);
@@ -114,6 +115,9 @@ export const normalizeData = (partial: unknown): { data: CadenceData; dropped: n
     const { day, start, mins } = p;
     if (typeof day !== "number" || !Number.isInteger(day) || day < 0 || day > 6) return null;
     if (!isNum(start) || !isNum(mins) || mins < STEP || start < DAY_START || start + mins > DAY_END) return null;
+    // S1.2: a buffer belongs to no area (any stray tags are ignored)
+    if (p.buffer === true)
+      return { catIds: [], day, start, mins, label: typeof p.label === "string" ? p.label : "", desc: typeof p.desc === "string" ? p.desc : "", buffer: true };
     const catIds: string[] = [];
     for (const c of p.catIds) if (typeof c === "string" && catSet.has(c) && !catIds.includes(c)) catIds.push(c);
     if (catIds.length === 0) return null;

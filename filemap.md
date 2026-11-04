@@ -26,7 +26,7 @@
 - `src/App.tsx` — header + view switch; owns UI state (view, active week, stats range, editing id, phone selected day); picks phone vs desktop grid props; starts `useSync` and wires its state to the header, Settings and the conflict banner; closes the editor / disarms tap-to-place when a server copy is applied
 - `src/styles.ts` — `S.*` style objects and tokens
 - `src/lib/` — pure business logic and its unit tests (`*.test.ts` next to each module)
-- `src/lib/constants.ts` — grid constants (`ROW_H` desktop, `ROW_H_PHONE`), `DEFAULT_CATEGORIES`, `PALETTE`
+- `src/lib/constants.ts` — grid constants (`ROW_H` desktop, `ROW_H_PHONE`), `DEFAULT_CATEGORIES`, `PALETTE`, buffer constants (`BUFFER_ID`, `BUFFER_MINS`, `BUFFER_COLOR`)
 - `src/lib/uid.ts` — `uid()`
 - `src/lib/time.ts` — `fmtTime`, `fmtDur`
 - `src/lib/placement.ts` — `freeGaps`, `resolvePlacement`, `resizeBlock`
@@ -42,6 +42,7 @@
 - `src/lib/stats.ts` — derived numbers: `weekBalance` (S1.2), `quotaStatus`, `completion`, `statsByCat`, `maxHours`, hour→minute conversions
 - `src/lib/gesture.ts` — pure gesture maths for the interaction engine: thresholds, y→slot start (row height as a parameter), `hitTest` on measured rects, autoscroll speed, touch grip sizing, `resolveDrop` / `dropPreview`, `withAlpha`
 - `src/lib/guardrail.ts` — S1.2 guardrails: `Limit` type, `parseLimit`, `floorFromTarget`, `legacyTarget`, `changeKind`, `balance`, wording (`fmtH`, `limitLabel`, `balanceLabel`, `balanceNote`), `barGeometry`
+- `src/lib/buffer.test.ts` — tests for buffer blocks across actions, drops, stats and normalizeData
 - `src/lib/now.ts` — "now" on the grid: `nowPoint`, `isNowBlock`, `minutesLeft`, `fmtLeft`, `nowLineTop`, `fmtClock`, `msToNextMinute`
 - `src/lib/dayview.ts` — phone day view maths: `defaultDay`, `swipeDay`, `daysWithBlocks`; row-height-scaled block text thresholds (`tallerThan`, `blockText`)
 - `src/lib/__fixtures__/legacy.ts` — legacy-app data fixture for tests
