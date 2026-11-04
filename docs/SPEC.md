@@ -187,6 +187,26 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
   - Signed in: "Signed in as <email>." + the current status line ("Everything's synced." / "Saving changes…" / "Offline. Changes are saved on this device and will sync later.") + "Sign out" (`S.resetCancel` style).
   - Conflict prompt (first sign-in, both sides have different data): card in `S.streakCard` colours left-aligned: "This device and your account both have a schedule." then two summary lines using the import summary sentence for each side ("On this device: …" / "In your account: …"), then buttons "Keep this device's" (`S.resetConfirm` with #1FA98A) and "Use my account's" (`S.resetCancel`). Until chosen, no push/pull happens. The prompt also shows as a banner at the top of the calendar view ("Choose which schedule to keep →" link to Settings) so it isn't missed.
 
+## Post-launch changes (user requests, 2026-11-03)
+
+### Hide the category tray
+- The "Drag into the grid" label row gets a right-aligned text button "hide" / "show" in the same `S.panelLabel` look (Spline Sans Mono 11px uppercase, letter-spacing 0.1em, colour #9a8d7d, no border/background, underline on hover). Touch target at least 32px tall (44px on `(pointer: coarse)` via padding), without changing the row's visual height on desktop.
+- Hidden: the tray grid is not rendered; the label stays so it can be shown again. Hiding disarms tap-to-place.
+- Per device, not synced: localStorage `cadence:ui:trayHidden` = "1" when hidden (read/write in try/catch; default shown).
+- While armed, the label text still switches to the tap hint; the toggle stays.
+
+### Solid backgrounds on hollow blocks
+- Blocks that are not done (dashed "empty" and solid-border "named", single- and multi-category) get `background: #fbf6ec` (the grid's own background) instead of transparent, so slot lines don't show through the text. Done (filled) blocks are unchanged. The multi-category gradient ring overlay is unchanged.
+
+### Tasks tab
+- Nav order: calendar, stats, tasks, categories, settings. View id "tasks".
+- Data: `tasks: Task[]` added to `CadenceData`, `type Task = { id: string; name: string; done: boolean; createdAt: number }`. New localStorage key `cadence:tasks` (default `[]`). `normalizeData` drops tasks without a string id and non-empty string name, coerces `done` to boolean and `createdAt` to a number (default 0); a missing `tasks` key is not a drop. Export envelope and sync document include `tasks`; import of older files without tasks → `[]`. `isEmptyData` must treat a non-empty task list as content. The import summary line appends " · N tasks" (singular "1 task") only when N > 0.
+- Actions (pure, tested): `addTask(data, name, deps?)` (trimmed; blank → no-op; appended at the end), `toggleTask(data, id)`, `removeTask(data, id)`.
+- UI (`TasksView`, body width `S.catBody`): h2 "Tasks" (`S.statsTitle`); intro (`S.catIntro`) "The little things that don't need a slot on the grid."; add row (flex, gap 10, marginTop 16): text input (`S.tplNameInput` look, flex 1, placeholder "Add a task…", 16px on coarse pointers via the existing rule) + "＋ Add" (`S.catAdd` look, marginTop 0). Enter or the button adds and clears the input; focus stays in the input.
+- List (marginTop 16, column, gap 8): each row like `S.catRow` (background #fbf6ec, radius 4, padding 10px 14px, align center, gap 12): a 22px round check button (1.5px solid ink border; done = background #1FA98A, border #1FA98A, white "✓"; aria-label "Mark done"/"Mark not done"), the name (Fraunces 16px, flex 1; tapping it also toggles; done = line-through, colour #9a8d7d), and a "✕" dismiss button (`S.catDel` look, aria-label "Dismiss") that removes it. On coarse pointers the check and ✕ get 44px hit areas.
+- Empty list: `S.tplEmpty` "Nothing on your list."
+- Insertion order; done tasks stay where they are.
+
 ## Phases
 1. Port + export/import + unit tests (this file's sections above).
 2. PWA + deploy: manifest, icons (incl. 180×180 apple-touch-icon, replace the emoji favicon), iOS meta tags, `viewport-fit=cover` + safe-area padding, service worker app-shell cache, self-hosted fonts, GitHub Pages workflow.

@@ -75,3 +75,12 @@ Depends: Phase 4.
 ### [x] 13. README + install note — Light
 `README.md` and `handoff/INSTALL-IPHONE.md` (one page for the user's friend).
 Depends: Phase 4.
+
+## Post-launch (see SPEC "Post-launch changes")
+
+### [ ] 14. Hide tray + solid block backgrounds — Light
+Depends: none.
+
+### [ ] 15. Tasks tab — Careful
+Data model + storage + normalize + export/import + sync document + actions + TasksView + nav.
+Depends: none (runs alongside 14; does not touch Sidebar.tsx or Block.tsx).
