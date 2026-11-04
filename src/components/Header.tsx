@@ -2,8 +2,8 @@ import { statusBadge } from "../lib/syncUi";
 import type { SyncStatus } from "../sync/engine";
 import { S } from "../styles";
 
-export type View = "calendar" | "stats" | "categories" | "settings";
-const VIEWS: View[] = ["calendar", "stats", "categories", "settings"];
+export type View = "calendar" | "stats" | "tasks" | "categories" | "settings";
+const VIEWS: View[] = ["calendar", "stats", "tasks", "categories", "settings"];
 
 export default function Header({
   view,

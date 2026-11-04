@@ -1,7 +1,7 @@
 import { normalizeData, type CadenceData } from "./model";
 
 export type StorageLike = Pick<Storage, "getItem" | "setItem">;
-export type DataKey = "cats" | "weeks" | "templates" | "history" | "streaks";
+export type DataKey = "cats" | "weeks" | "templates" | "history" | "streaks" | "tasks";
 
 export const STORAGE_KEYS = {
   cats: "cadence:cats",
@@ -9,6 +9,7 @@ export const STORAGE_KEYS = {
   templates: "cadence:templates",
   history: "cadence:history",
   streaks: "cadence:streaks",
+  tasks: "cadence:tasks",
 } as const satisfies Record<DataKey, string>;
 
 export type StorageKey = (typeof STORAGE_KEYS)[DataKey];
@@ -26,7 +27,7 @@ function loadState(key: string, storage: StorageLike): unknown {
   }
 }
 
-// Reads the five legacy keys; missing or unreadable ones fall back to defaults.
+// Reads the five legacy keys plus cadence:tasks; missing or unreadable ones fall back to defaults.
 export function loadData(storage: StorageLike = defaultStorage()): CadenceData {
   const raw: Partial<Record<DataKey, unknown>> = {};
   for (const k of DATA_KEYS) raw[k] = loadState(STORAGE_KEYS[k], storage);

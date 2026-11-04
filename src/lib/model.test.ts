@@ -18,7 +18,7 @@ const block = (over: Record<string, unknown> = {}) => ({
 describe("defaultData", () => {
   it("returns fresh defaults", () => {
     const d = defaultData();
-    expect(d).toEqual({ schemaVersion: 1, cats: DEFAULT_CATEGORIES, weeks: [[], []], templates: [], history: [], streaks: {} });
+    expect(d).toEqual({ schemaVersion: 1, cats: DEFAULT_CATEGORIES, weeks: [[], []], templates: [], history: [], streaks: {}, tasks: [] });
     d.cats[0].name = "changed";
     expect(DEFAULT_CATEGORIES[0].name).toBe("Exercise");
   });
@@ -164,8 +164,51 @@ describe("normalizeData", () => {
   });
 
   it("counts a wrong-typed piece as one drop and uses its default", () => {
-    const { data, dropped } = normalizeData({ cats: "nope", weeks: 5, templates: {}, history: "x", streaks: [] });
+    const { data, dropped } = normalizeData({ cats: "nope", weeks: 5, templates: {}, history: "x", streaks: [], tasks: {} });
     expect(data).toEqual(defaultData());
-    expect(dropped).toBe(5);
+    expect(dropped).toBe(6);
+  });
+
+  it("keeps valid tasks in order, coercing done and createdAt", () => {
+    const { data, dropped } = normalizeData({
+      tasks: [
+        { id: "t1", name: "Call mum", done: true, createdAt: 1700000000000 },
+        { id: "t2", name: "Buy milk", done: false, createdAt: 5 },
+        { id: "t3", name: "No extras" },
+        { id: "t4", name: "Odd types", done: "yes", createdAt: "42" },
+        { id: "t5", name: "Bad date", done: 1, createdAt: "soon" },
+      ],
+    });
+    expect(data.tasks).toEqual([
+      { id: "t1", name: "Call mum", done: true, createdAt: 1700000000000 },
+      { id: "t2", name: "Buy milk", done: false, createdAt: 5 },
+      { id: "t3", name: "No extras", done: false, createdAt: 0 },
+      { id: "t4", name: "Odd types", done: false, createdAt: 42 },
+      { id: "t5", name: "Bad date", done: false, createdAt: 0 },
+    ]);
+    expect(dropped).toBe(0);
+  });
+
+  it("drops tasks without a string id or a non-empty string name", () => {
+    const { data, dropped } = normalizeData({
+      tasks: [
+        { id: "ok", name: "Keep", done: false, createdAt: 1 },
+        { id: 7, name: "Numeric id" },
+        { id: "", name: "Empty id" },
+        { name: "No id" },
+        { id: "n1", name: "" },
+        { id: "n2", name: 3 },
+        { id: "n3" },
+        "string",
+        null,
+      ],
+    });
+    expect(data.tasks.map((t) => t.id)).toEqual(["ok"]);
+    expect(dropped).toBe(8);
+  });
+
+  it("treats a missing or null tasks key as an empty list, not a drop", () => {
+    expect(normalizeData({ cats: legacyRaw.cats })).toEqual({ data: { ...defaultData(), cats: legacyRaw.cats }, dropped: 0 });
+    expect(normalizeData({ tasks: null })).toEqual({ data: defaultData(), dropped: 0 });
   });
 });

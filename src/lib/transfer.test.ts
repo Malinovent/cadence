@@ -12,7 +12,7 @@ describe("export", () => {
       app: "cadence",
       schemaVersion: 1,
       exportedAt: "2026-03-04T05:06:07.000Z",
-      data: { cats: data.cats, weeks: data.weeks, templates: data.templates, history: data.history, streaks: data.streaks },
+      data: { cats: data.cats, weeks: data.weeks, templates: data.templates, history: data.history, streaks: data.streaks, tasks: data.tasks },
     });
     expect("schemaVersion" in env.data).toBe(false);
   });
@@ -30,8 +30,41 @@ describe("parseImport", () => {
       ok: true,
       data,
       dropped: 0,
-      summary: { categories: 5, blocks: 4, templates: 1, sessions: 2, streaks: 2 },
+      summary: { categories: 5, blocks: 4, templates: 1, sessions: 2, streaks: 2, tasks: 0 },
     });
+  });
+
+  it("round trips tasks through the export", () => {
+    const tasks = [
+      { id: "t1", name: "Call mum", done: false, createdAt: 10 },
+      { id: "t2", name: "Buy milk", done: true, createdAt: 20 },
+    ];
+    const withTasks = { ...data, tasks };
+    const env = buildExport(withTasks);
+    expect(env.data.tasks).toEqual(tasks);
+    const r = parseImport(JSON.stringify(env));
+    expect(r.ok && r.data).toEqual(withTasks);
+    expect(r.ok && r.dropped).toBe(0);
+    expect(r.ok && r.summary.tasks).toBe(2);
+  });
+
+  it("imports an older export without tasks with zero drops and an empty task list", () => {
+    const env = buildExport(data);
+    const { tasks: _t, ...oldData } = env.data;
+    void _t;
+    const r = parseImport(JSON.stringify({ ...env, data: oldData }));
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.dropped).toBe(0);
+    expect(r.data).toEqual({ ...data, tasks: [] });
+    expect(r.summary.tasks).toBe(0);
+  });
+
+  it("accepts cadence:tasks in a flat legacy-key file", () => {
+    const tasks = [{ id: "t1", name: "Call mum", done: false, createdAt: 10 }];
+    const r = parseImport(JSON.stringify({ ...legacyStorage, "cadence:tasks": JSON.stringify(tasks) }));
+    expect(r.ok && r.data.tasks).toEqual(tasks);
+    expect(r.ok && r.dropped).toBe(0);
   });
 
   it("accepts a flat legacy-key file with JSON string values", () => {

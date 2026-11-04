@@ -39,6 +39,11 @@ html, body { touch-action: manipulation; }
 @media not all and (pointer: coarse) {
   .cadence-grip, .cadence-coarse-only { display: none !important; }
 }
+/* small round/text buttons (task check, dismiss): 44px hit area on touch without changing the layout */
+.cadence-hit44 { position: relative; }
+@media (pointer: coarse) {
+  .cadence-hit44::after { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
+}
 `;
 export const ink = "#2b2622";
 export const paper = "#f4ede1";
@@ -877,5 +882,57 @@ export const S = {
     fontWeight: 500,
     fontSize: 14,
     color: ink
+  },
+  // ---- tasks tab ----
+  taskAddRow: {
+    display: "flex",
+    gap: 10,
+    marginTop: 16
+  },
+  taskList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 8,
+    marginTop: 16
+  },
+  taskRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    background: "#fbf6ec",
+    padding: "10px 14px",
+    borderRadius: 4
+  },
+  taskCheck: {
+    width: 22,
+    height: 22,
+    flexShrink: 0,
+    borderRadius: "50%",
+    border: `1.5px solid ${ink}`,
+    background: "transparent",
+    color: "#fff",
+    padding: 0,
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: 13,
+    lineHeight: 1
+  },
+  taskCheckDone: {
+    border: "1.5px solid #1FA98A",
+    background: "#1FA98A"
+  },
+  taskName: {
+    flex: 1,
+    minWidth: 0,
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontSize: 16,
+    cursor: "pointer",
+    overflowWrap: "anywhere"
+  },
+  taskNameDone: {
+    textDecoration: "line-through",
+    color: "#9a8d7d"
   }
 } satisfies Record<string, React.CSSProperties>;

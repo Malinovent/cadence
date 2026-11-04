@@ -53,6 +53,14 @@ describe("jsonEqual / contentEqual", () => {
     expect(contentEqual(local, withBlock())).toBe(false);
   });
 
+  it("compares tasks too", () => {
+    const d = defaultData();
+    const t = A.addTask(d, "Buy milk", { uid: () => "t", now: () => 1 });
+    expect(contentEqual(d, t)).toBe(false);
+    expect(contentEqual(t, A.toggleTask(t, "t"))).toBe(false);
+    expect(contentEqual(t, normalizeData(reorderKeys(JSON.parse(JSON.stringify(t)))).data)).toBe(true);
+  });
+
   it("ignores schemaVersion", () => {
     const d = defaultData();
     expect(contentEqual(d, { ...d, schemaVersion: 2 as 1 })).toBe(true);
@@ -72,6 +80,7 @@ describe("isEmptyData", () => {
     expect(isEmptyData({ ...d, templates: [{ id: "t", name: "T", blocks: [] }] })).toBe(false);
     expect(isEmptyData({ ...d, history: [{ id: "b", catId: "work", mins: 60, date: 1 }] })).toBe(false);
     expect(isEmptyData({ ...d, streaks: { work: { count: 1 } } })).toBe(false);
+    expect(isEmptyData(A.addTask(d, "Buy milk", { uid: () => "t", now: () => 1 }))).toBe(false);
     expect(isEmptyData(A.updateCat(d, "work", { targetMins: 600 }))).toBe(false);
     expect(isEmptyData(A.addCat(d, { uid: () => "c" }))).toBe(false);
   });

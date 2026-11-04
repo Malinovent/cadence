@@ -43,6 +43,7 @@ describe("storage", () => {
       "cadence:cats",
       "cadence:history",
       "cadence:streaks",
+      "cadence:tasks",
       "cadence:templates",
       "cadence:weeks",
     ]);
@@ -51,6 +52,22 @@ describe("storage", () => {
     expect(JSON.parse(s.map.get("cadence:cats")!)).toEqual(data.cats);
     expect(s.map.get("cadence:streaks")).not.toContain("schemaVersion");
     expect(loadData(s)).toEqual(data);
+  });
+
+  it("round trips tasks through cadence:tasks", () => {
+    const tasks = [
+      { id: "t1", name: "Call mum", done: false, createdAt: 10 },
+      { id: "t2", name: "Buy milk", done: true, createdAt: 20 },
+    ];
+    const s = new FakeStorage();
+    saveData({ ...defaultData(), tasks }, s);
+    expect(JSON.parse(s.map.get("cadence:tasks")!)).toEqual(tasks);
+    expect(loadData(s).tasks).toEqual(tasks);
+  });
+
+  it("loads legacy keys without cadence:tasks as an empty task list", () => {
+    expect("cadence:tasks" in legacyStorage).toBe(false);
+    expect(loadData(new FakeStorage(legacyStorage)).tasks).toEqual([]);
   });
 
   it("swallows storage errors like the legacy app", () => {

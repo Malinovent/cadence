@@ -8,7 +8,7 @@ export type ExportEnvelope = {
   data: Pick<CadenceData, DataKey>;
 };
 
-export type ImportSummary = { categories: number; blocks: number; templates: number; sessions: number; streaks: number };
+export type ImportSummary = { categories: number; blocks: number; templates: number; sessions: number; streaks: number; tasks: number };
 export type ImportResult =
   | { ok: true; data: CadenceData; dropped: number; summary: ImportSummary }
   | { ok: false; error: string };
@@ -26,6 +26,7 @@ export const buildExport = (data: CadenceData, now: Date = new Date()): ExportEn
     templates: data.templates,
     history: data.history,
     streaks: data.streaks,
+    tasks: data.tasks,
   },
 });
 
@@ -42,10 +43,11 @@ export const summarize = (data: CadenceData): ImportSummary => ({
   templates: data.templates.length,
   sessions: data.history.length,
   streaks: data.cats.filter((c) => (data.streaks[c.id]?.count ?? 0) > 0).length,
+  tasks: data.tasks.length,
 });
 
-// Accepts the export envelope, or a flat object keyed by the five localStorage
-// keys whose values are parsed JSON or JSON strings.
+// Accepts the export envelope, or a flat object keyed by the localStorage keys
+// (the five legacy ones, plus cadence:tasks) whose values are parsed JSON or JSON strings.
 export const parseImport = (text: string): ImportResult => {
   let parsed: unknown;
   try {

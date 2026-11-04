@@ -28,15 +28,15 @@
 - `src/lib/uid.ts` — `uid()`
 - `src/lib/time.ts` — `fmtTime`, `fmtDur`
 - `src/lib/placement.ts` — `freeGaps`, `resolvePlacement`, `resizeBlock`
-- `src/lib/model.ts` — data types, `defaultData`, migrations, `normalizeData`
-- `src/lib/storage.ts` — localStorage load/save of the five `cadence:*` keys
+- `src/lib/model.ts` — data types (incl. `Task`), `defaultData`, migrations, `normalizeData`
+- `src/lib/storage.ts` — localStorage load/save of the five legacy `cadence:*` keys plus `cadence:tasks`
 - `src/lib/meta.ts` — `cadence:meta` sync bookkeeping (`updatedAt`, `syncedAt`, `userId`): load/save, defaults, `isDirty`, `nextEditTime`
 - `src/lib/syncLogic.ts` — pure sync decisions: `decideAfterPull`, `decideAfterPush`, `isEmptyData`, `contentEqual` / `jsonEqual` (key-order-insensitive), `winningUpdatedAt`
 - `src/lib/transfer.ts` — export envelope/filename, `parseImport`
 - `src/lib/format.ts` — UI sentence formatting: import summary line, skipped-entries line
 - `src/lib/syncUi.ts` — sync UI wording: header status label + dot colour, Settings status sentence, auth error messages, email / 6-digit code checks, `isRemoteApply` (data changed by a server copy)
 - `src/lib/download.ts` — browser-only `downloadText` (Blob + object URL + `<a download>`)
-- `src/lib/actions.ts` — pure state transitions on `CadenceData`
+- `src/lib/actions.ts` — pure state transitions on `CadenceData` (blocks, templates, categories, tasks)
 - `src/lib/stats.ts` — derived numbers: `quotaStatus`, `completion`, `statsByCat`, `maxHours`, hour→minute conversions
 - `src/lib/gesture.ts` — pure gesture maths for the interaction engine: thresholds, y→slot start (row height as a parameter), `hitTest` on measured rects, autoscroll speed, touch grip sizing, `resolveDrop` / `dropPreview`, `withAlpha`
 - `src/lib/dayview.ts` — phone day view maths: `defaultDay`, `swipeDay`, `daysWithBlocks`; row-height-scaled block text thresholds (`tallerThan`, `blockText`)
@@ -58,6 +58,7 @@
 - `src/components/Block.tsx` — one placed block (states, gradient ring, press/lift/tag-target looks, mouse edge handles, touch grips)
 - `src/components/BlockEditor.tsx` — inline title/description/tags editor; touch-only day chips and delete
 - `src/components/StatsView.tsx` — streaks, hours chart, reset
+- `src/components/TasksView.tsx` — Tasks tab: add row, check / cross off, dismiss
 - `src/components/CategoriesView.tsx` — category editor
 - `src/components/SettingsView.tsx` — "Your data": export / import with summary + confirm; hosts "Account & sync" when sync is configured
 - `src/components/AccountSync.tsx` — Settings "Account & sync": conflict card, signed-out email form → code entry, signed-in email + status + sign out

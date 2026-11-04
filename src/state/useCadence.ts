@@ -31,6 +31,9 @@ const makeActions = (store: CadenceStore) => {
     updateCat: b(A.updateCat),
     addCat: b(A.addCat),
     removeCat: b(A.removeCat),
+    addTask: b(A.addTask),
+    toggleTask: b(A.toggleTask),
+    removeTask: b(A.removeTask),
     replaceAll: b(A.replaceAll),
   };
 };

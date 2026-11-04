@@ -78,15 +78,15 @@ export default function Block({
   let ringOverlay: React.ReactNode = null;
   if (!multi) {
     blockStyle = {
-      background: solidFill ? baseColor : "transparent",
+      background: solidFill ? baseColor : "#fbf6ec",
       border: p.done ? `1px solid ${baseColor}` : named ? `1.5px solid ${baseColor}` : `1.5px dashed ${baseColor}`,
     };
   } else if (solidFill) {
     // done: interior filled with the gradient
     blockStyle = { background: gradient ?? undefined, border: "1px solid transparent" };
   } else {
-    // hollow multi-type: transparent interior, gradient ring drawn by an overlay
-    blockStyle = { background: "transparent", border: "none" };
+    // hollow multi-type: grid-coloured interior, gradient ring drawn by an overlay
+    blockStyle = { background: "#fbf6ec", border: "none" };
     // gaps punched along the ring to mimic a dashed border
     const dashMask = named ? null : "repeating-linear-gradient(135deg, #000 0 5px, transparent 5px 10px)";
     ringOverlay = (

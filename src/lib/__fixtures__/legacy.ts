@@ -69,4 +69,5 @@ export const legacyNormalized = {
     { id: "", catId: "learn", mins: 60, date: 1720000000000 },
   ],
   streaks: { exercise: { count: 2 }, work: { count: 0 }, learn: { count: 1, lastWeek: 45 } },
+  tasks: [],
 };

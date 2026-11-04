@@ -48,9 +48,10 @@ export const contentEqual = (a: CadenceData, b: CadenceData): boolean =>
   jsonEqual(a.weeks, b.weeks) &&
   jsonEqual(a.templates, b.templates) &&
   jsonEqual(a.history, b.history) &&
-  jsonEqual(a.streaks, b.streaks);
+  jsonEqual(a.streaks, b.streaks) &&
+  jsonEqual(a.tasks, b.tasks);
 
-// nothing worth keeping: no blocks in either week, no templates, history or streaks,
+// nothing worth keeping: no blocks in either week, no templates, history, streaks or tasks,
 // categories exactly the defaults
 export const isEmptyData = (d: CadenceData): boolean =>
   d.weeks[0].length === 0 &&
@@ -58,6 +59,7 @@ export const isEmptyData = (d: CadenceData): boolean =>
   d.templates.length === 0 &&
   d.history.length === 0 &&
   Object.keys(d.streaks).length === 0 &&
+  d.tasks.length === 0 &&
   jsonEqual(d.cats, DEFAULT_CATEGORIES);
 
 // a fresh account on this device: never synced, or last synced as someone else

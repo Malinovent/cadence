@@ -16,7 +16,10 @@ type Props = {
   interaction: Interaction;
   armedCatId: string | null; // tap-to-place: the tray category waiting for a slot tap
   onArm: (catId: string | null) => void;
-  actions: Pick<CadenceActions, "saveTemplate" | "applyTemplate" | "deleteTemplate">;
+  actions: Pick<
+    CadenceActions,
+    "saveTemplate" | "applyTemplate" | "deleteTemplate"
+  >;
   onAdvance: () => void;
 };
 
@@ -28,10 +31,50 @@ const trayVars = (color: string) =>
     "--cadence-hold": withAlpha(color, "40"),
   }) as React.CSSProperties;
 
-export default function Sidebar({ data, week, setWeek, interaction, armedCatId, onArm, actions, onAdvance }: Props) {
+const TRAY_HIDDEN_KEY = "cadence:ui:trayHidden";
+const readTrayHidden = () => {
+  try {
+    return localStorage.getItem(TRAY_HIDDEN_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
+const writeTrayHidden = (hidden: boolean) => {
+  try {
+    if (hidden) localStorage.setItem(TRAY_HIDDEN_KEY, "1");
+    else localStorage.removeItem(TRAY_HIDDEN_KEY);
+  } catch {
+    // storage unavailable: the preference just won't persist
+  }
+};
+
+// hover underline + 44px touch target on coarse pointers (negative margins keep the row height)
+const TRAY_TOGGLE_CSS = `
+.cadence-tray-toggle { padding: 9px 0 9px 12px; margin: -9px 0; }
+.cadence-tray-toggle:hover { text-decoration: underline; }
+@media (pointer: coarse) { .cadence-tray-toggle { padding: 15px 0 15px 16px; margin: -15px 0; } }
+`;
+
+export default function Sidebar({
+  data,
+  week,
+  setWeek,
+  interaction,
+  armedCatId,
+  onArm,
+  actions,
+  onAdvance,
+}: Props) {
   const { engine, state } = interaction;
   const [namingTemplate, setNamingTemplate] = useState(false);
   const [templateName, setTemplateName] = useState("");
+  const [trayHidden, setTrayHidden] = useState(readTrayHidden);
+  const toggleTray = () => {
+    const next = !trayHidden;
+    setTrayHidden(next);
+    writeTrayHidden(next);
+    if (next) onArm(null);
+  };
   const blocks = data.weeks[week];
   const quotas = quotaStatus(data, week);
   const done = completion(data, week);
@@ -60,42 +103,92 @@ export default function Sidebar({ data, week, setWeek, interaction, armedCatId, 
         ))}
       </div>
 
-      <div style={S.panelLabel}>{armedCatId ? "Tap a slot to place · tap again to cancel" : "Drag into the grid"}</div>
-      <div className="cadence-tray" style={S.tray}>
-        {data.cats.map((c) => {
-          const armed = armedCatId === c.id;
-          const press = state.press;
-          const pressed = press?.source.kind === "tray" && press.source.catId === c.id;
-          return (
-            <div
-              key={c.id}
-              className="cadence-src cadence-tray-item"
-              data-press={pressed ? "" : undefined}
-              data-holding={pressed && press.hold ? "" : undefined}
-              data-armed={armed ? "" : undefined}
-              onPointerDown={(e) => engine.pressSource(e, e.currentTarget, { kind: "tray", catId: c.id }, { hold: true })}
-              // a tap (no drag) arms tap-to-place; tapping the armed item again disarms
-              onClick={() => onArm(armed ? null : c.id)}
-              onContextMenu={(e) => {
-                if (engine.blocksContextMenu()) e.preventDefault();
-              }}
-              style={{
-                ...S.trayBlock,
-                border: `1.5px ${armed ? "solid" : "dashed"} ${c.color}`,
-                color: armed ? "#fff" : c.color,
-                ...(armed ? { background: c.color } : null),
-                ...trayVars(c.color),
-              }}
-            >
-              <span className="cadence-hold-fill" aria-hidden="true" />
-              <span>{c.name}</span>
-              <span style={{ ...S.trayMins, color: armed ? "#fff" : c.color }}>{fmtDur(c.blockMins)}</span>
-            </div>
-          );
-        })}
+      <style>{TRAY_TOGGLE_CSS}</style>
+      <div
+        style={{
+          ...S.panelLabel,
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+        }}
+      >
+        <span style={{ flex: 1 }}>
+          {armedCatId
+            ? "Tap a slot to place · tap again to cancel"
+            : "Drag into the grid"}
+        </span>
+        <button
+          type="button"
+          className="cadence-tray-toggle"
+          onClick={toggleTray}
+          aria-expanded={!trayHidden}
+          style={{
+            fontFamily: "inherit",
+            fontSize: "inherit",
+            textTransform: "inherit",
+            letterSpacing: "inherit",
+            color: "inherit",
+            lineHeight: "14px",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            flexShrink: 0,
+          }}
+        >
+          {trayHidden ? "show" : "hide"}
+        </button>
       </div>
+      {!trayHidden && (
+        <div className="cadence-tray" style={S.tray}>
+          {data.cats.map((c) => {
+            const armed = armedCatId === c.id;
+            const press = state.press;
+            const pressed =
+              press?.source.kind === "tray" && press.source.catId === c.id;
+            return (
+              <div
+                key={c.id}
+                className="cadence-src cadence-tray-item"
+                data-press={pressed ? "" : undefined}
+                data-holding={pressed && press.hold ? "" : undefined}
+                data-armed={armed ? "" : undefined}
+                onPointerDown={(e) =>
+                  engine.pressSource(
+                    e,
+                    e.currentTarget,
+                    { kind: "tray", catId: c.id },
+                    { hold: true },
+                  )
+                }
+                // a tap (no drag) arms tap-to-place; tapping the armed item again disarms
+                onClick={() => onArm(armed ? null : c.id)}
+                onContextMenu={(e) => {
+                  if (engine.blocksContextMenu()) e.preventDefault();
+                }}
+                style={{
+                  ...S.trayBlock,
+                  border: `1.5px ${armed ? "solid" : "dashed"} ${c.color}`,
+                  color: armed ? "#fff" : c.color,
+                  ...(armed ? { background: c.color } : null),
+                  ...trayVars(c.color),
+                }}
+              >
+                <span className="cadence-hold-fill" aria-hidden="true" />
+                <span>{c.name}</span>
+                <span
+                  style={{ ...S.trayMins, color: armed ? "#fff" : c.color }}
+                >
+                  {fmtDur(c.blockMins)}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
-      <div className="cadence-after" style={S.panelLabel}>This week's time targets</div>
+      <div className="cadence-after" style={S.panelLabel}>
+        This week's time targets
+      </div>
       <div className="cadence-after" style={S.quotaList}>
         {quotas.map((q) => (
           <div key={q.cat.id} style={S.quotaRow}>
@@ -110,7 +203,9 @@ export default function Sidebar({ data, week, setWeek, interaction, armedCatId, 
                 }}
               />
             </div>
-            <span style={{ ...S.quotaCount, color: q.met ? "#1FA98A" : "#9a8d7d" }}>
+            <span
+              style={{ ...S.quotaCount, color: q.met ? "#1FA98A" : "#9a8d7d" }}
+            >
               {fmtDur(q.placedMins)}/{fmtDur(q.cat.targetMins)}
               {q.met && " ✓"}
             </span>
@@ -160,21 +255,33 @@ export default function Sidebar({ data, week, setWeek, interaction, armedCatId, 
             ＋ Save current week
           </button>
         )}
-        {data.templates.length === 0 && !namingTemplate && <div style={S.tplEmpty}>No templates yet.</div>}
+        {data.templates.length === 0 && !namingTemplate && (
+          <div style={S.tplEmpty}>No templates yet.</div>
+        )}
         {data.templates.map((t) => (
           <div key={t.id} style={S.tplRow}>
             <span style={S.tplName}>{t.name}</span>
-            <button onClick={() => actions.applyTemplate(week, t.id)} style={S.tplApply}>
+            <button
+              onClick={() => actions.applyTemplate(week, t.id)}
+              style={S.tplApply}
+            >
               apply
             </button>
-            <button onClick={() => actions.deleteTemplate(t.id)} style={S.tplDel}>
+            <button
+              onClick={() => actions.deleteTemplate(t.id)}
+              style={S.tplDel}
+            >
               ✕
             </button>
           </div>
         ))}
       </div>
 
-      <button className="cadence-after" onClick={onAdvance} style={S.advanceBtn}>
+      <button
+        className="cadence-after"
+        onClick={onAdvance}
+        style={S.advanceBtn}
+      >
         ⟳ Roll forward → next week becomes Week 1
       </button>
     </aside>

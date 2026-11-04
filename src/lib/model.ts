@@ -17,6 +17,7 @@ export type Template = { id: string; name: string; blocks: TemplateBlock[] };
 export type HistoryEntry = { id: string /* block id */; catId: string; mins: number; date: number /* ms epoch */ };
 export type Streaks = Record<string, { count: number; lastWeek?: number }>;
 export type Weeks = [Block[], Block[]];
+export type Task = { id: string; name: string; done: boolean; createdAt: number /* ms epoch */ };
 export type CadenceData = {
   schemaVersion: 1;
   cats: Category[];
@@ -24,6 +25,7 @@ export type CadenceData = {
   templates: Template[];
   history: HistoryEntry[];
   streaks: Streaks;
+  tasks: Task[];
 };
 
 type Rec = Record<string, unknown>;
@@ -38,6 +40,7 @@ export const defaultData = (): CadenceData => ({
   templates: [],
   history: [],
   streaks: {},
+  tasks: [],
 });
 
 // ---- migrate older saved data (single catId -> catIds array, add desc) ----
@@ -188,5 +191,18 @@ export const normalizeData = (partial: unknown): { data: CadenceData; dropped: n
     }
   }
 
-  return { data: { schemaVersion: 1, cats, weeks, templates, history, streaks }, dropped };
+  // tasks (a missing key is just an older file, not a drop)
+  const tasks: Task[] = [];
+  if (piece(raw.tasks, Array.isArray)) {
+    for (const t of raw.tasks as unknown[]) {
+      if (!isRec(t) || typeof t.id !== "string" || !t.id || typeof t.name !== "string" || !t.name) {
+        dropped++;
+        continue;
+      }
+      const createdAt = Number(t.createdAt);
+      tasks.push({ id: t.id, name: t.name, done: t.done === true, createdAt: Number.isFinite(createdAt) ? createdAt : 0 });
+    }
+  }
+
+  return { data: { schemaVersion: 1, cats, weeks, templates, history, streaks, tasks }, dropped };
 };

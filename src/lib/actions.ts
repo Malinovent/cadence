@@ -1,7 +1,7 @@
 // Pure state transitions. Each takes CadenceData and returns new CadenceData,
 // or the same reference when nothing changes. Inputs are never mutated.
 import { DAY_END, DAY_START, PALETTE, STEP } from "./constants";
-import type { Block, CadenceData, Category, HistoryEntry, Streaks, Template, Weeks } from "./model";
+import type { Block, CadenceData, Category, HistoryEntry, Streaks, Task, Template, Weeks } from "./model";
 import { resizeBlock, resolvePlacement } from "./placement";
 import { uid as defaultUid } from "./uid";
 
@@ -217,5 +217,21 @@ export const removeCat = (data: CadenceData, id: string): CadenceData => {
     history.length === data.history.length;
   return unchanged ? data : { ...data, cats, weeks, history };
 };
+
+// ---- tasks: a plain list in insertion order; done tasks stay where they are ----
+export const addTask = (data: CadenceData, name: string, deps: Deps = {}): CadenceData => {
+  const trimmed = name.trim();
+  if (!trimmed) return data;
+  const task: Task = { id: (deps.uid ?? defaultUid)(), name: trimmed, done: false, createdAt: (deps.now ?? Date.now)() };
+  return { ...data, tasks: [...data.tasks, task] };
+};
+
+export const toggleTask = (data: CadenceData, id: string): CadenceData =>
+  data.tasks.some((t) => t.id === id)
+    ? { ...data, tasks: data.tasks.map((t) => (t.id === id ? { ...t, done: !t.done } : t)) }
+    : data;
+
+export const removeTask = (data: CadenceData, id: string): CadenceData =>
+  data.tasks.some((t) => t.id === id) ? { ...data, tasks: data.tasks.filter((t) => t.id !== id) } : data;
 
 export const replaceAll = (_data: CadenceData, next: CadenceData): CadenceData => next;

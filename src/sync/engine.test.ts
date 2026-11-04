@@ -104,7 +104,7 @@ let online: boolean;
 const setup = (opts: { local?: CadenceData; meta?: object; session?: SyncSession | null } = {}) => {
   const init: Record<string, string> = {};
   if (opts.local) {
-    for (const k of ["cats", "weeks", "templates", "history", "streaks"] as const)
+    for (const k of ["cats", "weeks", "templates", "history", "streaks", "tasks"] as const)
       init[`cadence:${k}`] = JSON.stringify(opts.local[k]);
   }
   if (opts.meta) init[META_KEY] = JSON.stringify(opts.meta);
@@ -203,6 +203,20 @@ describe("sync engine: pushing edits", () => {
     expect(backend.pushes[0].updatedAt).toBe(clock);
     expect(store.getSnapshot().meta.syncedAt).toBe(clock);
     expect(engine.getState().status).toBe("synced");
+  });
+
+  it("pushes a task edit like any other edit", async () => {
+    await synced();
+    edit((d) => A.addTask(d, "Buy milk", { uid: () => "t1", now: () => clock }));
+    expect(engine.getState().status).toBe("syncing");
+    await vi.advanceTimersByTimeAsync(1500);
+    await flush();
+    expect(backend.pushes).toHaveLength(1);
+    expect(backend.pushes[0].data.tasks).toEqual([{ id: "t1", name: "Buy milk", done: false, createdAt: clock }]);
+    expect(engine.getState().status).toBe("synced");
+    store.edit((d) => A.toggleTask(d, "missing"));
+    await vi.advanceTimersByTimeAsync(3000);
+    expect(backend.pushes).toHaveLength(1);
   });
 
   it("does not push a no-op action", async () => {
@@ -319,8 +333,8 @@ describe("sync engine: first sign-in conflict", () => {
     await conflicted();
     const st = engine.getState();
     expect(st.conflict).toEqual({
-      local: { categories: 4, blocks: 1, templates: 0, sessions: 0, streaks: 0 },
-      server: { categories: 4, blocks: 1, templates: 0, sessions: 0, streaks: 0 },
+      local: { categories: 4, blocks: 1, templates: 0, sessions: 0, streaks: 0, tasks: 0 },
+      server: { categories: 4, blocks: 1, templates: 0, sessions: 0, streaks: 0, tasks: 0 },
     });
     const pulls = backend.pulls;
     edit((d) => withBlock(d, "loc2", 2));

@@ -4,6 +4,7 @@ import Header, { type View } from "./components/Header";
 import SettingsView from "./components/SettingsView";
 import Sidebar from "./components/Sidebar";
 import StatsView from "./components/StatsView";
+import TasksView from "./components/TasksView";
 import WeekGrid from "./components/WeekGrid";
 import { useInteraction } from "./interaction/useInteraction";
 import { moveBlock, type WeekIndex } from "./lib/actions";
@@ -137,6 +138,7 @@ export default function App() {
       {view === "stats" && (
         <StatsView data={data} range={statsRange} setRange={setStatsRange} resetStats={actions.resetStats} />
       )}
+      {view === "tasks" && <TasksView tasks={data.tasks} actions={actions} />}
       {view === "categories" && <CategoriesView cats={data.cats} actions={actions} />}
       {view === "settings" && <SettingsView data={data} onReplace={onReplace} sync={sync.configured ? sync : null} />}
     </div>
