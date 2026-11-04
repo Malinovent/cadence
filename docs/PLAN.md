@@ -126,7 +126,8 @@ Depends: all of the above; JP's live purchase (Nov 14).
 
 Each ships to JP's friend as it lands, in this order. Every storage change: JSON export first, migration tested on real-shaped data.
 
-### [ ] S1.1 A tick on every block
+### [~] S1.1 A tick on every block — Medium
+Round tick on every block (bigger on touch), done = area tint, Now ring + minutes left, current-time line; SPEC "Sprint 1 changes". No stored-data change. Checked in the browser at desktop and phone sizes with emulated taps. Left: JP's OK, then real iPhone check after deploy.
 ### [ ] S1.2 Guardrail quotas (floor / ceiling / range; quotas migrate to floors)
 ### [ ] S1.3 Balanced weeks instead of daily streaks
 ### [ ] S1.4 One panel for areas and tasks (desktop panel, phone tray with tabs)

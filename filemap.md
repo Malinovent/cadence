@@ -41,10 +41,12 @@
 - `src/lib/actions.ts` — pure state transitions on `CadenceData` (blocks, templates, categories, tasks)
 - `src/lib/stats.ts` — derived numbers: `quotaStatus`, `completion`, `statsByCat`, `maxHours`, hour→minute conversions
 - `src/lib/gesture.ts` — pure gesture maths for the interaction engine: thresholds, y→slot start (row height as a parameter), `hitTest` on measured rects, autoscroll speed, touch grip sizing, `resolveDrop` / `dropPreview`, `withAlpha`
+- `src/lib/now.ts` — "now" on the grid: `nowPoint`, `isNowBlock`, `minutesLeft`, `fmtLeft`, `nowLineTop`, `fmtClock`, `msToNextMinute`
 - `src/lib/dayview.ts` — phone day view maths: `defaultDay`, `swipeDay`, `daysWithBlocks`; row-height-scaled block text thresholds (`tallerThan`, `blockText`)
 - `src/lib/__fixtures__/legacy.ts` — legacy-app data fixture for tests
 - `src/state/store.ts` — `createCadenceStore`: framework-free holder of data + meta; per-key persistence; `edit` (user edit, bumps `updatedAt`), `applyRemote` (no bump), `setMeta`
 - `src/state/useCadence.ts` — `useCadence` hook: renders from the store (`useSyncExternalStore`); data, meta, bound user actions, `store`
+- `src/state/useNow.ts` — `useNow()`: current time, refreshed each whole minute and when the page becomes visible
 - `src/state/useIsPhone.ts` — `useIsPhone()`: matchMedia `(max-width: 899px)`, live, SSR default false
 - `src/sync/client.ts` — Supabase client from env, or `null` (local-only)
 - `src/sync/supabaseClient.ts` — `SyncClient` adapter over supabase-js (OTP auth, row select, `push_state` RPC, error mapping); `syncClient` (null when unconfigured)
@@ -56,8 +58,8 @@
 - `src/components/` — React view components
 - `src/components/Header.tsx` — logo, tagline, nav buttons (`View` type); sync status line under the nav when signed in (opens Settings)
 - `src/components/Sidebar.tsx` — week toggle, tray (drag source, press/hold feedback, tap-to-place arming), quotas, completion, templates, roll forward
-- `src/components/WeekGrid.tsx` — day grid (`rowH` and `days` props; `phone` prop: Mon–Sun day strip instead of the head row, 52px time column, swipe to change day), drop preview / tag highlight, tap-to-place, block taps and right-click
-- `src/components/Block.tsx` — one placed block (states, gradient ring, press/lift/tag-target looks, mouse edge handles, touch grips)
+- `src/components/WeekGrid.tsx` — day grid (`rowH` and `days` props; `phone` prop: Mon–Sun day strip instead of the head row, 52px time column, swipe to change day), drop preview / tag highlight, current-time line and clock tag, tap-to-place, block taps and right-click
+- `src/components/Block.tsx` — one placed block (states, gradient ring, round done tick, done tint, Now ring + minutes left, press/lift/tag-target looks, mouse edge handles, touch grips)
 - `src/components/BlockEditor.tsx` — inline title/description/tags editor; touch-only day chips and delete
 - `src/components/StatsView.tsx` — streaks, hours chart, reset
 - `src/components/TasksView.tsx` — Tasks tab: add row, check / cross off, dismiss

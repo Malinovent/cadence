@@ -6,9 +6,11 @@ import { DAY_END, DAY_START, DAYS, ROW_H, STEP } from "../lib/constants";
 import { daysWithBlocks, swipeDay } from "../lib/dayview";
 import { blockBox, dropPreview, resolveDrop, slotStartAt } from "../lib/gesture";
 import type { Block as BlockT, Category } from "../lib/model";
+import { fmtClock, isNowBlock, minutesLeft, nowLineTop, nowPoint } from "../lib/now";
 import { fmtTime } from "../lib/time";
 import type { CadenceActions } from "../state/useCadence";
 import { ink, line, paper, paper2, S } from "../styles";
+import { useNow } from "../state/useNow";
 import Block from "./Block";
 
 const SLOTS: number[] = [];
@@ -69,6 +71,11 @@ export default function WeekGrid({
   const pressedId = state.press?.source.kind === "move" ? state.press.source.id : null;
 
   const onToggleDone = (id: string) => actions.toggleDone(week, id);
+
+  // now: the block under way gets an outline and "minutes left"; a line marks the time today
+  const point = nowPoint(useNow());
+  const lineTop = nowLineTop(week, point, rowH);
+  const today = days.includes(point.day) ? point.day : null;
 
   // tap-to-place: a tap on an empty spot places the armed category there
   const onColumnClick = (e: React.MouseEvent<HTMLDivElement>, day: number) => {
@@ -147,6 +154,11 @@ export default function WeekGrid({
               {t % 60 === 0 ? fmtTime(t) : ""}
             </div>
           ))}
+          {lineTop !== null && today !== null && (
+            <div style={{ ...S.nowClock, top: lineTop }} aria-hidden="true">
+              {fmtClock(point)}
+            </div>
+          )}
         </div>
         {days.map((di) => (
           <div key={di} data-day={di} style={{ ...S.dayCol, height: colHeight }} onClick={(e) => onColumnClick(e, di)}>
@@ -179,11 +191,13 @@ export default function WeekGrid({
                   onTap={onBlockTap}
                   onContextMenu={onBlockContextMenu}
                   onToggleDone={onToggleDone}
+                  minsLeft={isNowBlock(p, week, point) ? minutesLeft(p, point) : null}
                   onMoveToDay={onMoveToDay}
                   actions={actions}
                 />
               ))}
             {preview && preview.day === di && <div style={{ ...S.dropPreview, ...blockBox(preview.start, preview.mins, rowH) }} />}
+            {lineTop !== null && di === today && <div style={{ ...S.nowLine, top: lineTop - 1 }} aria-hidden="true" />}
           </div>
         ))}
       </div>

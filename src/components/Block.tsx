@@ -1,11 +1,12 @@
 import type React from "react";
 import type { InteractionEngine } from "../interaction/engine";
-import { blockText } from "../lib/dayview";
-import { blockBox, GRIP_MIN_WIDTH, GRIP_SPAN, gripZones } from "../lib/gesture";
+import { blockText, tallerThan } from "../lib/dayview";
+import { blockBox, GRIP_MIN_WIDTH, GRIP_SPAN, gripZones, withAlpha } from "../lib/gesture";
 import type { Block as BlockT, Category } from "../lib/model";
+import { fmtLeft } from "../lib/now";
 import { fmtDur, fmtTime } from "../lib/time";
 import type { CadenceActions } from "../state/useCadence";
-import { S } from "../styles";
+import { ink, nowRing, S } from "../styles";
 import BlockEditor from "./BlockEditor";
 
 export type ResizeEdge = "top" | "bottom";
@@ -24,6 +25,7 @@ type Props = {
   onTap: (p: BlockT) => void; // a click/tap that was not a drag
   onContextMenu: (e: React.MouseEvent, p: BlockT) => void;
   onToggleDone: (id: string) => void;
+  minsLeft: number | null; // the block is happening now: whole minutes left; otherwise null
   onMoveToDay: (p: BlockT, day: number) => void;
   actions: Pick<CadenceActions, "addTag" | "removeTag" | "updateBlock" | "removeBlock">;
 };
@@ -58,6 +60,7 @@ export default function Block({
   onTap,
   onContextMenu,
   onToggleDone,
+  minsLeft,
   onMoveToDay,
   actions,
 }: Props) {
@@ -67,10 +70,14 @@ export default function Block({
   const named = !!p.label;
   const baseColor = colors[0];
   const multi = colors.length > 1;
-  // three states: empty -> dashed hollow | named -> solid hollow | done -> filled
-  const solidFill = p.done;
-  const onColor = solidFill ? "#fff" : baseColor;
+  // three states: empty -> dashed hollow | named -> solid hollow | done -> the area's tint, solid ring
+  // (sprint 1: done blocks are tinted, no longer filled, so ink text stays readable on every colour)
+  const done = p.done;
+  const onColor = done ? ink : baseColor;
   const gradient = multi ? blendGradient(colors) : null;
+  const TINT = "2e"; // ~18% of the area colour over the grid background
+  const tint = (c: string) => withAlpha(c, TINT);
+  const isNow = minsLeft !== null;
 
   // Single-type keeps plain CSS borders. Multi-type paints the gradient into
   // the border ring using mask-composite, which (unlike border-image) keeps border-radius.
@@ -78,21 +85,22 @@ export default function Block({
   let ringOverlay: React.ReactNode = null;
   if (!multi) {
     blockStyle = {
-      background: solidFill ? baseColor : "#fbf6ec",
-      border: p.done ? `1px solid ${baseColor}` : named ? `1.5px solid ${baseColor}` : `1.5px dashed ${baseColor}`,
+      // tint over the grid colour, so slot lines never show through
+      background: done ? `linear-gradient(${tint(baseColor)}, ${tint(baseColor)}), #fbf6ec` : "#fbf6ec",
+      border: done || named ? `1.5px solid ${baseColor}` : `1.5px dashed ${baseColor}`,
     };
-  } else if (solidFill) {
-    // done: interior filled with the gradient
-    blockStyle = { background: gradient ?? undefined, border: "1px solid transparent" };
   } else {
-    // hollow multi-type: grid-coloured interior, gradient ring drawn by an overlay
-    blockStyle = { background: "#fbf6ec", border: "none" };
+    // multi-type: gradient ring drawn by an overlay; done adds the blended tint inside
+    blockStyle = {
+      background: done ? `${blendGradient(colors.map(tint))}, #fbf6ec` : "#fbf6ec",
+      border: "none",
+    };
     // gaps punched along the ring to mimic a dashed border
-    const dashMask = named ? null : "repeating-linear-gradient(135deg, #000 0 5px, transparent 5px 10px)";
+    const dashMask = named || done ? null : "repeating-linear-gradient(135deg, #000 0 5px, transparent 5px 10px)";
     ringOverlay = (
       // keyed on the variant so switching dashed <-> solid remounts with a clean mask
       <div
-        key={named ? "solid" : "dashed"}
+        key={named || done ? "solid" : "dashed"}
         style={{
           position: "absolute",
           inset: 0,
@@ -119,6 +127,9 @@ export default function Block({
   const text = blockText(height, rowH, !!p.desc);
   const showDesc = !isEditing && text.desc;
   const showTime = !isEditing && text.time;
+  // the "Now · 38 min left" line gets its own row in blocks of an hour or more; shorter blocks
+  // show it in place of the duration
+  const nowRoom = tallerThan(height, rowH, 46);
 
   // mouse: invisible 7px edge handles (hidden on coarse pointers, see styles.ts)
   const edgeHandle = (edge: ResizeEdge) => (
@@ -139,7 +150,7 @@ export default function Block({
   // hit area outside the block. The part inside is handled by engine.pressBlock. These are
   // siblings of the block in the day column so they can reach past its clipped edges.
   const zones = gripZones(top, height, colHeight);
-  const gripColor = solidFill ? "#fff" : baseColor;
+  const gripColor = baseColor;
   const gripFade = lifted ? 0.35 : undefined;
   const outsideZone = (edge: ResizeEdge) => {
     const h = edge === "top" ? zones.outsideTop : zones.outsideBottom;
@@ -175,10 +186,11 @@ export default function Block({
           height,
           ...blockStyle,
           // keep text inset identical whether the ring is a real border or the masked overlay
-          padding: multi && !solidFill ? "6.5px 8.5px" : "5px 7px",
+          padding: multi ? "6.5px 8.5px" : "5px 7px",
           color: onColor,
           cursor: isEditing ? "default" : "grab",
-          zIndex: isEditing ? 20 : 2,
+          zIndex: isEditing ? 20 : isNow ? 3 : 2,
+          boxShadow: isNow ? nowRing : S.placedBlock.boxShadow,
           overflow: isEditing ? "visible" : "hidden",
           transition: "background 0.15s, transform 0.12s, opacity 0.12s",
           opacity: lifted ? 0.35 : undefined,
@@ -187,6 +199,12 @@ export default function Block({
       >
         {ringOverlay}
         {!isEditing && edgeHandle("top")}
+        {minsLeft !== null && nowRoom && (
+          <div style={S.nowBadge}>
+            <span style={S.nowTag}>Now</span>
+            {fmtLeft(minsLeft)}
+          </div>
+        )}
         <div style={S.placedTop}>
           <span style={S.placedNameWrap}>
             {multi && (
@@ -199,20 +217,28 @@ export default function Block({
             <span style={S.placedName}>{cats.map((c) => c.name).join(" + ") || "?"}</span>
           </span>
           <div style={S.placedTopRight}>
-            <span style={{ ...S.placedDur, color: solidFill ? "rgba(255,255,255,0.85)" : baseColor }}>{fmtDur(p.mins)}</span>
+            <span style={{ ...S.placedDur, color: isNow ? ink : baseColor }}>
+              {minsLeft !== null && !nowRoom ? `Now · ${fmtLeft(minsLeft)}` : fmtDur(p.mins)}
+            </span>
             <button
+              type="button"
+              className="cadence-tick cadence-hit44"
+              aria-pressed={done}
+              aria-label={done ? "Mark not done" : "Mark done"}
+              title={done ? "Done · click to undo" : "Mark done"}
+              // a tap on the tick never picks the block up or starts a resize
+              onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleDone(p.id);
               }}
               style={{
                 ...S.doneToggle,
-                background: solidFill ? "rgba(255,255,255,0.25)" : "transparent",
-                borderColor: solidFill ? "transparent" : baseColor,
-                color: solidFill ? "#fff" : baseColor,
+                background: done ? ink : "transparent",
+                color: done ? "#fff" : ink,
               }}
             >
-              {p.done ? "✓" : "○"}
+              {done ? "✓" : ""}
             </button>
           </div>
         </div>
@@ -233,12 +259,12 @@ export default function Block({
           <>
             {p.label && <div style={S.placedLabel}>{p.label}</div>}
             {showDesc && (
-              <div style={{ ...S.placedDesc, opacity: solidFill ? 0.85 : 0.75, WebkitLineClamp: text.descLines }}>
+              <div style={{ ...S.placedDesc, opacity: 0.75, WebkitLineClamp: text.descLines }}>
                 {p.desc}
               </div>
             )}
             {showTime && (
-              <div style={{ ...S.placedTime, opacity: solidFill ? 0.8 : 0.65 }}>
+              <div style={{ ...S.placedTime, opacity: 0.65 }}>
                 {fmtTime(p.start)}–{fmtTime(p.start + p.mins)}
               </div>
             )}

@@ -39,6 +39,10 @@ html, body { touch-action: manipulation; }
 @media not all and (pointer: coarse) {
   .cadence-grip, .cadence-coarse-only { display: none !important; }
 }
+/* block tick: bigger on touch */
+@media (pointer: coarse) {
+  .cadence-tick { width: 24px !important; height: 24px !important; font-size: 14px !important; }
+}
 /* small round/text buttons (task check, dismiss): 44px hit area on touch without changing the layout */
 .cadence-hit44 { position: relative; }
 @media (pointer: coarse) {
@@ -49,6 +53,8 @@ export const ink = "#2b2622";
 export const paper = "#f4ede1";
 export const paper2 = "#ece2d2";
 export const line = "#d8cbb8";
+// the block happening now: heavier ink outline drawn as a box-shadow (keeps its layout)
+export const nowRing = `0 0 0 2px ${ink}`;
 export const S = {
   root: {
     fontFamily: "'Fraunces Variable', 'Fraunces', Georgia, serif",
@@ -419,6 +425,7 @@ export const S = {
     borderRadius: "50%"
   },
   timeColWrap: {
+    position: "relative",
     borderRight: `1px solid ${line}`
   },
   timeLabel: {
@@ -628,16 +635,67 @@ export const S = {
     color: paper,
     cursor: "pointer"
   },
+  // Sprint 1 "A tick on every block": round tick, ink ring; done = filled ink with a white check.
+  // 16px with the mouse (fits a 30-min block), 24px on touch (FONT_IMPORT .cadence-tick), 44px hit area on touch.
   doneToggle: {
-    border: "1.5px solid transparent",
+    border: `1.5px solid ${ink}`,
     width: 16,
     height: 16,
     borderRadius: "50%",
     cursor: "pointer",
     fontSize: 10,
+    fontWeight: 700,
     lineHeight: 1,
     padding: 0,
-    flexShrink: 0
+    flexShrink: 0,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    zIndex: 4
+  },
+  // the block happening now ("Now · 38 min left", ring = nowRing below) and the current-time line
+  nowBadge: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 9,
+    fontWeight: 500,
+    letterSpacing: "0.06em",
+    textTransform: "uppercase",
+    color: ink,
+    display: "flex",
+    alignItems: "center",
+    gap: 5,
+    marginBottom: 2,
+    whiteSpace: "nowrap",
+    overflow: "hidden"
+  },
+  nowTag: {
+    background: ink,
+    color: paper,
+    padding: "1px 4px",
+    borderRadius: 2
+  },
+  nowLine: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    height: 0,
+    borderTop: `2px solid ${ink}`,
+    pointerEvents: "none",
+    zIndex: 1 // above the slot lines, under the blocks
+  },
+  nowClock: {
+    position: "absolute",
+    right: 2,
+    transform: "translateY(-50%)",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 10,
+    background: ink,
+    color: paper,
+    padding: "1px 4px",
+    borderRadius: 2,
+    pointerEvents: "none",
+    zIndex: 5
   },
   statsBody: {
     maxWidth: 760

@@ -72,7 +72,7 @@ Note: history entries carry the block `id` (the brief omits it). It is what un-m
 - Placement: `resolvePlacement` (394) for tray drops and moves; may shrink to fit; null = no-op.
 - Resize: top/bottom edge, clamped by neighbours and day bounds (684–715). Extract as `resizeBlock(blocks, id, edge, origStart, origMins, deltaSlots)`.
 - Tag add/remove, at least one tag (558–577). Drop a tray category on a block adds a tag.
-- Inline editor: title, description, category chips, done button; closes on outside pointerdown, Enter, Escape (501–513, 1172–1221).
+- Inline editor: title, description, category chips, done button (done look changed in S1.1, see "Sprint 1 changes"); closes on outside pointerdown, Enter, Escape (501–513, 1172–1221).
 - Right-click a block deletes it and its history entries (578).
 - Done toggle logs one history entry per tag with full duration; un-done removes by block id (605).
 - Quotas: placed minutes vs target per category, multi-tag counts fully to each; completion % = done blocks / blocks (722–737).
@@ -206,6 +206,16 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 - List (marginTop 16, column, gap 8): each row like `S.catRow` (background #fbf6ec, radius 4, padding 10px 14px, align center, gap 12): a 22px round check button (1.5px solid ink border; done = background #1FA98A, border #1FA98A, white "✓"; aria-label "Mark done"/"Mark not done"), the name (Fraunces 16px, flex 1; tapping it also toggles; done = line-through, colour #9a8d7d), and a "✕" dismiss button (`S.catDel` look, aria-label "Dismiss") that removes it. On coarse pointers the check and ✕ get 44px hit areas.
 - Empty list: `S.tplEmpty` "Nothing on your list."
 - Insertion order; done tasks stay where they are.
+
+## Sprint 1 changes (brief: `docs/BRIEF-sprints-0-1.md`)
+
+### S1.1 A tick on every block
+- Every block shows a round tick at the right of its top row: 1.5px ink ring, empty when not done; done = filled ink with a white "✓". 16px with the mouse, 24px on `(pointer: coarse)` (`.cadence-tick`), with the 44px touch hit area (`.cadence-hit44`). `aria-pressed`, aria-label "Mark done" / "Mark not done".
+- One click or tap toggles `done` (the existing field and `toggleDone` action, history unchanged). Pointer-down on the tick stops there, so it never picks the block up, starts a touch resize or opens the editor.
+- Done blocks take their area's tint instead of the legacy solid fill: area colour at ~18% (`#…2e`) over `#fbf6ec`, solid 1.5px border, ink text; multi-area done blocks blend the tints and keep the solid gradient ring. Not done stays as before (dashed / solid hollow). Nothing is ever red.
+- The block under way now (Week 1, today, start ≤ now < end) gets a 2px ink ring (`nowRing`, a box-shadow) and "NOW · 38 min left" (`fmtLeft`: "38 min left", "1 h left", "1 h 05 left"): on its own line above the top row when the block is an hour or longer, otherwise in place of the duration.
+- A 2px ink line crosses today's column at the current time (under the blocks), with the time ("1:55pm", grid format) in an ink tag in the time column. Week 1 only, 7am–11pm only. The clock updates on each whole minute and when the page becomes visible (`useNow`).
+- No Now/Next card, no Skip or Move buttons; unticked blocks just stay unticked. Logic: `src/lib/now.ts` (tested).
 
 ## Phases
 1. Port + export/import + unit tests (this file's sections above).
