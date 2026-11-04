@@ -99,8 +99,9 @@ Hero (A/B headline in session storage), how it works, offer, waitlist form, FAQ,
 Done: all sections from the wireframes in both languages, A/B headline, waitlist client checks. Left: wire waitlist (S0.3) and checkout (S0.4), real clip, Lighthouse run.
 Depends: S0.1.
 
-### [ ] S0.3 Supabase tables + `hits` + `waitlist` functions — Careful
+### [~] S0.3 Supabase tables + `hits` + `waitlist` functions — Careful
 `purchases`, `entitlements`, `waitlist`, `hits` tables (RLS: no public reads), edge functions with input validation, `?src=` / referrer source logic as pure tested functions, tagged link list.
+Done (site repo): `supabase/presale.sql`, `hit` + `waitlist` edge functions with tested rules/handlers, page wiring (beacon hit, signup with consent version), `npm run links`, `supabase/SETUP.md`. Checked end to end against a local mock of the functions. Left: JP runs SETUP.md (region check, SQL, deploy, variables); confirmation email waits on an email tool.
 Depends: JP's OK. Flag: Supabase region (Canada).
 
 ### [ ] S0.4 Checkout adapter + webhook — Careful
