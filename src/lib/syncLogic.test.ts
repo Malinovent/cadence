@@ -81,7 +81,7 @@ describe("isEmptyData", () => {
     expect(isEmptyData({ ...d, history: [{ id: "b", catId: "work", mins: 60, date: 1 }] })).toBe(false);
     expect(isEmptyData({ ...d, streaks: { work: { count: 1 } } })).toBe(false);
     expect(isEmptyData(A.addTask(d, "Buy milk", { uid: () => "t", now: () => 1 }))).toBe(false);
-    expect(isEmptyData(A.updateCat(d, "work", { targetMins: 600 }))).toBe(false);
+    expect(isEmptyData(A.updateCat(d, "work", { limit: { kind: "floor", min: 600 } }))).toBe(false);
     expect(isEmptyData(A.addCat(d, { uid: () => "c" }))).toBe(false);
   });
 });

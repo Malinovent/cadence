@@ -263,6 +263,86 @@ export const S = {
     textAlign: "right",
     flexShrink: 0
   },
+  // S1.2 guardrail balance (replaces the quota rows): name, kind, partial credit, then the bar
+  balanceList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 10
+  },
+  balanceHead: {
+    display: "flex",
+    alignItems: "baseline",
+    gap: 6,
+    marginBottom: 4
+  },
+  balanceName: {
+    fontSize: 13,
+    fontWeight: 600,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap"
+  },
+  balanceKind: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 9,
+    letterSpacing: "0.06em",
+    textTransform: "uppercase",
+    color: "#7a6e5e",
+    whiteSpace: "nowrap"
+  },
+  balanceCount: {
+    marginLeft: "auto",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 10,
+    color: ink,
+    whiteSpace: "nowrap"
+  },
+  balanceTrack: {
+    position: "relative",
+    height: 7,
+    background: paper2,
+    borderRadius: 4
+  },
+  balanceFill: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    borderRadius: 4,
+    transition: "width 0.3s"
+  },
+  // "still to plan": the gap up to a floor or range, in grey, never red
+  balanceGap: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    background: "#cabfb2"
+  },
+  balanceBand: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    background: line
+  },
+  balanceMark: {
+    position: "absolute",
+    top: -3,
+    width: 2,
+    height: 13,
+    marginLeft: -1,
+    background: ink
+  },
+  balanceNotes: {
+    background: paper2,
+    borderRadius: 4,
+    padding: "8px 10px",
+    marginTop: 12,
+    fontSize: 12,
+    lineHeight: 1.45,
+    display: "flex",
+    flexDirection: "column",
+    gap: 4
+  },
   completionCard: {
     background: ink,
     color: paper,
@@ -913,6 +993,38 @@ export const S = {
     padding: "5px",
     background: "#fff",
     color: ink
+  },
+  // S1.2 guardrail picker in the category row: Floor | Ceiling | Range, then the hours
+  catGuard: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 4
+  },
+  kindGroup: {
+    display: "inline-flex",
+    border: `1.5px solid ${ink}`,
+    borderRadius: 3,
+    overflow: "hidden"
+  },
+  kindBtn: {
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontSize: 12,
+    fontWeight: 600,
+    padding: "4px 10px",
+    minHeight: 28,
+    border: "none",
+    background: "transparent",
+    color: ink,
+    cursor: "pointer"
+  },
+  kindBtnActive: {
+    background: ink,
+    color: paper
+  },
+  catGuardHint: {
+    fontSize: 11,
+    fontStyle: "italic",
+    color: "#7a6e5e"
   },
   catColor: {
     width: 38,

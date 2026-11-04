@@ -217,6 +217,14 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 - A 2px ink line crosses today's column at the current time (under the blocks), with the time ("1:55pm", grid format) in an ink tag in the time column. Week 1 only, 7am–11pm only. The clock updates on each whole minute and when the page becomes visible (`useNow`).
 - No Now/Next card, no Skip or Move buttons; unticked blocks just stay unticked. Logic: `src/lib/now.ts` (tested).
 
+### S1.2 Guardrail quotas
+- Data: `Category.limit: Limit`, one of `{ kind: "floor", min }`, `{ kind: "ceiling", max }`, `{ kind: "range", min, max }` (minutes per week). `targetMins` stays in `cadence:cats` and always equals `legacyTarget(limit)` (floor min, range min, 0 for a ceiling), so a copy of the app that isn't updated yet still reads a sensible target. `normalizeData`: a missing or unreadable `limit` becomes a floor at the old `targetMins` (no drop); a backwards range is turned round. New areas start as a 1 h floor.
+- Migration safety: on the first load of data without guardrails, `loadData` keeps an untouched copy of the saved keys as an export envelope in `cadence:backup:before-guardrails` (never synced, never overwritten). Settings → Your data offers "Download it" while the copy exists. Checked against a real backup: zero drops, same counts, save/reload and export/import stable.
+- Balance (`src/lib/guardrail.ts`, `weekBalance` in stats.ts): planned minutes this week (a multi-area block counts fully to each). Floor: partial credit toward it ("7 of 10 h"); ceiling: "38 of 40 h max", a past ceiling is "over", never short; range: full credit anywhere inside ("6 h, in range"), "3 of 4–8 h" below, "9 h, past 8 h" above. Each week stands alone: nothing carries over, roll forward copies the plan only.
+- Sidebar "This week's balance" (`BalanceList`): dot, name, kind ("FLOOR 10 H"), the partial-credit label, and a bar spanning 1.2× the top limit (or the plan, if more): fill in the area colour, "still to plan" up to a floor/range in grey `#cabfb2`, the range band in `line`, ink marks at the floor, ceiling or both range ends. Notes under it describe, never judge: "Rest is lighter than your floor this week.", "Work is 2 h past your ceiling this week." No red, no green ✓.
+- Categories view: per area a Floor | Ceiling | Range toggle with its one-line hint, then "At least", "At most" or "From"/"To" hours; switching kind keeps sensible numbers (`changeKind`).
+- Not yet: the optional per-day buffer block in templates (waiting on JP, see PLAN S1.2). Streaks still use `targetMins` until S1.3 replaces them.
+
 ## Phases
 1. Port + export/import + unit tests (this file's sections above).
 2. PWA + deploy: manifest, icons (incl. 180×180 apple-touch-icon, replace the emoji favicon), iOS meta tags, `viewport-fit=cover` + safe-area padding, service worker app-shell cache, self-hosted fonts, GitHub Pages workflow.

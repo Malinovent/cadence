@@ -223,9 +223,9 @@ describe("advanceWeek", () => {
   it("updates streaks from week 1 done minutes and shifts the weeks", () => {
     const d = base({
       cats: [
-        { id: "work", name: "Work", color: "#000", targetMins: 120, blockMins: 60 },
-        { id: "learn", name: "Learn", color: "#111", targetMins: 60, blockMins: 60 },
-        { id: "play", name: "Play", color: "#222", targetMins: 60, blockMins: 60 },
+        { id: "work", name: "Work", color: "#000", targetMins: 120, blockMins: 60, limit: { kind: "floor", min: 120 } },
+        { id: "learn", name: "Learn", color: "#111", targetMins: 60, blockMins: 60, limit: { kind: "floor", min: 60 } },
+        { id: "play", name: "Play", color: "#222", targetMins: 60, blockMins: 60, limit: { kind: "floor", min: 60 } },
       ],
       weeks: [
         [
@@ -262,19 +262,23 @@ describe("resetStats", () => {
 describe("categories", () => {
   it("updates a category", () => {
     const d = base();
-    expect(updateCat(d, "work", { name: "Job", targetMins: 600 }).cats[1]).toEqual({
+    expect(updateCat(d, "work", { name: "Job", limit: { kind: "floor", min: 600 } }).cats[1]).toEqual({
       id: "work",
       name: "Job",
       color: "#3C6FE8",
       targetMins: 600,
       blockMins: 240,
+      limit: { kind: "floor", min: 600 },
     });
+    // a ceiling keeps a legacy target of 0; a range keeps its low end
+    expect(updateCat(d, "work", { limit: { kind: "ceiling", max: 2400 } }).cats[1].targetMins).toBe(0);
+    expect(updateCat(d, "work", { limit: { kind: "range", min: 240, max: 480 } }).cats[1].targetMins).toBe(240);
     expect(updateCat(d, "nope", { name: "x" })).toBe(d);
   });
   it("adds a category with the next palette colour", () => {
     const out = addCat(base(), { uid: () => "k" });
-    expect(out.cats[4]).toEqual({ id: "k", name: "New", color: PALETTE[4], targetMins: 60, blockMins: 60 });
-    const cats = Array.from({ length: 7 }, (_, i) => ({ id: `c${i}`, name: "", color: "", targetMins: 0, blockMins: 30 }));
+    expect(out.cats[4]).toEqual({ id: "k", name: "New", color: PALETTE[4], targetMins: 60, blockMins: 60, limit: { kind: "floor", min: 60 } });
+    const cats = Array.from({ length: 7 }, (_, i) => ({ id: `c${i}`, name: "", color: "", targetMins: 0, blockMins: 30, limit: { kind: "floor" as const, min: 0 } }));
     expect(addCat(base({ cats }), { uid: () => "k" }).cats[7].color).toBe(PALETTE[0]);
   });
   it("removes a category, stripping tags, dropping untagged blocks and its history", () => {

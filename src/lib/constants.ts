@@ -9,10 +9,10 @@ export const STEP = 30; // fixed: 30-minute slots
 export const SNAP_THRESHOLD = 25; // minutes — within this, snap to a neighbor edge
 
 export const DEFAULT_CATEGORIES: readonly Category[] = [
-  { id: "exercise", name: "Exercise", color: "#E8643C", targetMins: 240, blockMins: 120 },
-  { id: "work", name: "Work", color: "#3C6FE8", targetMins: 1200, blockMins: 240 },
-  { id: "learn", name: "Learn", color: "#1FA98A", targetMins: 240, blockMins: 60 },
-  { id: "play", name: "Play", color: "#C9A227", targetMins: 240, blockMins: 120 },
+  { id: "exercise", name: "Exercise", color: "#E8643C", targetMins: 240, blockMins: 120, limit: { kind: "floor", min: 240 } },
+  { id: "work", name: "Work", color: "#3C6FE8", targetMins: 1200, blockMins: 240, limit: { kind: "floor", min: 1200 } },
+  { id: "learn", name: "Learn", color: "#1FA98A", targetMins: 240, blockMins: 60, limit: { kind: "floor", min: 240 } },
+  { id: "play", name: "Play", color: "#C9A227", targetMins: 240, blockMins: 120, limit: { kind: "floor", min: 240 } },
 ];
 
 // colours handed out (in order, cycling) to new categories

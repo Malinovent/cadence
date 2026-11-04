@@ -31,7 +31,7 @@
 - `src/lib/time.ts` — `fmtTime`, `fmtDur`
 - `src/lib/placement.ts` — `freeGaps`, `resolvePlacement`, `resizeBlock`
 - `src/lib/model.ts` — data types (incl. `Task`), `defaultData`, migrations, `normalizeData`
-- `src/lib/storage.ts` — localStorage load/save of the five legacy `cadence:*` keys plus `cadence:tasks`
+- `src/lib/storage.ts` — localStorage load/save of the five legacy `cadence:*` keys plus `cadence:tasks`; pre-migration copies (`PREMIGRATION_KEYS`, `cadence:backup:before-guardrails`)
 - `src/lib/meta.ts` — `cadence:meta` sync bookkeeping (`updatedAt`, `syncedAt`, `userId`): load/save, defaults, `isDirty`, `nextEditTime`
 - `src/lib/syncLogic.ts` — pure sync decisions: `decideAfterPull`, `decideAfterPush`, `isEmptyData`, `contentEqual` / `jsonEqual` (key-order-insensitive), `winningUpdatedAt`
 - `src/lib/transfer.ts` — export envelope/filename, `parseImport`
@@ -39,8 +39,9 @@
 - `src/lib/syncUi.ts` — sync UI wording: header status label + dot colour, Settings status sentence, auth error messages, email / 6-digit code checks, `isRemoteApply` (data changed by a server copy)
 - `src/lib/download.ts` — browser-only `downloadText` (Blob + object URL + `<a download>`)
 - `src/lib/actions.ts` — pure state transitions on `CadenceData` (blocks, templates, categories, tasks)
-- `src/lib/stats.ts` — derived numbers: `quotaStatus`, `completion`, `statsByCat`, `maxHours`, hour→minute conversions
+- `src/lib/stats.ts` — derived numbers: `weekBalance` (S1.2), `quotaStatus`, `completion`, `statsByCat`, `maxHours`, hour→minute conversions
 - `src/lib/gesture.ts` — pure gesture maths for the interaction engine: thresholds, y→slot start (row height as a parameter), `hitTest` on measured rects, autoscroll speed, touch grip sizing, `resolveDrop` / `dropPreview`, `withAlpha`
+- `src/lib/guardrail.ts` — S1.2 guardrails: `Limit` type, `parseLimit`, `floorFromTarget`, `legacyTarget`, `changeKind`, `balance`, wording (`fmtH`, `limitLabel`, `balanceLabel`, `balanceNote`), `barGeometry`
 - `src/lib/now.ts` — "now" on the grid: `nowPoint`, `isNowBlock`, `minutesLeft`, `fmtLeft`, `nowLineTop`, `fmtClock`, `msToNextMinute`
 - `src/lib/dayview.ts` — phone day view maths: `defaultDay`, `swipeDay`, `daysWithBlocks`; row-height-scaled block text thresholds (`tallerThan`, `blockText`)
 - `src/lib/__fixtures__/legacy.ts` — legacy-app data fixture for tests
@@ -57,14 +58,15 @@
 - `src/interaction/useInteraction.ts` — React hook: one engine for tray + grid, mirrors its state
 - `src/components/` — React view components
 - `src/components/Header.tsx` — logo, tagline, nav buttons (`View` type); sync status line under the nav when signed in (opens Settings)
-- `src/components/Sidebar.tsx` — week toggle, tray (drag source, press/hold feedback, tap-to-place arming), quotas, completion, templates, roll forward
+- `src/components/Sidebar.tsx` — week toggle, tray (drag source, press/hold feedback, tap-to-place arming), this week's balance, completion, templates, roll forward
 - `src/components/WeekGrid.tsx` — day grid (`rowH` and `days` props; `phone` prop: Mon–Sun day strip instead of the head row, 52px time column, swipe to change day), drop preview / tag highlight, current-time line and clock tag, tap-to-place, block taps and right-click
 - `src/components/Block.tsx` — one placed block (states, gradient ring, round done tick, done tint, Now ring + minutes left, press/lift/tag-target looks, mouse edge handles, touch grips)
 - `src/components/BlockEditor.tsx` — inline title/description/tags editor; touch-only day chips and delete
+- `src/components/BalanceList.tsx` — sidebar "This week's balance": per-area guardrail bar, partial-credit label, calm notes
 - `src/components/StatsView.tsx` — streaks, hours chart, reset
 - `src/components/TasksView.tsx` — Tasks tab: add row, check / cross off, dismiss
-- `src/components/CategoriesView.tsx` — category editor
-- `src/components/SettingsView.tsx` — "Your data": export / import with summary + confirm; hosts "Account & sync" when sync is configured
+- `src/components/CategoriesView.tsx` — category editor: name, Floor/Ceiling/Range guardrail and its hours, block length, colour
+- `src/components/SettingsView.tsx` — "Your data": export / import with summary + confirm, download of the pre-guardrails copy; hosts "Account & sync" when sync is configured
 - `src/components/AccountSync.tsx` — Settings "Account & sync": conflict card, signed-out email form → code entry, signed-in email + status + sign out
 - `.github/workflows/deploy.yml` — CI: test, lint, build, deploy to GitHub Pages
 - `handoff/INSTALL-IPHONE.md` — one-page install + sign-in note for the end user

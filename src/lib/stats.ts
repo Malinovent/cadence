@@ -1,6 +1,7 @@
 // Derived numbers for the sidebar and the stats view (pure).
 import type { CadenceData, Category } from "./model";
 import type { WeekIndex } from "./actions";
+import { balance, balanceNote, type Balance } from "./guardrail";
 
 export type StatsRange = "month" | "quarter" | "year";
 export const RANGE_DAYS: Record<StatsRange, number> = { month: 30, quarter: 90, year: 365 };
@@ -15,6 +16,18 @@ export const quotaStatus = (data: CadenceData, week: WeekIndex): QuotaStatus[] =
     const placedMins = placed.reduce((s, p) => s + p.mins, 0);
     const doneMins = placed.filter((p) => p.done).reduce((s, p) => s + p.mins, 0);
     return { cat: c, placedMins, doneMins, met: placedMins >= c.targetMins };
+  });
+};
+
+export type AreaBalance = { cat: Category; balance: Balance; note: string | null };
+
+/** S1.2: this week's guardrail balance per area, from planned minutes. Each week stands alone. */
+export const weekBalance = (data: CadenceData, week: WeekIndex): AreaBalance[] => {
+  const blocks = data.weeks[week];
+  return data.cats.map((cat) => {
+    const planned = blocks.filter((p) => p.catIds.includes(cat.id)).reduce((s, p) => s + p.mins, 0);
+    const b = balance(cat.limit, planned);
+    return { cat, balance: b, note: balanceNote(cat.name, b) };
   });
 };
 

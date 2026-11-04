@@ -4,10 +4,11 @@ import type { Interaction } from "../interaction/useInteraction";
 import type { WeekIndex } from "../lib/actions";
 import { withAlpha } from "../lib/gesture";
 import type { CadenceData } from "../lib/model";
-import { completion, quotaStatus } from "../lib/stats";
+import { completion, weekBalance } from "../lib/stats";
 import { fmtDur } from "../lib/time";
 import type { CadenceActions } from "../state/useCadence";
 import { S } from "../styles";
+import BalanceList from "./BalanceList";
 
 type Props = {
   data: CadenceData;
@@ -76,7 +77,6 @@ export default function Sidebar({
     if (next) onArm(null);
   };
   const blocks = data.weeks[week];
-  const quotas = quotaStatus(data, week);
   const done = completion(data, week);
 
   const save = (name: string) => {
@@ -187,31 +187,9 @@ export default function Sidebar({
       )}
 
       <div className="cadence-after" style={S.panelLabel}>
-        This week's time targets
+        This week's balance
       </div>
-      <div className="cadence-after" style={S.quotaList}>
-        {quotas.map((q) => (
-          <div key={q.cat.id} style={S.quotaRow}>
-            <span style={{ ...S.dot, background: q.cat.color }} />
-            <span style={S.quotaName}>{q.cat.name}</span>
-            <div style={S.quotaBarWrap}>
-              <div
-                style={{
-                  ...S.quotaBar,
-                  width: `${Math.min(100, (q.placedMins / q.cat.targetMins) * 100)}%`,
-                  background: q.met ? q.cat.color : "#cabfb2",
-                }}
-              />
-            </div>
-            <span
-              style={{ ...S.quotaCount, color: q.met ? "#1FA98A" : "#9a8d7d" }}
-            >
-              {fmtDur(q.placedMins)}/{fmtDur(q.cat.targetMins)}
-              {q.met && " ✓"}
-            </span>
-          </div>
-        ))}
-      </div>
+      <BalanceList rows={weekBalance(data, week)} />
 
       <div className="cadence-after" style={S.completionCard}>
         <div style={S.completionPct}>{done.pct}%</div>

@@ -1,7 +1,10 @@
 import { DAY_END, DAY_START, DEFAULT_CATEGORIES, STEP } from "./constants";
+import { floorFromTarget, legacyTarget, parseLimit, type Limit } from "./guardrail";
 import { uid } from "./uid";
 
-export type Category = { id: string; name: string; color: string; targetMins: number; blockMins: number };
+// `limit` is the S1.2 guardrail; `targetMins` stays in the stored shape (= legacyTarget(limit)) so
+// older copies of the app still read a sensible weekly target.
+export type Category = { id: string; name: string; color: string; targetMins: number; blockMins: number; limit: Limit };
 export type Block = {
   id: string;
   catIds: string[];
@@ -91,12 +94,15 @@ export const normalizeData = (partial: unknown): { data: CadenceData; dropped: n
       seen.add(c.id);
       const target = Number(c.targetMins);
       const block = Number(c.blockMins);
+      // S1.2: a missing or unreadable guardrail becomes a floor at the old target
+      const limit = parseLimit(c.limit) ?? floorFromTarget(Number.isFinite(target) ? target : 0);
       cats.push({
         id: c.id,
         name: c.name,
         color: c.color,
-        targetMins: Number.isFinite(target) ? target : 0,
+        targetMins: legacyTarget(limit),
         blockMins: Number.isFinite(block) ? Math.max(30, block) : 30,
+        limit,
       });
     }
   } else {

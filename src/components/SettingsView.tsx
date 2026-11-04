@@ -3,6 +3,7 @@ import AccountSync, { type AccountSyncProps } from "./AccountSync";
 import { downloadText } from "../lib/download";
 import { droppedLine, importSummaryLine } from "../lib/format";
 import type { CadenceData } from "../lib/model";
+import { loadPremigrationCopy, PREMIGRATION_KEYS } from "../lib/storage";
 import { buildExport, exportFilename, NOT_A_BACKUP, parseImport, type ImportResult } from "../lib/transfer";
 import { S } from "../styles";
 
@@ -61,6 +62,8 @@ export default function SettingsView({
   };
 
   const dropped = status.kind === "pending" ? droppedLine(status.result.dropped) : null;
+  // the untouched copy kept before the November update changed targets into guardrails
+  const [beforeUpdate] = useState(() => loadPremigrationCopy(PREMIGRATION_KEYS.guardrails));
 
   return (
     <div style={S.catBody}>
@@ -75,6 +78,17 @@ export default function SettingsView({
         </button>
         <input ref={fileRef} type="file" accept=".json,application/json" style={{ display: "none" }} onChange={onFile} />
       </div>
+      {beforeUpdate && (
+        <div style={{ ...note, color: "#7a6e5e", marginTop: 12 }}>
+          A copy of your data from before targets became floors, ceilings and ranges is kept on this device.{" "}
+          <button
+            style={{ ...S.catDel, fontStyle: "normal", textDecoration: "underline", padding: 0 }}
+            onClick={() => downloadText(beforeUpdate, "cadence-backup-before-guardrails.json")}
+          >
+            Download it
+          </button>
+        </div>
+      )}
 
       {status.kind === "pending" && (
         <div style={{ ...S.streakCard, textAlign: "left", padding: 14, marginTop: 16 }}>

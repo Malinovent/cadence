@@ -1,5 +1,6 @@
 // Pure state transitions. Each takes CadenceData and returns new CadenceData,
 // or the same reference when nothing changes. Inputs are never mutated.
+import { legacyTarget } from "./guardrail";
 import { DAY_END, DAY_START, PALETTE, STEP } from "./constants";
 import type { Block, CadenceData, Category, HistoryEntry, Streaks, Task, Template, Weeks } from "./model";
 import { resizeBlock, resolvePlacement } from "./placement";
@@ -180,9 +181,15 @@ export const resetStats = (data: CadenceData): CadenceData => ({
   weeks: [data.weeks[0].map((p) => ({ ...p, done: false })), data.weeks[1].map((p) => ({ ...p, done: false }))],
 });
 
-export const updateCat = (data: CadenceData, id: string, patch: Partial<Omit<Category, "id">>): CadenceData =>
+// A new limit also rewrites the legacy targetMins beside it; targetMins alone can't be set any more.
+export const updateCat = (data: CadenceData, id: string, patch: Partial<Omit<Category, "id" | "targetMins">>): CadenceData =>
   data.cats.some((c) => c.id === id)
-    ? { ...data, cats: data.cats.map((c) => (c.id === id ? { ...c, ...patch } : c)) }
+    ? {
+        ...data,
+        cats: data.cats.map((c) =>
+          c.id === id ? { ...c, ...patch, ...(patch.limit ? { targetMins: legacyTarget(patch.limit) } : {}) } : c,
+        ),
+      }
     : data;
 
 export const addCat = (data: CadenceData, deps: Deps = {}): CadenceData => ({
@@ -195,6 +202,7 @@ export const addCat = (data: CadenceData, deps: Deps = {}): CadenceData => ({
       color: PALETTE[data.cats.length % PALETTE.length],
       targetMins: 60,
       blockMins: 60,
+      limit: { kind: "floor", min: 60 },
     },
   ],
 });

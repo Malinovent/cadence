@@ -47,6 +47,24 @@ describe("normalizeData", () => {
     expect(data).toEqual(legacyNormalized);
   });
 
+  it("migrates targets to floors and keeps a stored guardrail (S1.2)", () => {
+    const { data, dropped } = normalizeData({
+      cats: [
+        { id: "a", name: "A", color: "#000", targetMins: 600, blockMins: 60 },
+        { id: "b", name: "B", color: "#000", targetMins: 0, blockMins: 60, limit: { kind: "ceiling", max: 2400 } },
+        { id: "c", name: "C", color: "#000", targetMins: 999, blockMins: 60, limit: { kind: "range", min: 480, max: 240 } },
+        { id: "d", name: "D", color: "#000", targetMins: 120, blockMins: 60, limit: { kind: "bogus" } },
+      ],
+    });
+    expect(dropped).toBe(0);
+    expect(data.cats.map((c) => [c.limit, c.targetMins])).toEqual([
+      [{ kind: "floor", min: 600 }, 600],
+      [{ kind: "ceiling", max: 2400 }, 0],
+      [{ kind: "range", min: 240, max: 480 }, 240], // targetMins follows the limit, not the stale value
+      [{ kind: "floor", min: 120 }, 120], // unreadable guardrail: falls back to the old target
+    ]);
+  });
+
   it("is idempotent on normalized data", () => {
     const once = normalizeData(legacyRaw).data;
     const twice = normalizeData(once);
@@ -116,9 +134,9 @@ describe("normalizeData", () => {
       ],
     });
     expect(data.cats).toEqual([
-      { id: "work", name: "Work", color: "#3C6FE8", targetMins: 1200, blockMins: 240 },
-      { id: "z", name: "Z", color: "#000", targetMins: 90, blockMins: 30 },
-      { id: "w", name: "W", color: "#000", targetMins: 0, blockMins: 30 },
+      { id: "work", name: "Work", color: "#3C6FE8", targetMins: 1200, blockMins: 240, limit: { kind: "floor", min: 1200 } },
+      { id: "z", name: "Z", color: "#000", targetMins: 90, blockMins: 30, limit: { kind: "floor", min: 90 } },
+      { id: "w", name: "W", color: "#000", targetMins: 0, blockMins: 30, limit: { kind: "floor", min: 0 } },
     ]);
     expect(dropped).toBe(5);
   });
@@ -208,7 +226,7 @@ describe("normalizeData", () => {
   });
 
   it("treats a missing or null tasks key as an empty list, not a drop", () => {
-    expect(normalizeData({ cats: legacyRaw.cats })).toEqual({ data: { ...defaultData(), cats: legacyRaw.cats }, dropped: 0 });
+    expect(normalizeData({ cats: legacyRaw.cats })).toEqual({ data: { ...defaultData(), cats: legacyNormalized.cats }, dropped: 0 });
     expect(normalizeData({ tasks: null })).toEqual({ data: defaultData(), dropped: 0 });
   });
 });

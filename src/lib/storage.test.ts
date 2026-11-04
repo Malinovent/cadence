@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { legacyNormalized, legacyStorage } from "./__fixtures__/legacy";
 import { defaultData, normalizeData } from "./model";
-import { loadData, saveData, saveKey, type StorageLike } from "./storage";
+import { parseImport } from "./transfer";
+import { loadData, needsGuardrailMigration, PREMIGRATION_KEYS, saveData, saveKey, type StorageLike } from "./storage";
 
 class FakeStorage implements StorageLike {
   map = new Map<string, string>();
@@ -83,5 +84,38 @@ describe("storage", () => {
     expect(() => saveKey("cadence:cats", [], broken)).not.toThrow();
     expect(err).toHaveBeenCalledWith("save failed", expect.any(Error));
     expect(loadData(broken)).toEqual(defaultData());
+  });
+
+  describe("pre-migration copy (S1.2 guardrails)", () => {
+    const now = new Date("2026-11-20T12:00:00Z");
+    it("keeps an untouched copy of data saved before guardrails, once", () => {
+      const s = new FakeStorage(legacyStorage);
+      loadData(s, now);
+      const copy = s.getItem(PREMIGRATION_KEYS.guardrails);
+      expect(copy).not.toBeNull();
+      const env = JSON.parse(copy!);
+      expect(env.exportedAt).toBe("2026-11-20T12:00:00.000Z");
+      expect(env.data.cats).toEqual(JSON.parse(legacyStorage["cadence:cats"])); // the old shape, unchanged
+      // it imports like any backup, and gives back the same data
+      const back = parseImport(copy!);
+      expect(back.ok && back.data).toEqual(legacyNormalized);
+      // a later load never overwrites it
+      loadData(s, new Date("2027-01-01T00:00:00Z"));
+      expect(s.getItem(PREMIGRATION_KEYS.guardrails)).toBe(copy);
+    });
+    it("makes no copy for new users or already-migrated data", () => {
+      const fresh = new FakeStorage();
+      loadData(fresh, now);
+      expect(fresh.getItem(PREMIGRATION_KEYS.guardrails)).toBeNull();
+      const migrated = new FakeStorage();
+      saveData(loadData(new FakeStorage(legacyStorage), now), migrated);
+      loadData(migrated, now);
+      expect(migrated.getItem(PREMIGRATION_KEYS.guardrails)).toBeNull();
+    });
+    it("detects old categories", () => {
+      expect(needsGuardrailMigration([{ id: "a" }])).toBe(true);
+      expect(needsGuardrailMigration([{ id: "a", limit: { kind: "floor", min: 0 } }])).toBe(false);
+      expect(needsGuardrailMigration(null)).toBe(false);
+    });
   });
 });
