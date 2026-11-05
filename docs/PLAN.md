@@ -146,8 +146,8 @@ Done on branch `s1-welcome`: card after 7+ days without an edit (judged from the
 ### [x] S1.8 Starter templates
 Done on branch `s1-starters`: work-heavy, family and recovery weeks, under-filled, a buffer a day; applying adds missing Rest/People (JP's choice: keep the person's own areas and limits); offered under Templates and in Welcome back. Shipped to main 2026-11-04.
 ### [~] S1.9 French and English
-Done on branch `s1-finish`: catalogues for every string (en/fr), lib wording passed in, detection + Settings switch (device-local), Quebec formats, default areas named in the person's language. Left: JP reviews the French; JP's OK, ship.
-### [~] S1.10 Neutral stats
-Done on branch `s1-finish`: "Last week" in Stats, one describing sentence per area, tested for judging words. Left: JP's OK, ship. copy
-### [~] S1.11 Early-bird badge
-Done on branch `s1-finish`: reads `entitlements.early_bird` for the signed-in email; badge by the logo, thank-you in Settings; remembered per device. Not checked against a live early-bird account yet (needs a real purchase row). Left: JP's OK, ship.
+Done on branch `s1-finish`: catalogues for every string (en/fr), lib wording passed in, detection + Settings switch (device-local), Quebec formats, default areas named in the person's language. Shipped to main 2026-11-04. Left: JP reviews the French.
+### [x] S1.10 Neutral stats
+Done on branch `s1-finish`: "Last week" in Stats, one describing sentence per area, tested for judging words. Shipped to main 2026-11-04. copy
+### [x] S1.11 Early-bird badge
+Done on branch `s1-finish`: reads `entitlements.early_bird` for the signed-in email; badge by the logo, thank-you in Settings; remembered per device. Not checked against a live early-bird account yet (needs a real purchase row). Shipped to main 2026-11-04.
