@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
-import { DAYS } from "../lib/constants";
 import type { Block, Category } from "../lib/model";
 import type { CadenceActions } from "../state/useCadence";
 import { ink, paper, S } from "../styles";
+import { useI18n } from "../i18n/I18nProvider";
 
 type Props = {
   block: Block;
@@ -15,6 +15,7 @@ type Props = {
 };
 
 export default function BlockEditor({ block: p, cats, baseColor, onClose, onDelete, onMoveToDay, actions }: Props) {
+  const { m } = useI18n();
   const editorRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef(onClose);
   useEffect(() => {
@@ -37,7 +38,7 @@ export default function BlockEditor({ block: p, cats, baseColor, onClose, onDele
       <input
         autoFocus
         defaultValue={p.label}
-        placeholder="title…"
+        placeholder={m.editor.title}
         onChange={(e) => actions.updateBlock(p.id, { label: e.target.value })}
         onKeyDown={(e) => {
           if (e.key === "Enter") onClose();
@@ -47,7 +48,7 @@ export default function BlockEditor({ block: p, cats, baseColor, onClose, onDele
       />
       <textarea
         defaultValue={p.desc || ""}
-        placeholder="description…"
+        placeholder={m.editor.description}
         onChange={(e) => actions.updateBlock(p.id, { desc: e.target.value })}
         onKeyDown={(e) => {
           if (e.key === "Escape") onClose();
@@ -61,7 +62,7 @@ export default function BlockEditor({ block: p, cats, baseColor, onClose, onDele
             <button
               key={c.id}
               onClick={() => (on ? actions.removeTag(p.id, c.id) : actions.addTag(p.id, c.id))}
-              title={on ? `Remove ${c.name}` : `Add ${c.name}`}
+              title={on ? m.editor.remove(c.name) : m.editor.add(c.name)}
               style={{
                 ...S.chip,
                 background: on ? c.color : "transparent",
@@ -77,7 +78,7 @@ export default function BlockEditor({ block: p, cats, baseColor, onClose, onDele
       </div>
       {/* touch only (cadence-coarse-only): move to another day at the same start */}
       <div className="cadence-coarse-only" style={S.chipRow}>
-        {DAYS.map((d, i) => {
+        {m.lib.days.map((d, i) => {
           const on = p.day === i;
           return (
             <button
@@ -92,10 +93,10 @@ export default function BlockEditor({ block: p, cats, baseColor, onClose, onDele
       </div>
       <div style={S.editActions}>
         <button className="cadence-coarse-only" onClick={onDelete} style={{ ...S.editDone, background: "#b54" }}>
-          delete
+          {m.editor.delete}
         </button>
         <button onClick={onClose} style={S.editDone}>
-          done
+          {m.editor.done}
         </button>
       </div>
     </div>

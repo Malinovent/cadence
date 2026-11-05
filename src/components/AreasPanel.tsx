@@ -2,6 +2,7 @@ import type { Interaction } from "../interaction/useInteraction";
 import type { CadenceData } from "../lib/model";
 import type { PanelArea } from "../lib/panel";
 import { S } from "../styles";
+import { useI18n } from "../i18n/I18nProvider";
 import AreaChip from "./AreaChip";
 import TaskList, { type TaskActions } from "./TaskList";
 import BalanceBar from "./BalanceBar";
@@ -18,7 +19,6 @@ export type PanelProps = {
   actions: TaskActions;
 };
 
-export const armHint = (armed: boolean) => (armed ? "Tap a slot · tap again to cancel" : "Drag into the grid");
 
 /** The calm notes for what's off this week ("Rest is 3 h short of its floor"). */
 export function BalanceNotes({ notes }: { notes: string[] }) {
@@ -44,12 +44,15 @@ export default function AreasPanel({
   onHide,
   actions,
 }: PanelProps) {
+  const { m } = useI18n();
   return (
-    <aside style={S.sidebar} aria-label="Areas and tasks">
+    <aside style={S.sidebar} aria-label={m.panel.region}>
       <div style={S.panelHead}>
-        <span style={{ flex: 1 }}>Areas · {armHint(!!armedCatId)}</span>
+        <span style={{ flex: 1 }}>
+          {m.panel.areas} · {armedCatId ? m.panel.armedHint : m.panel.dragHint}
+        </span>
         <button type="button" className="cadence-tray-toggle" onClick={onHide} style={S.panelToggle}>
-          hide
+          {m.panel.hide}
         </button>
       </div>
       <div className="cadence-tray" style={S.areaList}>
@@ -63,7 +66,7 @@ export default function AreasPanel({
       <BalanceNotes notes={notes} />
 
       <div style={S.panelSection}>
-        <div style={S.panelLabel}>Tasks · drag onto a block</div>
+        <div style={S.panelLabel}>{m.panel.tasksHead}</div>
         <TaskList data={data} interaction={interaction} actions={actions} now={now} />
       </div>
     </aside>

@@ -18,13 +18,13 @@ export interface CadenceStore {
   setMeta(fn: (m: SyncMeta) => SyncMeta): void;
 }
 
-export type StoreDeps = { storage?: StorageLike; now?: () => number };
+export type StoreDeps = { storage?: StorageLike; now?: () => number; lang?: "en" | "fr" }; // lang: names a new person's default areas
 
 export function createCadenceStore(deps: StoreDeps = {}): CadenceStore {
   const storage = deps.storage ?? globalThis.localStorage;
   const now = deps.now ?? Date.now;
   // loading does not write anything back
-  let snap: Snapshot = { data: loadData(storage), meta: loadMeta(storage) };
+  let snap: Snapshot = { data: loadData(storage, new Date(), deps.lang), meta: loadMeta(storage) };
   const listeners = new Set<() => void>();
 
   const set = (next: Snapshot) => {

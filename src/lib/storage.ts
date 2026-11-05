@@ -63,12 +63,12 @@ export function loadPremigrationCopy(key: string, storage: StorageLike = default
 }
 
 // Reads the five legacy keys plus cadence:tasks; missing or unreadable ones fall back to defaults.
-export function loadData(storage: StorageLike = defaultStorage(), now: Date = new Date()): CadenceData {
+export function loadData(storage: StorageLike = defaultStorage(), now: Date = new Date(), lang: "en" | "fr" = "en"): CadenceData {
   const raw: Partial<Record<DataKey, unknown>> = {};
   for (const k of DATA_KEYS) raw[k] = loadState(STORAGE_KEYS[k], storage);
   if (needsGuardrailMigration(raw.cats)) keepPremigrationCopy(PREMIGRATION_KEYS.guardrails, raw, storage, now);
   if (needsTaskMigration(raw.tasks)) keepPremigrationCopy(PREMIGRATION_KEYS.tasks, raw, storage, now);
-  return normalizeData(raw).data;
+  return normalizeData(raw, lang).data;
 }
 
 export function saveKey(key: StorageKey, value: unknown, storage: StorageLike = defaultStorage()): void {

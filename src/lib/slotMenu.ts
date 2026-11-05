@@ -7,6 +7,7 @@ import { BUFFER_ID } from "./constants";
 import type { Block, Category } from "./model";
 import { resolvePlacement } from "./placement";
 import { placeMins } from "./actions";
+import { LIB_EN, type LibWords } from "./words";
 
 /** The lengths offered; null = the area's usual block (the default). */
 export const SLOT_LENGTHS = [30, 60, 90, 120] as const;
@@ -40,9 +41,12 @@ export const canAddAt = (blocks: readonly Block[], day: number, start: number): 
   resolvePlacement(blocks, day, start, 30, null) !== null;
 
 /** The menu's rows: the areas in their order, then the buffer. */
-export const slotOptions = (cats: readonly Category[]): { id: string; name: string; color: string | null }[] => [
-  ...cats.map((c) => ({ id: c.id, name: c.name || "Untitled", color: c.color })),
-  { id: BUFFER_ID, name: "Buffer", color: null },
+export const slotOptions = (
+  cats: readonly Category[],
+  w: LibWords = LIB_EN,
+): { id: string; name: string; color: string | null }[] => [
+  ...cats.map((c) => ({ id: c.id, name: c.name || w.panel.untitled, color: c.color })),
+  { id: BUFFER_ID, name: w.panel.buffer, color: null },
 ];
 
 /**

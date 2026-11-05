@@ -216,13 +216,13 @@ export const updateCat = (data: CadenceData, id: string, patch: Partial<Omit<Cat
       }
     : data;
 
-export const addCat = (data: CadenceData, deps: Deps = {}): CadenceData => ({
+export const addCat = (data: CadenceData, deps: Deps = {}, name = "New"): CadenceData => ({
   ...data,
   cats: [
     ...data.cats,
     {
       id: (deps.uid ?? defaultUid)(),
-      name: "New",
+      name,
       color: PALETTE[data.cats.length % PALETTE.length],
       targetMins: 60,
       blockMins: 60,

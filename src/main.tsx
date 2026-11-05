@@ -6,9 +6,12 @@ import "@fontsource-variable/fraunces/opsz.css";
 import "@fontsource/spline-sans-mono/latin-400.css";
 import "@fontsource/spline-sans-mono/latin-500.css";
 import App from "./App";
+import { I18nProvider } from "./i18n/I18nProvider";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <App />
+    <I18nProvider>
+      <App />
+    </I18nProvider>
   </React.StrictMode>,
 );

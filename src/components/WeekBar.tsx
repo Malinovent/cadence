@@ -1,6 +1,7 @@
 import type { WeekIndex } from "../lib/actions";
 import type { Season } from "../lib/balancedWeeks";
 import { S } from "../styles";
+import { useI18n } from "../i18n/I18nProvider";
 import BalancedWeeksCard from "./BalancedWeeksCard";
 
 type Props = {
@@ -14,16 +15,17 @@ type Props = {
 
 /** S1.4: above the grid, the week switch and the balanced-weeks count. */
 export default function WeekBar({ week, setWeek, season, footnote, onShowPanel }: Props) {
+  const { m } = useI18n();
   return (
     <div style={S.weekBar}>
       <div style={S.weekBarLeft}>
         {onShowPanel && (
           <button type="button" onClick={onShowPanel} style={S.showPanelBtn} aria-expanded={false}>
-            ◂ Show areas and tasks
+            {m.week.showPanel}
           </button>
         )}
         <div style={S.weekToggle}>
-          {(["Week 1", "Week 2"] as const).map((w, i) => (
+          {m.week.names.map((w, i) => (
             <button
               key={w}
               onClick={() => setWeek(i as WeekIndex)}

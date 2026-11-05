@@ -206,4 +206,3 @@ export const doneThisWeek = (tasks: readonly Task[], now: Date): Task[] => {
   return tasks.filter((t) => t.done && (t.doneAt ?? 0) >= from);
 };
 
-export const DAY_SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;

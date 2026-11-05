@@ -11,14 +11,16 @@ import { legacyTarget } from "./guardrail";
 import type { Block, CadenceData, Category, Weeks } from "./model";
 import { releaseRemoved } from "./tasks";
 import { uid as defaultUid } from "./uid";
+import { LIB_EN, type Lang, type LibWords } from "./words";
+import { LIB_FR } from "./words.fr";
 
-type Deps = { uid?: () => string };
+type Deps = { uid?: () => string; lang?: Lang }; // lang: names the areas it adds and the block labels
 type WeekIndex = 0 | 1;
 
 export type StarterAreaKey = "work" | "rest" | "people" | "exercise";
 export type StarterArea = { key: StarterAreaKey; name: string; blockMins: number; limit: Limit };
 /** A block in a starter: an area key, or null for the day's buffer. */
-export type StarterBlock = { area: StarterAreaKey | null; day: number; start: number; mins: number; label?: string };
+export type StarterBlock = { area: StarterAreaKey | null; day: number; start: number; mins: number; label?: "windDown" | "walk" };
 export type Starter = { id: string; name: string; blurb: string; areas: StarterArea[]; blocks: StarterBlock[] };
 
 const h = (n: number) => Math.round(n * 60);
@@ -31,7 +33,7 @@ const repeat = (
   area: StarterAreaKey | null,
   start: number,
   mins: number,
-  label?: string,
+  label?: StarterBlock["label"],
 ): StarterBlock[] => days.map((day) => ({ area, day, start, mins, ...(label ? { label } : {}) }));
 const buffers = (weekdayStart: number, weekendStart: number): StarterBlock[] => [
   ...repeat(WEEKDAYS, null, weekdayStart, BUFFER_MINS),
@@ -52,7 +54,7 @@ export const STARTERS: readonly Starter[] = [
     blocks: [
       ...repeat(WEEKDAYS, "work", at(9), h(3)),
       ...repeat(WEEKDAYS, "work", at(13), h(3)),
-      ...repeat(WEEKDAYS, "rest", at(21), h(1), "Wind down"),
+      ...repeat(WEEKDAYS, "rest", at(21), h(1), "windDown"),
       { area: "rest", day: 5, start: at(14), mins: h(2) },
       { area: "people", day: 2, start: at(19), mins: h(1.5) },
       { area: "people", day: 5, start: at(18), mins: h(2) },
@@ -100,7 +102,7 @@ export const STARTERS: readonly Starter[] = [
       { area: "rest", day: 5, start: at(13), mins: h(2) },
       { area: "people", day: 2, start: at(18), mins: h(1.5) },
       { area: "people", day: 6, start: at(11), mins: h(2) },
-      ...repeat([0, 2, 4], "exercise", at(8), h(0.5), "Walk"),
+      ...repeat([0, 2, 4], "exercise", at(8), h(0.5), "walk"),
       ...buffers(at(12, 30), at(16)),
     ],
   },
@@ -117,18 +119,29 @@ const STARTER_COLORS: Record<StarterAreaKey, string> = {
 const norm = (s: string) => s.trim().toLowerCase();
 
 /** The person's area for a starter area: same name, case and spaces ignored. */
-export const matchArea = (cats: readonly Category[], area: StarterArea): Category | undefined =>
-  cats.find((c) => norm(c.name) === norm(area.name));
+export const matchArea = (cats: readonly Category[], area: StarterArea): Category | undefined => {
+  // the same name in English or French (S1.9), case and spaces ignored
+  const names = new Set([area.name, LIB_EN.starters.areas[area.key], LIB_FR.starters.areas[area.key]].map(norm));
+  return cats.find((c) => names.has(norm(c.name)));
+};
+
+/** A starter's name and one-line description in the person's language. */
+export const starterText = (st: Starter, w: LibWords = LIB_EN): { name: string; blurb: string } =>
+  w.starters.names[st.id] ?? { name: st.name, blurb: st.blurb };
+
+/** A starter area's name in the person's language. */
+export const areaName = (a: StarterArea, w: LibWords = LIB_EN): string => w.starters.areas[a.key] ?? a.name;
 
 /** The starter's areas the person doesn't have yet (applying adds them). */
 export const missingAreas = (cats: readonly Category[], starter: Starter): StarterArea[] =>
   starter.areas.filter((a) => !matchArea(cats, a));
 
 /** "Adds Rest and People to your areas." — or null when nothing is added. */
-export const addedNote = (names: string[]): string | null => {
+export const addedNote = (names: string[], w: LibWords = LIB_EN): string | null => {
   if (names.length === 0) return null;
-  const list = names.length === 1 ? names[0] : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
-  return `Adds ${list} to your areas.`;
+  const list =
+    names.length === 1 ? names[0] : `${names.slice(0, -1).join(", ")} ${w.starters.and} ${names[names.length - 1]}`;
+  return w.starters.added(list);
 };
 
 /**
@@ -140,6 +153,7 @@ export function applyStarter(data: CadenceData, week: WeekIndex, starterId: stri
   const starter = STARTERS.find((s) => s.id === starterId);
   if (!starter) return data;
   const makeId = deps.uid ?? defaultUid;
+  const w = deps.lang === "fr" ? LIB_FR : LIB_EN;
   const cats = [...data.cats];
   const used = new Set(cats.map((c) => c.color.toLowerCase()));
   // each area's own calm colour when free, else the first palette colour not in use (never the
@@ -159,7 +173,7 @@ export function applyStarter(data: CadenceData, week: WeekIndex, starterId: stri
     }
     const cat: Category = {
       id: makeId(),
-      name: a.name,
+      name: areaName(a, w),
       color: pickColor(a.key),
       targetMins: legacyTarget(a.limit),
       blockMins: a.blockMins,
@@ -174,7 +188,7 @@ export function applyStarter(data: CadenceData, week: WeekIndex, starterId: stri
       day: b.day,
       start: b.start,
       mins: b.mins,
-      label: b.label ?? "",
+      label: b.label ? w.starters.labels[b.label] : "",
       desc: "",
       done: false,
     };

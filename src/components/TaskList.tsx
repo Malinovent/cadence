@@ -6,6 +6,7 @@ import { taskDots, taskNote } from "../lib/panel";
 import { doneThisWeek, openTasks } from "../lib/tasks";
 import type { CadenceActions } from "../state/useCadence";
 import { S } from "../styles";
+import { useI18n } from "../i18n/I18nProvider";
 
 export type TaskActions = Pick<CadenceActions, "addTask" | "toggleTask" | "removeTask">;
 
@@ -30,12 +31,13 @@ const HOLD_VARS = {
  * leave the list, behind "Show 3 done this week".
  */
 export default function TaskList({ data, interaction, actions, now }: Props) {
+  const { m } = useI18n();
   const [showDone, setShowDone] = useState(false);
   const open = openTasks(data.tasks);
   const done = doneThisWeek(data.tasks, now);
   return (
     <div style={S.areaTasks}>
-      {open.length === 0 && done.length === 0 && <div style={S.tplEmpty}>Nothing on your list.</div>}
+      {open.length === 0 && done.length === 0 && <div style={S.tplEmpty}>{m.tasks.empty}</div>}
       {open.length > 0 && (
         <div style={S.panelTaskList}>
           {open.map((t) => (
@@ -45,7 +47,7 @@ export default function TaskList({ data, interaction, actions, now }: Props) {
       )}
       {done.length > 0 && (
         <button type="button" style={S.taskDoneToggle} onClick={() => setShowDone(!showDone)} aria-expanded={showDone}>
-          {showDone ? "Hide done" : `Show ${done.length} done this week`}
+          {showDone ? m.tasks.hideDone : m.tasks.showDone(done.length)}
         </button>
       )}
       {showDone && done.length > 0 && (
@@ -72,8 +74,9 @@ function TaskRow({
   actions: TaskActions;
 }) {
   const { engine, state } = interaction;
+  const { m } = useI18n();
   const pressed = state.press?.source.kind === "task" && state.press.source.taskId === t.id;
-  const note = taskNote(t, data.weeks);
+  const note = taskNote(t, data.weeks, m.lib);
   const dots = t.done ? [] : taskDots(t, data);
   return (
     <div
@@ -87,7 +90,7 @@ function TaskRow({
       onContextMenu={(e) => {
         if (engine.blocksContextMenu()) e.preventDefault();
       }}
-      title={t.done ? undefined : "Drag onto a block to add it there"}
+      title={t.done ? undefined : m.tasks.dragTitle}
       style={{ ...S.panelTaskRow, ...HOLD_VARS, cursor: t.done ? "default" : "grab" }}
     >
       <span className="cadence-hold-fill" aria-hidden="true" />
@@ -95,7 +98,7 @@ function TaskRow({
         type="button"
         className="cadence-hit44"
         onClick={() => actions.toggleTask(t.id)}
-        aria-label={t.done ? `Mark "${t.name}" not done` : `Mark "${t.name}" done`}
+        aria-label={t.done ? m.tasks.markOpen(t.name) : m.tasks.markDone(t.name)}
         aria-pressed={t.done}
         style={{ ...S.taskCheck, ...S.panelTaskCheck, ...(t.done ? S.taskCheckDone : {}) }}
       >
@@ -118,7 +121,7 @@ function TaskRow({
       <button
         className="cadence-hit44"
         onClick={() => actions.removeTask(t.id)}
-        aria-label={`Dismiss "${t.name}"`}
+        aria-label={m.tasks.dismiss(t.name)}
         style={S.catDel}
       >
         ✕
@@ -128,13 +131,14 @@ function TaskRow({
 }
 
 function AddTask({ actions }: { actions: TaskActions }) {
+  const { m } = useI18n();
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   if (!adding)
     return (
       <button type="button" style={S.taskDoneToggle} onClick={() => setAdding(true)}>
-        ＋ Add a task
+        {m.tasks.add}
       </button>
     );
   // Enter or "＋": add, clear, keep focus; an empty Enter or Escape closes the row
@@ -161,11 +165,11 @@ function AddTask({ actions }: { actions: TaskActions }) {
           }
         }}
         onChange={(e) => setDraft(e.target.value)}
-        placeholder="Add a task…"
-        aria-label="New task"
+        placeholder={m.tasks.placeholder}
+        aria-label={m.tasks.newTask}
         style={S.tplNameInput}
       />
-      <button type="submit" style={S.tplApply} aria-label="Add task">
+      <button type="submit" style={S.tplApply} aria-label={m.tasks.addButton}>
         ＋
       </button>
     </form>

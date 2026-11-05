@@ -32,11 +32,13 @@ import { useNow } from "./state/useNow";
 import { useSync } from "./sync/useSync";
 import { useEarlyBird } from "./sync/useEarlyBird";
 import { FONT_IMPORT, S } from "./styles";
+import { useI18n } from "./i18n/I18nProvider";
 
 export default function App() {
   const { data, actions, store } = useCadence();
   // Supabase sync (no-op when not configured): header status, Settings "Account & sync", conflict banner
   const sync = useSync(store);
+  const { m, lang } = useI18n();
   const earlyBird = useEarlyBird(sync.session?.email ?? null); // S1.11
   const [view, setView] = useState<View>("calendar");
   const [activeWeek, setActiveWeek] = useState<WeekIndex>(0); // 0 = this week, 1 = next week
@@ -138,8 +140,8 @@ export default function App() {
   // calendar view: the panel's content (desktop side panel or phone dock) and the bars around the grid
   const done = completion(data, activeWeek);
   const panel = {
-    areas: panelAreas(data, activeWeek),
-    notes: panelNotes(data, activeWeek),
+    areas: panelAreas(data, activeWeek, m.lib),
+    notes: panelNotes(data, activeWeek, m.lib),
     data,
     now,
     interaction,
@@ -163,9 +165,9 @@ export default function App() {
         earlyBird={earlyBird} />
       {view === "calendar" && sync.conflict && (
         <div style={S.conflictBanner}>
-          <span>This device and your account both have a schedule.</span>
+          <span>{m.conflict.banner}</span>
           <button style={S.textBtn} onClick={() => changeView("settings")}>
-            Choose which to keep →
+            {m.conflict.choose}
           </button>
         </div>
       )}
@@ -179,7 +181,7 @@ export default function App() {
             changeWeek(0);
           }}
           onStarter={(id) => {
-            actions.applyStarter(0, id);
+            actions.applyStarter(0, id, { lang });
             answerWelcome();
             changeWeek(0);
           }}
@@ -195,7 +197,7 @@ export default function App() {
                 week={activeWeek}
                 setWeek={changeWeek}
                 season={season(data.cats, data.history, new Date(), readBalanceRules())}
-                footnote={`${done.done} of ${done.total} ${done.total === 1 ? "block" : "blocks"} ticked this week`}
+                footnote={m.week.ticked(done.done, done.total)}
                 onShowPanel={!isPhone && panelHidden ? () => setHidden(false) : null}
               />
               <WeekGrid

@@ -122,4 +122,14 @@ describe("applying a starter", () => {
     expect(addedNote(["Rest", "People"])).toBe("Adds Rest and People to your areas.");
     expect(addedNote(["Work", "Rest", "People"])).toBe("Adds Work, Rest and People to your areas.");
   });
+
+  it("in French: names the areas it adds and its labels in French, and matches French names", () => {
+    const fr = applyStarter(defaultData("fr"), 0, STARTERS[0].id, { ...ids(), lang: "fr" });
+    expect(fr.cats.slice(4).map((c) => c.name)).toEqual(["Repos", "Proches"]);
+    expect(fr.cats.filter((c) => c.name === "Travail")).toHaveLength(1); // matched, not added
+    expect(fr.weeks[0].some((b) => b.label === "Décompresser")).toBe(true);
+    // a French name matches the English starter area too, and the other way round
+    expect(missingAreas(fr.cats, STARTERS[2])).toEqual([]);
+    expect(missingAreas(applyStarter(defaultData(), 0, STARTERS[0].id, ids()).cats, STARTERS[0])).toEqual([]);
+  });
 });

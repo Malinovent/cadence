@@ -1,6 +1,6 @@
 // Pure decisions for Supabase sync (SPEC "Phase 4 design: sync" → "Sync rules").
 // Last-write-wins on the whole document, compared by each device's edit time (ms epoch).
-import { DEFAULT_CATEGORIES } from "./constants";
+import { defaultCategories } from "./constants";
 import type { SyncMeta } from "./meta";
 import type { CadenceData } from "./model";
 
@@ -60,7 +60,7 @@ export const isEmptyData = (d: CadenceData): boolean =>
   d.history.length === 0 &&
   Object.keys(d.streaks).length === 0 &&
   d.tasks.length === 0 &&
-  jsonEqual(d.cats, DEFAULT_CATEGORIES);
+  (jsonEqual(d.cats, defaultCategories("en")) || jsonEqual(d.cats, defaultCategories("fr")));
 
 // a fresh account on this device: never synced, or last synced as someone else
 export const isFirstSignIn = (meta: SyncMeta, sessionUserId: string): boolean => meta.userId !== sessionUserId;

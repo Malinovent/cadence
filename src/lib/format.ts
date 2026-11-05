@@ -1,19 +1,18 @@
 import type { ImportSummary } from "./transfer";
-
-const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+import { LIB_EN, type LibWords } from "./words";
 
 // "4 categories · 12 blocks across both weeks · 2 templates · 37 logged sessions · 3 streaks · 5 tasks."
 // (the tasks part only when there are any)
-export const importSummaryLine = (s: ImportSummary): string =>
+export const importSummaryLine = (s: ImportSummary, w: LibWords = LIB_EN): string =>
   [
-    count(s.categories, "category", "categories"),
-    `${count(s.blocks, "block", "blocks")} across both weeks`,
-    count(s.templates, "template", "templates"),
-    count(s.sessions, "logged session", "logged sessions"),
-    count(s.streaks, "streak", "streaks"),
-    ...(s.tasks > 0 ? [count(s.tasks, "task", "tasks")] : []),
+    w.summary.categories(s.categories),
+    w.summary.blocks(s.blocks),
+    w.summary.templates(s.templates),
+    w.summary.sessions(s.sessions),
+    w.summary.streaks(s.streaks),
+    ...(s.tasks > 0 ? [w.summary.tasks(s.tasks)] : []),
   ].join(" · ") + ".";
 
 // null when nothing was dropped
-export const droppedLine = (dropped: number): string | null =>
-  dropped > 0 ? `Skipped ${count(dropped, "entry", "entries")} that didn't look right.` : null;
+export const droppedLine = (dropped: number, w: LibWords = LIB_EN): string | null =>
+  dropped > 0 ? w.summary.dropped(dropped) : null;

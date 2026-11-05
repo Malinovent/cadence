@@ -8,6 +8,7 @@ export const ROW_H_PHONE = 40; // phone one-day view (< 900px)
 export const STEP = 30; // fixed: 30-minute slots
 export const SNAP_THRESHOLD = 25; // minutes — within this, snap to a neighbor edge
 
+// the default areas a new person starts with; names in their language (S1.9), same ids
 export const DEFAULT_CATEGORIES: readonly Category[] = [
   { id: "exercise", name: "Exercise", color: "#E8643C", targetMins: 240, blockMins: 120, limit: { kind: "floor", min: 240 } },
   { id: "work", name: "Work", color: "#3C6FE8", targetMins: 1200, blockMins: 240, limit: { kind: "floor", min: 1200 } },
@@ -23,3 +24,8 @@ export const BUFFER_COLOR = "#9a8d7d";
 
 // colours handed out (in order, cycling) to new categories
 export const PALETTE = ["#E8643C", "#3C6FE8", "#1FA98A", "#C9A227", "#9B4DCA", "#D6336C", "#0CA678"] as const;
+
+// S1.9: French (Canada) names of the default areas, same ids, colours and guardrails
+const DEFAULT_NAMES_FR: Record<string, string> = { exercise: "Exercice", work: "Travail", learn: "Apprentissage", play: "Loisirs" };
+export const defaultCategories = (lang: "en" | "fr" = "en"): Category[] =>
+  DEFAULT_CATEGORIES.map((c) => ({ ...c, ...(lang === "fr" ? { name: DEFAULT_NAMES_FR[c.id] ?? c.name } : {}) }));

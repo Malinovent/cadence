@@ -3,7 +3,8 @@ import { DOCK_ATTR } from "../interaction/dom";
 import { openCount } from "../lib/panel";
 import { S } from "../styles";
 import AreaChip from "./AreaChip";
-import { armHint, BalanceNotes, type PanelProps } from "./AreasPanel";
+import { BalanceNotes, type PanelProps } from "./AreasPanel";
+import { useI18n } from "../i18n/I18nProvider";
 import TaskList from "./TaskList";
 import BalanceBar from "./BalanceBar";
 
@@ -16,6 +17,7 @@ type Tab = "areas" | "tasks";
  */
 export default function PhoneDock(props: PanelProps & { folded: boolean; onShow: () => void }) {
   const { areas, notes, data, now, interaction, armedCatId, onArm, onHide, onShow, folded, actions } = props;
+  const { m } = useI18n();
   const [tab, setTab] = useState<Tab>("areas");
   const dockRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(0);
@@ -32,10 +34,10 @@ export default function PhoneDock(props: PanelProps & { folded: boolean; onShow:
   return (
     <>
       <div style={{ height }} aria-hidden="true" />
-      <div ref={dockRef} {...{ [DOCK_ATTR]: "" }} style={S.dock} role="region" aria-label="Areas and tasks">
+      <div ref={dockRef} {...{ [DOCK_ATTR]: "" }} style={S.dock} role="region" aria-label={m.panel.region}>
         {folded ? (
           <button type="button" onClick={onShow} style={S.dockBar} aria-expanded={false}>
-            ▴ Show areas and tasks
+            {m.panel.showBar}
           </button>
         ) : (
           <>
@@ -53,7 +55,7 @@ export default function PhoneDock(props: PanelProps & { folded: boolean; onShow:
                       ...(tab === t ? S.dockTabActive : {}),
                     }}
                   >
-                    {t === "areas" ? "Areas" : open > 0 ? `Tasks · ${open}` : "Tasks"}
+                    {t === "areas" ? m.panel.tabs.areas : open > 0 ? m.panel.tabs.tasksOpen(open) : m.panel.tabs.tasks}
                   </button>
                 ))}
               </div>
@@ -62,15 +64,15 @@ export default function PhoneDock(props: PanelProps & { folded: boolean; onShow:
                 onClick={onHide}
                 style={S.dockFold}
                 aria-expanded={true}
-                aria-label="Fold areas and tasks"
+                aria-label={m.panel.foldLabel}
               >
-                ▾ hide
+                {m.panel.fold}
               </button>
             </div>
             <div style={S.dockBody}>
               {tab === "areas" ? (
                 <>
-                  {armedCatId && <div style={{ ...S.panelLabel, marginTop: 0, marginBottom: 6 }}>{armHint(true)}</div>}
+                  {armedCatId && <div style={{ ...S.panelLabel, marginTop: 0, marginBottom: 6 }}>{m.panel.armedHint}</div>}
                   <div style={S.dockAreas}>
                     {areas.map((a) => (
                       <div key={a.id}>

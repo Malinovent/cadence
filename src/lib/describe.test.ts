@@ -3,7 +3,14 @@ import { describeArea, describeLastWeek } from "./describe";
 import type { Category, HistoryEntry } from "./model";
 
 const h = (n: number) => n * 60;
-const cat = (id: string, name: string, limit: Category["limit"]): Category => ({ id, name, color: "#000", targetMins: 0, blockMins: 60, limit });
+const cat = (id: string, name: string, limit: Category["limit"]): Category => ({
+  id,
+  name,
+  color: "#000",
+  targetMins: 0,
+  blockMins: 60,
+  limit,
+});
 const rest = cat("rest", "Rest", { kind: "floor", min: h(8) });
 const work = cat("work", "Work", { kind: "ceiling", max: h(40) });
 const proj = cat("proj", "Project", { kind: "range", min: h(4), max: h(8) });
@@ -34,6 +41,9 @@ describe("neutral week descriptions", () => {
       tick("rest", h(4), new Date(2026, 9, 25, 9)), // the week before: not counted
     ];
     const lines = describeLastWeek([rest, work], history, now);
-    expect(lines.map((l) => l.text)).toEqual(["Rest was lighter than your floor (5 of 8 h).", "Work stayed under your ceiling (0 of 40 h)."]);
+    expect(lines.map((l) => l.text)).toEqual([
+      "Rest was lighter than your floor (5 of 8 h).",
+      "Work stayed under your ceiling (0 of 40 h).",
+    ]);
   });
 });

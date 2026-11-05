@@ -4,21 +4,23 @@ import { downloadText } from "../lib/download";
 import { droppedLine, importSummaryLine } from "../lib/format";
 import type { CadenceData } from "../lib/model";
 import { loadPremigrationCopy, PREMIGRATION_KEYS } from "../lib/storage";
-import { buildExport, exportFilename, NOT_A_BACKUP, parseImport, type ImportResult } from "../lib/transfer";
+import { buildExport, exportFilename, NEWER_VERSION, NOT_A_BACKUP, parseImport, type ImportResult } from "../lib/transfer";
 import { clampRules, DEFAULT_RULES, type BalanceRules } from "../lib/balancedWeeks";
 import { readBalanceRules, writeBalanceRules } from "../state/balanceRules";
 import { S } from "../styles";
+import { useI18n } from "../i18n/I18nProvider";
+import type { LangChoice } from "../i18n/lang";
 
 const BEFORE_UPDATES = [
   {
     key: PREMIGRATION_KEYS.guardrails,
     file: "cadence-backup-before-guardrails.json",
-    line: "A copy of your data from before targets became floors, ceilings and ranges is kept on this device.",
+    line: "beforeGuardrails",
   },
   {
     key: PREMIGRATION_KEYS.tasks,
     file: "cadence-backup-before-tasks.json",
-    line: "A copy of your data from before the November tasks update is kept on this device.",
+    line: "beforeTasks",
   },
 ] as const;
 
@@ -44,6 +46,7 @@ export default function SettingsView({
   /** S1.11: show the early-bird thank-you */
   earlyBird?: boolean;
 }) {
+  const { m } = useI18n();
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -79,7 +82,9 @@ export default function SettingsView({
     setStatus({ kind: "success" });
   };
 
-  const dropped = status.kind === "pending" ? droppedLine(status.result.dropped) : null;
+  const dropped = status.kind === "pending" ? droppedLine(status.result.dropped, m.lib) : null;
+  // the lib reports import errors in English; show them in the person's language
+  const errorText = (msg: string) => (msg === NOT_A_BACKUP ? m.settings.notBackup : msg === NEWER_VERSION ? m.settings.newerVersion : msg);
   // untouched copies kept before an update migrated the saved data (S1.2 guardrails, S1.5 tasks)
   const [copies] = useState(() =>
     BEFORE_UPDATES.map((c) => ({ ...c, text: loadPremigrationCopy(c.key) })).filter(
@@ -89,58 +94,56 @@ export default function SettingsView({
 
   return (
     <div style={S.catBody}>
-      <h2 style={S.statsTitle}>Your data</h2>
-      <div style={S.catIntro}>Keep a copy of your weeks, or bring them in from another browser.</div>
+      <h2 style={S.statsTitle}>{m.settings.dataTitle}</h2>
+      <div style={S.catIntro}>{m.settings.dataIntro}</div>
       <div style={{ ...row, marginTop: 16 }}>
         <button style={{ ...S.catAdd, marginTop: 0 }} onClick={onExport}>
-          ↓ Export my data
+          {m.settings.export}
         </button>
         <button style={{ ...S.catAdd, marginTop: 0 }} onClick={onPickClick}>
-          ↑ Import from file
+          {m.settings.import}
         </button>
         <input ref={fileRef} type="file" accept=".json,application/json" style={{ display: "none" }} onChange={onFile} />
       </div>
       {copies.map((c) => (
         <div key={c.key} style={{ ...note, color: "#7a6e5e", marginTop: 12 }}>
-          {c.line}{" "}
+          {m.settings[c.line]}{" "}
           <button
             style={{ ...S.catDel, fontStyle: "normal", textDecoration: "underline", padding: 0 }}
             onClick={() => downloadText(c.text, c.file)}
           >
-            Download it
+            {m.settings.download}
           </button>
         </div>
       ))}
 
       {status.kind === "pending" && (
         <div style={{ ...S.streakCard, textAlign: "left", padding: 14, marginTop: 16 }}>
-          <div style={S.catIntro}>{importSummaryLine(status.result.summary)}</div>
+          <div style={S.catIntro}>{importSummaryLine(status.result.summary, m.lib)}</div>
           {dropped && <div style={{ ...note, color: "#9a8d7d", marginTop: 4 }}>{dropped}</div>}
-          <div style={{ ...S.resetWarn, marginTop: 8 }}>This replaces everything in Cadence on this device.</div>
+          <div style={{ ...S.resetWarn, marginTop: 8 }}>{m.settings.replaceWarn}</div>
           <div style={{ ...row, marginTop: 10 }}>
             <button style={{ ...S.resetConfirm, background: "#1FA98A" }} onClick={onConfirm}>
-              Yes, replace
+              {m.settings.replaceYes}
             </button>
             <button style={S.resetCancel} onClick={() => setStatus({ kind: "idle" })}>
-              Cancel
+              {m.settings.cancel}
             </button>
           </div>
         </div>
       )}
-      {status.kind === "error" && <div style={{ ...note, color: "#b54", marginTop: 12 }}>{status.message}</div>}
+      {status.kind === "error" && <div style={{ ...note, color: "#b54", marginTop: 12 }}>{errorText(status.message)}</div>}
       {status.kind === "success" && (
-        <div style={{ ...note, color: "#1FA98A", marginTop: 12 }}>Imported. Your week is back.</div>
+        <div style={{ ...note, color: "#1FA98A", marginTop: 12 }}>{m.settings.imported}</div>
       )}
 
       <BalanceRulesSection />
+      <LanguageSection />
 
       {earlyBird && (
         <div style={S.earlyThanks} role="note">
-          <span style={S.earlyBadge}>Early bird</span>
-          <span>
-            Thank you for believing in Cadence early. Your early-bird purchase is linked to this account, and Pro is
-            yours for life when it arrives.
-          </span>
+          <span style={S.earlyBadge}>{m.header.earlyBird}</span>
+          <span>{m.settings.earlyThanks}</span>
         </div>
       )}
       {sync && <AccountSync {...sync} />}
@@ -150,6 +153,7 @@ export default function SettingsView({
 
 /** S1.3: when a week counts as balanced. Saved on this device only. */
 function BalanceRulesSection() {
+  const { m } = useI18n();
   const [rules, setRules] = useState(readBalanceRules);
   const set = (patch: Partial<BalanceRules>) => {
     const next = clampRules({ ...rules, ...patch });
@@ -159,18 +163,15 @@ function BalanceRulesSection() {
   const changed = rules.floorPct !== DEFAULT_RULES.floorPct || rules.ceilingOverPct !== DEFAULT_RULES.ceilingOverPct;
   return (
     <div style={{ marginTop: 32 }}>
-      <h2 style={S.statsTitle}>Balanced weeks</h2>
-      <div style={S.catIntro}>
-        A week counts as balanced when every floor is met at least this much and no ceiling is passed by more than this.
-        Only ticked blocks count. Saved on this device.
-      </div>
+      <h2 style={S.statsTitle}>{m.settings.rulesTitle}</h2>
+      <div style={S.catIntro}>{m.settings.rulesIntro}</div>
       <div style={{ ...row, marginTop: 12, alignItems: "flex-end" }}>
         <label style={S.catField}>
-          <span>Floors met (%)</span>
+          <span>{m.settings.floorsMet}</span>
           <input type="number" min="0" max="100" step="5" value={rules.floorPct} onChange={(e) => set({ floorPct: +e.target.value })} style={S.catNum} />
         </label>
         <label style={S.catField}>
-          <span>Ceilings passed by (%)</span>
+          <span>{m.settings.ceilingsPassed}</span>
           <input
             type="number"
             min="0"
@@ -183,7 +184,7 @@ function BalanceRulesSection() {
         </label>
         {changed && (
           <button style={{ ...S.catDel, fontSize: 13, textDecoration: "underline" }} onClick={() => set(DEFAULT_RULES)}>
-            Back to 80% and 10%
+            {m.settings.rulesBack}
           </button>
         )}
       </div>
@@ -191,3 +192,33 @@ function BalanceRulesSection() {
   );
 }
 
+
+/** S1.9: the language, following the device unless one is chosen. Saved on this device. */
+function LanguageSection() {
+  const { m, choice, setChoice } = useI18n();
+  const options: { value: LangChoice; label: string }[] = [
+    { value: "auto", label: m.settings.langAuto },
+    { value: "fr", label: m.settings.langNames.fr },
+    { value: "en", label: m.settings.langNames.en },
+  ];
+  return (
+    <div style={{ marginTop: 32 }}>
+      <h2 style={S.statsTitle}>{m.settings.langTitle}</h2>
+      <div style={S.catIntro}>{m.settings.langIntro}</div>
+      <div style={{ ...S.kindGroup, marginTop: 12, display: "inline-flex" }} role="group" aria-label={m.settings.langTitle}>
+        {options.map((o) => (
+          <button
+            key={o.value}
+            type="button"
+            lang={o.value === "auto" ? undefined : o.value}
+            aria-pressed={choice === o.value}
+            onClick={() => setChoice(o.value)}
+            style={{ ...S.kindBtn, ...(choice === o.value ? S.kindBtnActive : {}) }}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}

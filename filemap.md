@@ -44,6 +44,10 @@
 - `src/lib/guardrail.ts` — S1.2 guardrails: `Limit` type, `parseLimit`, `floorFromTarget`, `legacyTarget`, `changeKind`, `balance`, wording (`fmtH`, `limitLabel`, `balanceLabel`, `balanceNote`), `barGeometry`
 - `src/lib/buffer.test.ts` — tests for buffer blocks across actions, drops, stats and normalizeData
 - `src/lib/slotMenu.ts` — S1.6 tap empty time to add: lengths, what a pick places, where the window opens
+- `src/lib/words.ts` — S1.9 the English wording of src/lib (`LibWords`, `LIB_EN`), passed to the lib's text functions
+- `src/lib/words.fr.ts` — S1.9 the same in Canadian French (`LIB_FR`)
+- `src/lib/describe.ts` — S1.10 neutral sentences about last week's ticked time per area
+- `src/lib/earlyBird.ts` — S1.11 reading the entitlements row, matching emails, the remembered answer
 - `src/lib/starters.ts` — S1.8 the three starter weeks, matching areas by name, adding missing ones, applying to a week
 - `src/lib/welcome.ts` — S1.7 when to welcome back (7+ days without an edit) and what a tap replaces
 - `src/lib/tasks.ts` — S1.5 task rules: add / tick / remove, attach to a block, single-task tick, return on tick, end or removal, done this week
@@ -54,6 +58,7 @@
 - `src/lib/__fixtures__/legacy.ts` — legacy-app data fixture for tests
 - `src/state/store.ts` — `createCadenceStore`: framework-free holder of data + meta; per-key persistence; `edit` (user edit, bumps `updatedAt`), `applyRemote` (no bump), `setMeta`
 - `src/state/useCadence.ts` — `useCadence` hook: renders from the store (`useSyncExternalStore`); data, meta, bound user actions, `store`
+- `src/sync/useEarlyBird.ts` — S1.11 is the signed-in email an early bird? (entitlements, remembered per device)
 - `src/state/welcomePrefs.ts` — per-device: the absence the welcome-back card was answered for (`cadence:ui:welcomeAnswered`)
 - `src/state/panelPrefs.ts` — read/write the per-device panel hidden / tray folded choice (`cadence:ui:trayHidden`)
 - `src/state/balanceRules.ts` — read/write the per-device balanced-week rules (`cadence:ui:balanceRules`)
@@ -66,6 +71,9 @@
 - `src/interaction/engine.ts` — Pointer Events engine (framework-free): press → long-press / 4px → drag → drop, edge resizes, autoscroll, scroll lock, click suppression; `engine.test.ts` (jsdom)
 - `src/interaction/dom.ts` — browser side of the engine: grid measuring (`data-row-h` / `data-day` / `data-block-id` contract), drag ghost, click swallowing, coarse-pointer query, phone dock top (`dockTop`)
 - `src/interaction/useInteraction.ts` — React hook: one engine for tray + grid, mirrors its state
+- `src/i18n/en.ts`, `src/i18n/fr.ts` — S1.9 every string the app shows, English and Canadian French (same shape)
+- `src/i18n/lang.ts` — S1.9 detecting the language, the Settings choice (`cadence:ui:lang`), locales
+- `src/i18n/I18nProvider.tsx` — S1.9 `useI18n()`: the catalogue, language and locale for the app; keeps `<html lang>` and the title in step
 - `src/components/` — React view components
 - `src/components/Header.tsx` — logo, tagline, nav buttons (`View` type); sync status line under the nav when signed in (opens Settings)
 - `src/components/AreasPanel.tsx` — S1.4 desktop left panel: area chips with this week's balance, buffer, calm notes, tasks, hide; shared `PanelProps`, `armHint`, `BalanceNotes`

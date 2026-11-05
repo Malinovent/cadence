@@ -13,6 +13,7 @@ import { fmtTime } from "../lib/time";
 import type { CadenceActions } from "../state/useCadence";
 import { ink, line, paper, paper2, S } from "../styles";
 import { useNow } from "../state/useNow";
+import { useI18n } from "../i18n/I18nProvider";
 import Block from "./Block";
 
 const SLOTS: number[] = [];
@@ -65,6 +66,7 @@ export default function WeekGrid({
   slotMark,
 }: Props) {
   const { engine, state } = interaction;
+  const { m, lang } = useI18n();
   const cols = phone ? "52px 1fr" : `64px repeat(${days.length}, 1fr)`;
   const colHeight = SLOTS.length * rowH;
 
@@ -159,7 +161,7 @@ export default function WeekGrid({
           <div style={S.corner} />
           {days.map((d) => (
             <div key={d} style={S.dayHead}>
-              {DAYS[d]}
+              {m.lib.days[d]}
             </div>
           ))}
         </div>
@@ -173,12 +175,12 @@ export default function WeekGrid({
         <div style={S.timeColWrap}>
           {SLOTS.map((t) => (
             <div key={t} style={{ ...S.timeLabel, height: rowH, opacity: t % 60 === 0 ? 1 : 0 }}>
-              {t % 60 === 0 ? fmtTime(t) : ""}
+              {t % 60 === 0 ? fmtTime(t, lang) : ""}
             </div>
           ))}
           {lineTop !== null && today !== null && (
             <div style={{ ...S.nowClock, top: lineTop }} aria-hidden="true">
-              {fmtClock(point)}
+              {fmtClock(point, lang)}
             </div>
           )}
         </div>
@@ -234,9 +236,10 @@ export default function WeekGrid({
 
 // phone: Mon-Sun strip in place of the head row; a dot marks days with blocks this week
 function DayStrip({ day, setDay, hasBlocks }: { day: number; setDay: (d: number) => void; hasBlocks: boolean[] }) {
+  const { m } = useI18n();
   return (
     <div style={S.dayStrip}>
-      {DAYS.map((name, i) => {
+      {m.lib.days.map((name, i) => {
         const on = i === day;
         return (
           <button

@@ -1,6 +1,7 @@
 import { statusBadge } from "../lib/syncUi";
 import type { SyncStatus } from "../sync/engine";
 import { S } from "../styles";
+import { useI18n } from "../i18n/I18nProvider";
 
 // S1.4: no Tasks view any more, tasks live in the areas-and-tasks panel beside the grid
 export type View = "calendar" | "stats" | "categories" | "settings";
@@ -19,12 +20,13 @@ export default function Header({
   /** S1.11: the signed-in email bought the early-bird offer */
   earlyBird?: boolean;
 }) {
-  const badge = syncStatus ? statusBadge(syncStatus) : null;
+  const { m } = useI18n();
+  const badge = syncStatus ? statusBadge(syncStatus, m.lib) : null;
   const nav = (
     <nav style={S.nav}>
       {VIEWS.map((v) => (
         <button key={v} onClick={() => setView(v)} style={{ ...S.navBtn, ...(view === v ? S.navBtnActive : {}) }}>
-          {v}
+          {m.header.nav[v]}
         </button>
       ))}
     </nav>
@@ -34,9 +36,9 @@ export default function Header({
       <div>
         <h1 style={S.logo}>
           Cadence
-          {earlyBird && <span style={S.earlyBadge}>Early bird</span>}
+          {earlyBird && <span style={S.earlyBadge}>{m.header.earlyBird}</span>}
         </h1>
-        <p style={S.tagline}>Balance the week before the week balances you.</p>
+        <p style={S.tagline}>{m.header.tagline}</p>
       </div>
       {badge ? (
         <div style={S.navStack}>

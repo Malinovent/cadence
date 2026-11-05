@@ -1,5 +1,4 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { DAYS } from "../lib/constants";
 import type { Block, Category } from "../lib/model";
 import {
   menuPosition,
@@ -10,9 +9,10 @@ import {
   type SlotLength,
   type SlotTap,
 } from "../lib/slotMenu";
-import { fmtTime } from "../lib/time";
+import { fmtDur, fmtTime } from "../lib/time";
 import { BUFFER_COLOR } from "../lib/constants";
 import { S } from "../styles";
+import { useI18n } from "../i18n/I18nProvider";
 
 type Props = {
   tap: SlotTap;
@@ -23,8 +23,7 @@ type Props = {
   onClose: () => void;
 };
 
-const lengthLabel = (m: SlotLength) =>
-  m === null ? "Usual" : m < 60 ? `${m} min` : m % 60 ? `${Math.floor(m / 60)} h ${m % 60}` : `${m / 60} h`;
+const lengthLabel = (m: SlotLength, usual: string, lang: "en" | "fr") => (m === null ? usual : fmtDur(m, lang));
 
 /**
  * S1.6: tap or click empty time. Desktop: a small window beside the slot; phone: a bottom sheet.
@@ -33,6 +32,7 @@ const lengthLabel = (m: SlotLength) =>
  * closes with nothing changed.
  */
 export default function SlotMenu({ tap, blocks, cats, phone, onPick, onClose }: Props) {
+  const { m, lang } = useI18n();
   const [length, setLength] = useState<SlotLength>(null);
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
@@ -76,34 +76,34 @@ export default function SlotMenu({ tap, blocks, cats, phone, onPick, onClose }: 
     <div
       ref={ref}
       role="dialog"
-      aria-label={`Add at ${DAYS[tap.day]} ${fmtTime(tap.start)}`}
+      aria-label={m.slot.addAt(m.lib.days[tap.day], fmtTime(tap.start, lang))}
       style={
         phone ? S.slotSheet : { ...S.slotMenu, ...(pos ?? { left: tap.x + 12, top: tap.y, visibility: "hidden" }) }
       }
     >
       <div style={S.slotHead}>
         <span style={{ flex: 1 }}>
-          Add at {DAYS[tap.day]} {fmtTime(tap.start)}
+          {m.slot.addAt(m.lib.days[tap.day], fmtTime(tap.start, lang))}
         </span>
-        <button type="button" className="cadence-hit44" onClick={onClose} aria-label="Close" style={S.catDel}>
+        <button type="button" className="cadence-hit44" onClick={onClose} aria-label={m.slot.close} style={S.catDel}>
           ✕
         </button>
       </div>
-      <div style={S.slotLengths} role="group" aria-label="Length">
-        {[null, ...SLOT_LENGTHS].map((m) => (
+      <div style={S.slotLengths} role="group" aria-label={m.slot.length}>
+        {[null, ...SLOT_LENGTHS].map((len) => (
           <button
-            key={String(m)}
+            key={String(len)}
             type="button"
-            aria-pressed={length === m}
-            onClick={() => setLength(m)}
-            style={{ ...S.kindBtn, ...S.slotLength, ...(length === m ? S.kindBtnActive : {}) }}
+            aria-pressed={length === len}
+            onClick={() => setLength(len)}
+            style={{ ...S.kindBtn, ...S.slotLength, ...(length === len ? S.kindBtnActive : {}) }}
           >
-            {lengthLabel(m)}
+            {lengthLabel(len, m.slot.usual, lang)}
           </button>
         ))}
       </div>
       <div style={S.slotOptions}>
-        {slotOptions(cats).map((o) => {
+        {slotOptions(cats, m.lib).map((o) => {
           const fit = pickPlacement(blocks, cats, tap, o.id, length);
           const color = o.color ?? BUFFER_COLOR;
           return (
@@ -123,7 +123,7 @@ export default function SlotMenu({ tap, blocks, cats, phone, onPick, onClose }: 
             >
               <span style={S.trayName}>{o.name}</span>
               <span style={{ ...S.trayMins, color }}>
-                {fit ? `${fmtTime(fit.start)}–${fmtTime(fit.start + fit.mins)}` : "no room"}
+                {fit ? `${fmtTime(fit.start, lang)}–${fmtTime(fit.start + fit.mins, lang)}` : m.slot.noRoom}
               </span>
             </button>
           );

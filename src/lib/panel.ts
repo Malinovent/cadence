@@ -1,10 +1,10 @@
+import { LIB_EN, type LibWords } from "./words";
 // S1.4: one panel for areas and tasks. What the panel lists, in order, without any DOM.
 import { BUFFER_COLOR, BUFFER_ID, BUFFER_MINS } from "./constants";
 import type { WeekIndex } from "./actions";
 import { limitLabel, type Balance } from "./guardrail";
 import type { CadenceData, Task } from "./model";
 import { weekBalance } from "./stats";
-import { DAY_SHORT } from "./tasks";
 import { fmtTime } from "./time";
 
 /** One draggable row: an area with this week's balance, or the buffer (no area, no balance). */
@@ -18,18 +18,18 @@ export type PanelArea = {
 };
 
 /** Areas in their own order, then the buffer last. */
-export function panelAreas(data: CadenceData, week: WeekIndex): PanelArea[] {
-  const rows: PanelArea[] = weekBalance(data, week).map(({ cat, balance }) => ({
+export function panelAreas(data: CadenceData, week: WeekIndex, w: LibWords = LIB_EN): PanelArea[] {
+  const rows: PanelArea[] = weekBalance(data, week, w).map(({ cat, balance }) => ({
     id: cat.id,
-    name: cat.name || "Untitled",
+    name: cat.name || w.panel.untitled,
     color: cat.color,
     mins: cat.blockMins,
     balance,
-    limitText: limitLabel(cat.limit),
+    limitText: limitLabel(cat.limit, w),
   }));
   rows.push({
     id: BUFFER_ID,
-    name: "Buffer",
+    name: w.panel.buffer,
     color: BUFFER_COLOR,
     mins: BUFFER_MINS,
     balance: null,
@@ -39,8 +39,8 @@ export function panelAreas(data: CadenceData, week: WeekIndex): PanelArea[] {
 }
 
 /** The calm notes under the areas ("Rest is 3 h short of its floor"), only the ones that apply. */
-export const panelNotes = (data: CadenceData, week: WeekIndex): string[] =>
-  weekBalance(data, week)
+export const panelNotes = (data: CadenceData, week: WeekIndex, w: LibWords = LIB_EN): string[] =>
+  weekBalance(data, week, w)
     .map((r) => r.note)
     .filter((n): n is string => !!n);
 
@@ -50,13 +50,13 @@ export const openCount = (tasks: readonly Task[]): number => tasks.filter((t) =>
 // ---------------------------------------------------------------- S1.5 tasks in the panel
 
 /** Under a task's name: where it is ("Tue 9am", "next week · Thu 2pm"), or "back from Tue". */
-export function taskNote(task: Task, weeks: CadenceData["weeks"]): string {
-  const w = task.blockId === undefined ? -1 : weeks.findIndex((list) => list.some((b) => b.id === task.blockId));
-  if (w >= 0) {
-    const b = weeks[w].find((x) => x.id === task.blockId)!;
-    return `${w === 1 ? "next week · " : ""}${DAY_SHORT[b.day]} ${fmtTime(b.start)}`;
+export function taskNote(task: Task, weeks: CadenceData["weeks"], w: LibWords = LIB_EN): string {
+  const wk = task.blockId === undefined ? -1 : weeks.findIndex((list) => list.some((b) => b.id === task.blockId));
+  if (wk >= 0) {
+    const b = weeks[wk].find((x) => x.id === task.blockId)!;
+    return `${wk === 1 ? `${w.panel.nextWeek} · ` : ""}${w.days[b.day]} ${fmtTime(b.start, w.lang)}`;
   }
-  return task.returnedFrom !== undefined ? `back from ${DAY_SHORT[task.returnedFrom]}` : "";
+  return task.returnedFrom !== undefined ? w.panel.backFrom(w.days[task.returnedFrom]) : "";
 }
 
 /**

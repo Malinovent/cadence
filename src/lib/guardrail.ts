@@ -1,3 +1,4 @@
+import { LIB_EN, type LibWords } from "./words";
 // Guardrail quotas (sprint 1, S1.2): each area has a floor, a ceiling or a range of weekly time.
 // The balance counts PLANNED minutes in the week (a block tagged with several areas counts fully
 // to each), as the old targets did. Shortfalls are described, never judged, and never carried over.
@@ -106,28 +107,29 @@ export function balance(limit: Limit, plannedMins: number): Balance {
 export const fmtH = (m: number): string => String(Math.round((m / 60) * 100) / 100);
 
 /** "Floor 10 h", "Ceiling 40 h", "Range 4–8 h" */
-export function limitLabel(l: Limit): string {
-  if (l.kind === "floor") return `Floor ${fmtH(l.min)} h`;
-  if (l.kind === "ceiling") return `Ceiling ${fmtH(l.max)} h`;
-  return `Range ${fmtH(l.min)}–${fmtH(l.max)} h`;
+export function limitLabel(l: Limit, w: LibWords = LIB_EN): string {
+  if (l.kind === "floor") return w.limit.floor(fmtH(l.min));
+  if (l.kind === "ceiling") return w.limit.ceiling(fmtH(l.max));
+  return w.limit.range(fmtH(l.min), fmtH(l.max));
 }
 
 /** Partial credit, always shown: "7 of 10 h", "38 of 40 h max", "6 h, in range", "3 of 4–8 h". */
-export function balanceLabel(b: Balance): string {
+export function balanceLabel(b: Balance, w: LibWords = LIB_EN): string {
   const p = fmtH(b.plannedMins);
   const l = b.limit;
-  if (l.kind === "floor") return `${p} of ${fmtH(l.min)} h`;
-  if (l.kind === "ceiling") return `${p} of ${fmtH(l.max)} h max`;
-  if (b.state === "inRange") return `${p} h, in range`;
-  if (b.state === "short") return `${p} of ${fmtH(l.min)}–${fmtH(l.max)} h`;
-  return `${p} h, past ${fmtH(l.max)} h`;
+  if (l.kind === "floor") return w.balance.floor(p, fmtH(l.min));
+  if (l.kind === "ceiling") return w.balance.ceiling(p, fmtH(l.max));
+  if (b.state === "inRange") return w.balance.inRange(p);
+  if (b.state === "short") return w.balance.rangeShort(p, fmtH(l.min), fmtH(l.max));
+  return w.balance.rangeOver(p, fmtH(l.max));
 }
 
 /** A calm sentence when something is off this week, or null. Never "missed", never red. */
-export function balanceNote(name: string, b: Balance): string | null {
-  const who = name.trim() || "This area";
-  if (b.state === "short") return `${who} is lighter than your ${b.limit.kind === "range" ? "range" : "floor"} this week.`;
-  if (b.state === "over") return `${who} is ${fmtH(b.overMins)} h past your ${b.limit.kind === "range" ? "range" : "ceiling"} this week.`;
+export function balanceNote(name: string, b: Balance, w: LibWords = LIB_EN): string | null {
+  const who = name.trim() || w.note.thisArea;
+  const range = b.limit.kind === "range";
+  if (b.state === "short") return w.note.short(who, range);
+  if (b.state === "over") return w.note.over(who, fmtH(b.overMins), range);
   return null;
 }
 

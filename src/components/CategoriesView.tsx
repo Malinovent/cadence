@@ -3,17 +3,14 @@ import type { Category } from "../lib/model";
 import { hoursToBlockMins, hoursToTargetMins } from "../lib/stats";
 import type { CadenceActions } from "../state/useCadence";
 import { S } from "../styles";
+import { useI18n } from "../i18n/I18nProvider";
 
 type Props = {
   cats: Category[];
   actions: Pick<CadenceActions, "updateCat" | "addCat" | "removeCat">;
 };
 
-const KINDS: { kind: LimitKind; label: string; hint: string }[] = [
-  { kind: "floor", label: "Floor", hint: "A floor protects at least this much time each week." },
-  { kind: "ceiling", label: "Ceiling", hint: "A ceiling keeps this to at most this much each week." },
-  { kind: "range", label: "Range", hint: "A range counts fully anywhere in between." },
-];
+const KINDS: LimitKind[] = ["floor", "ceiling", "range"];
 
 function HoursInput({ label, mins, onChange }: { label: string; mins: number; onChange: (mins: number) => void }) {
   return (
@@ -32,20 +29,21 @@ function HoursInput({ label, mins, onChange }: { label: string; mins: number; on
 }
 
 function GuardrailField({ cat, onChange }: { cat: Category; onChange: (limit: Limit) => void }) {
+  const { m } = useI18n();
   const l = cat.limit;
-  const hint = KINDS.find((k) => k.kind === l.kind)!.hint;
+  const hint = m.categories.kinds[l.kind].hint;
   return (
     <div style={S.catGuard}>
-      <div style={S.kindGroup} role="group" aria-label={`${cat.name || "Area"} guardrail`}>
+      <div style={S.kindGroup} role="group" aria-label={m.categories.guardrail(cat.name || m.categories.area)}>
         {KINDS.map((k) => (
           <button
-            key={k.kind}
+            key={k}
             type="button"
-            aria-pressed={l.kind === k.kind}
-            onClick={() => onChange(changeKind(l, k.kind, cat.blockMins))}
-            style={{ ...S.kindBtn, ...(l.kind === k.kind ? S.kindBtnActive : {}) }}
+            aria-pressed={l.kind === k}
+            onClick={() => onChange(changeKind(l, k, cat.blockMins))}
+            style={{ ...S.kindBtn, ...(l.kind === k ? S.kindBtnActive : {}) }}
           >
-            {k.label}
+            {m.categories.kinds[k].label}
           </button>
         ))}
       </div>
@@ -55,25 +53,24 @@ function GuardrailField({ cat, onChange }: { cat: Category; onChange: (limit: Li
 }
 
 function LimitHours({ limit: l, onChange }: { limit: Limit; onChange: (limit: Limit) => void }) {
-  if (l.kind === "floor") return <HoursInput label="At least (h/week)" mins={l.min} onChange={(min) => onChange({ ...l, min })} />;
-  if (l.kind === "ceiling") return <HoursInput label="At most (h/week)" mins={l.max} onChange={(max) => onChange({ ...l, max })} />;
+  const { m } = useI18n();
+  if (l.kind === "floor") return <HoursInput label={m.categories.atLeast} mins={l.min} onChange={(min) => onChange({ ...l, min })} />;
+  if (l.kind === "ceiling") return <HoursInput label={m.categories.atMost} mins={l.max} onChange={(max) => onChange({ ...l, max })} />;
   // keep the range the right way round as either end moves
   return (
     <>
-      <HoursInput label="From (h/week)" mins={l.min} onChange={(min) => onChange({ ...l, min, max: Math.max(min, l.max) })} />
-      <HoursInput label="To (h/week)" mins={l.max} onChange={(max) => onChange({ ...l, max, min: Math.min(max, l.min) })} />
+      <HoursInput label={m.categories.from} mins={l.min} onChange={(min) => onChange({ ...l, min, max: Math.max(min, l.max) })} />
+      <HoursInput label={m.categories.to} mins={l.max} onChange={(max) => onChange({ ...l, max, min: Math.min(max, l.min) })} />
     </>
   );
 }
 
 export default function CategoriesView({ cats, actions }: Props) {
+  const { m } = useI18n();
   return (
     <div style={S.catBody}>
-      <h2 style={S.statsTitle}>Define your blocks</h2>
-      <p style={S.catIntro}>
-        For each area, set a floor, a ceiling or a range of hours per week, the default block length you drag in, and a
-        color. Each week starts fresh.
-      </p>
+      <h2 style={S.statsTitle}>{m.categories.title}</h2>
+      <p style={S.catIntro}>{m.categories.intro}</p>
       <div style={S.catList}>
         {cats.map((c) => {
           const setLimit = (limit: Limit) => actions.updateCat(c.id, { limit });
@@ -83,7 +80,7 @@ export default function CategoriesView({ cats, actions }: Props) {
               <GuardrailField cat={c} onChange={setLimit} />
               <LimitHours limit={c.limit} onChange={setLimit} />
               <label style={S.catField}>
-                <span>Block (hrs)</span>
+                <span>{m.categories.block}</span>
                 <input
                   type="number"
                   min="0.5"
@@ -99,15 +96,15 @@ export default function CategoriesView({ cats, actions }: Props) {
                 onChange={(e) => actions.updateCat(c.id, { color: e.target.value })}
                 style={S.catColor}
               />
-              <button onClick={() => actions.removeCat(c.id)} style={S.catDel}>
+              <button onClick={() => actions.removeCat(c.id)} style={S.catDel} aria-label={m.categories.remove(c.name)}>
                 ✕
               </button>
             </div>
           );
         })}
       </div>
-      <button onClick={() => actions.addCat()} style={S.catAdd}>
-        ＋ Add category
+      <button onClick={() => actions.addCat(undefined, m.categories.newName)} style={S.catAdd}>
+        {m.categories.add}
       </button>
     </div>
   );

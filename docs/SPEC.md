@@ -279,6 +279,19 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 - Templates section below the grid: "Starter weeks" beside the person's own templates, each row with the name, a one-line description, "Adds Rest and People to your areas." when it would, and "apply" (to the week shown). The person's list now reads "No templates of your own yet." when empty.
 - Welcome back (S1.7) offers them too ("or a starter:" after the person's templates, "Starter weeks:" when there are none), so it can always show.
 
+### S1.9 French and English
+- Every string the app shows lives in `src/i18n/en.ts` and `src/i18n/fr.ts` (Canadian French: « courriel », « fin de semaine », 24-hour times, decimal comma), same shape, checked by the types and a test (same keys, no empty strings, French never just the English). Wording made by `src/lib` lives in `src/lib/words.ts` (English) and `src/lib/words.fr.ts`; each lib function takes the words as an argument, English by default, so the logic stays pure and the tests read English. Components read `useI18n()` (`src/i18n/I18nProvider.tsx`): `m` (the catalogue), `lang`, `locale` ("fr-CA" / "en-CA").
+- Language: the device's (`navigator.languages`: the first French or English one; anything else → English), unless chosen in Settings → Language ("Device language", "Français", "English"), saved per device in `cadence:ui:lang` (never synced). `<html lang>` and the tab title follow it.
+- Formats: times "9 h", "13 h 30" in French, "9am" in English; lengths "2 h 30" / "2h30"; hours with a decimal comma in French ("2,5 h"); dates through `toLocaleDateString(locale)`; short day names "lun." … "dim.".
+- Data stays as the person wrote it: area, task and template names aren't translated. A new person's default areas are named in their language (Exercice, Travail, Apprentissage, Loisirs; same ids), and untouched defaults in either language still count as "nothing worth keeping" for the first sign-in. Starter weeks match areas by their English or French name and add missing ones in the person's language. Import errors from the lib are shown translated.
+- JP reviews the French.
+
+### S1.10 Neutral stats
+- Stats gets "Last week": one sentence per area about last calendar week's ticked time against its guardrail, describing, never judging (`describeLastWeek`, `src/lib/describe.ts`): "Rest was lighter than your floor (5 of 8 h).", "Work stayed under your ceiling (32 of 40 h).", "No Rest blocks were ticked." A test checks no sentence uses "miss", "fail", "only", "behind", "should", "broke" or "bad". The other calm wording (balance notes, balanced weeks, grace squares) already described.
+
+### S1.11 Early-bird badge
+- When signed in, the app reads `early_bird` for the account's email (lower-cased) from `entitlements` (read-own RLS, set by the pre-sale webhook). If true: a small "Early bird" pill by the logo (`S.earlyBadge`) and a thank-you in Settings ("Thank you for believing in Cadence early…"). No feature gating. The answer is remembered per device for that email (`cadence:ui:earlyBird`), so it shows offline and doesn't flicker; a fresh answer from the server wins; an error (offline, no table yet) keeps what was known.
+
 ## Phases
 1. Port + export/import + unit tests (this file's sections above).
 2. PWA + deploy: manifest, icons (incl. 180×180 apple-touch-icon, replace the emoji favicon), iOS meta tags, `viewport-fit=cover` + safe-area padding, service worker app-shell cache, self-hosted fonts, GitHub Pages workflow.

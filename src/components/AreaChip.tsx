@@ -4,6 +4,7 @@ import { withAlpha } from "../lib/gesture";
 import type { PanelArea } from "../lib/panel";
 import { fmtDur } from "../lib/time";
 import { S } from "../styles";
+import { useI18n } from "../i18n/I18nProvider";
 
 // hover / press / hold-progress colours for the tray item CSS (styles.ts FONT_IMPORT)
 const trayVars = (color: string) =>
@@ -23,6 +24,7 @@ type Props = {
 /** The drag handle for an area (or the buffer): drag it into the grid, or tap it then tap a slot. */
 export default function AreaChip({ area: a, interaction, armed, onArm }: Props) {
   const { engine, state } = interaction;
+  const { lang } = useI18n();
   const press = state.press;
   const pressed = press?.source.kind === "tray" && press.source.catId === a.id;
   return (
@@ -47,7 +49,7 @@ export default function AreaChip({ area: a, interaction, armed, onArm }: Props) 
     >
       <span className="cadence-hold-fill" aria-hidden="true" />
       <span style={S.trayName}>{a.name}</span>
-      <span style={{ ...S.trayMins, color: armed ? "#fff" : a.color }}>{fmtDur(a.mins)}</span>
+      <span style={{ ...S.trayMins, color: armed ? "#fff" : a.color }}>{fmtDur(a.mins, lang)}</span>
     </div>
   );
 }

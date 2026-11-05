@@ -5,6 +5,7 @@ import { applyStarter } from "../lib/starters";
 import type { SyncMeta } from "../lib/meta";
 import type { CadenceData } from "../lib/model";
 import { createCadenceStore, type CadenceStore } from "./store";
+import { startLang } from "../i18n/lang";
 
 // wrap a pure action as a user edit: (data, ...args) -> (...args). The store applies it
 // synchronously and bumps meta.updatedAt once (no React updater, so StrictMode can't double it).
@@ -48,7 +49,7 @@ export type CadenceActions = ReturnType<typeof makeActions>;
 
 // data + per-key persistence (in the store) + bound user actions; `store` is for useSync
 export function useCadence(): { data: CadenceData; meta: SyncMeta; actions: CadenceActions; store: CadenceStore } {
-  const [store] = useState(() => createCadenceStore());
+  const [store] = useState(() => createCadenceStore({ lang: startLang() }));
   const snap = useSyncExternalStore(store.subscribe, store.getSnapshot);
   const actions = useMemo(() => makeActions(store), [store]);
   return { data: snap.data, meta: snap.meta, actions, store };

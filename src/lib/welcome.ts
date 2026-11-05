@@ -1,3 +1,5 @@
+import { LIB_EN, type LibWords } from "./words";
+
 // S1.7 Welcome back: after 7+ days without an edit, offer to start this week fresh from a
 // template. One tap builds the week; "Not now" leaves everything as it was.
 //
@@ -19,7 +21,5 @@ export const shouldWelcome = ({ lastEdit, now, dismissedFor, templates }: Welcom
   lastEdit > 0 && now - lastEdit >= WELCOME_DAYS * DAY_MS && dismissedFor !== lastEdit && templates > 0;
 
 /** Honest about what a tap replaces: "It replaces the 4 blocks in Week 1." (nothing when it's empty) */
-export const replaceNote = (blocksInWeek1: number): string | null =>
-  blocksInWeek1 === 0
-    ? null
-    : `It replaces the ${blocksInWeek1 === 1 ? "block" : `${blocksInWeek1} blocks`} in Week 1.`;
+export const replaceNote = (blocksInWeek1: number, w: LibWords = LIB_EN): string | null =>
+  blocksInWeek1 === 0 ? null : w.welcome.replaces(blocksInWeek1);

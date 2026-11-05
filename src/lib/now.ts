@@ -4,6 +4,7 @@ import type { WeekIndex } from "./actions";
 import { DAY_END, DAY_START, STEP } from "./constants";
 import type { Block } from "./model";
 import { fmtTime } from "./time";
+import { LIB_EN, type Lang, type LibWords } from "./words";
 
 export type NowPoint = { day: number; mins: number }; // day: Mon = 0; mins from 00:00
 
@@ -21,12 +22,7 @@ export const minutesLeft = (b: Pick<Block, "start" | "mins">, p: NowPoint): numb
   Math.max(1, Math.ceil(b.start + b.mins - p.mins));
 
 /** "38 min left", "1 h left", "1 h 20 left". */
-export const fmtLeft = (mins: number): string => {
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  if (!h) return `${m} min left`;
-  return m ? `${h} h ${String(m).padStart(2, "0")} left` : `${h} h left`;
-};
+export const fmtLeft = (mins: number, w: LibWords = LIB_EN): string => w.now.left(Math.floor(mins / 60), mins % 60);
 
 /** px from the top of the day column for the current-time line, or null outside the grid's hours or on week 2. */
 export const nowLineTop = (week: WeekIndex, p: NowPoint, rowH: number): number | null => {
@@ -35,7 +31,7 @@ export const nowLineTop = (week: WeekIndex, p: NowPoint, rowH: number): number |
 };
 
 /** "10:22am" for the label beside the current-time line, in the grid's own time format (S1.9 makes it local). */
-export const fmtClock = (p: NowPoint): string => fmtTime(Math.floor(p.mins));
+export const fmtClock = (p: NowPoint, lang: Lang = "en"): string => fmtTime(Math.floor(p.mins), lang);
 
 /** ms until the next whole minute, so a clock ticking once a minute stays on the minute. */
 export const msToNextMinute = (now: Date): number => 60_000 - (now.getSeconds() * 1000 + now.getMilliseconds());

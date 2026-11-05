@@ -1,4 +1,4 @@
-import { DAY_END, DAY_START, DEFAULT_CATEGORIES, STEP } from "./constants";
+import { DAY_END, DAY_START, defaultCategories, STEP } from "./constants";
 import { floorFromTarget, legacyTarget, parseLimit, type Limit } from "./guardrail";
 import { uid } from "./uid";
 
@@ -56,9 +56,10 @@ const isRec = (v: unknown): v is Rec => typeof v === "object" && v !== null && !
 const isNum = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
 const arr = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
 
-export const defaultData = (): CadenceData => ({
+// `lang` only names the default areas of a new person (S1.9)
+export const defaultData = (lang: "en" | "fr" = "en"): CadenceData => ({
   schemaVersion: 2,
-  cats: DEFAULT_CATEGORIES.map((c) => ({ ...c })),
+  cats: defaultCategories(lang),
   weeks: [[], []],
   templates: [],
   history: [],
@@ -90,7 +91,7 @@ export const migrateTemplates = (templates: unknown): (Rec & { blocks: Migrated[
 // ---- normalize: tolerant cleanup used by storage load and import ----
 // Fills defaults for missing pieces, migrates, and drops anything malformed.
 // `dropped` counts discarded items (and catIds stripped from surviving blocks).
-export const normalizeData = (partial: unknown): { data: CadenceData; dropped: number } => {
+export const normalizeData = (partial: unknown, lang: "en" | "fr" = "en"): { data: CadenceData; dropped: number } => {
   const raw: Rec = isRec(partial) ? partial : {};
   let dropped = 0;
   // a present-but-wrong-typed piece counts as one drop
@@ -126,7 +127,7 @@ export const normalizeData = (partial: unknown): { data: CadenceData; dropped: n
       });
     }
   } else {
-    cats = defaultData().cats;
+    cats = defaultData(lang).cats;
   }
   const catSet = new Set(cats.map((c) => c.id));
 

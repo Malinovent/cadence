@@ -9,6 +9,7 @@ import type { CadenceActions } from "../state/useCadence";
 import { BUFFER_COLOR } from "../lib/constants";
 import { ink, nowRing, S } from "../styles";
 import BlockEditor from "./BlockEditor";
+import { useI18n } from "../i18n/I18nProvider";
 
 export type ResizeEdge = "top" | "bottom";
 
@@ -69,6 +70,7 @@ export default function Block({
   todos,
   onToggleTask,
 }: Props) {
+  const { m, lang } = useI18n();
   const cats = p.catIds.map((id) => allCats.find((c) => c.id === id)).filter((c): c is Category => !!c);
   const buffer = p.buffer === true; // S1.2: unassigned time, grey dashed, no tick
   const colors = buffer ? [BUFFER_COLOR] : cats.length ? cats.map((c) => c.color) : ["#999"];
@@ -186,9 +188,7 @@ export default function Block({
         onClick={() => onTap(p)}
         onContextMenu={(e) => onContextMenu(e, p)}
         title={
-          buffer
-            ? "Buffer time · drag an area onto me to fill it · right-click to delete"
-            : "Click to edit · drag a category onto me to add a type · right-click to delete"
+          buffer ? m.block.bufferTitle : m.block.title
         }
         style={{
           ...S.placedBlock,
@@ -211,8 +211,8 @@ export default function Block({
         {!isEditing && edgeHandle("top")}
         {minsLeft !== null && nowRoom && (
           <div style={S.nowBadge}>
-            <span style={S.nowTag}>Now</span>
-            {fmtLeft(minsLeft)}
+            <span style={S.nowTag}>{m.block.now}</span>
+            {fmtLeft(minsLeft, m.lib)}
           </div>
         )}
         <div style={S.placedTop}>
@@ -225,22 +225,22 @@ export default function Block({
               </span>
             )}
             {buffer ? (
-              <span style={{ ...S.placedName, ...S.bufferName }}>Buffer</span>
+              <span style={{ ...S.placedName, ...S.bufferName }}>{m.lib.panel.buffer}</span>
             ) : (
               <span style={S.placedName}>{cats.map((c) => c.name).join(" + ") || "?"}</span>
             )}
           </span>
           <div style={S.placedTopRight}>
             <span style={{ ...S.placedDur, color: isNow ? ink : baseColor }}>
-              {minsLeft !== null && !nowRoom ? `Now · ${fmtLeft(minsLeft)}` : fmtDur(p.mins)}
+              {minsLeft !== null && !nowRoom ? `${m.block.now} · ${fmtLeft(minsLeft, m.lib)}` : fmtDur(p.mins, lang)}
             </span>
             {!buffer && (
               <button
                 type="button"
                 className="cadence-tick cadence-hit44"
                 aria-pressed={done}
-                aria-label={done ? "Mark not done" : "Mark done"}
-                title={done ? "Done · click to undo" : "Mark done"}
+                aria-label={done ? m.block.markOpen : m.block.markDone}
+                title={done ? m.block.doneTitle : m.block.markDone}
                 // a tap on the tick never picks the block up or starts a resize
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
@@ -276,14 +276,14 @@ export default function Block({
             {p.label && <div style={S.placedLabel}>{p.label}</div>}
             {todos.length > 0 && (
               // S1.5: the block's tasks as checkboxes; they come first, the description and time make way
-              <ul style={S.blockTodos} aria-label="Tasks in this block">
+              <ul style={S.blockTodos} aria-label={m.block.todos}>
                 {todos.map((t) => (
                   <li key={t.id} style={S.blockTodo}>
                     <button
                       type="button"
                       className="cadence-hit44"
                       aria-pressed={t.done}
-                      aria-label={t.done ? `Mark "${t.name}" not done` : `Mark "${t.name}" done`}
+                      aria-label={t.done ? m.tasks.markOpen(t.name) : m.tasks.markDone(t.name)}
                       onPointerDown={(e) => e.stopPropagation()}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -305,7 +305,7 @@ export default function Block({
             )}
             {showTime && todos.length === 0 && (
               <div style={{ ...S.placedTime, opacity: 0.65 }}>
-                {fmtTime(p.start)}–{fmtTime(p.start + p.mins)}
+                {fmtTime(p.start, lang)}–{fmtTime(p.start + p.mins, lang)}
               </div>
             )}
           </>
