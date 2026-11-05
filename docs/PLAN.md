@@ -132,9 +132,9 @@ Round tick on every block (bigger on touch), done = area tint, Now ring + minute
 ### [~] S1.2 Guardrail quotas (floor / ceiling / range; quotas migrate to floors) — Careful
 Done on branch `s1-guardrails`: `limit` on categories with lossless migration and a pre-migration copy (Settings download), balance maths + wording (tested), sidebar balance, guardrail picker. Real backup checked. Shipped to main 2026-11-04. Buffer block done on branch `s1-buffer` (tray item, no area, fills when an area is dropped on it, kept by templates). Buffer shipped to main 2026-11-04.
 ### [~] S1.3 Balanced weeks instead of daily streaks — Medium
-Done on branch `s1-balanced-weeks`: judged from ticked history by calendar week, all balanced weeks this season (JP's choices), grace squares, rules in Settings (device-local), card in sidebar and Stats. Left: JP's OK, ship.
+Done on branch `s1-balanced-weeks`: judged from ticked history by calendar week, all balanced weeks this season (JP's choices), grace squares, rules in Settings (device-local), card in sidebar and Stats. Shipped to main 2026-11-04.
 ### [~] S1.4 One panel for areas and tasks (desktop panel, phone tray with tabs)
-Done on branch `s1-panel`: desktop left panel (area drag handles with balance bars, buffer, notes, tasks; hideable), week bar above the grid, templates and roll forward below it, phone tray docked at the bottom with Areas/Tasks tabs and a slim folded bar (device-local). Tasks view folded into the panel. Per-area task folds come with S1.5. Left: JP's OK, ship.
+Done on branch `s1-panel`: desktop left panel (area drag handles with balance bars, buffer, notes, tasks; hideable), week bar above the grid, templates and roll forward below it, phone tray docked at the bottom with Areas/Tasks tabs and a slim folded bar (device-local). Tasks view folded into the panel. Per-area task folds come with S1.5. Shipped to main 2026-11-04.
 ### [ ] S1.5 Tasks under areas (schema v2; migrates the current Tasks tab's area-less tasks)
 ### [ ] S1.6 Click or tap empty time to add (check with JP: tap already places an armed block)
 ### [ ] S1.7 Welcome back
