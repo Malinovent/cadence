@@ -10,7 +10,7 @@ describe("export", () => {
     const env = buildExport(data, new Date("2026-03-04T05:06:07.000Z"));
     expect(env).toEqual({
       app: "cadence",
-      schemaVersion: 1,
+      schemaVersion: 2,
       exportedAt: "2026-03-04T05:06:07.000Z",
       data: { cats: data.cats, weeks: data.weeks, templates: data.templates, history: data.history, streaks: data.streaks, tasks: data.tasks },
     });
@@ -36,8 +36,8 @@ describe("parseImport", () => {
 
   it("round trips tasks through the export", () => {
     const tasks = [
-      { id: "t1", name: "Call mum", done: false, createdAt: 10 },
-      { id: "t2", name: "Buy milk", done: true, createdAt: 20 },
+      { id: "t1", name: "Call mum", catId: "learn", estMins: 45, done: false, order: 0, createdAt: 10 },
+      { id: "t2", name: "Buy milk", catId: null, done: true, doneAt: 30, order: 1, createdAt: 20 },
     ];
     const withTasks = { ...data, tasks };
     const env = buildExport(withTasks);
@@ -63,7 +63,7 @@ describe("parseImport", () => {
   it("accepts cadence:tasks in a flat legacy-key file", () => {
     const tasks = [{ id: "t1", name: "Call mum", done: false, createdAt: 10 }];
     const r = parseImport(JSON.stringify({ ...legacyStorage, "cadence:tasks": JSON.stringify(tasks) }));
-    expect(r.ok && r.data.tasks).toEqual(tasks);
+    expect(r.ok && r.data.tasks).toEqual([{ ...tasks[0], catId: null, order: 0 }]);
     expect(r.ok && r.dropped).toBe(0);
   });
 
@@ -102,7 +102,7 @@ describe("parseImport", () => {
   });
 
   it("rejects a newer schema version", () => {
-    const env = { ...buildExport(data), schemaVersion: 2 };
+    const env = { ...buildExport(data), schemaVersion: 3 };
     expect(parseImport(JSON.stringify(env))).toEqual({ ok: false, error: NEWER_VERSION });
   });
 });

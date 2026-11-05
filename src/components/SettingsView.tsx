@@ -9,6 +9,19 @@ import { clampRules, DEFAULT_RULES, type BalanceRules } from "../lib/balancedWee
 import { readBalanceRules, writeBalanceRules } from "../state/balanceRules";
 import { S } from "../styles";
 
+const BEFORE_UPDATES = [
+  {
+    key: PREMIGRATION_KEYS.guardrails,
+    file: "cadence-backup-before-guardrails.json",
+    line: "A copy of your data from before targets became floors, ceilings and ranges is kept on this device.",
+  },
+  {
+    key: PREMIGRATION_KEYS.tasks,
+    file: "cadence-backup-before-tasks.json",
+    line: "A copy of your data from before tasks moved under areas is kept on this device.",
+  },
+] as const;
+
 type Status =
   | { kind: "idle" }
   | { kind: "pending"; result: Extract<ImportResult, { ok: true }> }
@@ -64,8 +77,12 @@ export default function SettingsView({
   };
 
   const dropped = status.kind === "pending" ? droppedLine(status.result.dropped) : null;
-  // the untouched copy kept before the November update changed targets into guardrails
-  const [beforeUpdate] = useState(() => loadPremigrationCopy(PREMIGRATION_KEYS.guardrails));
+  // untouched copies kept before an update migrated the saved data (S1.2 guardrails, S1.5 tasks)
+  const [copies] = useState(() =>
+    BEFORE_UPDATES.map((c) => ({ ...c, text: loadPremigrationCopy(c.key) })).filter(
+      (c): c is (typeof BEFORE_UPDATES)[number] & { text: string } => c.text !== null,
+    ),
+  );
 
   return (
     <div style={S.catBody}>
@@ -80,17 +97,17 @@ export default function SettingsView({
         </button>
         <input ref={fileRef} type="file" accept=".json,application/json" style={{ display: "none" }} onChange={onFile} />
       </div>
-      {beforeUpdate && (
-        <div style={{ ...note, color: "#7a6e5e", marginTop: 12 }}>
-          A copy of your data from before targets became floors, ceilings and ranges is kept on this device.{" "}
+      {copies.map((c) => (
+        <div key={c.key} style={{ ...note, color: "#7a6e5e", marginTop: 12 }}>
+          {c.line}{" "}
           <button
             style={{ ...S.catDel, fontStyle: "normal", textDecoration: "underline", padding: 0 }}
-            onClick={() => downloadText(beforeUpdate, "cadence-backup-before-guardrails.json")}
+            onClick={() => downloadText(c.text, c.file)}
           >
             Download it
           </button>
         </div>
-      )}
+      ))}
 
       {status.kind === "pending" && (
         <div style={{ ...S.streakCard, textAlign: "left", padding: 14, marginTop: 16 }}>

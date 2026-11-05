@@ -1167,6 +1167,7 @@ export const S = {
     marginTop: 8
   },
   panelTaskRow: {
+    position: "relative",
     display: "flex",
     alignItems: "center",
     gap: 8,
@@ -1309,6 +1310,130 @@ export const S = {
     display: "grid",
     gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
     gap: 10
+  },
+  // ---- S1.5 tasks under areas ----
+  areaTasksHead: {
+    display: "flex",
+    alignItems: "baseline",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 6
+  },
+  areaFold: {
+    padding: "2px 0",
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 10,
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    color: "#7a6e5e"
+  },
+  // tasks against planned time: grey, never red
+  areaTasksLine: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 10,
+    color: "#9a8d7d"
+  },
+  areaTasks: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
+    marginTop: 4
+  },
+  panelTaskScheduled: {
+    opacity: 0.6
+  },
+  panelTaskText: {
+    flex: 1,
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column"
+  },
+  panelTaskNote: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 10,
+    color: "#7a6e5e"
+  },
+  taskDoneToggle: {
+    alignSelf: "flex-start",
+    padding: "2px 0",
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontSize: 12,
+    fontStyle: "italic",
+    color: "#7a6e5e",
+    textDecoration: "underline"
+  },
+  taskMoveSelect: {
+    maxWidth: 96,
+    padding: "3px 4px",
+    border: `1px solid ${line}`,
+    borderRadius: 3,
+    background: "#fff",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 10,
+    color: ink
+  },
+  taskEstSelect: {
+    flexShrink: 0,
+    padding: "6px 4px",
+    border: `1.5px solid ${ink}`,
+    borderRadius: 3,
+    background: "#fff",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 10,
+    color: ink
+  },
+  blockTodos: {
+    listStyle: "none",
+    margin: "3px 0 0",
+    padding: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: 2
+  },
+  blockTodo: {
+    display: "flex",
+    alignItems: "center",
+    gap: 5,
+    minWidth: 0
+  },
+  blockTodoBox: {
+    width: 12,
+    height: 12,
+    flexShrink: 0,
+    padding: 0,
+    border: "1.5px solid",
+    borderRadius: 2,
+    color: "#fff",
+    fontSize: 8,
+    lineHeight: 1,
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  blockTodoName: {
+    fontSize: 11,
+    lineHeight: 1.25,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    color: ink
+  },
+  dockTaskGroups: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 12
+  },
+  dockTaskArea: {
+    display: "flex",
+    alignItems: "center",
+    gap: 6
   },
   // ---- tasks (S1.4: inside the panel) ----
   taskAddRow: {

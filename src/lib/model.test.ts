@@ -18,7 +18,7 @@ const block = (over: Record<string, unknown> = {}) => ({
 describe("defaultData", () => {
   it("returns fresh defaults", () => {
     const d = defaultData();
-    expect(d).toEqual({ schemaVersion: 1, cats: DEFAULT_CATEGORIES, weeks: [[], []], templates: [], history: [], streaks: {}, tasks: [] });
+    expect(d).toEqual({ schemaVersion: 2, cats: DEFAULT_CATEGORIES, weeks: [[], []], templates: [], history: [], streaks: {}, tasks: [] });
     d.cats[0].name = "changed";
     expect(DEFAULT_CATEGORIES[0].name).toBe("Exercise");
   });
@@ -187,7 +187,7 @@ describe("normalizeData", () => {
     expect(dropped).toBe(6);
   });
 
-  it("keeps valid tasks in order, coercing done and createdAt", () => {
+  it("migrates schema 1 tasks to Unsorted, in order, coercing done and createdAt", () => {
     const { data, dropped } = normalizeData({
       tasks: [
         { id: "t1", name: "Call mum", done: true, createdAt: 1700000000000 },
@@ -197,12 +197,13 @@ describe("normalizeData", () => {
         { id: "t5", name: "Bad date", done: 1, createdAt: "soon" },
       ],
     });
+    const v2 = { catId: null };
     expect(data.tasks).toEqual([
-      { id: "t1", name: "Call mum", done: true, createdAt: 1700000000000 },
-      { id: "t2", name: "Buy milk", done: false, createdAt: 5 },
-      { id: "t3", name: "No extras", done: false, createdAt: 0 },
-      { id: "t4", name: "Odd types", done: false, createdAt: 42 },
-      { id: "t5", name: "Bad date", done: false, createdAt: 0 },
+      { id: "t1", name: "Call mum", done: true, createdAt: 1700000000000, ...v2, order: 0 },
+      { id: "t2", name: "Buy milk", done: false, createdAt: 5, ...v2, order: 1 },
+      { id: "t3", name: "No extras", done: false, createdAt: 0, ...v2, order: 2 },
+      { id: "t4", name: "Odd types", done: false, createdAt: 42, ...v2, order: 3 },
+      { id: "t5", name: "Bad date", done: false, createdAt: 0, ...v2, order: 4 },
     ]);
     expect(dropped).toBe(0);
   });

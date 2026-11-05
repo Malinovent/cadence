@@ -57,8 +57,8 @@ describe("storage", () => {
 
   it("round trips tasks through cadence:tasks", () => {
     const tasks = [
-      { id: "t1", name: "Call mum", done: false, createdAt: 10 },
-      { id: "t2", name: "Buy milk", done: true, createdAt: 20 },
+      { id: "t1", name: "Call mum", catId: "learn", estMins: 30, done: false, order: 0, createdAt: 10 },
+      { id: "t2", name: "Buy milk", catId: null, done: true, doneAt: 25, order: 1, createdAt: 20 },
     ];
     const s = new FakeStorage();
     saveData({ ...defaultData(), tasks }, s);

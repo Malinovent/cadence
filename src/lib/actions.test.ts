@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   addCat,
   addTag,
-  addTask,
   advanceWeek,
   applyTemplate,
   deleteTemplate,
@@ -11,13 +10,11 @@ import {
   removeBlock,
   removeCat,
   removeTag,
-  removeTask,
   replaceAll,
   resetStats,
   resize,
   saveTemplate,
   toggleDone,
-  toggleTask,
   updateBlock,
   updateCat,
 } from "./actions";
@@ -302,36 +299,6 @@ describe("categories", () => {
     expect(noLearn.weeks[0][1].catIds).toEqual(["exercise"]);
     expect(noLearn.weeks[1]).toBe(d.weeks[1]);
     expect(removeCat(d, "nope")).toBe(d);
-  });
-});
-
-describe("tasks", () => {
-  const task = (id: string, over: Partial<CadenceData["tasks"][number]> = {}) => ({ id, name: id, done: false, createdAt: 1, ...over });
-  const deps = { uid: () => "new", now: () => 1234 };
-
-  it("adds a trimmed task at the end", () => {
-    const d = base({ tasks: [task("t1", { done: true })] });
-    const out = addTask(d, "  Buy milk  ", deps);
-    expect(out.tasks).toEqual([task("t1", { done: true }), { id: "new", name: "Buy milk", done: false, createdAt: 1234 }]);
-    expect(out.weeks).toBe(d.weeks);
-  });
-  it("ignores a blank name", () => {
-    const d = base();
-    expect(addTask(d, "", deps)).toBe(d);
-    expect(addTask(d, "   \t ", deps)).toBe(d);
-  });
-  it("toggles a task in place, leaving the order alone", () => {
-    const d = base({ tasks: [task("t1"), task("t2"), task("t3")] });
-    const out = toggleTask(d, "t2");
-    expect(out.tasks).toEqual([task("t1"), task("t2", { done: true }), task("t3")]);
-    expect(out.tasks[0]).toBe(d.tasks[0]);
-    expect(toggleTask(out, "t2").tasks).toEqual(d.tasks);
-    expect(toggleTask(d, "nope")).toBe(d);
-  });
-  it("removes a task", () => {
-    const d = base({ tasks: [task("t1"), task("t2")] });
-    expect(removeTask(d, "t1").tasks).toEqual([task("t2")]);
-    expect(removeTask(d, "nope")).toBe(d);
   });
 });
 

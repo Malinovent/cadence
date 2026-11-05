@@ -5,7 +5,8 @@ import type { WeekIndex } from "../lib/actions";
 import { BUFFER_ID, DAY_END, DAY_START, DAYS, ROW_H, STEP } from "../lib/constants";
 import { daysWithBlocks, swipeDay } from "../lib/dayview";
 import { blockBox, dropPreview, resolveDrop, slotStartAt } from "../lib/gesture";
-import type { Block as BlockT, Category } from "../lib/model";
+import type { Block as BlockT, Category, Task } from "../lib/model";
+import { blockTasks, singleTaskOf } from "../lib/tasks";
 import { fmtClock, isNowBlock, minutesLeft, nowLineTop, nowPoint } from "../lib/now";
 import { fmtTime } from "../lib/time";
 import type { CadenceActions } from "../state/useCadence";
@@ -22,6 +23,7 @@ type Props = {
   week: WeekIndex;
   blocks: BlockT[];
   cats: Category[];
+  tasks: Task[]; // S1.5: for block to-do lists and task drop previews
   editingId: string | null;
   setEditingId: (id: string | null) => void;
   interaction: Interaction;
@@ -29,7 +31,7 @@ type Props = {
   onPlaced: () => void; // tap-to-place used its one placement
   actions: Pick<
     CadenceActions,
-    "placeBlock" | "moveBlock" | "addTag" | "removeTag" | "updateBlock" | "removeBlock" | "toggleDone"
+    "placeBlock" | "moveBlock" | "addTag" | "removeTag" | "updateBlock" | "removeBlock" | "toggleDone" | "toggleTask"
   >;
   rowH?: number; // px per 30-min row (desktop ROW_H)
   days?: readonly number[]; // day indexes shown as columns, Mon = 0 (desktop: all seven)
@@ -45,6 +47,7 @@ export default function WeekGrid({
   week,
   blocks,
   cats,
+  tasks,
   editingId,
   setEditingId,
   interaction,
@@ -63,10 +66,12 @@ export default function WeekGrid({
   // what the current drag would do: outline the landing spot, or highlight the block to tag
   const drag = state.drag;
   const intent = drag?.hit ? resolveDrop(drag.source, drag.hit) : null;
-  const preview = intent ? dropPreview(blocks, cats, intent) : null;
-  const tagTargetId = intent?.kind === "tag" ? intent.blockId : null;
-  const dragCatId = drag?.source.kind === "tray" ? drag.source.catId : null;
-  const tagColor = cats.find((c) => c.id === dragCatId)?.color ?? null;
+  const preview = intent ? dropPreview(blocks, cats, intent, tasks) : null;
+  const tagTargetId = intent?.kind === "tag" || intent?.kind === "attach" ? intent.blockId : null;
+  // the outline colour on the block a drop would add to: the area dragged, or the dragged task's area
+  const dragTask = drag?.source.kind === "task" ? tasks.find((t) => drag.source.kind === "task" && t.id === drag.source.taskId) : undefined;
+  const dragCatId = drag?.source.kind === "tray" ? drag.source.catId : (dragTask?.catId ?? null);
+  const tagColor = cats.find((c) => c.id === dragCatId)?.color ?? (dragTask ? ink : null);
   const liftedId = drag?.source.kind === "move" ? drag.source.id : null;
   const pressedId = state.press?.source.kind === "move" ? state.press.source.id : null;
 
@@ -195,6 +200,8 @@ export default function WeekGrid({
                   minsLeft={isNowBlock(p, week, point) ? minutesLeft(p, point) : null}
                   onMoveToDay={onMoveToDay}
                   actions={actions}
+                  todos={singleTaskOf(tasks, p) ? [] : blockTasks(tasks, p.id)}
+                  onToggleTask={(id) => actions.toggleTask(id)}
                 />
               ))}
             {preview && preview.day === di && <div style={{ ...S.dropPreview, ...blockBox(preview.start, preview.mins, rowH) }} />}

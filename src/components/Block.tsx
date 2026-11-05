@@ -2,7 +2,7 @@ import type React from "react";
 import type { InteractionEngine } from "../interaction/engine";
 import { blockText, tallerThan } from "../lib/dayview";
 import { blockBox, GRIP_MIN_WIDTH, GRIP_SPAN, gripZones, withAlpha } from "../lib/gesture";
-import type { Block as BlockT, Category } from "../lib/model";
+import type { Block as BlockT, Category, Task } from "../lib/model";
 import { fmtLeft } from "../lib/now";
 import { fmtDur, fmtTime } from "../lib/time";
 import type { CadenceActions } from "../state/useCadence";
@@ -29,6 +29,8 @@ type Props = {
   minsLeft: number | null; // the block is happening now: whole minutes left; otherwise null
   onMoveToDay: (p: BlockT, day: number) => void;
   actions: Pick<CadenceActions, "addTag" | "removeTag" | "updateBlock" | "removeBlock">;
+  todos: Task[]; // S1.5: the block's to-do list (empty for a single-task block: its tick is the task's)
+  onToggleTask: (taskId: string) => void;
 };
 
 // Width of the touch grip strips outside a block, in its day column (the block is inset 3px
@@ -64,6 +66,8 @@ export default function Block({
   minsLeft,
   onMoveToDay,
   actions,
+  todos,
+  onToggleTask,
 }: Props) {
   const cats = p.catIds.map((id) => allCats.find((c) => c.id === id)).filter((c): c is Category => !!c);
   const buffer = p.buffer === true; // S1.2: unassigned time, grey dashed, no tick
@@ -270,12 +274,36 @@ export default function Block({
         ) : (
           <>
             {p.label && <div style={S.placedLabel}>{p.label}</div>}
-            {showDesc && (
+            {todos.length > 0 && (
+              // S1.5: the block's tasks as checkboxes; they come first, the description and time make way
+              <ul style={S.blockTodos} aria-label="Tasks in this block">
+                {todos.map((t) => (
+                  <li key={t.id} style={S.blockTodo}>
+                    <button
+                      type="button"
+                      className="cadence-hit44"
+                      aria-pressed={t.done}
+                      aria-label={t.done ? `Mark "${t.name}" not done` : `Mark "${t.name}" done`}
+                      onPointerDown={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onToggleTask(t.id);
+                      }}
+                      style={{ ...S.blockTodoBox, borderColor: onColor, background: t.done ? ink : "transparent" }}
+                    >
+                      {t.done ? "✓" : ""}
+                    </button>
+                    <span style={{ ...S.blockTodoName, ...(t.done ? S.taskNameDone : {}) }}>{t.name}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {showDesc && todos.length === 0 && (
               <div style={{ ...S.placedDesc, opacity: 0.75, WebkitLineClamp: text.descLines }}>
                 {p.desc}
               </div>
             )}
-            {showTime && (
+            {showTime && todos.length === 0 && (
               <div style={{ ...S.placedTime, opacity: 0.65 }}>
                 {fmtTime(p.start)}–{fmtTime(p.start + p.mins)}
               </div>

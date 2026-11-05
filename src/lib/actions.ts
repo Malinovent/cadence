@@ -2,7 +2,8 @@
 // or the same reference when nothing changes. Inputs are never mutated.
 import { legacyTarget } from "./guardrail";
 import { BUFFER_ID, BUFFER_MINS, DAY_END, DAY_START, PALETTE, STEP } from "./constants";
-import type { Block, CadenceData, Category, HistoryEntry, Streaks, Task, Template, Weeks } from "./model";
+import type { Block, CadenceData, Category, HistoryEntry, Streaks, Template, Weeks } from "./model";
+import { afterBlockTick, releaseRemoved, unsortArea } from "./tasks";
 import { resizeBlock, resolvePlacement } from "./placement";
 import { uid as defaultUid } from "./uid";
 
@@ -115,11 +116,12 @@ export const removeBlock = (data: CadenceData, id: string): CadenceData => {
   const has = (w: Block[]) => w.some((p) => p.id === id);
   const inHistory = data.history.some((e) => e.id === id);
   if (!has(data.weeks[0]) && !has(data.weeks[1]) && !inHistory) return data;
-  return {
+  const next: CadenceData = {
     ...data,
     weeks: [data.weeks[0].filter((p) => p.id !== id), data.weeks[1].filter((p) => p.id !== id)],
     history: inHistory ? data.history.filter((e) => e.id !== id) : data.history,
   };
+  return releaseRemoved(data, next); // S1.5: its tasks go back to their list
 };
 
 // done: log one history entry per tagged category, each with the FULL duration.
@@ -136,7 +138,8 @@ export const toggleDone = (data: CadenceData, week: WeekIndex, id: string, deps:
   } else {
     history = data.history.filter((e) => e.id !== q.id);
   }
-  return { ...withWeek(data, week, blocks.map((x) => (x === p ? q : x))), history };
+  // S1.5: a single-task block finishes its task; otherwise unticked tasks go back to their list
+  return afterBlockTick({ ...withWeek(data, week, blocks.map((x) => (x === p ? q : x))), history }, q, deps);
 };
 
 export const saveTemplate = (data: CadenceData, week: WeekIndex, name?: string, deps: Deps = {}): CadenceData => {
@@ -173,7 +176,7 @@ export const applyTemplate = (data: CadenceData, week: WeekIndex, templateId: st
     const catIds = b.catIds.filter((c) => known.has(c));
     if (catIds.length) blocks.push({ ...b, catIds, id: makeId(), done: false });
   }
-  return withWeek(data, week, blocks);
+  return releaseRemoved(data, withWeek(data, week, blocks)); // S1.5: the replaced blocks' tasks go back
 };
 
 export const deleteTemplate = (data: CadenceData, id: string): CadenceData =>
@@ -190,7 +193,8 @@ export const advanceWeek = (data: CadenceData): CadenceData => {
     const cur = streaks[c.id] || { count: 0 };
     streaks[c.id] = { count: met ? cur.count + 1 : 0 }; // legacy drops lastWeek
   });
-  return { ...data, streaks, weeks: [data.weeks[1], []] };
+  // S1.5: tasks never roll forward; week 1's tasks go back to their list
+  return releaseRemoved(data, { ...data, streaks, weeks: [data.weeks[1], []] });
 };
 
 // clears history and streaks, and done flags so nothing re-logs
@@ -243,23 +247,10 @@ export const removeCat = (data: CadenceData, id: string): CadenceData => {
     weeks[0] === data.weeks[0] &&
     weeks[1] === data.weeks[1] &&
     history.length === data.history.length;
-  return unchanged ? data : { ...data, cats, weeks, history };
+  // S1.5: its tasks go to Unsorted, tasks of blocks dropped with it go back to their list
+  const next = unchanged ? data : releaseRemoved(data, { ...data, cats, weeks, history });
+  return unsortArea(next, id);
 };
 
-// ---- tasks: a plain list in insertion order; done tasks stay where they are ----
-export const addTask = (data: CadenceData, name: string, deps: Deps = {}): CadenceData => {
-  const trimmed = name.trim();
-  if (!trimmed) return data;
-  const task: Task = { id: (deps.uid ?? defaultUid)(), name: trimmed, done: false, createdAt: (deps.now ?? Date.now)() };
-  return { ...data, tasks: [...data.tasks, task] };
-};
-
-export const toggleTask = (data: CadenceData, id: string): CadenceData =>
-  data.tasks.some((t) => t.id === id)
-    ? { ...data, tasks: data.tasks.map((t) => (t.id === id ? { ...t, done: !t.done } : t)) }
-    : data;
-
-export const removeTask = (data: CadenceData, id: string): CadenceData =>
-  data.tasks.some((t) => t.id === id) ? { ...data, tasks: data.tasks.filter((t) => t.id !== id) } : data;
-
+// ---- tasks: see tasks.ts (S1.5) ----
 export const replaceAll = (_data: CadenceData, next: CadenceData): CadenceData => next;

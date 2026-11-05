@@ -1,9 +1,9 @@
-import { normalizeData, type CadenceData } from "./model";
+import { normalizeData, SCHEMA_VERSION, type CadenceData } from "./model";
 import { DATA_KEYS, STORAGE_KEYS, type DataKey } from "./storage";
 
 export type ExportEnvelope = {
   app: "cadence";
-  schemaVersion: 1;
+  schemaVersion: 2;
   exportedAt: string;
   data: Pick<CadenceData, DataKey>;
 };
@@ -18,7 +18,7 @@ export const NEWER_VERSION = "This backup is from a newer version of Cadence.";
 
 export const buildExport = (data: CadenceData, now: Date = new Date()): ExportEnvelope => ({
   app: "cadence",
-  schemaVersion: 1,
+  schemaVersion: 2,
   exportedAt: now.toISOString(),
   data: {
     cats: data.cats,
@@ -62,7 +62,7 @@ export const parseImport = (text: string): ImportResult => {
   let found = 0;
   if ("data" in parsed || parsed.app === "cadence") {
     if (parsed.app !== undefined && parsed.app !== "cadence") return { ok: false, error: NOT_A_BACKUP };
-    if (typeof parsed.schemaVersion === "number" && parsed.schemaVersion > 1) return { ok: false, error: NEWER_VERSION };
+    if (typeof parsed.schemaVersion === "number" && parsed.schemaVersion > SCHEMA_VERSION) return { ok: false, error: NEWER_VERSION };
     const data = parsed.data;
     if (!isRec(data)) return { ok: false, error: NOT_A_BACKUP };
     for (const k of DATA_KEYS) {

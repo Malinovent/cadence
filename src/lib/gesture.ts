@@ -4,7 +4,7 @@
 // Nothing here touches the DOM; geometry is passed in, so the grid's row height
 // and column count are parameters (desktop: 7 columns of 26px rows).
 import { BUFFER_ID, BUFFER_MINS, DAY_END, DAY_START, STEP } from "./constants";
-import type { Block, Category } from "./model";
+import type { Block, Category, Task } from "./model";
 import { resolvePlacement, type Bounds } from "./placement";
 
 // ---- thresholds (SPEC "Phase 3 design") ----
@@ -149,8 +149,10 @@ export const hitTest = (
 };
 
 // ---- what a drop means ----
-export type DragSource = { kind: "tray"; catId: string } | { kind: "move"; id: string };
+export type DragSource = { kind: "tray"; catId: string } | { kind: "move"; id: string } | { kind: "task"; taskId: string };
 export type DropIntent =
+  | { kind: "attach"; blockId: string; taskId: string } // S1.5: task dropped onto a block: joins its to-do list
+  | { kind: "placeTask"; taskId: string; day: number; start: number } // S1.5: task on empty time: its own block
   | { kind: "tag"; blockId: string; catId: string } // tray category dropped onto a block
   | { kind: "place"; catId: string; day: number; start: number } // tray category dropped on a slot
   | { kind: "move"; id: string; day: number; start: number }; // placed block dropped on a slot
@@ -164,6 +166,10 @@ export const ghostOffset = (source: DragSource, startX: number, startY: number, 
     : { x: TRAY_GHOST_OFFSET, y: TRAY_GHOST_OFFSET };
 
 export const resolveDrop = (source: DragSource, hit: GridHit): DropIntent => {
+  if (source.kind === "task")
+    return hit.blockId
+      ? { kind: "attach", blockId: hit.blockId, taskId: source.taskId }
+      : { kind: "placeTask", taskId: source.taskId, day: hit.day, start: hit.start };
   if (source.kind === "tray") {
     // a buffer is never a tag: dropped over a block it goes in the nearest free spot instead
     if (hit.blockId && source.catId !== BUFFER_ID) return { kind: "tag", blockId: hit.blockId, catId: source.catId };
@@ -179,8 +185,18 @@ export const dropPreview = (
   blocks: readonly Block[],
   cats: readonly Category[],
   intent: DropIntent,
+  tasks: readonly Task[] = [],
 ): { day: number; start: number; mins: number } | null => {
-  if (intent.kind === "tag") return null;
+  if (intent.kind === "tag" || intent.kind === "attach") return null;
+  if (intent.kind === "placeTask") {
+    // same length rule as tasks.placeTask: the estimate, else the area's usual block; Unsorted can't place
+    const t = tasks.find((x) => x.id === intent.taskId);
+    if (!t || t.done || t.catId === null) return null;
+    const dur = t.estMins ?? cats.find((c) => c.id === t.catId)?.blockMins;
+    if (!dur) return null;
+    const r = resolvePlacement(blocks, intent.day, intent.start, dur, null);
+    return r && { day: intent.day, ...r };
+  }
   if (intent.kind === "place") {
     const dur = intent.catId === BUFFER_ID ? BUFFER_MINS : cats.find((c) => c.id === intent.catId)?.blockMins;
     if (!dur) return null;

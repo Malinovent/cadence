@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as A from "../lib/actions";
+import * as T from "../lib/tasks";
 import { META_KEY } from "../lib/meta";
 import { defaultData, type CadenceData } from "../lib/model";
 import type { StorageLike } from "../lib/storage";
@@ -207,14 +208,14 @@ describe("sync engine: pushing edits", () => {
 
   it("pushes a task edit like any other edit", async () => {
     await synced();
-    edit((d) => A.addTask(d, "Buy milk", { uid: () => "t1", now: () => clock }));
+    edit((d) => T.addTask(d, "Buy milk", {}, { uid: () => "t1", now: () => clock }));
     expect(engine.getState().status).toBe("syncing");
     await vi.advanceTimersByTimeAsync(1500);
     await flush();
     expect(backend.pushes).toHaveLength(1);
-    expect(backend.pushes[0].data.tasks).toEqual([{ id: "t1", name: "Buy milk", done: false, createdAt: clock }]);
+    expect(backend.pushes[0].data.tasks).toEqual([{ id: "t1", name: "Buy milk", catId: null, done: false, order: 0, createdAt: clock }]);
     expect(engine.getState().status).toBe("synced");
-    store.edit((d) => A.toggleTask(d, "missing"));
+    store.edit((d) => T.toggleTask(d, "missing"));
     await vi.advanceTimersByTimeAsync(3000);
     expect(backend.pushes).toHaveLength(1);
   });

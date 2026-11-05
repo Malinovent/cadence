@@ -1,24 +1,29 @@
+import { useState } from "react";
 import type { Interaction } from "../interaction/useInteraction";
-import type { PanelArea } from "../lib/panel";
-import type { Task } from "../lib/model";
-import type { CadenceActions } from "../state/useCadence";
+import type { WeekIndex } from "../lib/actions";
+import type { CadenceData } from "../lib/model";
+import { tasksLine, type PanelArea } from "../lib/panel";
+import { doneThisWeek, openTasks, taskMins } from "../lib/tasks";
+import { readFolded, writeFolded } from "../state/panelFolds";
 import { S } from "../styles";
 import AreaChip from "./AreaChip";
+import AreaTasks, { type TaskActions } from "./AreaTasks";
 import BalanceBar from "./BalanceBar";
-import TaskList from "./TaskList";
 
 export type PanelProps = {
   areas: PanelArea[];
   notes: string[];
-  tasks: Task[];
+  data: CadenceData;
+  week: WeekIndex;
+  now: Date;
   interaction: Interaction;
   armedCatId: string | null; // tap-to-place: the area waiting for a slot tap
   onArm: (catId: string | null) => void;
   onHide: () => void;
-  actions: Pick<CadenceActions, "addTask" | "toggleTask" | "removeTask">;
+  actions: TaskActions;
 };
 
-export const armHint = (armed: boolean) => (armed ? "Tap a slot to place · tap again to cancel" : "Drag into the grid");
+export const armHint = (armed: boolean) => (armed ? "Tap a slot · tap again to cancel" : "Drag into the grid");
 
 /** The calm notes for what's off this week ("Rest is 3 h short of its floor"). */
 export function BalanceNotes({ notes }: { notes: string[] }) {
@@ -32,17 +37,67 @@ export function BalanceNotes({ notes }: { notes: string[] }) {
   );
 }
 
-/** S1.4 desktop: the left panel. Each area is its drag handle plus this week's balance; tasks below. */
+/** Folded areas, remembered on this device (S1.5). */
+export function useFolds(): [Set<string>, (id: string) => void] {
+  const [folded, setFolded] = useState(() => new Set(readFolded()));
+  const toggle = (id: string) => {
+    const next = new Set(folded);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setFolded(next);
+    writeFolded([...next]);
+  };
+  return [folded, toggle];
+}
+
+/** "Tasks · 3" fold button and the grey tasks-against-planned line for one area. */
+export function TasksHead({
+  count,
+  line,
+  open,
+  onToggle,
+  name,
+}: {
+  count: number;
+  line: string | null;
+  open: boolean;
+  onToggle: () => void;
+  name: string;
+}) {
+  return (
+    <div style={S.areaTasksHead}>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        aria-label={`${open ? "Fold" : "Show"} ${name} tasks`}
+        style={S.areaFold}
+      >
+        {open ? "▾" : "▸"} {count > 0 ? `Tasks · ${count}` : "Tasks"}
+      </button>
+      {line && <span style={S.areaTasksLine}>{line}</span>}
+    </div>
+  );
+}
+
+/** Unsorted tasks (from before tasks had areas) exist, open or finished this week. */
+export const hasUnsorted = (data: CadenceData, now: Date) =>
+  openTasks(data.tasks, null).length > 0 || doneThisWeek(data.tasks, null, now).length > 0;
+
+/** S1.4/S1.5 desktop: the left panel. Each area: its drag handle, this week's balance, its tasks (folding away). */
 export default function AreasPanel({
   areas,
   notes,
-  tasks,
+  data,
+  week,
+  now,
   interaction,
   armedCatId,
   onArm,
   onHide,
   actions,
 }: PanelProps) {
+  const [folded, toggleFold] = useFolds();
   return (
     <aside style={S.sidebar} aria-label="Areas and tasks">
       <div style={S.panelHead}>
@@ -52,19 +107,36 @@ export default function AreasPanel({
         </button>
       </div>
       <div className="cadence-tray" style={S.areaList}>
-        {areas.map((a) => (
-          <div key={a.id}>
-            <AreaChip area={a} interaction={interaction} armed={armedCatId === a.id} onArm={onArm} />
-            {a.balance && <BalanceBar balance={a.balance} color={a.color} kind={a.limitText} />}
-          </div>
-        ))}
+        {areas.map((a) => {
+          const isArea = a.balance !== null;
+          const open = !folded.has(a.id);
+          return (
+            <div key={a.id}>
+              <AreaChip area={a} interaction={interaction} armed={armedCatId === a.id} onArm={onArm} />
+              {a.balance && <BalanceBar balance={a.balance} color={a.color} kind={a.limitText} />}
+              {isArea && (
+                <>
+                  <TasksHead
+                    name={a.name}
+                    count={openTasks(data.tasks, a.id).length}
+                    line={tasksLine(taskMins(data.tasks, a.id), a.balance!.plannedMins, week)}
+                    open={open}
+                    onToggle={() => toggleFold(a.id)}
+                  />
+                  {open && <AreaTasks catId={a.id} data={data} interaction={interaction} actions={actions} now={now} />}
+                </>
+              )}
+            </div>
+          );
+        })}
       </div>
+      {hasUnsorted(data, now) && (
+        <div style={S.panelSection}>
+          <div style={S.panelLabel}>Unsorted · give each an area</div>
+          <AreaTasks catId={null} data={data} interaction={interaction} actions={actions} now={now} />
+        </div>
+      )}
       <BalanceNotes notes={notes} />
-
-      <div style={S.panelSection}>
-        <div style={S.panelLabel}>Tasks</div>
-        <TaskList tasks={tasks} actions={actions} />
-      </div>
     </aside>
   );
 }

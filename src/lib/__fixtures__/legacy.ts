@@ -44,7 +44,7 @@ export const legacyStorage: Record<string, string> = {
 
 // what normalizeData should make of it
 export const legacyNormalized = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   // S1.2: every legacy target becomes a floor at the same minutes
   cats: legacyRaw.cats.map((c) => ({ ...c, limit: { kind: "floor" as const, min: c.targetMins } })),
   weeks: [

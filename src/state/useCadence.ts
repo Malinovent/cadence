@@ -1,5 +1,6 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 import * as A from "../lib/actions";
+import * as T from "../lib/tasks";
 import type { SyncMeta } from "../lib/meta";
 import type { CadenceData } from "../lib/model";
 import { createCadenceStore, type CadenceStore } from "./store";
@@ -31,9 +32,15 @@ const makeActions = (store: CadenceStore) => {
     updateCat: b(A.updateCat),
     addCat: b(A.addCat),
     removeCat: b(A.removeCat),
-    addTask: b(A.addTask),
-    toggleTask: b(A.toggleTask),
-    removeTask: b(A.removeTask),
+    addTask: b(T.addTask),
+    toggleTask: b(T.toggleTask),
+    removeTask: b(T.removeTask),
+    setTaskArea: b(T.setTaskArea),
+    setTaskEstimate: b(T.setTaskEstimate),
+    attachTask: b(T.attachTask),
+    placeTask: b(T.placeTask),
+    detachTask: b(T.detachTask),
+    returnEnded: b(T.returnEnded),
     replaceAll: b(A.replaceAll),
   };
 };

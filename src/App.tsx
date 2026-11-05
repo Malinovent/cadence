@@ -22,6 +22,7 @@ import { readBalanceRules } from "./state/balanceRules";
 import { readPanelHidden, writePanelHidden } from "./state/panelPrefs";
 import { useCadence } from "./state/useCadence";
 import { useIsPhone } from "./state/useIsPhone";
+import { useNow } from "./state/useNow";
 import { useSync } from "./sync/useSync";
 import { FONT_IMPORT, S } from "./styles";
 
@@ -50,6 +51,8 @@ export default function App() {
       const d = resolveDrop(source, hit);
       if (d.kind === "tag") actions.addTag(d.blockId, d.catId);
       else if (d.kind === "place") actions.placeBlock(activeWeek, d.catId, d.day, d.start);
+      else if (d.kind === "attach") actions.attachTask(d.taskId, d.blockId);
+      else if (d.kind === "placeTask") actions.placeTask(activeWeek, d.taskId, d.day, d.start);
       else actions.moveBlock(activeWeek, d.id, d.day, d.start);
     },
     onResize: (id, edge, origStart, origMins, deltaSlots) =>
@@ -109,12 +112,20 @@ export default function App() {
     changeWeek(0);
   };
 
+  // S1.5: as the clock passes the end of a block that wasn't ticked, its tasks go back to their list
+  const now = useNow();
+  useEffect(() => {
+    actions.returnEnded(now);
+  }, [actions, now, data.tasks]);
+
   // calendar view: the panel's content (desktop side panel or phone dock) and the bars around the grid
   const done = completion(data, activeWeek);
   const panel = {
     areas: panelAreas(data, activeWeek),
     notes: panelNotes(data, activeWeek),
-    tasks: data.tasks,
+    data,
+    week: activeWeek,
+    now,
     interaction,
     armedCatId,
     onArm: setArmedCatId,
@@ -151,6 +162,7 @@ export default function App() {
                 week={activeWeek}
                 blocks={data.weeks[activeWeek]}
                 cats={data.cats}
+                tasks={data.tasks}
                 editingId={editingId}
                 setEditingId={setEditingId}
                 interaction={interaction}

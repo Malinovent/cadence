@@ -15,15 +15,34 @@ export type Block = {
   desc: string;
   done: boolean;
   buffer?: true; // S1.2: unassigned buffer time; catIds is [] and it never counts toward an area
+  sourceTaskId?: string; // S1.5: the block was made by dropping this task on empty time
 };
 export type TemplateBlock = Omit<Block, "id" | "done">;
 export type Template = { id: string; name: string; blocks: TemplateBlock[] };
 export type HistoryEntry = { id: string /* block id */; catId: string; mins: number; date: number /* ms epoch */ };
 export type Streaks = Record<string, { count: number; lastWeek?: number }>;
 export type Weeks = [Block[], Block[]];
-export type Task = { id: string; name: string; done: boolean; createdAt: number /* ms epoch */ };
+// S1.5 (schema 2): tasks live under an area. `name` is the brief's "title" (kept as `name` so a
+// copy of the app from before S1.5 still reads the list). catId null = "Unsorted" (tasks from
+// before areas, until the user gives them one). blockId = in that block's to-do list.
+// returnedFrom = day (0 = Mon) of the block it came back from, for "back from Tue".
+// The list's array order is the user's order; `order` mirrors it (index) in the stored shape.
+export type Task = {
+  id: string;
+  name: string;
+  catId: string | null;
+  estMins?: number;
+  blockId?: string;
+  attachedAt?: number; // ms epoch: when it joined that block (a block that ends after this sends it back)
+  done: boolean;
+  doneAt?: number; // ms epoch
+  returnedFrom?: number;
+  order: number;
+  createdAt: number; // ms epoch
+};
+export const SCHEMA_VERSION = 2;
 export type CadenceData = {
-  schemaVersion: 1;
+  schemaVersion: 2;
   cats: Category[];
   weeks: Weeks;
   templates: Template[];
@@ -38,7 +57,7 @@ const isNum = (v: unknown): v is number => typeof v === "number" && Number.isFin
 const arr = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
 
 export const defaultData = (): CadenceData => ({
-  schemaVersion: 1,
+  schemaVersion: 2,
   cats: DEFAULT_CATEGORIES.map((c) => ({ ...c })),
   weeks: [[], []],
   templates: [],
@@ -149,7 +168,9 @@ export const normalizeData = (partial: unknown): { data: CadenceData; dropped: n
           continue;
         }
         const id = typeof p.id === "string" && p.id ? p.id : isNum(p.id) ? String(p.id) : uid();
-        weeks[i].push({ id, ...b, done: p.done === true });
+        const block: Block = { id, ...b, done: p.done === true };
+        if (typeof p.sourceTaskId === "string" && p.sourceTaskId && !b.buffer) block.sourceTaskId = p.sourceTaskId;
+        weeks[i].push(block);
       }
     }
   }
@@ -201,18 +222,48 @@ export const normalizeData = (partial: unknown): { data: CadenceData; dropped: n
     }
   }
 
-  // tasks (a missing key is just an older file, not a drop)
+  // tasks (a missing key is just an older file, not a drop). Schema 1 tasks had only id, name,
+  // done and createdAt: they become Unsorted, in their old order.
+  const blockIds = new Map<string, Block>();
+  for (const w of weeks) for (const b of w) blockIds.set(b.id, b);
   const tasks: Task[] = [];
   if (piece(raw.tasks, Array.isArray)) {
-    for (const t of raw.tasks as unknown[]) {
-      if (!isRec(t) || typeof t.id !== "string" || !t.id || typeof t.name !== "string" || !t.name) {
+    const seen = new Set<string>();
+    const rawTasks = (raw.tasks as unknown[]).map((t, i) => ({ t, i }));
+    // stored `order` wins, then the array position (stable)
+    const ord = (x: { t: unknown; i: number }) => (isRec(x.t) && isNum(x.t.order) ? x.t.order : x.i);
+    rawTasks.sort((a, b) => ord(a) - ord(b) || a.i - b.i);
+    for (const { t } of rawTasks) {
+      if (!isRec(t) || typeof t.id !== "string" || !t.id || seen.has(t.id) || typeof t.name !== "string" || !t.name) {
         dropped++;
         continue;
       }
+      seen.add(t.id);
       const createdAt = Number(t.createdAt);
-      tasks.push({ id: t.id, name: t.name, done: t.done === true, createdAt: Number.isFinite(createdAt) ? createdAt : 0 });
+      const task: Task = {
+        id: t.id,
+        name: t.name,
+        // an area deleted since (or never set) leaves the task Unsorted, never lost
+        catId: typeof t.catId === "string" && catSet.has(t.catId) ? t.catId : null,
+        done: t.done === true,
+        order: tasks.length,
+        createdAt: Number.isFinite(createdAt) ? createdAt : 0,
+      };
+      if (isNum(t.estMins) && t.estMins > 0) task.estMins = Math.round(t.estMins);
+      // a block that no longer exists: the task is simply back in its list
+      if (typeof t.blockId === "string" && blockIds.has(t.blockId)) {
+        task.blockId = t.blockId;
+        if (isNum(t.attachedAt)) task.attachedAt = t.attachedAt;
+      }
+      if (task.done && isNum(t.doneAt)) task.doneAt = t.doneAt;
+      if (isNum(t.returnedFrom) && Number.isInteger(t.returnedFrom) && t.returnedFrom >= 0 && t.returnedFrom <= 6)
+        task.returnedFrom = t.returnedFrom;
+      tasks.push(task);
     }
   }
+  // a block made from a task keeps the link only while that task exists
+  const taskIds = new Set(tasks.map((t) => t.id));
+  for (const b of blockIds.values()) if (b.sourceTaskId !== undefined && !taskIds.has(b.sourceTaskId)) delete b.sourceTaskId;
 
-  return { data: { schemaVersion: 1, cats, weeks, templates, history, streaks, tasks }, dropped };
+  return { data: { schemaVersion: 2, cats, weeks, templates, history, streaks, tasks }, dropped };
 };

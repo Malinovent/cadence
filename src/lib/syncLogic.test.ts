@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import * as A from "./actions";
+import * as T from "./tasks";
 import type { SyncMeta } from "./meta";
 import { defaultData, normalizeData, type CadenceData } from "./model";
 import {
@@ -55,15 +56,15 @@ describe("jsonEqual / contentEqual", () => {
 
   it("compares tasks too", () => {
     const d = defaultData();
-    const t = A.addTask(d, "Buy milk", { uid: () => "t", now: () => 1 });
+    const t = T.addTask(d, "Buy milk", {}, { uid: () => "t", now: () => 1 });
     expect(contentEqual(d, t)).toBe(false);
-    expect(contentEqual(t, A.toggleTask(t, "t"))).toBe(false);
+    expect(contentEqual(t, T.toggleTask(t, "t"))).toBe(false);
     expect(contentEqual(t, normalizeData(reorderKeys(JSON.parse(JSON.stringify(t)))).data)).toBe(true);
   });
 
   it("ignores schemaVersion", () => {
     const d = defaultData();
-    expect(contentEqual(d, { ...d, schemaVersion: 2 as 1 })).toBe(true);
+    expect(contentEqual(d, { ...d, schemaVersion: 3 as 2 })).toBe(true);
   });
 });
 
@@ -80,7 +81,7 @@ describe("isEmptyData", () => {
     expect(isEmptyData({ ...d, templates: [{ id: "t", name: "T", blocks: [] }] })).toBe(false);
     expect(isEmptyData({ ...d, history: [{ id: "b", catId: "work", mins: 60, date: 1 }] })).toBe(false);
     expect(isEmptyData({ ...d, streaks: { work: { count: 1 } } })).toBe(false);
-    expect(isEmptyData(A.addTask(d, "Buy milk", { uid: () => "t", now: () => 1 }))).toBe(false);
+    expect(isEmptyData(T.addTask(d, "Buy milk", {}, { uid: () => "t", now: () => 1 }))).toBe(false);
     expect(isEmptyData(A.updateCat(d, "work", { limit: { kind: "floor", min: 600 } }))).toBe(false);
     expect(isEmptyData(A.addCat(d, { uid: () => "c" }))).toBe(false);
   });

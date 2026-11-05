@@ -21,7 +21,8 @@ import {
   type ColRect,
   type Rect,
 } from "./gesture";
-import { defaultData, type Block, type CadenceData } from "./model";
+import { defaultData, type Block, type CadenceData, type Task } from "./model";
+import { placeTask } from "./tasks";
 
 const blk = (id: string, day: number, start: number, mins: number, catIds = ["work"]): Block => ({
   id,
@@ -239,6 +240,10 @@ describe("resolveDrop", () => {
       catId: "learn",
     });
   });
+  it("a task on a block joins it, a task on a slot makes its own block (S1.5)", () => {
+    expect(resolveDrop({ kind: "task", taskId: "t" }, { ...hit, blockId: "b1" })).toEqual({ kind: "attach", blockId: "b1", taskId: "t" });
+    expect(resolveDrop({ kind: "task", taskId: "t" }, hit)).toEqual({ kind: "placeTask", taskId: "t", day: 3, start: 600 });
+  });
   it("a moving block ignores the block under the pointer", () => {
     expect(resolveDrop({ kind: "move", id: "b1" }, { ...hit, blockId: "b2" })).toEqual({ kind: "move", id: "b1", day: 3, start: 600 });
   });
@@ -271,6 +276,28 @@ describe("dropPreview", () => {
     expect(dropPreview([], cats, { kind: "place", catId: "nope", day: 0, start: 600 })).toBeNull();
     expect(dropPreview([], cats, { kind: "move", id: "nope", day: 0, start: 600 })).toBeNull();
     expect(dropPreview(full, cats, { kind: "tag", blockId: "f", catId: "learn" })).toBeNull();
+  });
+});
+
+describe("dropPreview for tasks (S1.5)", () => {
+  const cats = DEFAULT_CATEGORIES;
+  const tk = (over: Partial<Task> = {}): Task => ({ id: "t", name: "T", catId: "work", done: false, order: 0, createdAt: 0, ...over });
+  it("matches placeTask: estimate first, then the area's block", () => {
+    const blocks = [blk("x", 1, 540, 60)];
+    const tasks = [tk({ estMins: 45 })];
+    const preview = dropPreview(blocks, cats, { kind: "placeTask", taskId: "t", day: 1, start: 600 }, tasks);
+    const data = { ...defaultData(), weeks: [blocks, []] as CadenceData["weeks"], tasks };
+    const made = placeTask(data, 0, "t", 1, 600, { uid: () => "new" }).weeks[0].find((b) => b.id === "new")!;
+    expect(preview).toEqual({ day: 1, start: made.start, mins: made.mins });
+    const work = cats.find((c) => c.id === "work")!;
+    expect(dropPreview([], cats, { kind: "placeTask", taskId: "t", day: 0, start: 600 }, [tk()])?.mins).toBe(work.blockMins);
+  });
+  it("is null for Unsorted, finished or unknown tasks, and for attach", () => {
+    const at = { kind: "placeTask" as const, taskId: "t", day: 0, start: 600 };
+    expect(dropPreview([], cats, at, [tk({ catId: null })])).toBeNull();
+    expect(dropPreview([], cats, at, [tk({ done: true })])).toBeNull();
+    expect(dropPreview([], cats, at, [])).toBeNull();
+    expect(dropPreview([], cats, { kind: "attach", blockId: "b", taskId: "t" }, [tk()])).toBeNull();
   });
 });
 

@@ -59,7 +59,7 @@ type Block = { id: string; catIds: string[]; day: number /*0=Mon..6*/; start: nu
 type Template = { id: string; name: string; blocks: Omit<Block, "id" | "done">[] };
 type HistoryEntry = { id: string /*block id*/; catId: string; mins: number; date: number /*ms epoch*/ };
 type Streaks = Record<string, { count: number; lastWeek?: number }>;
-type CadenceData = { schemaVersion: 1; cats: Category[]; weeks: [Block[], Block[]];
+type CadenceData = { schemaVersion: 2 /* 1 before S1.5 */; cats: Category[]; weeks: [Block[], Block[]];
                      templates: Template[]; history: HistoryEntry[]; streaks: Streaks };
 ```
 
@@ -84,7 +84,7 @@ Note: history entries carry the block `id` (the brief omits it). It is what un-m
 ## Export / import (Phase 1)
 Export envelope, filename `cadence-backup-YYYY-MM-DD.json`:
 ```json
-{ "app": "cadence", "schemaVersion": 1, "exportedAt": "<ISO>", "data": { "cats": [], "weeks": [[],[]], "templates": [], "history": [], "streaks": {} } }
+{ "app": "cadence", "schemaVersion": 2, "exportedAt": "<ISO>", "data": { "cats": [], "weeks": [[],[]], "templates": [], "history": [], "streaks": {} } }
 ```
 Import accepts (a) that envelope, (b) a flat object keyed by the five localStorage keys (values either parsed or JSON strings). It then:
 - rejects non-JSON, a non-object, or a file with no recognisable Cadence keys (clear error message);
@@ -154,7 +154,7 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 - `updated_at` is the CLIENT's last-edit time of the document (not `now()`), so last-write-wins compares edit times across devices.
 - Writes go through `public.push_state(p_data jsonb, p_updated_at timestamptz) returns table(data jsonb, updated_at timestamptz)`, `security invoker`: insert the caller's row, or update it only if the stored `updated_at` is older than `p_updated_at`; always returns the row that is now stored (ours if we won, the newer server one if we lost). Atomic LWW, so an offline device can't overwrite a newer copy.
 - SQL lives in `supabase/schema.sql` (idempotent: `create table if not exists`, `create or replace function`, `drop policy if exists` + create).
-- `data` = `{ schemaVersion: 1, cats, weeks, templates, history, streaks }` (same as the export envelope's data plus schemaVersion). Anything pulled goes through `normalizeData`.
+- `data` = `{ schemaVersion: 2, cats, weeks, templates, history, streaks }` (same as the export envelope's data plus schemaVersion). Anything pulled goes through `normalizeData`.
 
 ### Auth
 - Supabase email OTP via `signInWithOtp({ email, options: { emailRedirectTo: <app url>, shouldCreateUser: true } })`.
@@ -242,6 +242,19 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 - Phone (< 900px): areas and tasks share a tray docked at the bottom (`PhoneDock`, fixed, paper with an ink top rule, safe-area padding) with Areas and Tasks tabs ("Tasks · 3" when 3 are open) and a "▾ hide" button. Areas tab: chips in two columns, each with its bar and count; the tap hint only while armed; the notes below, reached by scrolling the tray (body capped at 30vh). One tap on "hide" folds it to a slim "▴ Show areas and tasks" bar. A spacer as tall as the dock keeps the end of the page reachable. This supersedes the Phase 3 "tray above the calendar, no bottom sheet" layout, per the sprint 1 brief.
 - The dock covers the grid where it sits: while dragging, a pointer over the dock is no hit and no drop, and autoscroll uses the dock's top as the bottom edge (no autoscroll while over the dock). The engine reads it through `EngineEnv.viewBottom` (`dockTop` in `interaction/dom.ts`, the element with `data-cadence-dock`).
 - Hidden/folded is one per-device choice, not synced: `cadence:ui:trayHidden` = "1" (the old tray "hide" key, so an earlier choice carries over). Hiding disarms tap-to-place.
+
+### S1.5 Tasks under areas (schema 2)
+- JP's choice (2026-11-04): tasks saved before S1.5 have no area; they go to an "Unsorted" group at the bottom of the panel ("Unsorted · give each an area", each row with "Move to…"), never into an area the user didn't pick. New tasks are always added under an area.
+- Data, `schemaVersion: 2` (exports carry 2; importing anything above 2 says it's from a newer version). `Task = { id, name, catId: string | null, estMins?, blockId?, attachedAt?, done, doneAt?, returnedFrom?, order, createdAt }`, still under `cadence:tasks`. `name` is the brief's "title", kept as `name` so a copy of the app from before S1.5 still reads the list (it drops the new fields, so update every device). `order` mirrors the array position; normalize sorts by it. `returnedFrom` is a day index (0 = Mon) for "back from Tue". Blocks get `sourceTaskId?` when made from a task.
+- Migration (`normalizeData`): schema 1 tasks get `catId: null` and `order` = their position; a `catId` of a deleted area → null; a `blockId` whose block is gone is dropped (the task is back in its list); a block's `sourceTaskId` whose task is gone is dropped; duplicate task ids are dropped (counted). Before stored schema 1 tasks are migrated, an untouched copy is kept in `cadence:backup:before-tasks` (once, never synced), downloadable in Settings ("A copy of your data from before tasks moved under areas is kept on this device. Download it").
+- Rules (`src/lib/tasks.ts`, pure, tested):
+  - Drop a task on a block: it joins that block's to-do list (`blockId`, `attachedAt`), from the list or from another block. Shown as small checkboxes inside the block, after its label (the description and time make way).
+  - Drop it on empty time: a block of its area, labelled with its name, as long as its estimate or the area's block length, placed like an area drop (nearest gap, shrunk to fit). Unsorted tasks can't (no area); the drop preview shows nothing.
+  - One task, one tick: a block made from a task and holding only it shows no checklist; ticking the block finishes the task, unticking reopens it.
+  - Unfinished tasks come back: ticking a block sends its unticked tasks back to their list with `returnedFrom`; a Week 1 block that ends without a tick does the same, as the clock passes its end (checked each minute) — but only for tasks that joined before it ended, so a task put into a block that's already over (logging after the fact) stays until the block is ticked or rolled away. Deleting a block, applying a template over the week, roll forward and deleting an area free their blocks' tasks the same way (finished ones just unlink). Nothing reorders.
+  - Finished tasks leave the list; "Show N done this week" (finished since this Monday) lists them, and they can be unticked there.
+  - Templates and roll forward copy blocks, never tasks (template blocks never carry `sourceTaskId`). Deleting an area moves its tasks to Unsorted.
+- Panel: under each area's balance, "▾ Tasks · 3" folds its tasks away (folds per device, `cadence:ui:foldedAreas`), then the grey "7 h 15 of tasks · 6 h planned this week" (open tasks' estimates against the area's planned minutes, only when an open task has an estimate; "next week" on Week 2). Rows: tick, name, a mono note (estimate, where it sits — "Wed 9am", "next week · Thu 2pm" — or "back from Tue"), ✕; scheduled rows are faded; rows are drag sources like the area chips (mouse drag, touch long-press). "＋ Add a task" opens an input with an estimate menu (none, 15 min … 2 h); Enter adds and keeps the row open, Escape or an empty Enter closes it. Phone Tasks tab: the same, grouped by area with a colour dot, Unsorted last.
 
 ## Phases
 1. Port + export/import + unit tests (this file's sections above).
