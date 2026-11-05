@@ -18,7 +18,7 @@ const BEFORE_UPDATES = [
   {
     key: PREMIGRATION_KEYS.tasks,
     file: "cadence-backup-before-tasks.json",
-    line: "A copy of your data from before tasks moved under areas is kept on this device.",
+    line: "A copy of your data from before the November tasks update is kept on this device.",
   },
 ] as const;
 

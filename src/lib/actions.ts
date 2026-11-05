@@ -247,7 +247,7 @@ export const removeCat = (data: CadenceData, id: string): CadenceData => {
     weeks[0] === data.weeks[0] &&
     weeks[1] === data.weeks[1] &&
     history.length === data.history.length;
-  // S1.5: its tasks go to Unsorted, tasks of blocks dropped with it go back to their list
+  // S1.5: tasks that had this area forget it; tasks of blocks dropped with it go back to their list
   const next = unchanged ? data : releaseRemoved(data, { ...data, cats, weeks, history });
   return unsortArea(next, id);
 };

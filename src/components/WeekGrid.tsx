@@ -23,7 +23,7 @@ type Props = {
   week: WeekIndex;
   blocks: BlockT[];
   cats: Category[];
-  tasks: Task[]; // S1.5: for block to-do lists and task drop previews
+  tasks: Task[]; // S1.5: for block to-do lists
   editingId: string | null;
   setEditingId: (id: string | null) => void;
   interaction: Interaction;
@@ -66,12 +66,11 @@ export default function WeekGrid({
   // what the current drag would do: outline the landing spot, or highlight the block to tag
   const drag = state.drag;
   const intent = drag?.hit ? resolveDrop(drag.source, drag.hit) : null;
-  const preview = intent ? dropPreview(blocks, cats, intent, tasks) : null;
+  const preview = intent ? dropPreview(blocks, cats, intent) : null;
   const tagTargetId = intent?.kind === "tag" || intent?.kind === "attach" ? intent.blockId : null;
-  // the outline colour on the block a drop would add to: the area dragged, or the dragged task's area
-  const dragTask = drag?.source.kind === "task" ? tasks.find((t) => drag.source.kind === "task" && t.id === drag.source.taskId) : undefined;
-  const dragCatId = drag?.source.kind === "tray" ? drag.source.catId : (dragTask?.catId ?? null);
-  const tagColor = cats.find((c) => c.id === dragCatId)?.color ?? (dragTask ? ink : null);
+  // the outline on the block a drop would add to: the dragged area's colour, ink for a task
+  const dragCatId = drag?.source.kind === "tray" ? drag.source.catId : null;
+  const tagColor = cats.find((c) => c.id === dragCatId)?.color ?? (drag?.source.kind === "task" ? ink : null);
   const liftedId = drag?.source.kind === "move" ? drag.source.id : null;
   const pressedId = state.press?.source.kind === "move" ? state.press.source.id : null;
 

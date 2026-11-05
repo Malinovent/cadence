@@ -256,6 +256,11 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
   - Templates and roll forward copy blocks, never tasks (template blocks never carry `sourceTaskId`). Deleting an area moves its tasks to Unsorted.
 - Panel: under each area's balance, "▾ Tasks · 3" folds its tasks away (folds per device, `cadence:ui:foldedAreas`). Rows: tick, name, a mono note (where it sits — "Wed 9am", "next week · Thu 2pm" — or "back from Tue"), ✕; scheduled rows are faded; rows are drag sources like the area chips (mouse drag, touch long-press). "＋ Add a task" opens a name input; Enter adds and keeps the row open, Escape or an empty Enter closes it. Phone Tasks tab: the same, grouped by area with a colour dot, Unsorted last.
 
+### S1.5b One task list, apart from the areas (JP, 2026-11-04)
+- Supersedes the area parts of S1.5 ("I like keeping categories a bit cleaner"). Tasks are one plain list in the panel under the areas ("Tasks · drag onto a block"), and the phone Tasks tab is the same list. Areas are just their chip and balance again; no per-area task folds, no Unsorted group, no "Move to…".
+- A task goes into blocks only: dropped on a block it joins that block's checklist; dropped on empty time nothing happens (no preview). While it sits in a block, its row shows one small dot per area of that block, in their colours (the buffer's grey for a buffer), before "Thu 9am".
+- Data: no schema change. `catId` stays in the saved shape and is kept as it is (tasks given an area on Nov 4 keep it), but nothing reads it; new tasks get null. Blocks made from a task earlier (`sourceTaskId`) keep their one tick. Everything else in S1.5 (checklists, one tick, coming back "back from Tue", done this week, templates and roll forward) is unchanged.
+
 ## Phases
 1. Port + export/import + unit tests (this file's sections above).
 2. PWA + deploy: manifest, icons (incl. 180×180 apple-touch-icon, replace the emoji favicon), iOS meta tags, `viewport-fit=cover` + safe-area padding, service worker app-shell cache, self-hosted fonts, GitHub Pages workflow.

@@ -9,10 +9,8 @@ import {
   detachTask,
   doneThisWeek,
   openTasks,
-  placeTask,
   removeTask,
   returnEnded,
-  setTaskArea,
   singleTaskOf,
   toggleTask,
 } from "./tasks";
@@ -146,25 +144,22 @@ describe("schema 2 migration", () => {
 });
 
 describe("list edits", () => {
-  it("adds under an area", () => {
-    const d = addTask(base(), "  Write report ", { catId: "work" }, deps);
-    expect(d.tasks).toEqual([
-      { id: "new", name: "Write report", catId: "work", done: false, order: 0, createdAt: 5000 },
-    ]);
-    expect(addTask(base(), "x", { catId: "nope" }, deps).tasks[0].catId).toBeNull();
+  it("adds to the one list, with no area", () => {
+    const d = addTask(base(), "  Write report ", deps);
+    expect(d.tasks).toEqual([{ id: "new", name: "Write report", catId: null, done: false, order: 0, createdAt: 5000 }]);
     const blank = base();
-    expect(addTask(blank, "  ", {}, deps)).toBe(blank);
+    expect(addTask(blank, "  ", deps)).toBe(blank);
   });
-  it("moves a task to an area", () => {
-    const d = base({ tasks: [task("a", { catId: null })] });
-    expect(t(setTaskArea(d, "a", "learn"), "a").catId).toBe("learn");
-    expect(setTaskArea(d, "a", "nope")).toBe(d);
+  it("keeps an area given to a task earlier, though nothing shows it", () => {
+    const d = normalizeData({ ...base(), tasks: [task("a", { catId: "learn" })] }).data;
+    expect(t(d, "a").catId).toBe("learn");
+    expect(openTasks(d.tasks).map((x) => x.id)).toEqual(["a"]);
   });
   it("ticks with a time, unticks without, and finished tasks leave the open list", () => {
     const d = base({ tasks: [task("a", { returnedFrom: 1 }), task("b")] });
     const done = toggleTask(d, "a", deps);
     expect(t(done, "a")).toEqual({ ...task("a"), done: true, doneAt: 5000 });
-    expect(openTasks(done.tasks, "work").map((x) => x.id)).toEqual(["b"]);
+    expect(openTasks(done.tasks).map((x) => x.id)).toEqual(["b"]);
     expect(t(toggleTask(done, "a"), "a")).toEqual({ ...task("a"), done: false });
   });
   it("removes a task and forgets it on a block made from it", () => {
@@ -183,7 +178,7 @@ describe("list edits", () => {
       task("d", { blockId: "b1" }),
       task("e"),
     ];
-    expect(doneThisWeek(tasks, "work", now).map((x) => x.id)).toEqual(["a"]);
+    expect(doneThisWeek(tasks, now).map((x) => x.id)).toEqual(["a"]);
   });
 });
 
@@ -196,36 +191,20 @@ describe("tasks and blocks", () => {
     expect(attachTask(d, "a", "missing")).toBe(d);
     expect(attachTask(out, "a", "b1")).toBe(out);
   });
-  it("drops a task on empty time: a block named after it, as long as the area's block", () => {
+  it("a block made from a single task (before tasks lost their area) has one tick", () => {
     const d = base({
-      tasks: [task("a"), task("b", { order: 1 }), task("u", { catId: null, order: 2 })],
+      weeks: [[blk("b1"), blk("mine", { day: 2, label: "a", sourceTaskId: "a" })], []],
+      tasks: [task("a", { blockId: "mine" })],
     });
-    const work = d.cats.find((c) => c.id === "work")!;
-    const out = placeTask(d, 0, "a", 2, 600, deps);
-    const made = out.weeks[0].find((b) => b.id === "new")!;
-    expect(made).toEqual({
-      id: "new",
-      catIds: ["work"],
-      day: 2,
-      start: 600,
-      mins: work.blockMins,
-      label: "a",
-      desc: "",
-      done: false,
-      sourceTaskId: "a",
-    });
-    expect(t(out, "a").blockId).toBe("new");
-    expect(singleTaskOf(out.tasks, made)?.id).toBe("a");
-    expect(placeTask(d, 1, "b", 0, 600, deps).weeks[1].find((b) => b.id === "new")!.mins).toBe(work.blockMins);
-    expect(placeTask(d, 0, "u", 2, 600, deps)).toBe(d); // Unsorted: no area to make a block of
-  });
-  it("a single-task block has one tick: ticking finishes the task, unticking reopens it", () => {
-    const d = placeTask(base({ tasks: [task("a")] }), 0, "a", 2, 600, deps);
-    const ticked = toggleDone(d, 0, "new", deps);
-    expect(t(ticked, "a")).toMatchObject({ done: true, doneAt: 5000, blockId: "new" });
-    const unticked = toggleDone(ticked, 0, "new", deps);
-    expect(t(unticked, "a")).toMatchObject({ done: false, blockId: "new" });
+    expect(singleTaskOf(d.tasks, d.weeks[0][1])?.id).toBe("a");
+    const ticked = toggleDone(d, 0, "mine", deps);
+    expect(t(ticked, "a")).toMatchObject({ done: true, doneAt: 5000, blockId: "mine" });
+    const unticked = toggleDone(ticked, 0, "mine", deps);
+    expect(t(unticked, "a")).toMatchObject({ done: false, blockId: "mine" });
     expect(t(unticked, "a").doneAt).toBeUndefined();
+    // a second task in it makes it an ordinary block with a checklist
+    const two = attachTask(base({ ...d, tasks: [...d.tasks, task("b", { order: 1 })] }), "b", "mine");
+    expect(singleTaskOf(two.tasks, two.weeks[0][1])).toBeNull();
   });
   it("ticking a block sends its unticked tasks back, 'back from Tue'; ticked ones stay in it", () => {
     let d = base({ tasks: [task("a"), task("b", { order: 1 })] });
@@ -276,13 +255,17 @@ describe("tasks and blocks", () => {
     expect(t(rolled, "a").returnedFrom).toBe(1);
     expect(t(rolled, "c").blockId).toBe("n1");
     // applying a template replaces the week: tasks never come with it
-    const withTpl = saveTemplate(placeTask(d, 1, "a", 5, 600, deps), 1, "T", { uid: () => "tpl" });
+    const made = {
+      ...d,
+      weeks: [d.weeks[0], [...d.weeks[1], blk("mine", { day: 5, sourceTaskId: "a" })]] as CadenceData["weeks"],
+    };
+    const withTpl = saveTemplate(made, 1, "T", { uid: () => "tpl" });
     expect(withTpl.templates[0].blocks.every((b) => !("sourceTaskId" in b))).toBe(true);
     const applied = applyTemplate(withTpl, 1, "tpl", { uid: () => "copy" });
-    expect(applied.tasks.every((x) => x.blockId !== "n1" && x.blockId !== "new")).toBe(true);
+    expect(applied.tasks.every((x) => x.blockId !== "n1")).toBe(true);
     expect(t(applied, "c").returnedFrom).toBe(3);
   });
-  it("deleting an area moves its tasks to Unsorted", () => {
+  it("deleting an area clears it from tasks that had it", () => {
     const d = base({ tasks: [task("a"), task("l", { catId: "learn", order: 1 })] });
     const out = removeCat(d, "work");
     expect(out.tasks.map((x) => x.catId)).toEqual([null, "learn"]);

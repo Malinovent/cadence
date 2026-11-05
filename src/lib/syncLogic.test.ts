@@ -56,7 +56,7 @@ describe("jsonEqual / contentEqual", () => {
 
   it("compares tasks too", () => {
     const d = defaultData();
-    const t = T.addTask(d, "Buy milk", {}, { uid: () => "t", now: () => 1 });
+    const t = T.addTask(d, "Buy milk", { uid: () => "t", now: () => 1 });
     expect(contentEqual(d, t)).toBe(false);
     expect(contentEqual(t, T.toggleTask(t, "t"))).toBe(false);
     expect(contentEqual(t, normalizeData(reorderKeys(JSON.parse(JSON.stringify(t)))).data)).toBe(true);
@@ -81,7 +81,7 @@ describe("isEmptyData", () => {
     expect(isEmptyData({ ...d, templates: [{ id: "t", name: "T", blocks: [] }] })).toBe(false);
     expect(isEmptyData({ ...d, history: [{ id: "b", catId: "work", mins: 60, date: 1 }] })).toBe(false);
     expect(isEmptyData({ ...d, streaks: { work: { count: 1 } } })).toBe(false);
-    expect(isEmptyData(T.addTask(d, "Buy milk", {}, { uid: () => "t", now: () => 1 }))).toBe(false);
+    expect(isEmptyData(T.addTask(d, "Buy milk", { uid: () => "t", now: () => 1 }))).toBe(false);
     expect(isEmptyData(A.updateCat(d, "work", { limit: { kind: "floor", min: 600 } }))).toBe(false);
     expect(isEmptyData(A.addCat(d, { uid: () => "c" }))).toBe(false);
   });

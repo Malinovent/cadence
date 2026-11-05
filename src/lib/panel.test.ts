@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { BUFFER_ID, BUFFER_MINS } from "./constants";
+import { BUFFER_COLOR, BUFFER_ID, BUFFER_MINS } from "./constants";
 import { defaultData, type CadenceData, type Task } from "./model";
-import { openCount, panelAreas, panelNotes, taskNote } from "./panel";
+import { openCount, panelAreas, panelNotes, taskDots, taskNote } from "./panel";
 
 const data = (): CadenceData => ({
   ...defaultData(),
@@ -89,5 +89,17 @@ describe("tasks in the panel (S1.5)", () => {
     expect(taskNote(tk({ blockId: "b1" }), d.weeks)).toMatch(/^Mon 9/);
     expect(taskNote(tk({ returnedFrom: 1 }), d.weeks)).toBe("back from Tue");
     expect(taskNote(tk({ blockId: "gone", returnedFrom: 2 }), d.weeks)).toBe("back from Wed");
+  });
+  it("dots a task in a block with that block's colours", () => {
+    const d = data();
+    d.weeks[1] = [
+      { id: "two", day: 2, start: 540, mins: 60, catIds: ["work", "rest"], done: false, label: "", desc: "" },
+      { id: "buf", day: 3, start: 540, mins: 30, catIds: [], done: false, label: "", desc: "", buffer: true },
+    ];
+    expect(taskDots(tk({ blockId: "b1" }), d)).toEqual(["#123456"]);
+    expect(taskDots(tk({ blockId: "two" }), d)).toEqual(["#654321", "#123456"]);
+    expect(taskDots(tk({ blockId: "buf" }), d)).toEqual([BUFFER_COLOR]);
+    expect(taskDots(tk(), d)).toEqual([]);
+    expect(taskDots(tk({ blockId: "gone" }), d)).toEqual([]);
   });
 });

@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { DOCK_ATTR } from "../interaction/dom";
 import { openCount } from "../lib/panel";
-import { openTasks } from "../lib/tasks";
 import { S } from "../styles";
 import AreaChip from "./AreaChip";
-import { armHint, BalanceNotes, hasUnsorted, TasksHead, useFolds, type PanelProps } from "./AreasPanel";
-import AreaTasks from "./AreaTasks";
+import { armHint, BalanceNotes, type PanelProps } from "./AreasPanel";
+import TaskList from "./TaskList";
 import BalanceBar from "./BalanceBar";
 
 type Tab = "areas" | "tasks";
@@ -17,7 +16,6 @@ type Tab = "areas" | "tasks";
  */
 export default function PhoneDock(props: PanelProps & { folded: boolean; onShow: () => void }) {
   const { areas, notes, data, now, interaction, armedCatId, onArm, onHide, onShow, folded, actions } = props;
-  const [foldedAreas, toggleFold] = useFolds();
   const [tab, setTab] = useState<Tab>("areas");
   const dockRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(0);
@@ -85,39 +83,7 @@ export default function PhoneDock(props: PanelProps & { folded: boolean; onShow:
                   <BalanceNotes notes={notes} />
                 </>
               ) : (
-                // S1.5: tasks grouped under their areas, each folding away; Unsorted last
-                <div style={S.dockTaskGroups}>
-                  {areas
-                    .filter((a) => a.balance !== null)
-                    .map((a) => {
-                      const isOpen = !foldedAreas.has(a.id);
-                      return (
-                        <div key={a.id}>
-                          <div style={S.dockTaskArea}>
-                            <span style={{ ...S.dot, background: a.color }} />
-                            <span style={S.balanceName}>{a.name}</span>
-                          </div>
-                          <TasksHead
-                            name={a.name}
-                            count={openTasks(data.tasks, a.id).length}
-                            open={isOpen}
-                            onToggle={() => toggleFold(a.id)}
-                          />
-                          {isOpen && (
-                            <AreaTasks catId={a.id} data={data} interaction={interaction} actions={actions} now={now} />
-                          )}
-                        </div>
-                      );
-                    })}
-                  {hasUnsorted(data, now) && (
-                    <div>
-                      <div style={S.dockTaskArea}>
-                        <span style={S.balanceName}>Unsorted · give each an area</span>
-                      </div>
-                      <AreaTasks catId={null} data={data} interaction={interaction} actions={actions} now={now} />
-                    </div>
-                  )}
-                </div>
+                <TaskList data={data} interaction={interaction} actions={actions} now={now} />
               )}
             </div>
           </>

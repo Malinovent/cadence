@@ -49,10 +49,10 @@ export default function App() {
   const interaction = useInteraction({
     onDrop: (source, hit) => {
       const d = resolveDrop(source, hit);
+      if (!d) return;
       if (d.kind === "tag") actions.addTag(d.blockId, d.catId);
       else if (d.kind === "place") actions.placeBlock(activeWeek, d.catId, d.day, d.start);
       else if (d.kind === "attach") actions.attachTask(d.taskId, d.blockId);
-      else if (d.kind === "placeTask") actions.placeTask(activeWeek, d.taskId, d.day, d.start);
       else actions.moveBlock(activeWeek, d.id, d.day, d.start);
     },
     onResize: (id, edge, origStart, origMins, deltaSlots) =>

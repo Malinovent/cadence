@@ -208,7 +208,7 @@ describe("sync engine: pushing edits", () => {
 
   it("pushes a task edit like any other edit", async () => {
     await synced();
-    edit((d) => T.addTask(d, "Buy milk", {}, { uid: () => "t1", now: () => clock }));
+    edit((d) => T.addTask(d, "Buy milk", { uid: () => "t1", now: () => clock }));
     expect(engine.getState().status).toBe("syncing");
     await vi.advanceTimersByTimeAsync(1500);
     await flush();

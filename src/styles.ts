@@ -1311,39 +1311,26 @@ export const S = {
     gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
     gap: 10
   },
-  // ---- S1.5 tasks under areas ----
-  areaTasksHead: {
-    display: "flex",
-    alignItems: "baseline",
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 6
-  },
-  areaFold: {
-    padding: "2px 0",
-    border: "none",
-    background: "transparent",
-    cursor: "pointer",
-    fontFamily: "'Spline Sans Mono', monospace",
-    fontSize: 10,
-    textTransform: "uppercase",
-    letterSpacing: "0.08em",
-    color: "#7a6e5e"
-  },
+  // ---- S1.5 tasks ----
   areaTasks: {
     display: "flex",
     flexDirection: "column",
     gap: 4,
     marginTop: 4
   },
-  panelTaskScheduled: {
-    opacity: 0.6
-  },
   panelTaskText: {
     flex: 1,
     minWidth: 0,
     display: "flex",
     flexDirection: "column"
+  },
+  // a task in a block: small dots in that block's area colours, before "Wed 9am"
+  taskDot: {
+    display: "inline-block",
+    width: 7,
+    height: 7,
+    marginRight: 3,
+    verticalAlign: "0px"
   },
   panelTaskNote: {
     fontFamily: "'Spline Sans Mono', monospace",
@@ -1361,16 +1348,6 @@ export const S = {
     fontStyle: "italic",
     color: "#7a6e5e",
     textDecoration: "underline"
-  },
-  taskMoveSelect: {
-    maxWidth: 96,
-    padding: "3px 4px",
-    border: `1px solid ${line}`,
-    borderRadius: 3,
-    background: "#fff",
-    fontFamily: "'Spline Sans Mono', monospace",
-    fontSize: 10,
-    color: ink
   },
   blockTodos: {
     listStyle: "none",
@@ -1408,16 +1385,6 @@ export const S = {
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
     color: ink
-  },
-  dockTaskGroups: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 12
-  },
-  dockTaskArea: {
-    display: "flex",
-    alignItems: "center",
-    gap: 6
   },
   // ---- tasks (S1.4: inside the panel) ----
   taskAddRow: {

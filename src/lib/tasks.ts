@@ -1,19 +1,18 @@
-// S1.5: tasks under areas. Pure state transitions on CadenceData (same contract as actions.ts:
+// S1.5: tasks. Pure state transitions on CadenceData (same contract as actions.ts:
 // a new object when something changes, the same reference when nothing does).
 //
 // The rules (brief, S1.5):
-// - a task lives under an area (catId), or in "Unsorted" (catId null) until the user picks one
+// - one plain list, apart from the areas (JP, 2026-11-04: "keep categories cleaner"). `catId`
+//   is still kept in saved data (tasks given an area earlier keep it) but nothing uses it.
 // - dropped on a block, it joins that block's to-do list (blockId)
-// - dropped on empty time, it makes its own block, named after it, as long as the area's usual
-//   block (sourceTaskId on the block). Tasks have no estimates (JP, 2026-11-04).
+// - they go into existing blocks only: no estimates, no area, so no block of their own
+//   (JP, 2026-11-04). Blocks made from a task earlier (sourceTaskId) keep working:
 // - a block made from a single task has one tick: ticking the block finishes the task
 // - when a block ends or is ticked, its unticked tasks go back to their list, "back from Tue",
 //   never into another block
 // - finished tasks leave the list; templates and roll forward copy blocks, never tasks
-import { DAY_END, DAY_START, STEP } from "./constants";
 import { mondayOf } from "./balancedWeeks";
 import type { Block, CadenceData, Task, Weeks } from "./model";
-import { resolvePlacement } from "./placement";
 import { uid as defaultUid } from "./uid";
 
 type Deps = { uid?: () => string; now?: () => number };
@@ -83,31 +82,18 @@ export const releaseRemoved = (before: CadenceData, after: CadenceData): Cadence
 
 // ---------------------------------------------------------------- list edits
 
-export const addTask = (
-  data: CadenceData,
-  name: string,
-  where: { catId?: string | null } = {},
-  deps: Deps = {},
-): CadenceData => {
-  const { catId = null } = where;
+export const addTask = (data: CadenceData, name: string, deps: Deps = {}): CadenceData => {
   const trimmed = name.trim();
   if (!trimmed) return data;
-  const area = catId !== null && data.cats.some((c) => c.id === catId) ? catId : null;
   const task: Task = {
     id: (deps.uid ?? defaultUid)(),
     name: trimmed,
-    catId: area,
+    catId: null,
     done: false,
     order: data.tasks.length,
     createdAt: (deps.now ?? Date.now)(),
   };
   return { ...data, tasks: [...data.tasks, task] };
-};
-
-/** Give a task an area (Unsorted tasks get one here); null puts it back in Unsorted. */
-export const setTaskArea = (data: CadenceData, id: string, catId: string | null): CadenceData => {
-  if (catId !== null && !data.cats.some((c) => c.id === catId)) return data;
-  return mapTask(data, id, (t) => (t.catId === catId ? t : { ...t, catId }));
 };
 
 /** Tick or untick a task. Finished tasks leave the list (they stay ticked inside their block, if any). */
@@ -150,46 +136,6 @@ export const attachTask = (data: CadenceData, taskId: string, blockId: string, d
     void _r;
     return { ...rest, blockId, attachedAt: (deps.now ?? Date.now)() };
   });
-};
-
-/** Length of a block made from this task: its area's usual block. */
-export const taskBlockMins = (data: CadenceData, task: Task): number | undefined =>
-  data.cats.find((c) => c.id === task.catId)?.blockMins;
-
-/**
- * Dropped on empty time: a block of the task's area, named after it, placed like an area drop
- * (nearest free spot, shrunk to fit). Unsorted tasks have no area, so they can't make one.
- */
-export const placeTask = (
-  data: CadenceData,
-  week: WeekIndex,
-  taskId: string,
-  day: number,
-  start: number,
-  deps: Deps = {},
-): CadenceData => {
-  const task = data.tasks.find((t) => t.id === taskId);
-  if (!task || task.done || task.catId === null) return data;
-  const dur = taskBlockMins(data, task);
-  if (!dur) return data;
-  const blocks = data.weeks[week];
-  const r = resolvePlacement(blocks, day, start, dur, null, [DAY_START, DAY_END], STEP);
-  if (!r) return data; // day full
-  const id = (deps.uid ?? defaultUid)();
-  const block: Block = {
-    id,
-    catIds: [task.catId],
-    day,
-    start: r.start,
-    mins: r.mins,
-    label: task.name,
-    desc: "",
-    done: false,
-    sourceTaskId: task.id,
-  };
-  const weeks: Weeks = [data.weeks[0], data.weeks[1]];
-  weeks[week] = [...blocks, block];
-  return attachTask({ ...data, weeks }, taskId, id, deps);
 };
 
 /** Take a task out of its block by hand: back to its list, without a "back from" note. */
@@ -243,7 +189,7 @@ export const returnEnded = (data: CadenceData, now: Date): CadenceData => {
   return { ...data, tasks };
 };
 
-/** An area was deleted: its tasks go to Unsorted, never away. */
+/** An area was deleted: tasks that had it forget it (never go away). */
 export const unsortArea = (data: CadenceData, catId: string): CadenceData =>
   data.tasks.some((t) => t.catId === catId)
     ? { ...data, tasks: data.tasks.map((t) => (t.catId === catId ? { ...t, catId: null } : t)) }
@@ -251,14 +197,13 @@ export const unsortArea = (data: CadenceData, catId: string): CadenceData =>
 
 // ---------------------------------------------------------------- reading the list
 
-/** The list shows open tasks only, in the user's order; scheduled ones too (they show where they are). */
-export const openTasks = (tasks: readonly Task[], catId: string | null): Task[] =>
-  tasks.filter((t) => !t.done && t.catId === catId);
+/** The list shows open tasks only, in the user's order; ones in a block too (they show where they are). */
+export const openTasks = (tasks: readonly Task[]): Task[] => tasks.filter((t) => !t.done);
 
-/** "Show 3 done this week": tasks finished since this Monday, in the area (or Unsorted). */
-export const doneThisWeek = (tasks: readonly Task[], catId: string | null, now: Date): Task[] => {
+/** "Show 3 done this week": tasks finished since this Monday. */
+export const doneThisWeek = (tasks: readonly Task[], now: Date): Task[] => {
   const from = mondayOf(now).getTime();
-  return tasks.filter((t) => t.done && t.catId === catId && (t.doneAt ?? 0) >= from);
+  return tasks.filter((t) => t.done && (t.doneAt ?? 0) >= from);
 };
 
 export const DAY_SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;

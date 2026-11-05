@@ -58,3 +58,15 @@ export function taskNote(task: Task, weeks: CadenceData["weeks"]): string {
   }
   return task.returnedFrom !== undefined ? `back from ${DAY_SHORT[task.returnedFrom]}` : "";
 }
+
+/**
+ * The colour dots on a task that sits in a block: one per area of that block, in its order
+ * (the buffer's grey for a buffer). Empty when the task isn't in a block.
+ */
+export function taskDots(task: Task, data: Pick<CadenceData, "weeks" | "cats">): string[] {
+  if (task.blockId === undefined) return [];
+  const b = data.weeks[0].find((x) => x.id === task.blockId) ?? data.weeks[1].find((x) => x.id === task.blockId);
+  if (!b) return [];
+  if (b.buffer) return [BUFFER_COLOR];
+  return b.catIds.map((id) => data.cats.find((c) => c.id === id)?.color).filter((c): c is string => !!c);
+}

@@ -34,14 +34,14 @@ function loadState(key: string, storage: StorageLike): unknown {
  */
 export const PREMIGRATION_KEYS = {
   guardrails: "cadence:backup:before-guardrails",
-  tasks: "cadence:backup:before-tasks", // S1.5: schema 2, tasks under areas
+  tasks: "cadence:backup:before-tasks", // S1.5: schema 2 tasks
 } as const;
 
 /** S1.2: saved categories that don't have a guardrail yet (written by an older version). */
 export const needsGuardrailMigration = (rawCats: unknown): boolean =>
   Array.isArray(rawCats) && rawCats.some((c) => typeof c === "object" && c !== null && !("limit" in c));
 
-/** S1.5: saved tasks in the schema 1 shape (no `order`), written before tasks lived under areas. */
+/** S1.5: saved tasks in the schema 1 shape (no `order`), written before S1.5. */
 export const needsTaskMigration = (rawTasks: unknown): boolean =>
   Array.isArray(rawTasks) && rawTasks.some((t) => typeof t === "object" && t !== null && !("order" in t));
 

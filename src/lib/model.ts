@@ -22,9 +22,10 @@ export type Template = { id: string; name: string; blocks: TemplateBlock[] };
 export type HistoryEntry = { id: string /* block id */; catId: string; mins: number; date: number /* ms epoch */ };
 export type Streaks = Record<string, { count: number; lastWeek?: number }>;
 export type Weeks = [Block[], Block[]];
-// S1.5 (schema 2): tasks live under an area. `name` is the brief's "title" (kept as `name` so a
-// copy of the app from before S1.5 still reads the list). catId null = "Unsorted" (tasks from
-// before areas, until the user gives them one). blockId = in that block's to-do list.
+// S1.5 (schema 2): one plain task list. `name` is the brief's "title" (kept as `name` so a
+// copy of the app from before S1.5 still reads the list). catId: kept in saved data (an area some
+// tasks got on Nov 4 before tasks became one plain list) but unused; null for new tasks.
+// blockId = in that block's to-do list.
 // returnedFrom = day (0 = Mon) of the block it came back from, for "back from Tue".
 // The list's array order is the user's order; `order` mirrors it (index) in the stored shape.
 export type Task = {
@@ -222,7 +223,7 @@ export const normalizeData = (partial: unknown): { data: CadenceData; dropped: n
   }
 
   // tasks (a missing key is just an older file, not a drop). Schema 1 tasks had only id, name,
-  // done and createdAt: they become Unsorted, in their old order.
+  // done and createdAt: they get catId null, in their old order.
   const blockIds = new Map<string, Block>();
   for (const w of weeks) for (const b of w) blockIds.set(b.id, b);
   const tasks: Task[] = [];
@@ -242,7 +243,7 @@ export const normalizeData = (partial: unknown): { data: CadenceData; dropped: n
       const task: Task = {
         id: t.id,
         name: t.name,
-        // an area deleted since (or never set) leaves the task Unsorted, never lost
+        // an area deleted since (or never set) becomes null; the task is never lost
         catId: typeof t.catId === "string" && catSet.has(t.catId) ? t.catId : null,
         done: t.done === true,
         order: tasks.length,
