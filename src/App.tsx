@@ -8,6 +8,9 @@ import PhoneDock from "./components/PhoneDock";
 import WeekBar from "./components/WeekBar";
 import WeekFooter from "./components/WeekFooter";
 import WeekGrid from "./components/WeekGrid";
+import WelcomeBack from "./components/WelcomeBack";
+import { shouldWelcome } from "./lib/welcome";
+import { readWelcomeAnswered, writeWelcomeAnswered } from "./state/welcomePrefs";
 import SlotMenu from "./components/SlotMenu";
 import type { SlotTap } from "./lib/slotMenu";
 import { useInteraction } from "./interaction/useInteraction";
@@ -38,6 +41,10 @@ export default function App() {
   const [editingId, setEditingId] = useState<string | null>(null); // block open in the inline editor
   const [armedCatId, setArmedCatId] = useState<string | null>(null); // tap-to-place: armed tray category
   const [slotTap, setSlotTap] = useState<SlotTap | null>(null); // S1.6: the add window, open on this slot
+  // S1.7: the last edit as of opening (or a later one pulled from the account), never the
+  // automatic changes made after opening; and the absence the prompt was last answered for
+  const [lastEdit, setLastEdit] = useState(() => store.getSnapshot().meta.updatedAt);
+  const [welcomeAnswered, setWelcomeAnswered] = useState(readWelcomeAnswered);
   const [phoneDay, setPhoneDay] = useState(() => defaultDay(0, new Date())); // phone: the one day shown, Mon = 0
   const isPhone = useIsPhone();
   // S1.4: the areas-and-tasks panel hidden (desktop) or folded (phone); remembered on this device
@@ -70,6 +77,7 @@ export default function App() {
       const remote = isRemoteApply(prev, next, meta);
       prev = next;
       if (!remote) return;
+      setLastEdit((t) => Math.max(t, meta.updatedAt)); // an edit on another device counts
       setEditingId(null);
       setArmedCatId(null);
       setSlotTap(null);
@@ -138,6 +146,11 @@ export default function App() {
     actions,
   };
   const showSide = !isPhone && !panelHidden;
+  const welcome = shouldWelcome({ lastEdit, now: now.getTime(), dismissedFor: welcomeAnswered, templates: data.templates.length });
+  const answerWelcome = () => {
+    writeWelcomeAnswered(lastEdit);
+    setWelcomeAnswered(lastEdit);
+  };
   const closeSlotMenu = useCallback(() => setSlotTap(null), []);
 
   return (
@@ -151,6 +164,18 @@ export default function App() {
             Choose which to keep →
           </button>
         </div>
+      )}
+      {view === "calendar" && welcome && (
+        <WelcomeBack
+          templates={data.templates}
+          blocksInWeek1={data.weeks[0].length}
+          onUse={(id) => {
+            actions.applyTemplate(0, id);
+            answerWelcome();
+            changeWeek(0);
+          }}
+          onNotNow={answerWelcome}
+        />
       )}
       {view === "calendar" && (
         <>

@@ -146,6 +146,52 @@ export const S = {
     fontFamily: "'Fraunces Variable', 'Fraunces', serif",
     fontSize: 14
   },
+  // S1.7 welcome back: a calm card above the calendar
+  welcomeCard: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flexWrap: "wrap",
+    gap: 12,
+    background: paper2,
+    border: `1.5px solid ${ink}`,
+    borderRadius: 4,
+    padding: "12px 16px",
+    marginBottom: 20,
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontSize: 15
+  },
+  welcomeText: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 2
+  },
+  welcomeTitle: {
+    fontWeight: 700
+  },
+  welcomeNote: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 11,
+    color: "#7a6e5e"
+  },
+  welcomeActions: {
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 10
+  },
+  welcomeUse: {
+    minHeight: 40,
+    padding: "8px 14px",
+    border: "none",
+    background: ink,
+    color: paper,
+    borderRadius: 3,
+    cursor: "pointer",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 600,
+    fontSize: 14
+  },
   // Phase 4: borderless text button ("Use a different email", "Choose which to keep →")
   textBtn: {
     padding: 0,

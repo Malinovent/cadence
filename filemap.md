@@ -44,6 +44,7 @@
 - `src/lib/guardrail.ts` — S1.2 guardrails: `Limit` type, `parseLimit`, `floorFromTarget`, `legacyTarget`, `changeKind`, `balance`, wording (`fmtH`, `limitLabel`, `balanceLabel`, `balanceNote`), `barGeometry`
 - `src/lib/buffer.test.ts` — tests for buffer blocks across actions, drops, stats and normalizeData
 - `src/lib/slotMenu.ts` — S1.6 tap empty time to add: lengths, what a pick places, where the window opens
+- `src/lib/welcome.ts` — S1.7 when to welcome back (7+ days without an edit) and what a tap replaces
 - `src/lib/tasks.ts` — S1.5 task rules: add / tick / remove, attach to a block, single-task tick, return on tick, end or removal, done this week
 - `src/lib/panel.ts` — S1.4/S1.5: the panel's area rows (area + this week's balance, buffer last), notes, open task count, where a task is, its block's colour dots
 - `src/lib/balancedWeeks.ts` — S1.3: calendar weeks and weather seasons, ticked minutes per week from history, `limitKept` / `weekBalanced` with `BalanceRules`, `season` (marks + count)
@@ -52,6 +53,7 @@
 - `src/lib/__fixtures__/legacy.ts` — legacy-app data fixture for tests
 - `src/state/store.ts` — `createCadenceStore`: framework-free holder of data + meta; per-key persistence; `edit` (user edit, bumps `updatedAt`), `applyRemote` (no bump), `setMeta`
 - `src/state/useCadence.ts` — `useCadence` hook: renders from the store (`useSyncExternalStore`); data, meta, bound user actions, `store`
+- `src/state/welcomePrefs.ts` — per-device: the absence the welcome-back card was answered for (`cadence:ui:welcomeAnswered`)
 - `src/state/panelPrefs.ts` — read/write the per-device panel hidden / tray folded choice (`cadence:ui:trayHidden`)
 - `src/state/balanceRules.ts` — read/write the per-device balanced-week rules (`cadence:ui:balanceRules`)
 - `src/state/useNow.ts` — `useNow()`: current time, refreshed each whole minute and when the page becomes visible
@@ -70,6 +72,7 @@
 - `src/components/AreaChip.tsx` — one draggable area (or buffer) chip: drag source, press/hold feedback, tap-to-place arming
 - `src/components/BalanceBar.tsx` — one area's guardrail bar with kind and partial-credit label
 - `src/components/SlotMenu.tsx` — S1.6 the add window (desktop, beside the slot) / bottom sheet (phone): length, areas and buffer
+- `src/components/WelcomeBack.tsx` — S1.7 "Welcome back. Start this week fresh from a template?" card
 - `src/components/TaskList.tsx` — the one task list in the panel / phone Tasks tab: draggable rows (onto a block), tick, block colour dots + where it is, dismiss, done this week, add row
 - `src/components/WeekBar.tsx` — above the grid: Week 1 / Week 2 switch, compact balanced weeks card, "Show areas and tasks" when the panel is hidden
 - `src/components/WeekFooter.tsx` — below the grid: templates, save current week, roll forward

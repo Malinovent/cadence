@@ -266,6 +266,13 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 - A click or tap on empty time (not on a block, not the tap that closes an open block editor, not on a full day) opens it for that slot, which gets an ink outline (`S.slotMark`, one row). Desktop: a 240px window (`S.slotMenu`, paper, ink border) beside the point, to its right or flipped left, kept inside the viewport (`menuPosition`); scrolling the page closes it. Phone: a bottom sheet (`S.slotSheet`) over a light backdrop, above the dock.
 - Contents (`SlotMenu`): "Add at Wed 9am", ✕; a length row "Usual · 30 min · 1 h · 1 h 30 · 2 h" (Usual = the area's block length, or 30 min for the buffer; default); then one row per area and the buffer, in the tray's dashed look, each showing what it would place ("9am–11am", the same nearest-gap / shrink-to-fit rule as a drop, `pickPlacement`) or "no room" (disabled). A pick places the block (`placeBlock` with the length) and closes. Escape, ✕, a tap outside, changing view, week or phone day close it with nothing changed. Dragging is unchanged.
 
+### S1.7 Welcome back
+- Shown at the top of the calendar view when the last edit is 7 days old or more (`shouldWelcome`, `src/lib/welcome.ts`), there is at least one template, and this absence wasn't answered yet on this device. New users (never edited) never see it.
+- "Last edit" = `meta.updatedAt` as loaded when the app opened, raised by a copy pulled from the account (an edit on another device counts), never by automatic changes after opening (tasks coming back from ended blocks).
+- Card (`WelcomeBack`, `S.welcomeCard`: paper2, ink border): "**Welcome back.** Start this week fresh from a template?", then, when Week 1 has blocks, "It replaces the 4 blocks in Week 1." (mono, grey). Buttons: one per template (`Use “Calm week”` when there's one, the names when several), and "Not now".
+- A template button applies it to Week 1 (the usual Apply: replaces Week 1, its tasks go back to their list) and shows Week 1. "Not now" changes nothing, not even the edit time. Either answer is remembered per device (`cadence:ui:welcomeAnswered` = the last-edit time it was shown for), so it asks again only after the next 7-day gap.
+- With no templates yet it stays hidden; S1.8's starter templates will give everyone some.
+
 ## Phases
 1. Port + export/import + unit tests (this file's sections above).
 2. PWA + deploy: manifest, icons (incl. 180×180 apple-touch-icon, replace the emoji favicon), iOS meta tags, `viewport-fit=cover` + safe-area padding, service worker app-shell cache, self-hosted fonts, GitHub Pages workflow.
