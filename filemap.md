@@ -44,6 +44,7 @@
 - `src/lib/guardrail.ts` — S1.2 guardrails: `Limit` type, `parseLimit`, `floorFromTarget`, `legacyTarget`, `changeKind`, `balance`, wording (`fmtH`, `limitLabel`, `balanceLabel`, `balanceNote`), `barGeometry`
 - `src/lib/buffer.test.ts` — tests for buffer blocks across actions, drops, stats and normalizeData
 - `src/lib/slotMenu.ts` — S1.6 tap empty time to add: lengths, what a pick places, where the window opens
+- `src/lib/starters.ts` — S1.8 the three starter weeks, matching areas by name, adding missing ones, applying to a week
 - `src/lib/welcome.ts` — S1.7 when to welcome back (7+ days without an edit) and what a tap replaces
 - `src/lib/tasks.ts` — S1.5 task rules: add / tick / remove, attach to a block, single-task tick, return on tick, end or removal, done this week
 - `src/lib/panel.ts` — S1.4/S1.5: the panel's area rows (area + this week's balance, buffer last), notes, open task count, where a task is, its block's colour dots
@@ -75,7 +76,7 @@
 - `src/components/WelcomeBack.tsx` — S1.7 "Welcome back. Start this week fresh from a template?" card
 - `src/components/TaskList.tsx` — the one task list in the panel / phone Tasks tab: draggable rows (onto a block), tick, block colour dots + where it is, dismiss, done this week, add row
 - `src/components/WeekBar.tsx` — above the grid: Week 1 / Week 2 switch, compact balanced weeks card, "Show areas and tasks" when the panel is hidden
-- `src/components/WeekFooter.tsx` — below the grid: templates, save current week, roll forward
+- `src/components/WeekFooter.tsx` — below the grid: templates, save current week, starter weeks (S1.8), roll forward
 - `src/components/WeekGrid.tsx` — day grid (`rowH` and `days` props; `phone` prop: Mon–Sun day strip instead of the head row, 52px time column, swipe to change day), drop preview / tag highlight, current-time line and clock tag, tap-to-place, block taps and right-click
 - `src/components/Block.tsx` — one placed block (states, gradient ring, round done tick, done tint, Now ring + minutes left, press/lift/tag-target looks, mouse edge handles, touch grips)
 - `src/components/BlockEditor.tsx` — inline title/description/tags editor; touch-only day chips and delete

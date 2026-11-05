@@ -271,7 +271,13 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 - "Last edit" = `meta.updatedAt` as loaded when the app opened, raised by a copy pulled from the account (an edit on another device counts), never by automatic changes after opening (tasks coming back from ended blocks).
 - Card (`WelcomeBack`, `S.welcomeCard`: paper2, ink border): "**Welcome back.** Start this week fresh from a template?", then, when Week 1 has blocks, "It replaces the 4 blocks in Week 1." (mono, grey). Buttons: one per template (`Use “Calm week”` when there's one, the names when several), and "Not now".
 - A template button applies it to Week 1 (the usual Apply: replaces Week 1, its tasks go back to their list) and shows Week 1. "Not now" changes nothing, not even the edit time. Either answer is remembered per device (`cadence:ui:welcomeAnswered` = the last-edit time it was shown for), so it asks again only after the next 7-day gap.
-- With no templates yet it stays hidden; S1.8's starter templates will give everyone some.
+- Since S1.8 it always has something to offer: the starter weeks.
+
+### S1.8 Starter templates
+- Three built-in starter weeks (`src/lib/starters.ts`), never stored or synced (not in `templates`, no change to the saved shape): "Work-heavy week", "Family week", "Recovery week". Each uses Work (a ceiling), Rest and People (floors) and Exercise (a floor), and has one 30-min buffer every day. Under-filled on purpose: every floor is 60–95% planned and Work sits under its ceiling, so there's room to add. Tested: on the grid, on half-hours, no overlaps, a buffer a day.
+- JP's choice (2026-11-04): applying one adds the areas it needs that the person doesn't have (matched by name, case and spaces ignored), with the starter's guardrail and block length and a calm colour (Rest #9B4DCA, People #0CA678, else the first free palette colour, never #D6336C); areas the person already has keep their own limits and get the starter's blocks. It replaces the week like a template (tasks in replaced blocks go back to the list).
+- Templates section below the grid: "Starter weeks" beside the person's own templates, each row with the name, a one-line description, "Adds Rest and People to your areas." when it would, and "apply" (to the week shown). The person's list now reads "No templates of your own yet." when empty.
+- Welcome back (S1.7) offers them too ("or a starter:" after the person's templates, "Starter weeks:" when there are none), so it can always show.
 
 ## Phases
 1. Port + export/import + unit tests (this file's sections above).

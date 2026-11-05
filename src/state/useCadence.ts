@@ -1,6 +1,7 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 import * as A from "../lib/actions";
 import * as T from "../lib/tasks";
+import { applyStarter } from "../lib/starters";
 import type { SyncMeta } from "../lib/meta";
 import type { CadenceData } from "../lib/model";
 import { createCadenceStore, type CadenceStore } from "./store";
@@ -26,6 +27,7 @@ const makeActions = (store: CadenceStore) => {
     toggleDone: b(A.toggleDone),
     saveTemplate: b(A.saveTemplate),
     applyTemplate: b(A.applyTemplate),
+    applyStarter: b(applyStarter),
     deleteTemplate: b(A.deleteTemplate),
     advanceWeek: b(A.advanceWeek),
     resetStats: b(A.resetStats),

@@ -146,6 +146,27 @@ export const S = {
     fontFamily: "'Fraunces Variable', 'Fraunces', serif",
     fontSize: 14
   },
+  // S1.8 starter weeks: a template row with a short description
+  starterRow: {
+    alignItems: "flex-start"
+  },
+  starterText: {
+    flex: 1,
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: 2
+  },
+  starterBlurb: {
+    fontSize: 12,
+    color: "#7a6e5e",
+    lineHeight: 1.35
+  },
+  starterNote: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 10,
+    color: "#7a6e5e"
+  },
   // S1.7 welcome back: a calm card above the calendar
   welcomeCard: {
     display: "flex",
@@ -179,6 +200,26 @@ export const S = {
     alignItems: "center",
     flexWrap: "wrap",
     gap: 10
+  },
+  welcomeStarters: {
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 6,
+    fontSize: 13,
+    color: "#7a6e5e"
+  },
+  welcomeStarter: {
+    minHeight: 36,
+    padding: "6px 10px",
+    border: `1.5px solid ${ink}`,
+    background: "transparent",
+    color: ink,
+    borderRadius: 3,
+    cursor: "pointer",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 600,
+    fontSize: 13
   },
   welcomeUse: {
     minHeight: 40,

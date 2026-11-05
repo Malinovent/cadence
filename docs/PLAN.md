@@ -143,7 +143,8 @@ Done on branch `s1-slot-menu`: window beside the slot (desktop), bottom sheet (p
 Note: tasks have no estimates (JP, 2026-11-04), so a task picked there makes a block of the chosen length or its area's usual block, not "from its estimate".
 ### [x] S1.7 Welcome back
 Done on branch `s1-welcome`: card after 7+ days without an edit (judged from the edit time at opening, or a newer one from the account), one tap per template builds Week 1, says how many blocks it replaces, "Not now" changes nothing; answered once per absence, per device. Hidden while there are no templates (S1.8). Shipped to main 2026-11-04.
-### [ ] S1.8 Starter templates
+### [~] S1.8 Starter templates
+Done on branch `s1-starters`: work-heavy, family and recovery weeks, under-filled, a buffer a day; applying adds missing Rest/People (JP's choice: keep the person's own areas and limits); offered under Templates and in Welcome back. Left: JP's OK, ship.
 ### [ ] S1.9 French and English
 ### [ ] S1.10 Neutral stats copy
 ### [ ] S1.11 Early-bird badge

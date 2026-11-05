@@ -10,6 +10,7 @@ import WeekFooter from "./components/WeekFooter";
 import WeekGrid from "./components/WeekGrid";
 import WelcomeBack from "./components/WelcomeBack";
 import { shouldWelcome } from "./lib/welcome";
+import { STARTERS } from "./lib/starters";
 import { readWelcomeAnswered, writeWelcomeAnswered } from "./state/welcomePrefs";
 import SlotMenu from "./components/SlotMenu";
 import type { SlotTap } from "./lib/slotMenu";
@@ -146,7 +147,7 @@ export default function App() {
     actions,
   };
   const showSide = !isPhone && !panelHidden;
-  const welcome = shouldWelcome({ lastEdit, now: now.getTime(), dismissedFor: welcomeAnswered, templates: data.templates.length });
+  const welcome = shouldWelcome({ lastEdit, now: now.getTime(), dismissedFor: welcomeAnswered, templates: data.templates.length + STARTERS.length });
   const answerWelcome = () => {
     writeWelcomeAnswered(lastEdit);
     setWelcomeAnswered(lastEdit);
@@ -171,6 +172,11 @@ export default function App() {
           blocksInWeek1={data.weeks[0].length}
           onUse={(id) => {
             actions.applyTemplate(0, id);
+            answerWelcome();
+            changeWeek(0);
+          }}
+          onStarter={(id) => {
+            actions.applyStarter(0, id);
             answerWelcome();
             changeWeek(0);
           }}

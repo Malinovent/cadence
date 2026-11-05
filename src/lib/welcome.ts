@@ -12,7 +12,7 @@ export type WelcomeInput = {
   lastEdit: number; // ms epoch; 0 = never edited (a new user, nothing to welcome back to)
   now: number;
   dismissedFor: number | null; // the lastEdit the prompt was last answered for, on this device
-  templates: number;
+  templates: number; // the person's templates plus the built-in starter weeks (S1.8)
 };
 
 export const shouldWelcome = ({ lastEdit, now, dismissedFor, templates }: WelcomeInput): boolean =>
