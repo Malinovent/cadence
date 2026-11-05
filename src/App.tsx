@@ -30,12 +30,14 @@ import { useCadence } from "./state/useCadence";
 import { useIsPhone } from "./state/useIsPhone";
 import { useNow } from "./state/useNow";
 import { useSync } from "./sync/useSync";
+import { useEarlyBird } from "./sync/useEarlyBird";
 import { FONT_IMPORT, S } from "./styles";
 
 export default function App() {
   const { data, actions, store } = useCadence();
   // Supabase sync (no-op when not configured): header status, Settings "Account & sync", conflict banner
   const sync = useSync(store);
+  const earlyBird = useEarlyBird(sync.session?.email ?? null); // S1.11
   const [view, setView] = useState<View>("calendar");
   const [activeWeek, setActiveWeek] = useState<WeekIndex>(0); // 0 = this week, 1 = next week
   const [statsRange, setStatsRange] = useState<StatsRange>("month");
@@ -157,7 +159,8 @@ export default function App() {
   return (
     <div style={S.root}>
       <style>{FONT_IMPORT}</style>
-      <Header view={view} setView={changeView} syncStatus={sync.configured && sync.session ? sync.status : null} />
+      <Header view={view} setView={changeView} syncStatus={sync.configured && sync.session ? sync.status : null}
+        earlyBird={earlyBird} />
       {view === "calendar" && sync.conflict && (
         <div style={S.conflictBanner}>
           <span>This device and your account both have a schedule.</span>
@@ -247,7 +250,7 @@ export default function App() {
         <StatsView data={data} range={statsRange} setRange={setStatsRange} resetStats={actions.resetStats} />
       )}
       {view === "categories" && <CategoriesView cats={data.cats} actions={actions} />}
-      {view === "settings" && <SettingsView data={data} onReplace={onReplace} sync={sync.configured ? sync : null} />}
+      {view === "settings" && <SettingsView data={data} onReplace={onReplace} sync={sync.configured ? sync : null} earlyBird={earlyBird} />}
     </div>
   );
 }

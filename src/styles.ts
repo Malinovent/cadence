@@ -1019,6 +1019,50 @@ export const S = {
     fontFamily: "'Spline Sans Mono', monospace",
     flexShrink: 0
   },
+  // S1.11 early bird: a small badge by the logo, and a thank-you in Settings
+  earlyBadge: {
+    display: "inline-block",
+    marginLeft: 10,
+    padding: "2px 7px",
+    verticalAlign: "middle",
+    border: `1.5px solid ${ink}`,
+    borderRadius: 999,
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 10,
+    fontWeight: 500,
+    letterSpacing: "0.08em",
+    textTransform: "uppercase",
+    color: ink,
+    background: "#fbf6ec"
+  },
+  earlyThanks: {
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 10,
+    background: paper2,
+    borderRadius: 4,
+    padding: "12px 14px",
+    margin: "24px 0 8px",
+    fontSize: 14,
+    lineHeight: 1.45
+  },
+  // S1.10 last week in words
+  weekWords: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+    background: paper2,
+    borderRadius: 4,
+    padding: "12px 14px",
+    marginBottom: 24
+  },
+  weekWord: {
+    display: "flex",
+    gap: 8,
+    fontSize: 14,
+    lineHeight: 1.4
+  },
   statsNote: {
     marginTop: 24,
     fontStyle: "italic",

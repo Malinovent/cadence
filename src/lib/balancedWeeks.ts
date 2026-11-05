@@ -53,7 +53,7 @@ export function seasonMondays(now: Date): Date[] {
   for (; m <= last; m = addDays(m, 7)) out.push(m);
   return out;
 }
-const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+export const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
 
 // ---------------------------------------------------------------- judging a week
 

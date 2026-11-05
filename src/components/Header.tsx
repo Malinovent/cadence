@@ -10,11 +10,14 @@ export default function Header({
   view,
   setView,
   syncStatus,
+  earlyBird = false,
 }: {
   view: View;
   setView: (v: View) => void;
   /** set only when sync is configured and signed in; null hides the status line */
   syncStatus: SyncStatus | null;
+  /** S1.11: the signed-in email bought the early-bird offer */
+  earlyBird?: boolean;
 }) {
   const badge = syncStatus ? statusBadge(syncStatus) : null;
   const nav = (
@@ -29,7 +32,10 @@ export default function Header({
   return (
     <header style={S.header}>
       <div>
-        <h1 style={S.logo}>Cadence</h1>
+        <h1 style={S.logo}>
+          Cadence
+          {earlyBird && <span style={S.earlyBadge}>Early bird</span>}
+        </h1>
         <p style={S.tagline}>Balance the week before the week balances you.</p>
       </div>
       {badge ? (

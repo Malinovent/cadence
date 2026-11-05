@@ -35,11 +35,14 @@ export default function SettingsView({
   data,
   onReplace,
   sync,
+  earlyBird = false,
 }: {
   data: CadenceData;
   onReplace: (next: CadenceData) => void;
   /** null when sync is not configured: the "Account & sync" section is hidden */
   sync: AccountSyncProps | null;
+  /** S1.11: show the early-bird thank-you */
+  earlyBird?: boolean;
 }) {
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const fileRef = useRef<HTMLInputElement>(null);
@@ -131,6 +134,15 @@ export default function SettingsView({
 
       <BalanceRulesSection />
 
+      {earlyBird && (
+        <div style={S.earlyThanks} role="note">
+          <span style={S.earlyBadge}>Early bird</span>
+          <span>
+            Thank you for believing in Cadence early. Your early-bird purchase is linked to this account, and Pro is
+            yours for life when it arrives.
+          </span>
+        </div>
+      )}
       {sync && <AccountSync {...sync} />}
     </div>
   );
