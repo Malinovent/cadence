@@ -141,8 +141,8 @@ Changed on branch `s1-task-list` (JP, 2026-11-04): tasks are one plain list apar
 ### [x] S1.6 Click or tap empty time to add (JP: armed tap stays; window when nothing is armed)
 Done on branch `s1-slot-menu`: window beside the slot (desktop), bottom sheet (phone), lengths + areas + buffer, no tasks (JP), closes with nothing changed. Also the current-time line now sits above the blocks (JP). Shipped to main 2026-11-04.
 Note: tasks have no estimates (JP, 2026-11-04), so a task picked there makes a block of the chosen length or its area's usual block, not "from its estimate".
-### [~] S1.7 Welcome back
-Done on branch `s1-welcome`: card after 7+ days without an edit (judged from the edit time at opening, or a newer one from the account), one tap per template builds Week 1, says how many blocks it replaces, "Not now" changes nothing; answered once per absence, per device. Hidden while there are no templates (S1.8). Left: JP's OK, ship.
+### [x] S1.7 Welcome back
+Done on branch `s1-welcome`: card after 7+ days without an edit (judged from the edit time at opening, or a newer one from the account), one tap per template builds Week 1, says how many blocks it replaces, "Not now" changes nothing; answered once per absence, per device. Hidden while there are no templates (S1.8). Shipped to main 2026-11-04.
 ### [ ] S1.8 Starter templates
 ### [ ] S1.9 French and English
 ### [ ] S1.10 Neutral stats copy
