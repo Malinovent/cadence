@@ -36,7 +36,7 @@ describe("parseImport", () => {
 
   it("round trips tasks through the export", () => {
     const tasks = [
-      { id: "t1", name: "Call mum", catId: "learn", estMins: 45, done: false, order: 0, createdAt: 10 },
+      { id: "t1", name: "Call mum", catId: "learn", done: false, order: 0, createdAt: 10 },
       { id: "t2", name: "Buy milk", catId: null, done: true, doneAt: 30, order: 1, createdAt: 20 },
     ];
     const withTasks = { ...data, tasks };

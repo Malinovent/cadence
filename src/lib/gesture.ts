@@ -189,10 +189,10 @@ export const dropPreview = (
 ): { day: number; start: number; mins: number } | null => {
   if (intent.kind === "tag" || intent.kind === "attach") return null;
   if (intent.kind === "placeTask") {
-    // same length rule as tasks.placeTask: the estimate, else the area's usual block; Unsorted can't place
+    // same length rule as tasks.placeTask: the area's usual block; Unsorted can't place
     const t = tasks.find((x) => x.id === intent.taskId);
     if (!t || t.done || t.catId === null) return null;
-    const dur = t.estMins ?? cats.find((c) => c.id === t.catId)?.blockMins;
+    const dur = cats.find((c) => c.id === t.catId)?.blockMins;
     if (!dur) return null;
     const r = resolvePlacement(blocks, intent.day, intent.start, dur, null);
     return r && { day: intent.day, ...r };

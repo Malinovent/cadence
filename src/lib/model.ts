@@ -31,7 +31,6 @@ export type Task = {
   id: string;
   name: string;
   catId: string | null;
-  estMins?: number;
   blockId?: string;
   attachedAt?: number; // ms epoch: when it joined that block (a block that ends after this sends it back)
   done: boolean;
@@ -249,7 +248,6 @@ export const normalizeData = (partial: unknown): { data: CadenceData; dropped: n
         order: tasks.length,
         createdAt: Number.isFinite(createdAt) ? createdAt : 0,
       };
-      if (isNum(t.estMins) && t.estMins > 0) task.estMins = Math.round(t.estMins);
       // a block that no longer exists: the task is simply back in its list
       if (typeof t.blockId === "string" && blockIds.has(t.blockId)) {
         task.blockId = t.blockId;

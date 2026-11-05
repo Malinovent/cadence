@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { DOCK_ATTR } from "../interaction/dom";
-import { openCount, tasksLine } from "../lib/panel";
-import { openTasks, taskMins } from "../lib/tasks";
+import { openCount } from "../lib/panel";
+import { openTasks } from "../lib/tasks";
 import { S } from "../styles";
 import AreaChip from "./AreaChip";
 import { armHint, BalanceNotes, hasUnsorted, TasksHead, useFolds, type PanelProps } from "./AreasPanel";
@@ -16,7 +16,7 @@ type Tab = "areas" | "tasks";
  * A spacer in the page flow keeps the end of the page reachable above the dock.
  */
 export default function PhoneDock(props: PanelProps & { folded: boolean; onShow: () => void }) {
-  const { areas, notes, data, week, now, interaction, armedCatId, onArm, onHide, onShow, folded, actions } = props;
+  const { areas, notes, data, now, interaction, armedCatId, onArm, onHide, onShow, folded, actions } = props;
   const [foldedAreas, toggleFold] = useFolds();
   const [tab, setTab] = useState<Tab>("areas");
   const dockRef = useRef<HTMLDivElement>(null);
@@ -100,7 +100,6 @@ export default function PhoneDock(props: PanelProps & { folded: boolean; onShow:
                           <TasksHead
                             name={a.name}
                             count={openTasks(data.tasks, a.id).length}
-                            line={tasksLine(taskMins(data.tasks, a.id), a.balance!.plannedMins, week)}
                             open={isOpen}
                             onToggle={() => toggleFold(a.id)}
                           />

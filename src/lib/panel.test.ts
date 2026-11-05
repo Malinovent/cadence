@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { BUFFER_ID, BUFFER_MINS } from "./constants";
 import { defaultData, type CadenceData, type Task } from "./model";
-import { fmtHM, openCount, panelAreas, panelNotes, taskNote, tasksLine } from "./panel";
+import { openCount, panelAreas, panelNotes, taskNote } from "./panel";
 
 const data = (): CadenceData => ({
   ...defaultData(),
@@ -74,23 +74,20 @@ describe("panel", () => {
 });
 
 describe("tasks in the panel (S1.5)", () => {
-  const tk = (over: Partial<Task> = {}): Task => ({ id: "t", name: "T", catId: "rest", done: false, order: 0, createdAt: 0, ...over });
-  it("writes task time the brief's way", () => {
-    expect(fmtHM(435)).toBe("7 h 15");
-    expect(fmtHM(360)).toBe("6 h");
-    expect(fmtHM(45)).toBe("45 min");
-    expect(fmtHM(65)).toBe("1 h 05");
+  const tk = (over: Partial<Task> = {}): Task => ({
+    id: "t",
+    name: "T",
+    catId: "rest",
+    done: false,
+    order: 0,
+    createdAt: 0,
+    ...over,
   });
-  it("compares tasks against planned time, only when there are estimates", () => {
-    expect(tasksLine(435, 360, 0)).toBe("7 h 15 of tasks · 6 h planned this week");
-    expect(tasksLine(30, 0, 1)).toBe("30 min of tasks · 0 min planned next week");
-    expect(tasksLine(0, 360, 0)).toBeNull();
-  });
-  it("notes the estimate and where the task is, or where it came back from", () => {
+  it("notes where the task is, or where it came back from", () => {
     const d = data();
-    expect(taskNote(tk({ estMins: 45 }), d.weeks)).toBe("45 min");
+    expect(taskNote(tk(), d.weeks)).toBe("");
     expect(taskNote(tk({ blockId: "b1" }), d.weeks)).toMatch(/^Mon 9/);
-    expect(taskNote(tk({ returnedFrom: 1, estMins: 60 }), d.weeks)).toBe("1 h · back from Tue");
+    expect(taskNote(tk({ returnedFrom: 1 }), d.weeks)).toBe("back from Tue");
     expect(taskNote(tk({ blockId: "gone", returnedFrom: 2 }), d.weeks)).toBe("back from Wed");
   });
 });

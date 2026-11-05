@@ -1330,12 +1330,6 @@ export const S = {
     letterSpacing: "0.08em",
     color: "#7a6e5e"
   },
-  // tasks against planned time: grey, never red
-  areaTasksLine: {
-    fontFamily: "'Spline Sans Mono', monospace",
-    fontSize: 10,
-    color: "#9a8d7d"
-  },
   areaTasks: {
     display: "flex",
     flexDirection: "column",
@@ -1372,16 +1366,6 @@ export const S = {
     maxWidth: 96,
     padding: "3px 4px",
     border: `1px solid ${line}`,
-    borderRadius: 3,
-    background: "#fff",
-    fontFamily: "'Spline Sans Mono', monospace",
-    fontSize: 10,
-    color: ink
-  },
-  taskEstSelect: {
-    flexShrink: 0,
-    padding: "6px 4px",
-    border: `1.5px solid ${ink}`,
     borderRadius: 3,
     background: "#fff",
     fontFamily: "'Spline Sans Mono', monospace",

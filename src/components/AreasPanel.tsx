@@ -1,9 +1,8 @@
 import { useState } from "react";
 import type { Interaction } from "../interaction/useInteraction";
-import type { WeekIndex } from "../lib/actions";
 import type { CadenceData } from "../lib/model";
-import { tasksLine, type PanelArea } from "../lib/panel";
-import { doneThisWeek, openTasks, taskMins } from "../lib/tasks";
+import type { PanelArea } from "../lib/panel";
+import { doneThisWeek, openTasks } from "../lib/tasks";
 import { readFolded, writeFolded } from "../state/panelFolds";
 import { S } from "../styles";
 import AreaChip from "./AreaChip";
@@ -14,7 +13,6 @@ export type PanelProps = {
   areas: PanelArea[];
   notes: string[];
   data: CadenceData;
-  week: WeekIndex;
   now: Date;
   interaction: Interaction;
   armedCatId: string | null; // tap-to-place: the area waiting for a slot tap
@@ -50,16 +48,14 @@ export function useFolds(): [Set<string>, (id: string) => void] {
   return [folded, toggle];
 }
 
-/** "Tasks · 3" fold button and the grey tasks-against-planned line for one area. */
+/** "Tasks · 3" fold button for one area. */
 export function TasksHead({
   count,
-  line,
   open,
   onToggle,
   name,
 }: {
   count: number;
-  line: string | null;
   open: boolean;
   onToggle: () => void;
   name: string;
@@ -75,7 +71,6 @@ export function TasksHead({
       >
         {open ? "▾" : "▸"} {count > 0 ? `Tasks · ${count}` : "Tasks"}
       </button>
-      {line && <span style={S.areaTasksLine}>{line}</span>}
     </div>
   );
 }
@@ -89,7 +84,6 @@ export default function AreasPanel({
   areas,
   notes,
   data,
-  week,
   now,
   interaction,
   armedCatId,
@@ -119,7 +113,6 @@ export default function AreasPanel({
                   <TasksHead
                     name={a.name}
                     count={openTasks(data.tasks, a.id).length}
-                    line={tasksLine(taskMins(data.tasks, a.id), a.balance!.plannedMins, week)}
                     open={open}
                     onToggle={() => toggleFold(a.id)}
                   />

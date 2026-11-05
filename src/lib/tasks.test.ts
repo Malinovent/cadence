@@ -13,9 +13,7 @@ import {
   removeTask,
   returnEnded,
   setTaskArea,
-  setTaskEstimate,
   singleTaskOf,
-  taskMins,
   toggleTask,
 } from "./tasks";
 import { buildExport, parseImport } from "./transfer";
@@ -106,7 +104,7 @@ describe("schema 2 migration", () => {
       ...base(),
       weeks: [[blk("b1", { sourceTaskId: "a", label: "a" })], []],
       tasks: [
-        task("a", { blockId: "b1", estMins: 45 }),
+        task("a", { blockId: "b1" }),
         task("b", { catId: null, done: true, doneAt: 99, order: 1 }),
         task("c", { returnedFrom: 2, order: 2 }),
       ],
@@ -126,13 +124,19 @@ describe("schema 2 migration", () => {
       tasks: [
         task("a", { blockId: "nope", catId: "deleted" }),
         task("a", { name: "dup" }),
-        task("x", { returnedFrom: 9, estMins: -3 }),
+        task("x", { returnedFrom: 9 }),
       ],
     });
     expect(data.tasks[0]).toEqual({ id: "a", name: "a", catId: null, done: false, order: 0, createdAt: 1 });
     expect(data.tasks[1]).toEqual({ id: "x", name: "x", catId: "work", done: false, order: 1, createdAt: 1 });
     expect(data.weeks[0][0].sourceTaskId).toBeUndefined();
     expect(dropped).toBe(1); // the duplicate id
+  });
+
+  it("ignores an estimate field (tasks have none)", () => {
+    const { data, dropped } = normalizeData({ tasks: [{ ...task("a"), estMins: 45 }] });
+    expect(data.tasks[0]).toEqual(task("a"));
+    expect(dropped).toBe(0);
   });
 
   it("follows the stored order", () => {
@@ -142,21 +146,19 @@ describe("schema 2 migration", () => {
 });
 
 describe("list edits", () => {
-  it("adds under an area, with an optional estimate", () => {
-    const d = addTask(base(), "  Write report ", { catId: "work", estMins: 90 }, deps);
+  it("adds under an area", () => {
+    const d = addTask(base(), "  Write report ", { catId: "work" }, deps);
     expect(d.tasks).toEqual([
-      { id: "new", name: "Write report", catId: "work", estMins: 90, done: false, order: 0, createdAt: 5000 },
+      { id: "new", name: "Write report", catId: "work", done: false, order: 0, createdAt: 5000 },
     ]);
     expect(addTask(base(), "x", { catId: "nope" }, deps).tasks[0].catId).toBeNull();
     const blank = base();
     expect(addTask(blank, "  ", {}, deps)).toBe(blank);
   });
-  it("moves a task to an area, sets and clears its estimate", () => {
+  it("moves a task to an area", () => {
     const d = base({ tasks: [task("a", { catId: null })] });
     expect(t(setTaskArea(d, "a", "learn"), "a").catId).toBe("learn");
     expect(setTaskArea(d, "a", "nope")).toBe(d);
-    expect(t(setTaskEstimate(d, "a", 30), "a").estMins).toBe(30);
-    expect("estMins" in t(setTaskEstimate(setTaskEstimate(d, "a", 30), "a", null), "a")).toBe(false);
   });
   it("ticks with a time, unticks without, and finished tasks leave the open list", () => {
     const d = base({ tasks: [task("a", { returnedFrom: 1 }), task("b")] });
@@ -171,18 +173,17 @@ describe("list edits", () => {
     expect(out.tasks).toEqual([task("b")]);
     expect(out.weeks[0][0].sourceTaskId).toBeUndefined();
   });
-  it("lists this week's finished tasks and adds up estimates of open ones", () => {
+  it("lists this week's finished tasks", () => {
     const now = new Date(2026, 10, 4, 12); // Wed
     const monday = new Date(2026, 10, 2).getTime();
     const tasks = [
       task("a", { done: true, doneAt: monday + 1 }),
       task("b", { done: true, doneAt: monday - 1 }),
-      task("c", { estMins: 45 }),
-      task("d", { estMins: 30, blockId: "b1" }),
+      task("c"),
+      task("d", { blockId: "b1" }),
       task("e"),
     ];
     expect(doneThisWeek(tasks, "work", now).map((x) => x.id)).toEqual(["a"]);
-    expect(taskMins(tasks, "work")).toBe(75);
   });
 });
 
@@ -195,10 +196,11 @@ describe("tasks and blocks", () => {
     expect(attachTask(d, "a", "missing")).toBe(d);
     expect(attachTask(out, "a", "b1")).toBe(out);
   });
-  it("drops a task on empty time: a block named after it, its estimate long, then the area's block", () => {
+  it("drops a task on empty time: a block named after it, as long as the area's block", () => {
     const d = base({
-      tasks: [task("a", { estMins: 90 }), task("b", { order: 1 }), task("u", { catId: null, order: 2 })],
+      tasks: [task("a"), task("b", { order: 1 }), task("u", { catId: null, order: 2 })],
     });
+    const work = d.cats.find((c) => c.id === "work")!;
     const out = placeTask(d, 0, "a", 2, 600, deps);
     const made = out.weeks[0].find((b) => b.id === "new")!;
     expect(made).toEqual({
@@ -206,7 +208,7 @@ describe("tasks and blocks", () => {
       catIds: ["work"],
       day: 2,
       start: 600,
-      mins: 90,
+      mins: work.blockMins,
       label: "a",
       desc: "",
       done: false,
@@ -214,7 +216,6 @@ describe("tasks and blocks", () => {
     });
     expect(t(out, "a").blockId).toBe("new");
     expect(singleTaskOf(out.tasks, made)?.id).toBe("a");
-    const work = d.cats.find((c) => c.id === "work")!;
     expect(placeTask(d, 1, "b", 0, 600, deps).weeks[1].find((b) => b.id === "new")!.mins).toBe(work.blockMins);
     expect(placeTask(d, 0, "u", 2, 600, deps)).toBe(d); // Unsorted: no area to make a block of
   });

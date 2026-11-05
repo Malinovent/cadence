@@ -282,9 +282,9 @@ describe("dropPreview", () => {
 describe("dropPreview for tasks (S1.5)", () => {
   const cats = DEFAULT_CATEGORIES;
   const tk = (over: Partial<Task> = {}): Task => ({ id: "t", name: "T", catId: "work", done: false, order: 0, createdAt: 0, ...over });
-  it("matches placeTask: estimate first, then the area's block", () => {
+  it("matches placeTask: the area's block length", () => {
     const blocks = [blk("x", 1, 540, 60)];
-    const tasks = [tk({ estMins: 45 })];
+    const tasks = [tk()];
     const preview = dropPreview(blocks, cats, { kind: "placeTask", taskId: "t", day: 1, start: 600 }, tasks);
     const data = { ...defaultData(), weeks: [blocks, []] as CadenceData["weeks"], tasks };
     const made = placeTask(data, 0, "t", 1, 600, { uid: () => "new" }).weeks[0].find((b) => b.id === "new")!;

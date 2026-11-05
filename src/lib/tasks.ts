@@ -4,8 +4,8 @@
 // The rules (brief, S1.5):
 // - a task lives under an area (catId), or in "Unsorted" (catId null) until the user picks one
 // - dropped on a block, it joins that block's to-do list (blockId)
-// - dropped on empty time, it makes its own block, named after it, as long as its estimate or the
-//   area's usual block (sourceTaskId on the block)
+// - dropped on empty time, it makes its own block, named after it, as long as the area's usual
+//   block (sourceTaskId on the block). Tasks have no estimates (JP, 2026-11-04).
 // - a block made from a single task has one tick: ticking the block finishes the task
 // - when a block ends or is ticked, its unticked tasks go back to their list, "back from Tue",
 //   never into another block
@@ -86,10 +86,10 @@ export const releaseRemoved = (before: CadenceData, after: CadenceData): Cadence
 export const addTask = (
   data: CadenceData,
   name: string,
-  where: { catId?: string | null; estMins?: number } = {},
+  where: { catId?: string | null } = {},
   deps: Deps = {},
 ): CadenceData => {
-  const { catId = null, estMins } = where;
+  const { catId = null } = where;
   const trimmed = name.trim();
   if (!trimmed) return data;
   const area = catId !== null && data.cats.some((c) => c.id === catId) ? catId : null;
@@ -101,7 +101,6 @@ export const addTask = (
     order: data.tasks.length,
     createdAt: (deps.now ?? Date.now)(),
   };
-  if (estMins && estMins > 0) task.estMins = Math.round(estMins);
   return { ...data, tasks: [...data.tasks, task] };
 };
 
@@ -110,15 +109,6 @@ export const setTaskArea = (data: CadenceData, id: string, catId: string | null)
   if (catId !== null && !data.cats.some((c) => c.id === catId)) return data;
   return mapTask(data, id, (t) => (t.catId === catId ? t : { ...t, catId }));
 };
-
-export const setTaskEstimate = (data: CadenceData, id: string, estMins: number | null): CadenceData =>
-  mapTask(data, id, (t) => {
-    const next = estMins && estMins > 0 ? Math.round(estMins) : undefined;
-    if (t.estMins === next) return t;
-    const { estMins: _e, ...rest } = t;
-    void _e;
-    return next === undefined ? rest : { ...rest, estMins: next };
-  });
 
 /** Tick or untick a task. Finished tasks leave the list (they stay ticked inside their block, if any). */
 export const toggleTask = (data: CadenceData, id: string, deps: Deps = {}): CadenceData =>
@@ -162,9 +152,9 @@ export const attachTask = (data: CadenceData, taskId: string, blockId: string, d
   });
 };
 
-/** Length of a block made from this task: its estimate, or its area's usual block. */
+/** Length of a block made from this task: its area's usual block. */
 export const taskBlockMins = (data: CadenceData, task: Task): number | undefined =>
-  task.estMins ?? data.cats.find((c) => c.id === task.catId)?.blockMins;
+  data.cats.find((c) => c.id === task.catId)?.blockMins;
 
 /**
  * Dropped on empty time: a block of the task's area, named after it, placed like an area drop
@@ -270,9 +260,5 @@ export const doneThisWeek = (tasks: readonly Task[], catId: string | null, now: 
   const from = mondayOf(now).getTime();
   return tasks.filter((t) => t.done && t.catId === catId && (t.doneAt ?? 0) >= from);
 };
-
-/** Estimated minutes of an area's open tasks (only tasks with an estimate count). */
-export const taskMins = (tasks: readonly Task[], catId: string): number =>
-  openTasks(tasks, catId).reduce((s, t) => s + (t.estMins ?? 0), 0);
 
 export const DAY_SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;

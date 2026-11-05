@@ -43,7 +43,7 @@
 - `src/lib/gesture.ts` — pure gesture maths for the interaction engine: thresholds, y→slot start (row height as a parameter), `hitTest` on measured rects, autoscroll speed, touch grip sizing, `resolveDrop` / `dropPreview`, `withAlpha`
 - `src/lib/guardrail.ts` — S1.2 guardrails: `Limit` type, `parseLimit`, `floorFromTarget`, `legacyTarget`, `changeKind`, `balance`, wording (`fmtH`, `limitLabel`, `balanceLabel`, `balanceNote`), `barGeometry`
 - `src/lib/buffer.test.ts` — tests for buffer blocks across actions, drops, stats and normalizeData
-- `src/lib/tasks.ts` — S1.5 task rules: add / area / estimate / tick / remove, attach to a block, place as its own block, single-task tick, return on tick, end or removal, done this week, task minutes
+- `src/lib/tasks.ts` — S1.5 task rules: add / area / tick / remove, attach to a block, place as its own block, single-task tick, return on tick, end or removal, done this week
 - `src/lib/panel.ts` — S1.4/S1.5: the panel's area rows (area + this week's balance, buffer last), notes, open task count, task time wording and notes
 - `src/lib/balancedWeeks.ts` — S1.3: calendar weeks and weather seasons, ticked minutes per week from history, `limitKept` / `weekBalanced` with `BalanceRules`, `season` (marks + count)
 - `src/lib/now.ts` — "now" on the grid: `nowPoint`, `isNowBlock`, `minutesLeft`, `fmtLeft`, `nowLineTop`, `fmtClock`, `msToNextMinute`
@@ -69,7 +69,7 @@
 - `src/components/PhoneDock.tsx` — S1.4 phone tray docked at the bottom: Areas / Tasks tabs, fold to a slim "Show areas and tasks" bar, page spacer, `data-cadence-dock`
 - `src/components/AreaChip.tsx` — one draggable area (or buffer) chip: drag source, press/hold feedback, tap-to-place arming
 - `src/components/BalanceBar.tsx` — one area's guardrail bar with kind and partial-credit label
-- `src/components/AreaTasks.tsx` — S1.5 one area's (or Unsorted) tasks in the panel: draggable rows, tick, note, Move to…, dismiss, done this week, add row with estimate
+- `src/components/AreaTasks.tsx` — S1.5 one area's (or Unsorted) tasks in the panel: draggable rows, tick, note, Move to…, dismiss, done this week, add row
 - `src/components/WeekBar.tsx` — above the grid: Week 1 / Week 2 switch, compact balanced weeks card, "Show areas and tasks" when the panel is hidden
 - `src/components/WeekFooter.tsx` — below the grid: templates, save current week, roll forward
 - `src/components/WeekGrid.tsx` — day grid (`rowH` and `days` props; `phone` prop: Mon–Sun day strip instead of the head row, 52px time column, swipe to change day), drop preview / tag highlight, current-time line and clock tag, tap-to-place, block taps and right-click

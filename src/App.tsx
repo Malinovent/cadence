@@ -124,7 +124,6 @@ export default function App() {
     areas: panelAreas(data, activeWeek),
     notes: panelNotes(data, activeWeek),
     data,
-    week: activeWeek,
     now,
     interaction,
     armedCatId,

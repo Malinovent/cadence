@@ -2,7 +2,7 @@ import type React from "react";
 import { useRef, useState, type FormEvent } from "react";
 import type { Interaction } from "../interaction/useInteraction";
 import type { Category, CadenceData, Task } from "../lib/model";
-import { fmtHM, taskNote } from "../lib/panel";
+import { taskNote } from "../lib/panel";
 import { doneThisWeek, openTasks } from "../lib/tasks";
 import type { CadenceActions } from "../state/useCadence";
 import { S } from "../styles";
@@ -24,13 +24,11 @@ const HOLD_VARS = {
   "--cadence-hold": "rgba(43, 38, 34, 0.16)",
 } as React.CSSProperties;
 
-const ESTIMATES = [15, 30, 45, 60, 90, 120];
-
 /**
  * S1.5: one area's tasks (or the Unsorted ones) in the panel. Open tasks in the user's order,
  * each a drag source (drop on a block to add it there, on empty time to give it its own block);
  * finished ones leave the list, behind "Show 3 done this week". Areas get an add row; Unsorted
- * rows get "Move to…" instead.
+ * rows get "Move to…" instead. No estimates (JP, 2026-11-04).
  */
 export default function AreaTasks({ catId, data, interaction, actions, now }: Props) {
   const [showDone, setShowDone] = useState(false);
@@ -153,7 +151,6 @@ function TaskRow({
 function AddTask({ catId, actions }: { catId: string; actions: TaskActions }) {
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState("");
-  const [est, setEst] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   if (!adding)
     return (
@@ -168,7 +165,7 @@ function AddTask({ catId, actions }: { catId: string; actions: TaskActions }) {
       setAdding(false); // an empty Enter closes the row
       return;
     }
-    actions.addTask(draft, { catId, estMins: est || undefined });
+    actions.addTask(draft, { catId });
     setDraft("");
     inputRef.current?.focus();
   };
@@ -189,14 +186,6 @@ function AddTask({ catId, actions }: { catId: string; actions: TaskActions }) {
         aria-label="New task"
         style={S.tplNameInput}
       />
-      <select aria-label="Estimate" value={est} onChange={(e) => setEst(+e.target.value)} style={S.taskEstSelect}>
-        <option value={0}>no estimate</option>
-        {ESTIMATES.map((m) => (
-          <option key={m} value={m}>
-            {fmtHM(m)}
-          </option>
-        ))}
-      </select>
       <button type="submit" style={S.tplApply} aria-label="Add task">
         ＋
       </button>

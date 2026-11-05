@@ -49,26 +49,12 @@ export const openCount = (tasks: readonly Task[]): number => tasks.filter((t) =>
 
 // ---------------------------------------------------------------- S1.5 tasks in the panel
 
-/** "7 h 15", "6 h", "45 min" (the brief's wording for task time). */
-export const fmtHM = (mins: number): string => {
-  const h = Math.floor(mins / 60);
-  const m = Math.round(mins % 60);
-  if (h === 0) return `${m} min`;
-  return m ? `${h} h ${String(m).padStart(2, "0")}` : `${h} h`;
-};
-
-/** "7 h 15 of tasks · 6 h planned this week", or null when no open task has an estimate. Shown in grey, never red. */
-export const tasksLine = (taskMins: number, plannedMins: number, week: WeekIndex): string | null =>
-  taskMins > 0 ? `${fmtHM(taskMins)} of tasks · ${fmtHM(plannedMins)} planned ${week === 0 ? "this" : "next"} week` : null;
-
-/** Under a task's name: its estimate, where it is ("Tue 9am", "next week · Thu 2pm"), or "back from Tue". */
+/** Under a task's name: where it is ("Tue 9am", "next week · Thu 2pm"), or "back from Tue". */
 export function taskNote(task: Task, weeks: CadenceData["weeks"]): string {
-  const parts: string[] = [];
-  if (task.estMins) parts.push(fmtHM(task.estMins));
   const w = task.blockId === undefined ? -1 : weeks.findIndex((list) => list.some((b) => b.id === task.blockId));
   if (w >= 0) {
     const b = weeks[w].find((x) => x.id === task.blockId)!;
-    parts.push(`${w === 1 ? "next week · " : ""}${DAY_SHORT[b.day]} ${fmtTime(b.start)}`);
-  } else if (task.returnedFrom !== undefined) parts.push(`back from ${DAY_SHORT[task.returnedFrom]}`);
-  return parts.join(" · ");
+    return `${w === 1 ? "next week · " : ""}${DAY_SHORT[b.day]} ${fmtTime(b.start)}`;
+  }
+  return task.returnedFrom !== undefined ? `back from ${DAY_SHORT[task.returnedFrom]}` : "";
 }

@@ -36,7 +36,6 @@ const makeActions = (store: CadenceStore) => {
     toggleTask: b(T.toggleTask),
     removeTask: b(T.removeTask),
     setTaskArea: b(T.setTaskArea),
-    setTaskEstimate: b(T.setTaskEstimate),
     attachTask: b(T.attachTask),
     placeTask: b(T.placeTask),
     detachTask: b(T.detachTask),
