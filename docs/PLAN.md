@@ -138,8 +138,8 @@ Done on branch `s1-panel`: desktop left panel (area drag handles with balance ba
 ### [x] S1.5 Tasks (first under areas, then one plain list) (schema v2; migrates the current Tasks tab's area-less tasks)
 Done on branch `s1-tasks`: schema 2 tasks with migration (old tasks → Unsorted, JP's choice) and a pre-migration copy, drop on block / on empty time, one tick for a single-task block, tasks come back when a block is ticked or ends, done this week, no estimates (JP's call), per-area folds, phone Tasks tab grouped by area. Real backup checked (it predates tasks: zero drops, stable). Shipped to main 2026-11-04.
 Changed on branch `s1-task-list` (JP, 2026-11-04): tasks are one plain list apart from the areas; they go into blocks only and show the block's colour dots there. Shipped to main 2026-11-04.
-### [~] S1.6 Click or tap empty time to add (JP: armed tap stays; window when nothing is armed)
-Done on branch `s1-slot-menu`: window beside the slot (desktop), bottom sheet (phone), lengths + areas + buffer, no tasks (JP), closes with nothing changed. Also the current-time line now sits above the blocks (JP). Left: JP's OK, ship.
+### [x] S1.6 Click or tap empty time to add (JP: armed tap stays; window when nothing is armed)
+Done on branch `s1-slot-menu`: window beside the slot (desktop), bottom sheet (phone), lengths + areas + buffer, no tasks (JP), closes with nothing changed. Also the current-time line now sits above the blocks (JP). Shipped to main 2026-11-04.
 Note: tasks have no estimates (JP, 2026-11-04), so a task picked there makes a block of the chosen length or its area's usual block, not "from its estimate".
 ### [ ] S1.7 Welcome back
 ### [ ] S1.8 Starter templates
