@@ -806,7 +806,7 @@ export const S = {
     height: 0,
     borderTop: `2px solid ${ink}`,
     pointerEvents: "none",
-    zIndex: 1 // above the slot lines, under the blocks
+    zIndex: 4 // above the blocks (JP, 2026-11-04), under an open block editor (20)
   },
   nowClock: {
     position: "absolute",
@@ -1310,6 +1310,86 @@ export const S = {
     display: "grid",
     gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
     gap: 10
+  },
+  // ---- S1.6 tap empty time to add: desktop window beside the slot, phone bottom sheet ----
+  slotMenu: {
+    position: "fixed",
+    zIndex: 40,
+    width: 240,
+    background: paper,
+    border: `1.5px solid ${ink}`,
+    borderRadius: 4,
+    boxShadow: "3px 3px 0 rgba(0,0,0,0.12)",
+    padding: 10,
+    display: "flex",
+    flexDirection: "column",
+    gap: 8
+  },
+  slotSheet: {
+    position: "fixed",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 41,
+    maxHeight: "70vh",
+    overflowY: "auto",
+    background: paper,
+    borderTop: `1.5px solid ${ink}`,
+    padding: "12px 14px calc(14px + env(safe-area-inset-bottom))",
+    display: "flex",
+    flexDirection: "column",
+    gap: 10
+  },
+  slotBackdrop: {
+    position: "fixed",
+    inset: 0,
+    zIndex: 40,
+    background: "rgba(43, 38, 34, 0.25)"
+  },
+  slotHead: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+    color: "#7a6e5e"
+  },
+  slotLengths: {
+    display: "flex",
+    flexWrap: "wrap",
+    border: `1.5px solid ${ink}`,
+    borderRadius: 3,
+    overflow: "hidden"
+  },
+  slotLength: {
+    flex: "1 1 auto",
+    padding: "4px 6px"
+  },
+  slotOptions: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 6
+  },
+  slotOption: {
+    width: "100%",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    background: "#fbf6ec",
+    cursor: "pointer",
+    minHeight: 40,
+    textAlign: "left"
+  },
+  // the tapped slot, outlined while the window is open
+  slotMark: {
+    position: "absolute",
+    left: 3,
+    right: 3,
+    border: `1.5px solid ${ink}`,
+    borderRadius: 4,
+    background: "rgba(43, 38, 34, 0.06)",
+    pointerEvents: "none",
+    zIndex: 4
   },
   // ---- S1.5 tasks ----
   areaTasks: {

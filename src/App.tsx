@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import CategoriesView from "./components/CategoriesView";
 import Header, { type View } from "./components/Header";
 import SettingsView from "./components/SettingsView";
@@ -8,6 +8,8 @@ import PhoneDock from "./components/PhoneDock";
 import WeekBar from "./components/WeekBar";
 import WeekFooter from "./components/WeekFooter";
 import WeekGrid from "./components/WeekGrid";
+import SlotMenu from "./components/SlotMenu";
+import type { SlotTap } from "./lib/slotMenu";
 import { useInteraction } from "./interaction/useInteraction";
 import { moveBlock, type WeekIndex } from "./lib/actions";
 import { ROW_H_PHONE } from "./lib/constants";
@@ -35,6 +37,7 @@ export default function App() {
   const [statsRange, setStatsRange] = useState<StatsRange>("month");
   const [editingId, setEditingId] = useState<string | null>(null); // block open in the inline editor
   const [armedCatId, setArmedCatId] = useState<string | null>(null); // tap-to-place: armed tray category
+  const [slotTap, setSlotTap] = useState<SlotTap | null>(null); // S1.6: the add window, open on this slot
   const [phoneDay, setPhoneDay] = useState(() => defaultDay(0, new Date())); // phone: the one day shown, Mon = 0
   const isPhone = useIsPhone();
   // S1.4: the areas-and-tasks panel hidden (desktop) or folded (phone); remembered on this device
@@ -69,6 +72,7 @@ export default function App() {
       if (!remote) return;
       setEditingId(null);
       setArmedCatId(null);
+      setSlotTap(null);
     });
   }, [store]);
 
@@ -86,10 +90,12 @@ export default function App() {
   const changeView = (v: View) => {
     setView(v);
     setArmedCatId(null);
+    setSlotTap(null);
   };
   const changeWeek = (w: WeekIndex) => {
     setActiveWeek(w);
     setArmedCatId(null);
+    setSlotTap(null);
   };
 
   // week 2 becomes week 1, and the view jumps back to it
@@ -132,6 +138,7 @@ export default function App() {
     actions,
   };
   const showSide = !isPhone && !panelHidden;
+  const closeSlotMenu = useCallback(() => setSlotTap(null), []);
 
   return (
     <div style={S.root}>
@@ -169,11 +176,19 @@ export default function App() {
                 onPlaced={() => setArmedCatId(null)}
                 actions={actions}
                 onMoveToDay={onMoveToDay}
+                onEmptyTap={setSlotTap}
+                slotMark={slotTap}
                 {...(isPhone
                   ? {
                       rowH: ROW_H_PHONE,
                       days: [phoneDay],
-                      phone: { day: phoneDay, setDay: setPhoneDay },
+                      phone: {
+                        day: phoneDay,
+                        setDay: (d: number) => {
+                          setPhoneDay(d);
+                          setSlotTap(null);
+                        },
+                      },
                     }
                   : {})}
               />
@@ -181,6 +196,20 @@ export default function App() {
             </main>
           </div>
           {isPhone && <PhoneDock {...panel} folded={panelHidden} onShow={() => setHidden(false)} />}
+          {slotTap && (
+            <SlotMenu
+              key={`${slotTap.day}-${slotTap.start}`}
+              tap={slotTap}
+              blocks={data.weeks[activeWeek]}
+              cats={data.cats}
+              phone={isPhone}
+              onPick={(catId, mins) => {
+                actions.placeBlock(activeWeek, catId, slotTap.day, slotTap.start, mins);
+                setSlotTap(null);
+              }}
+              onClose={closeSlotMenu}
+            />
+          )}
         </>
       )}
       {view === "stats" && (

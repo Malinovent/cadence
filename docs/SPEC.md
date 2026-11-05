@@ -214,7 +214,7 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 - One click or tap toggles `done` (the existing field and `toggleDone` action, history unchanged). Pointer-down on the tick stops there, so it never picks the block up, starts a touch resize or opens the editor.
 - Done blocks take their area's tint instead of the legacy solid fill: area colour at ~18% (`#…2e`) over `#fbf6ec`, solid 1.5px border, ink text; multi-area done blocks blend the tints and keep the solid gradient ring. Not done stays as before (dashed / solid hollow). Nothing is ever red.
 - The block under way now (Week 1, today, start ≤ now < end) gets a 2px ink ring (`nowRing`, a box-shadow) and "NOW · 38 min left" (`fmtLeft`: "38 min left", "1 h left", "1 h 05 left"): on its own line above the top row when the block is an hour or longer, otherwise in place of the duration.
-- A 2px ink line crosses today's column at the current time (under the blocks), with the time ("1:55pm", grid format) in an ink tag in the time column. Week 1 only, 7am–11pm only. The clock updates on each whole minute and when the page becomes visible (`useNow`).
+- A 2px ink line crosses today's column at the current time, drawn above the blocks (JP, 2026-11-04; it was under them at first), with the time ("1:55pm", grid format) in an ink tag in the time column. Week 1 only, 7am–11pm only. The clock updates on each whole minute and when the page becomes visible (`useNow`).
 - No Now/Next card, no Skip or Move buttons; unticked blocks just stay unticked. Logic: `src/lib/now.ts` (tested).
 
 ### S1.2 Guardrail quotas
@@ -260,6 +260,11 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 - Supersedes the area parts of S1.5 ("I like keeping categories a bit cleaner"). Tasks are one plain list in the panel under the areas ("Tasks · drag onto a block"), and the phone Tasks tab is the same list. Areas are just their chip and balance again; no per-area task folds, no Unsorted group, no "Move to…".
 - A task goes into blocks only: dropped on a block it joins that block's checklist; dropped on empty time nothing happens (no preview). While it sits in a block, its row shows one small dot per area of that block, in their colours (the buffer's grey for a buffer), before "Thu 9am".
 - Data: no schema change. `catId` stays in the saved shape and is kept as it is (tasks given an area on Nov 4 keep it), but nothing reads it; new tasks get null. Blocks made from a task earlier (`sourceTaskId`) keep their one tick. Everything else in S1.5 (checklists, one tick, coming back "back from Tue", done this week, templates and roll forward) is unchanged.
+
+### S1.6 Click or tap empty time to add
+- JP (2026-11-04): an armed area's tap keeps placing it, exactly as before; the add window opens only when nothing is armed. It offers areas and the buffer, not tasks (tasks go into blocks only, S1.5b).
+- A click or tap on empty time (not on a block, not the tap that closes an open block editor, not on a full day) opens it for that slot, which gets an ink outline (`S.slotMark`, one row). Desktop: a 240px window (`S.slotMenu`, paper, ink border) beside the point, to its right or flipped left, kept inside the viewport (`menuPosition`); scrolling the page closes it. Phone: a bottom sheet (`S.slotSheet`) over a light backdrop, above the dock.
+- Contents (`SlotMenu`): "Add at Wed 9am", ✕; a length row "Usual · 30 min · 1 h · 1 h 30 · 2 h" (Usual = the area's block length, or 30 min for the buffer; default); then one row per area and the buffer, in the tray's dashed look, each showing what it would place ("9am–11am", the same nearest-gap / shrink-to-fit rule as a drop, `pickPlacement`) or "no room" (disabled). A pick places the block (`placeBlock` with the length) and closes. Escape, ✕, a tap outside, changing view, week or phone day close it with nothing changed. Dragging is unchanged.
 
 ## Phases
 1. Port + export/import + unit tests (this file's sections above).

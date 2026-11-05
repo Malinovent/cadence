@@ -7,6 +7,7 @@ import { daysWithBlocks, swipeDay } from "../lib/dayview";
 import { blockBox, dropPreview, resolveDrop, slotStartAt } from "../lib/gesture";
 import type { Block as BlockT, Category, Task } from "../lib/model";
 import { blockTasks, singleTaskOf } from "../lib/tasks";
+import { canAddAt, type SlotTap } from "../lib/slotMenu";
 import { fmtClock, isNowBlock, minutesLeft, nowLineTop, nowPoint } from "../lib/now";
 import { fmtTime } from "../lib/time";
 import type { CadenceActions } from "../state/useCadence";
@@ -38,6 +39,8 @@ type Props = {
   // phone one-day view: the day strip replaces the head row, swipes change day
   phone?: { day: number; setDay: (day: number) => void };
   onMoveToDay?: (p: BlockT, day: number) => void; // editor day chips (default: moveBlock)
+  onEmptyTap?: (tap: SlotTap) => void; // S1.6: tap on empty time with nothing armed
+  slotMark?: { day: number; start: number } | null; // S1.6: the slot the add window is for
 };
 
 // x/y where a touch went down on the grid body, and whether the engine dragged/resized since
@@ -58,6 +61,8 @@ export default function WeekGrid({
   days = ALL_DAYS,
   phone,
   onMoveToDay: onMoveToDayProp,
+  onEmptyTap,
+  slotMark,
 }: Props) {
   const { engine, state } = interaction;
   const cols = phone ? "52px 1fr" : `64px repeat(${days.length}, 1fr)`;
@@ -81,11 +86,23 @@ export default function WeekGrid({
   const lineTop = nowLineTop(week, point, rowH);
   const today = days.includes(point.day) ? point.day : null;
 
-  // tap-to-place: a tap on an empty spot places the armed category there
+  // a tap that closes the block editor (outside it) must not also open the add window
+  const editorClosedAt = useRef(0);
+  const prevEditing = useRef(editingId);
+  useEffect(() => {
+    if (prevEditing.current && !editingId) editorClosedAt.current = Date.now();
+    prevEditing.current = editingId;
+  }, [editingId]);
+
+  // a tap on an empty spot: places the armed category there, or (nothing armed) opens the add window
   const onColumnClick = (e: React.MouseEvent<HTMLDivElement>, day: number) => {
-    if (!armedCatId) return;
     if ((e.target as Element).closest("[data-block-id]")) return; // the block handles its own tap
     const start = slotStartAt(e.clientY - e.currentTarget.getBoundingClientRect().top, rowH);
+    if (!armedCatId) {
+      if (!onEmptyTap || editingId || Date.now() - editorClosedAt.current < 400) return;
+      if (canAddAt(blocks, day, start)) onEmptyTap({ day, start, x: e.clientX, y: e.clientY });
+      return;
+    }
     // a full day places nothing; stay armed so another slot can be tried
     if (!dropPreview(blocks, cats, { kind: "place", catId: armedCatId, day, start })) return;
     actions.placeBlock(week, armedCatId, day, start);
@@ -204,6 +221,9 @@ export default function WeekGrid({
                 />
               ))}
             {preview && preview.day === di && <div style={{ ...S.dropPreview, ...blockBox(preview.start, preview.mins, rowH) }} />}
+            {slotMark && slotMark.day === di && (
+              <div style={{ ...S.slotMark, ...blockBox(slotMark.start, STEP, rowH) }} aria-hidden="true" />
+            )}
             {lineTop !== null && di === today && <div style={{ ...S.nowLine, top: lineTop - 1 }} aria-hidden="true" />}
           </div>
         ))}
