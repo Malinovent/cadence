@@ -136,7 +136,7 @@ Done on branch `s1-balanced-weeks`: judged from ticked history by calendar week,
 ### [x] S1.4 One panel for areas and tasks (desktop panel, phone tray with tabs)
 Done on branch `s1-panel`: desktop left panel (area drag handles with balance bars, buffer, notes, tasks; hideable), week bar above the grid, templates and roll forward below it, phone tray docked at the bottom with Areas/Tasks tabs and a slim folded bar (device-local). Tasks view folded into the panel. Per-area task folds come with S1.5. Shipped to main 2026-11-04.
 ### [~] S1.5 Tasks under areas (schema v2; migrates the current Tasks tab's area-less tasks)
-Done on branch `s1-tasks`: schema 2 tasks with migration (old tasks → Unsorted, JP's choice) and a pre-migration copy, drop on block / on empty time, one tick for a single-task block, tasks come back when a block is ticked or ends, done this week, no estimates (JP's call), per-area folds, phone Tasks tab grouped by area. Real backup checked (it predates tasks: zero drops, stable). Left: JP's OK, ship.
+Done on branch `s1-tasks`: schema 2 tasks with migration (old tasks → Unsorted, JP's choice) and a pre-migration copy, drop on block / on empty time, one tick for a single-task block, tasks come back when a block is ticked or ends, done this week, no estimates (JP's call), per-area folds, phone Tasks tab grouped by area. Real backup checked (it predates tasks: zero drops, stable). Shipped to main 2026-11-04.
 ### [ ] S1.6 Click or tap empty time to add (check with JP: tap already places an armed block)
 Note: tasks have no estimates (JP, 2026-11-04), so a task picked there makes a block of the chosen length or its area's usual block, not "from its estimate".
 ### [ ] S1.7 Welcome back
