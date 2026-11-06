@@ -71,6 +71,7 @@ export const fr: Messages = {
     tasks: "Tâches",
     noTasks: "Aucune tâche ouverte.",
     addTask: (name) => `Ajouter « ${name} » à ce bloc`,
+    moveTask: (name, where) => `« ${name} » est dans ${where}. La déplacer dans ce bloc`,
     removeTask: (name) => `Retirer « ${name} » de ce bloc`,
     delete: "supprimer",
     done: "terminé",

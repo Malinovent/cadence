@@ -5,6 +5,7 @@ import { loadData, needsTaskMigration, PREMIGRATION_KEYS, saveData, type Storage
 import {
   addTask,
   attachTask,
+  blockPicker,
   blockTasks,
   detachTask,
   doneThisWeek,
@@ -236,6 +237,19 @@ describe("tasks and blocks", () => {
     expect(returnEnded(d, new Date(2026, 10, 4, 19, 30))).toBe(d);
     // ticking the block still sends it back unless it's ticked too
     expect(t(toggleDone(d, 0, "b1", deps), "a").returnedFrom).toBe(1);
+  });
+  it("sorts the block popup's list: in this block, free, already in another block", () => {
+    const list = [
+      task("here", { blockId: "b1" }),
+      task("gone", { blockId: "b2" }),
+      task("free"),
+      task("doneHere", { blockId: "b1", done: true }),
+      task("doneElsewhere", { blockId: "b2", done: true }),
+    ];
+    const p = blockPicker(list, "b1");
+    expect(p.inBlock.map((t) => t.id)).toEqual(["here", "doneHere"]);
+    expect(p.free.map((t) => t.id)).toEqual(["free"]);
+    expect(p.elsewhere.map((t) => t.id)).toEqual(["gone"]);
   });
   it("moving a task to another block, or out of it by hand", () => {
     const d = attachTask(base({ tasks: [task("a")] }), "a", "b1");

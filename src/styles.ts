@@ -881,6 +881,18 @@ export const S = {
     background: paper2,
     borderColor: ink
   },
+  editTaskElsewhere: {
+    borderStyle: "dashed",
+    background: "transparent",
+    color: "#7a6e5e"
+  },
+  editTaskWhere: {
+    flexShrink: 0,
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 9,
+    color: "#7a6e5e",
+    whiteSpace: "nowrap"
+  },
   editTaskName: {
     flex: 1,
     minWidth: 0,

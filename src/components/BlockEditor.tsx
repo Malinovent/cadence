@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import type { Block, Category, Task } from "../lib/model";
-import { taskNote } from "../lib/panel";
-import { blockTasks, openTasks } from "../lib/tasks";
+import { taskDots, taskNote } from "../lib/panel";
+import { blockPicker } from "../lib/tasks";
 import type { CadenceActions } from "../state/useCadence";
 import { ink, paper, S } from "../styles";
 import { useI18n } from "../i18n/I18nProvider";
@@ -30,8 +30,7 @@ export default function BlockEditor({
   actions,
 }: Props) {
   const { m } = useI18n();
-  const inBlock = blockTasks(tasks, p.id);
-  const others = openTasks(tasks).filter((t) => t.blockId !== p.id);
+  const { inBlock, free, elsewhere } = blockPicker(tasks, p.id);
   const editorRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef(onClose);
   useEffect(() => {
@@ -124,24 +123,45 @@ export default function BlockEditor({
               <span style={{ ...S.editTaskName, ...(t.done ? S.taskNameDone : {}) }}>{t.name}</span>
             </button>
           ))}
-          {others.map((t) => {
+          {free.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              aria-label={m.editor.addTask(t.name)}
+              title={m.editor.addTask(t.name)}
+              onClick={() => actions.attachTask(t.id, p.id)}
+              style={S.editTask}
+            >
+              <span aria-hidden="true">＋</span>
+              <span style={S.editTaskName}>{t.name}</span>
+            </button>
+          ))}
+          {/* already in another block: its colours and time; a tap moves it here */}
+          {elsewhere.map((t) => {
             const where = taskNote(t, weeks, m.lib);
             return (
               <button
                 key={t.id}
                 type="button"
-                aria-label={m.editor.addTask(t.name)}
-                title={where || m.editor.addTask(t.name)}
+                aria-label={m.editor.moveTask(t.name, where)}
+                title={m.editor.moveTask(t.name, where)}
                 onClick={() => actions.attachTask(t.id, p.id)}
-                style={S.editTask}
+                style={{ ...S.editTask, ...S.editTaskElsewhere }}
               >
-                <span aria-hidden="true">＋</span>
+                <span aria-hidden="true">↪</span>
                 <span style={S.editTaskName}>{t.name}</span>
-                {where && <span style={S.panelTaskNote}>{where}</span>}
+                <span style={S.editTaskWhere}>
+                  {taskDots(t, { weeks, cats }).map((c, i) => (
+                    <span key={i} style={{ ...S.dot, ...S.taskDot, background: c }} aria-hidden="true" />
+                  ))}
+                  {where}
+                </span>
               </button>
             );
           })}
-          {inBlock.length === 0 && others.length === 0 && <span style={S.tplEmpty}>{m.editor.noTasks}</span>}
+          {inBlock.length === 0 && free.length === 0 && elsewhere.length === 0 && (
+            <span style={S.tplEmpty}>{m.editor.noTasks}</span>
+          )}
         </div>
       </div>
       <div style={S.editActions}>

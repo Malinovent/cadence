@@ -200,6 +200,16 @@ export const unsortArea = (data: CadenceData, catId: string): CadenceData =>
 /** The list shows open tasks only, in the user's order; ones in a block too (they show where they are). */
 export const openTasks = (tasks: readonly Task[]): Task[] => tasks.filter((t) => !t.done);
 
+/** The block popup's task list: in this block, free to add, and already in another block (they'd move). */
+export const blockPicker = (tasks: readonly Task[], blockId: string): { inBlock: Task[]; free: Task[]; elsewhere: Task[] } => {
+  const open = openTasks(tasks).filter((t) => t.blockId !== blockId);
+  return {
+    inBlock: blockTasks(tasks, blockId),
+    free: open.filter((t) => t.blockId === undefined),
+    elsewhere: open.filter((t) => t.blockId !== undefined),
+  };
+};
+
 /** "Show 3 done this week": tasks finished since this Monday. */
 export const doneThisWeek = (tasks: readonly Task[], now: Date): Task[] => {
   const from = mondayOf(now).getTime();

@@ -70,6 +70,7 @@ export const en = {
     tasks: "Tasks",
     noTasks: "No open tasks.",
     addTask: (name: string) => `Add "${name}" to this block`,
+    moveTask: (name: string, where: string) => `"${name}" is in ${where}. Move it to this block`,
     removeTask: (name: string) => `Take "${name}" out of this block`,
     delete: "delete",
     done: "done",
