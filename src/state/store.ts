@@ -12,6 +12,12 @@ export interface CadenceStore {
   subscribe(fn: () => void): () => void;
   /** A user edit: applies fn and bumps meta.updatedAt, unless fn returned the same data. */
   edit(fn: (d: CadenceData) => CadenceData): void;
+  /**
+   * An automatic change the app works out for itself (tasks coming back from ended blocks). Saved
+   * here but not an edit: updatedAt stays, so a stale device can never beat a newer account copy
+   * with it. Every device works out the same result, and the next real edit syncs it.
+   */
+  adjust(fn: (d: CadenceData) => CadenceData): void;
   /** A copy pulled from the server: replaces the data without counting as an edit. */
   applyRemote(data: CadenceData, serverUpdatedAt: number, userId: string | null): void;
   /** Sync bookkeeping only; never touches data. */
@@ -47,6 +53,10 @@ export function createCadenceStore(deps: StoreDeps = {}): CadenceStore {
       const data = fn(snap.data);
       if (data === snap.data) return; // no-op actions are not edits
       set({ data, meta: { ...snap.meta, updatedAt: nextEditTime(snap.meta, now()) } });
+    },
+    adjust(fn) {
+      const data = fn(snap.data);
+      if (data !== snap.data) set({ data, meta: snap.meta });
     },
     applyRemote(data, serverUpdatedAt, userId) {
       set({ data, meta: { updatedAt: serverUpdatedAt, syncedAt: serverUpdatedAt, userId } });

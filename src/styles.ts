@@ -11,6 +11,11 @@ export const FONT_IMPORT = `
 .cadence-tray-toggle { padding: 9px 0 9px 12px; margin: -9px 0; }
 .cadence-tray-toggle:hover { text-decoration: underline; }
 @media (pointer: coarse) { .cadence-tray-toggle { padding: 15px 0 15px 16px; margin: -15px 0; } }
+/* reduced motion: nothing slides, grows or scales; state changes appear at once */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+  .cadence-tray-item[data-press], .cadence-block[data-press] { transform: none !important; }
+}
 /* no double-tap zoom (pinch zoom stays) */
 html, body { touch-action: manipulation; }
 /* drag sources: long-press must not select text or open the iOS callout; vertical/horizontal pan still scrolls */

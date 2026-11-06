@@ -25,7 +25,11 @@ export const isValidEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@
 // the numeric code from the email (Supabase sends 6–10 digits depending on project settings)
 export const isValidCode = (code: string): boolean => /^\d{6,10}$/.test(code.trim());
 
-// A data change that left the document clean came from the server (store.applyRemote), not a user edit:
-// user edits always bump meta.updatedAt past syncedAt.
-export const isRemoteApply = (prevData: unknown, nextData: unknown, nextMeta: { updatedAt: number; syncedAt: number | null }) =>
-  prevData !== nextData && nextMeta.syncedAt === nextMeta.updatedAt;
+// A data change that left the document clean, under a new edit time, came from the server
+// (store.applyRemote). User edits bump meta.updatedAt past syncedAt; automatic changes
+// (store.adjust) keep updatedAt as it was.
+export const isRemoteApply = (
+  prev: { data: unknown; updatedAt: number },
+  nextData: unknown,
+  nextMeta: { updatedAt: number; syncedAt: number | null },
+) => prev.data !== nextData && nextMeta.updatedAt !== prev.updatedAt && nextMeta.syncedAt === nextMeta.updatedAt;

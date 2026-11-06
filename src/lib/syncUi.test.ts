@@ -56,14 +56,17 @@ describe("isValidCode", () => {
 describe("isRemoteApply", () => {
   const a = {};
   const b = {};
-  it("is a remote apply when data changed and the document is clean", () => {
-    expect(isRemoteApply(a, b, { updatedAt: 5, syncedAt: 5 })).toBe(true);
+  it("is a remote apply when data changed under a new edit time and the document is clean", () => {
+    expect(isRemoteApply({ data: a, updatedAt: 4 }, b, { updatedAt: 5, syncedAt: 5 })).toBe(true);
   });
   it("is not when the change is a dirty user edit", () => {
-    expect(isRemoteApply(a, b, { updatedAt: 6, syncedAt: 5 })).toBe(false);
-    expect(isRemoteApply(a, b, { updatedAt: 6, syncedAt: null })).toBe(false);
+    expect(isRemoteApply({ data: a, updatedAt: 5 }, b, { updatedAt: 6, syncedAt: 5 })).toBe(false);
+    expect(isRemoteApply({ data: a, updatedAt: 5 }, b, { updatedAt: 6, syncedAt: null })).toBe(false);
   });
   it("is not when data is unchanged (meta-only update)", () => {
-    expect(isRemoteApply(a, a, { updatedAt: 5, syncedAt: 5 })).toBe(false);
+    expect(isRemoteApply({ data: a, updatedAt: 4 }, a, { updatedAt: 5, syncedAt: 5 })).toBe(false);
+  });
+  it("is not an automatic change: the edit time stays, so an open editor is left alone", () => {
+    expect(isRemoteApply({ data: a, updatedAt: 5 }, b, { updatedAt: 5, syncedAt: 5 })).toBe(false);
   });
 });

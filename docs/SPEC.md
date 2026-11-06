@@ -292,6 +292,10 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 ### S1.11 Early-bird badge
 - When signed in, the app reads `early_bird` for the account's email (lower-cased) from `entitlements` (read-own RLS, set by the pre-sale webhook). If true: a small "Early bird" pill by the logo (`S.earlyBadge`) and a thank-you in Settings ("Thank you for believing in Cadence early…"). No feature gating. The answer is remembered per device for that email (`cadence:ui:earlyBird`), so it shows offline and doesn't flicker; a fresh answer from the server wins; an error (offline, no table yet) keeps what was known.
 
+### Audit fixes (2026-11-06)
+- Automatic changes are not edits: tasks coming back from ended blocks go through `store.adjust`, which saves the change but keeps `meta.updatedAt`. Before this, a device opening with an old copy stamped itself newer than the account and overwrote newer work. Every device works out the same result, and the next real edit syncs it. `isRemoteApply` also needs a new edit time, so an automatic change never closes an open editor.
+- Reduced motion: under `prefers-reduced-motion: reduce`, all transitions and animations are off (`FONT_IMPORT`) and pressed items don't scale; state changes appear at once.
+
 ## Phases
 1. Port + export/import + unit tests (this file's sections above).
 2. PWA + deploy: manifest, icons (incl. 180×180 apple-touch-icon, replace the emoji favicon), iOS meta tags, `viewport-fit=cover` + safe-area padding, service worker app-shell cache, self-hosted fonts, GitHub Pages workflow.

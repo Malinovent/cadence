@@ -140,6 +140,46 @@ afterEach(() => {
 });
 
 describe("sync engine: launch", () => {
+  it("a stale device opening: tasks coming back from ended blocks never beat the newer account copy", async () => {
+    const opened = new Date(2026, 10, 6, 9); // Friday; the block below ended Tuesday
+    const local: CadenceData = {
+      ...defaultData(),
+      weeks: [[{ id: "b1", catIds: ["work"], day: 1, start: 540, mins: 60, label: "", desc: "", done: false }], []],
+      tasks: [{ id: "t", name: "t", catId: null, blockId: "b1", attachedAt: 1, done: false, order: 0, createdAt: 1 }],
+    };
+    const newer = { ...defaultData(), templates: [{ id: "tp", name: "From the laptop", blocks: [] }] };
+    backend.rows.set(U1.userId, { data: clone(newer), updatedAt: 900 });
+    setup({ local, meta: { updatedAt: 500, syncedAt: 500, userId: U1.userId } });
+    store.adjust((d) => T.returnEnded(d, opened)); // what the app does on opening, before the pull lands
+    expect(store.getSnapshot().data.tasks[0].returnedFrom).toBe(1);
+    await flush();
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(backend.pushes).toHaveLength(0);
+    expect(store.getSnapshot().data.templates[0].name).toBe("From the laptop");
+    expect(store.getSnapshot().meta.updatedAt).toBe(900);
+  });
+
+  it("an automatic change on an up-to-date device pushes nothing by itself; the next real edit carries it", async () => {
+    const opened = new Date(2026, 10, 6, 9);
+    const local: CadenceData = {
+      ...defaultData(),
+      weeks: [[{ id: "b1", catIds: ["work"], day: 1, start: 540, mins: 60, label: "", desc: "", done: false }], []],
+      tasks: [{ id: "t", name: "t", catId: null, blockId: "b1", attachedAt: 1, done: false, order: 0, createdAt: 1 }],
+    };
+    backend.rows.set(U1.userId, { data: clone(local), updatedAt: 500 });
+    setup({ local, meta: { updatedAt: 500, syncedAt: 500, userId: U1.userId } });
+    await flush();
+    store.adjust((d) => T.returnEnded(d, opened));
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(backend.pushes).toHaveLength(0);
+    expect(engine.getState().status).toBe("synced");
+    edit((d) => T.addTask(d, "Next", { uid: () => "t2", now: () => clock }));
+    await vi.advanceTimersByTimeAsync(1500);
+    await flush();
+    expect(backend.pushes).toHaveLength(1);
+    expect(backend.pushes[0].data.tasks[0].returnedFrom).toBe(1);
+  });
+
   it("signed out: local only, nothing is sent", async () => {
     setup({ session: null });
     await flush();

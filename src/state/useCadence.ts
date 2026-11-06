@@ -40,7 +40,6 @@ const makeActions = (store: CadenceStore) => {
     removeTask: b(T.removeTask),
     attachTask: b(T.attachTask),
     detachTask: b(T.detachTask),
-    returnEnded: b(T.returnEnded),
     replaceAll: b(A.replaceAll),
   };
 };

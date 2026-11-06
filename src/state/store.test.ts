@@ -42,6 +42,19 @@ describe("cadence store", () => {
     expect(store.getSnapshot().meta.updatedAt).toBe(2000);
   });
 
+  it("an automatic change is saved but is not an edit", () => {
+    const s = mem({ [META_KEY]: JSON.stringify({ updatedAt: 10, syncedAt: 10, userId: "u" }) });
+    const store = createCadenceStore({ storage: s.storage, now: () => 5000 });
+    const meta = store.getSnapshot().meta;
+    store.adjust((d) => A.placeBlock(d, 0, "work", 0, 9 * 60));
+    expect(store.getSnapshot().meta).toBe(meta);
+    expect(store.getSnapshot().data.weeks[0]).toHaveLength(1);
+    expect(s.writes).toEqual([STORAGE_KEYS.weeks]);
+    const before = store.getSnapshot();
+    store.adjust((d) => d);
+    expect(store.getSnapshot()).toBe(before);
+  });
+
   it("a no-op action is not an edit", () => {
     const s = mem();
     const store = createCadenceStore({ storage: s.storage, now: () => 5 });

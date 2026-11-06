@@ -26,6 +26,7 @@ import { season } from "./lib/balancedWeeks";
 import { panelAreas, panelNotes } from "./lib/panel";
 import { readBalanceRules } from "./state/balanceRules";
 import { readPanelHidden, writePanelHidden } from "./state/panelPrefs";
+import { returnEnded } from "./lib/tasks";
 import { useCadence } from "./state/useCadence";
 import { useIsPhone } from "./state/useIsPhone";
 import { useNow } from "./state/useNow";
@@ -76,11 +77,11 @@ export default function App() {
 
   // a server copy replaced the data: the open editor and an armed tray item may point at stale ids
   useEffect(() => {
-    let prev = store.getSnapshot().data;
+    let prev = { data: store.getSnapshot().data, updatedAt: store.getSnapshot().meta.updatedAt };
     return store.subscribe(() => {
       const { data: next, meta } = store.getSnapshot();
       const remote = isRemoteApply(prev, next, meta);
-      prev = next;
+      prev = { data: next, updatedAt: meta.updatedAt };
       if (!remote) return;
       setLastEdit((t) => Math.max(t, meta.updatedAt)); // an edit on another device counts
       setEditingId(null);
@@ -131,11 +132,12 @@ export default function App() {
     changeWeek(0);
   };
 
-  // S1.5: as the clock passes the end of a block that wasn't ticked, its tasks go back to their list
+  // S1.5: as the clock passes the end of a block that wasn't ticked, its tasks go back to their
+  // list. Automatic, so not an edit: a device opening with an old copy must not beat newer data.
   const now = useNow();
   useEffect(() => {
-    actions.returnEnded(now);
-  }, [actions, now, data.tasks]);
+    store.adjust((d) => returnEnded(d, now));
+  }, [store, now, data.tasks]);
 
   // calendar view: the panel's content (desktop side panel or phone dock) and the bars around the grid
   const done = completion(data, activeWeek);
