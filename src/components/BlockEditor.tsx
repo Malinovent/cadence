@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
-import type { Block, Category } from "../lib/model";
+import type { Block, Category, Task } from "../lib/model";
+import { taskNote } from "../lib/panel";
+import { blockTasks, openTasks } from "../lib/tasks";
 import type { CadenceActions } from "../state/useCadence";
 import { ink, paper, S } from "../styles";
 import { useI18n } from "../i18n/I18nProvider";
@@ -7,15 +9,29 @@ import { useI18n } from "../i18n/I18nProvider";
 type Props = {
   block: Block;
   cats: Category[];
+  tasks: Task[];
+  weeks: [Block[], Block[]]; // to say where a task sits now
   baseColor: string;
   onClose: () => void;
   onDelete: () => void; // touch only: there is no right-click
   onMoveToDay: (day: number) => void; // touch only: day chips
-  actions: Pick<CadenceActions, "updateBlock" | "addTag" | "removeTag">;
+  actions: Pick<CadenceActions, "updateBlock" | "addTag" | "removeTag" | "attachTask" | "detachTask">;
 };
 
-export default function BlockEditor({ block: p, cats, baseColor, onClose, onDelete, onMoveToDay, actions }: Props) {
+export default function BlockEditor({
+  block: p,
+  cats,
+  tasks,
+  weeks,
+  baseColor,
+  onClose,
+  onDelete,
+  onMoveToDay,
+  actions,
+}: Props) {
   const { m } = useI18n();
+  const inBlock = blockTasks(tasks, p.id);
+  const others = openTasks(tasks).filter((t) => t.blockId !== p.id);
   const editorRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef(onClose);
   useEffect(() => {
@@ -90,6 +106,43 @@ export default function BlockEditor({ block: p, cats, baseColor, onClose, onDele
             </button>
           );
         })}
+      </div>
+      {/* the block's tasks, and the open tasks to add to it */}
+      <div style={S.editTasks}>
+        <span style={S.editTasksLabel}>{m.editor.tasks}</span>
+        <div style={S.editTaskList}>
+          {inBlock.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              aria-label={m.editor.removeTask(t.name)}
+              title={m.editor.removeTask(t.name)}
+              onClick={() => actions.detachTask(t.id)}
+              style={{ ...S.editTask, ...S.editTaskOn }}
+            >
+              <span aria-hidden="true">✓</span>
+              <span style={{ ...S.editTaskName, ...(t.done ? S.taskNameDone : {}) }}>{t.name}</span>
+            </button>
+          ))}
+          {others.map((t) => {
+            const where = taskNote(t, weeks, m.lib);
+            return (
+              <button
+                key={t.id}
+                type="button"
+                aria-label={m.editor.addTask(t.name)}
+                title={where || m.editor.addTask(t.name)}
+                onClick={() => actions.attachTask(t.id, p.id)}
+                style={S.editTask}
+              >
+                <span aria-hidden="true">＋</span>
+                <span style={S.editTaskName}>{t.name}</span>
+                {where && <span style={S.panelTaskNote}>{where}</span>}
+              </button>
+            );
+          })}
+          {inBlock.length === 0 && others.length === 0 && <span style={S.tplEmpty}>{m.editor.noTasks}</span>}
+        </div>
       </div>
       <div style={S.editActions}>
         <button className="cadence-coarse-only" onClick={onDelete} style={{ ...S.editDone, background: "#b54" }}>

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { placeBlock } from "./actions";
 import { BUFFER_ID, BUFFER_MINS, DEFAULT_CATEGORIES } from "./constants";
 import { defaultData, type Block } from "./model";
-import { canAddAt, menuPosition, pickMins, pickPlacement, slotOptions } from "./slotMenu";
+import { canAddAt, menuPosition, pickPlacement, slotOptions } from "./slotMenu";
 
 const cats = DEFAULT_CATEGORIES;
 const blk = (id: string, day: number, start: number, mins: number): Block => ({
@@ -17,19 +17,20 @@ const blk = (id: string, day: number, start: number, mins: number): Block => ({
 });
 
 describe("slot menu", () => {
-  it("uses the chosen length, else the area's or the buffer's usual one", () => {
+  it("places an area at its usual length, the buffer at 30 minutes", () => {
     const work = cats.find((c) => c.id === "work")!;
-    expect(pickMins(cats, "work", null)).toBe(work.blockMins);
-    expect(pickMins(cats, "work", 90)).toBe(90);
-    expect(pickMins(cats, BUFFER_ID, null)).toBe(BUFFER_MINS);
-    expect(pickMins(cats, "nope", null)).toBeUndefined();
+    expect(pickPlacement([], cats, { day: 1, start: 540 }, "work")).toEqual({ start: 540, mins: work.blockMins });
+    expect(pickPlacement([], cats, { day: 1, start: 540 }, BUFFER_ID)).toEqual({ start: 540, mins: BUFFER_MINS });
+    expect(pickPlacement([], cats, { day: 1, start: 540 }, "nope")).toBeNull();
   });
 
   it("places exactly what placeBlock would", () => {
     const blocks = [blk("x", 1, 540, 60), blk("y", 1, 690, 60)]; // gap 600..690
-    const p = pickPlacement(blocks, cats, { day: 1, start: 600 }, "learn", 120);
+    const p = pickPlacement(blocks, cats, { day: 1, start: 600 }, "work");
     const data = { ...defaultData(), weeks: [blocks, []] as [Block[], Block[]] };
-    const made = placeBlock(data, 0, "learn", 1, 600, 120, { uid: () => "new" }).weeks[0].find((b) => b.id === "new")!;
+    const made = placeBlock(data, 0, "work", 1, 600, undefined, { uid: () => "new" }).weeks[0].find(
+      (b) => b.id === "new",
+    )!;
     expect(p).toEqual({ start: made.start, mins: made.mins });
     expect(p).toEqual({ start: 600, mins: 90 }); // shrunk to fit
   });
@@ -38,7 +39,7 @@ describe("slot menu", () => {
     const full = [blk("f", 0, 420, 960)];
     expect(canAddAt(full, 0, 600)).toBe(false);
     expect(canAddAt([], 0, 600)).toBe(true);
-    expect(pickPlacement(full, cats, { day: 0, start: 600 }, "work", null)).toBeNull();
+    expect(pickPlacement(full, cats, { day: 0, start: 600 }, "work")).toBeNull();
   });
 
   it("offers the areas in order, then the buffer", () => {

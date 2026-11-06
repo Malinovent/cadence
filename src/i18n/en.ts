@@ -67,6 +67,10 @@ export const en = {
     description: "description…",
     add: (name: string) => `Add ${name}`,
     remove: (name: string) => `Remove ${name}`,
+    tasks: "Tasks",
+    noTasks: "No open tasks.",
+    addTask: (name: string) => `Add "${name}" to this block`,
+    removeTask: (name: string) => `Take "${name}" out of this block`,
     delete: "delete",
     done: "done",
   },
@@ -84,8 +88,6 @@ export const en = {
   slot: {
     addAt: (day: string, time: string) => `Add at ${day} ${time}`,
     close: "Close",
-    length: "Length",
-    usual: "Usual",
     noRoom: "no room",
   },
   welcome: {

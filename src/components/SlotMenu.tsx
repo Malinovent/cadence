@@ -1,16 +1,10 @@
+import type React from "react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { Block, Category } from "../lib/model";
-import {
-  menuPosition,
-  pickMins,
-  pickPlacement,
-  SLOT_LENGTHS,
-  slotOptions,
-  type SlotLength,
-  type SlotTap,
-} from "../lib/slotMenu";
-import { fmtDur, fmtTime } from "../lib/time";
+import { menuPosition, pickPlacement, slotOptions, type SlotTap } from "../lib/slotMenu";
+import { fmtTime } from "../lib/time";
 import { BUFFER_COLOR } from "../lib/constants";
+import { withAlpha } from "../lib/gesture";
 import { S } from "../styles";
 import { useI18n } from "../i18n/I18nProvider";
 
@@ -19,21 +13,18 @@ type Props = {
   blocks: Block[];
   cats: Category[];
   phone: boolean;
-  onPick: (catId: string, mins: number | undefined) => void;
+  onPick: (catId: string) => void;
   onClose: () => void;
 };
 
-const lengthLabel = (m: SlotLength, usual: string, lang: "en" | "fr") => (m === null ? usual : fmtDur(m, lang));
-
 /**
- * S1.6: tap or click empty time. Desktop: a small window beside the slot; phone: a bottom sheet.
- * A length (the area's usual one by default) and the areas plus the buffer; a pick places a block
- * there (nearest free spot, shrunk to fit, like a drop) and closes. Escape, ✕ or a tap outside
+ * S1.6: tap or click empty time. Desktop: a small window beside the slot; phone: a floating sheet.
+ * One tap on an area (or the buffer) places its usual length there (nearest free spot, shrunk to
+ * fit, like a drop) and closes; the person resizes it in the calendar. Escape, ✕ or a tap outside
  * closes with nothing changed.
  */
 export default function SlotMenu({ tap, blocks, cats, phone, onPick, onClose }: Props) {
   const { m, lang } = useI18n();
-  const [length, setLength] = useState<SlotLength>(null);
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
 
@@ -82,49 +73,37 @@ export default function SlotMenu({ tap, blocks, cats, phone, onPick, onClose }: 
       }
     >
       <div style={S.slotHead}>
-        <span style={{ flex: 1 }}>
-          {m.slot.addAt(m.lib.days[tap.day], fmtTime(tap.start, lang))}
-        </span>
+        <span style={{ flex: 1 }}>{m.slot.addAt(m.lib.days[tap.day], fmtTime(tap.start, lang))}</span>
         <button type="button" className="cadence-hit44" onClick={onClose} aria-label={m.slot.close} style={S.catDel}>
           ✕
         </button>
       </div>
-      <div style={S.slotLengths} role="group" aria-label={m.slot.length}>
-        {[null, ...SLOT_LENGTHS].map((len) => (
-          <button
-            key={String(len)}
-            type="button"
-            aria-pressed={length === len}
-            onClick={() => setLength(len)}
-            style={{ ...S.kindBtn, ...S.slotLength, ...(length === len ? S.kindBtnActive : {}) }}
-          >
-            {lengthLabel(len, m.slot.usual, lang)}
-          </button>
-        ))}
-      </div>
       <div style={S.slotOptions}>
         {slotOptions(cats, m.lib).map((o) => {
-          const fit = pickPlacement(blocks, cats, tap, o.id, length);
+          const fit = pickPlacement(blocks, cats, tap, o.id);
+          const buffer = o.color === null;
           const color = o.color ?? BUFFER_COLOR;
           return (
             <button
               key={o.id}
               type="button"
               data-slot-pick=""
+              className="cadence-slot-pick"
               disabled={!fit}
-              onClick={() => fit && onPick(o.id, pickMins(cats, o.id, length))}
-              style={{
-                ...S.trayBlock,
-                ...S.slotOption,
-                border: `1.5px dashed ${color}`,
-                color,
-                opacity: fit ? 1 : 0.4,
-              }}
+              onClick={() => onPick(o.id)}
+              title={fit ? undefined : m.slot.noRoom}
+              style={
+                {
+                  ...S.slotOption,
+                  border: `1.5px ${buffer ? "dashed" : "solid"} ${color}`,
+                  opacity: fit ? 1 : 0.4,
+                  cursor: fit ? "pointer" : "default",
+                  "--cadence-hover": withAlpha(color, "1a"),
+                } as React.CSSProperties
+              }
             >
-              <span style={S.trayName}>{o.name}</span>
-              <span style={{ ...S.trayMins, color }}>
-                {fit ? `${fmtTime(fit.start, lang)}–${fmtTime(fit.start + fit.mins, lang)}` : m.slot.noRoom}
-              </span>
+              <span style={{ ...S.dot, background: color, flexShrink: 0 }} aria-hidden="true" />
+              <span style={S.slotOptionName}>{o.name}</span>
             </button>
           );
         })}

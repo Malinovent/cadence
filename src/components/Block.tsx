@@ -29,7 +29,9 @@ type Props = {
   onToggleDone: (id: string) => void;
   minsLeft: number | null; // the block is happening now: whole minutes left; otherwise null
   onMoveToDay: (p: BlockT, day: number) => void;
-  actions: Pick<CadenceActions, "addTag" | "removeTag" | "updateBlock" | "removeBlock">;
+  actions: Pick<CadenceActions, "addTag" | "removeTag" | "updateBlock" | "removeBlock" | "attachTask" | "detachTask">;
+  tasks: Task[]; // all of them: the popup lists the open ones to add
+  weeks: [BlockT[], BlockT[]];
   todos: Task[]; // S1.5: the block's to-do list (empty for a single-task block: its tick is the task's)
   onToggleTask: (taskId: string) => void;
 };
@@ -69,6 +71,8 @@ export default function Block({
   actions,
   todos,
   onToggleTask,
+  tasks,
+  weeks,
 }: Props) {
   const { m, lang } = useI18n();
   const cats = p.catIds.map((id) => allCats.find((c) => c.id === id)).filter((c): c is Category => !!c);
@@ -262,6 +266,8 @@ export default function Block({
           <BlockEditor
             block={p}
             cats={allCats}
+            tasks={tasks}
+            weeks={weeks}
             baseColor={baseColor}
             onClose={() => setEditingId(null)}
             onDelete={() => {

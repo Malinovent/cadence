@@ -25,7 +25,8 @@ type Props = {
   week: WeekIndex;
   blocks: BlockT[];
   cats: Category[];
-  tasks: Task[]; // S1.5: for block to-do lists
+  tasks: Task[]; // S1.5: for block to-do lists and the block popup
+  weeks: [BlockT[], BlockT[]]; // both weeks: the popup says where a task sits now
   editingId: string | null;
   setEditingId: (id: string | null) => void;
   interaction: Interaction;
@@ -33,7 +34,16 @@ type Props = {
   onPlaced: () => void; // tap-to-place used its one placement
   actions: Pick<
     CadenceActions,
-    "placeBlock" | "moveBlock" | "addTag" | "removeTag" | "updateBlock" | "removeBlock" | "toggleDone" | "toggleTask"
+    | "placeBlock"
+    | "moveBlock"
+    | "addTag"
+    | "removeTag"
+    | "updateBlock"
+    | "removeBlock"
+    | "toggleDone"
+    | "toggleTask"
+    | "attachTask"
+    | "detachTask"
   >;
   rowH?: number; // px per 30-min row (desktop ROW_H)
   days?: readonly number[]; // day indexes shown as columns, Mon = 0 (desktop: all seven)
@@ -52,6 +62,7 @@ export default function WeekGrid({
   blocks,
   cats,
   tasks,
+  weeks,
   editingId,
   setEditingId,
   interaction,
@@ -220,6 +231,8 @@ export default function WeekGrid({
                   actions={actions}
                   todos={singleTaskOf(tasks, p) ? [] : blockTasks(tasks, p.id)}
                   onToggleTask={(id) => actions.toggleTask(id)}
+                  tasks={tasks}
+                  weeks={weeks}
                 />
               ))}
             {preview && preview.day === di && <div style={{ ...S.dropPreview, ...blockBox(preview.start, preview.mins, rowH) }} />}

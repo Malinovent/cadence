@@ -296,6 +296,10 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 - Automatic changes are not edits: tasks coming back from ended blocks go through `store.adjust`, which saves the change but keeps `meta.updatedAt`. Before this, a device opening with an old copy stamped itself newer than the account and overwrote newer work. Every device works out the same result, and the next real edit syncs it. `isRemoteApply` also needs a new edit time, so an automatic change never closes an open editor.
 - Reduced motion: under `prefers-reduced-motion: reduce`, all transitions and animations are off (`FONT_IMPORT`) and pressed items don't scale; state changes appear at once.
 
+### Add window and block popup (JP, 2026-11-06)
+- Supersedes the length row in S1.6. The add window asks for an area only: a grid of area buttons plus the buffer (dot and name, wrapping to two columns on a phone); one tap places the area's usual length (the buffer's 30 min) by the drop rule and closes; the person resizes it in the calendar. An area with no room is disabled. Desktop: 252px window with a small pop-in. Phone: a floating sheet with margins and rounded corners, not edge to edge. Both entrances are off under reduced motion.
+- The block popup (`BlockEditor`) gets a Tasks section: tasks in this block first (✓; tap to take one out, it goes back to the list without a "back from" note), then every other open task (＋; tap to add it, moving it if it's in another block, whose time it shows). The list scrolls past about five rows. "No open tasks." when there are none. So a task can now reach a block without dragging.
+
 ## Phases
 1. Port + export/import + unit tests (this file's sections above).
 2. PWA + deploy: manifest, icons (incl. 180×180 apple-touch-icon, replace the emoji favicon), iOS meta tags, `viewport-fit=cover` + safe-area padding, service worker app-shell cache, self-hosted fonts, GitHub Pages workflow.

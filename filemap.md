@@ -43,7 +43,7 @@
 - `src/lib/gesture.ts` — pure gesture maths for the interaction engine: thresholds, y→slot start (row height as a parameter), `hitTest` on measured rects, autoscroll speed, touch grip sizing, `resolveDrop` / `dropPreview`, `withAlpha`
 - `src/lib/guardrail.ts` — S1.2 guardrails: `Limit` type, `parseLimit`, `floorFromTarget`, `legacyTarget`, `changeKind`, `balance`, wording (`fmtH`, `limitLabel`, `balanceLabel`, `balanceNote`), `barGeometry`
 - `src/lib/buffer.test.ts` — tests for buffer blocks across actions, drops, stats and normalizeData
-- `src/lib/slotMenu.ts` — S1.6 tap empty time to add: lengths, what a pick places, where the window opens
+- `src/lib/slotMenu.ts` — S1.6 tap empty time to add: what a pick places, where the window opens
 - `src/lib/words.ts` — S1.9 the English wording of src/lib (`LibWords`, `LIB_EN`), passed to the lib's text functions
 - `src/lib/words.fr.ts` — S1.9 the same in Canadian French (`LIB_FR`)
 - `src/lib/describe.ts` — S1.10 neutral sentences about last week's ticked time per area
@@ -80,14 +80,14 @@
 - `src/components/PhoneDock.tsx` — S1.4 phone tray docked at the bottom: Areas / Tasks tabs, fold to a slim "Show areas and tasks" bar, page spacer, `data-cadence-dock`
 - `src/components/AreaChip.tsx` — one draggable area (or buffer) chip: drag source, press/hold feedback, tap-to-place arming
 - `src/components/BalanceBar.tsx` — one area's guardrail bar with kind and partial-credit label
-- `src/components/SlotMenu.tsx` — S1.6 the add window (desktop, beside the slot) / bottom sheet (phone): length, areas and buffer
+- `src/components/SlotMenu.tsx` — S1.6 the add window (desktop, beside the slot) / floating sheet (phone): one-tap grid of areas and the buffer
 - `src/components/WelcomeBack.tsx` — S1.7 "Welcome back. Start this week fresh from a template?" card
 - `src/components/TaskList.tsx` — the one task list in the panel / phone Tasks tab: draggable rows (onto a block), tick, block colour dots + where it is, dismiss, done this week, add row
 - `src/components/WeekBar.tsx` — above the grid: Week 1 / Week 2 switch, compact balanced weeks card, "Show areas and tasks" when the panel is hidden
 - `src/components/WeekFooter.tsx` — below the grid: templates, save current week, starter weeks (S1.8), roll forward
 - `src/components/WeekGrid.tsx` — day grid (`rowH` and `days` props; `phone` prop: Mon–Sun day strip instead of the head row, 52px time column, swipe to change day), drop preview / tag highlight, current-time line and clock tag, tap-to-place, block taps and right-click
 - `src/components/Block.tsx` — one placed block (states, gradient ring, round done tick, done tint, Now ring + minutes left, press/lift/tag-target looks, mouse edge handles, touch grips)
-- `src/components/BlockEditor.tsx` — inline title/description/tags editor; touch-only day chips and delete
+- `src/components/BlockEditor.tsx` — inline title/description/tags editor, tasks to add or take out; touch-only day chips and delete
 - `src/components/BalancedWeeksCard.tsx` — "N balanced weeks this season" card with a square per week
 - `src/components/StatsView.tsx` — balanced weeks card, hours chart, reset
 - `src/components/CategoriesView.tsx` — category editor: name, Floor/Ceiling/Range guardrail and its hours, block length, colour

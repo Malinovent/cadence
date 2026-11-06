@@ -207,6 +207,7 @@ export default function App() {
                 blocks={data.weeks[activeWeek]}
                 cats={data.cats}
                 tasks={data.tasks}
+                weeks={data.weeks}
                 editingId={editingId}
                 setEditingId={setEditingId}
                 interaction={interaction}
@@ -241,8 +242,8 @@ export default function App() {
               blocks={data.weeks[activeWeek]}
               cats={data.cats}
               phone={isPhone}
-              onPick={(catId, mins) => {
-                actions.placeBlock(activeWeek, catId, slotTap.day, slotTap.start, mins);
+              onPick={(catId) => {
+                actions.placeBlock(activeWeek, catId, slotTap.day, slotTap.start);
                 setSlotTap(null);
               }}
               onClose={closeSlotMenu}

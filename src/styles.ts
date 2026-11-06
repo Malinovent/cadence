@@ -16,6 +16,10 @@ export const FONT_IMPORT = `
   *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
   .cadence-tray-item[data-press], .cadence-block[data-press] { transform: none !important; }
 }
+/* S1.6 add window: a quick, small entrance (off under reduced motion, above) */
+@keyframes cadence-pop { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: none; } }
+@keyframes cadence-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.cadence-slot-pick:not(:disabled):hover { background-color: var(--cadence-hover) !important; }
 /* no double-tap zoom (pinch zoom stays) */
 html, body { touch-action: manipulation; }
 /* drag sources: long-press must not select text or open the iOS callout; vertical/horizontal pan still scrolls */
@@ -834,6 +838,54 @@ export const S = {
     cursor: "pointer",
     lineHeight: 1.4
   },
+  // block popup: the tasks in this block, and open tasks to add to it
+  editTasks: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 3,
+    borderTop: `1px dashed ${line}`,
+    paddingTop: 5
+  },
+  editTasksLabel: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 9,
+    letterSpacing: "0.08em",
+    textTransform: "uppercase",
+    color: "#7a6e5e"
+  },
+  editTaskList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 3,
+    maxHeight: 132,
+    overflowY: "auto"
+  },
+  editTask: {
+    display: "flex",
+    alignItems: "center",
+    gap: 5,
+    width: "100%",
+    minHeight: 26,
+    padding: "3px 6px",
+    border: `1px solid ${line}`,
+    borderRadius: 4,
+    background: "#fbf6ec",
+    color: ink,
+    cursor: "pointer",
+    textAlign: "left",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontSize: 12,
+    lineHeight: 1.2
+  },
+  editTaskOn: {
+    background: paper2,
+    borderColor: ink
+  },
+  editTaskName: {
+    flex: 1,
+    minWidth: 0,
+    overflowWrap: "anywhere"
+  },
   // Phase 3: right-aligned row holding (touch-only) "delete" and "done"
   editActions: {
     display: "flex",
@@ -1451,30 +1503,62 @@ export const S = {
   slotMenu: {
     position: "fixed",
     zIndex: 40,
-    width: 240,
+    width: 252,
     background: paper,
     border: `1.5px solid ${ink}`,
-    borderRadius: 4,
-    boxShadow: "3px 3px 0 rgba(0,0,0,0.12)",
-    padding: 10,
+    borderRadius: 8,
+    boxShadow: "0 8px 24px rgba(43, 38, 34, 0.18)",
+    padding: 12,
     display: "flex",
     flexDirection: "column",
-    gap: 8
+    gap: 10,
+    animation: "cadence-pop 120ms ease-out"
   },
+  // phone: a floating sheet, not edge to edge
   slotSheet: {
     position: "fixed",
-    left: 0,
-    right: 0,
-    bottom: 0,
+    left: 10,
+    right: 10,
+    bottom: "calc(10px + env(safe-area-inset-bottom))",
+    maxWidth: 460,
+    margin: "0 auto",
     zIndex: 41,
     maxHeight: "70vh",
     overflowY: "auto",
     background: paper,
-    borderTop: `1.5px solid ${ink}`,
-    padding: "12px 14px calc(14px + env(safe-area-inset-bottom))",
+    border: `1.5px solid ${ink}`,
+    borderRadius: 14,
+    boxShadow: "0 8px 24px rgba(43, 38, 34, 0.22)",
+    padding: 14,
     display: "flex",
     flexDirection: "column",
-    gap: 10
+    gap: 12,
+    animation: "cadence-rise 160ms ease-out"
+  },
+  slotOptions: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(104px, 1fr))",
+    gap: 8
+  },
+  slotOption: {
+    display: "flex",
+    alignItems: "center",
+    gap: 7,
+    minHeight: 44,
+    minWidth: 0,
+    padding: "8px 10px",
+    borderRadius: 6,
+    background: "#fbf6ec",
+    color: ink,
+    textAlign: "left",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 600,
+    fontSize: 14
+  },
+  slotOptionName: {
+    minWidth: 0,
+    overflowWrap: "anywhere",
+    lineHeight: 1.15
   },
   slotBackdrop: {
     position: "fixed",
@@ -1491,30 +1575,6 @@ export const S = {
     textTransform: "uppercase",
     letterSpacing: "0.1em",
     color: "#7a6e5e"
-  },
-  slotLengths: {
-    display: "flex",
-    flexWrap: "wrap",
-    border: `1.5px solid ${ink}`,
-    borderRadius: 3,
-    overflow: "hidden"
-  },
-  slotLength: {
-    flex: "1 1 auto",
-    padding: "4px 6px"
-  },
-  slotOptions: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 6
-  },
-  slotOption: {
-    width: "100%",
-    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
-    background: "#fbf6ec",
-    cursor: "pointer",
-    minHeight: 40,
-    textAlign: "left"
   },
   // the tapped slot, outlined while the window is open
   slotMark: {

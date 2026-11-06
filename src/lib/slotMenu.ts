@@ -9,29 +9,21 @@ import { resolvePlacement } from "./placement";
 import { placeMins } from "./actions";
 import { LIB_EN, type LibWords } from "./words";
 
-/** The lengths offered; null = the area's usual block (the default). */
-export const SLOT_LENGTHS = [30, 60, 90, 120] as const;
-export type SlotLength = (typeof SLOT_LENGTHS)[number] | null;
-
 /** Where the user tapped: the day and the slot's start (mins), plus the viewport point. */
 export type SlotTap = { day: number; start: number; x: number; y: number };
 
-/** The length a pick places: the chosen one, or the area's (or the buffer's) usual length. */
-export const pickMins = (cats: readonly Category[], catId: string, length: SlotLength): number | undefined =>
-  length ?? placeMins(cats, catId);
-
 /**
- * What picking `catId` would place: the same nearest-gap / shrink-to-fit rule as a drop, so the
- * window can say so beforehand. Null when nothing fits (the day is full).
+ * Where picking `catId` lands: the area's (or the buffer's) usual length, by the same nearest-gap
+ * / shrink-to-fit rule as a drop. Null when nothing fits. JP (2026-11-06): the window doesn't ask
+ * for a length; the person resizes the block in the calendar.
  */
 export const pickPlacement = (
   blocks: readonly Block[],
   cats: readonly Category[],
   tap: Pick<SlotTap, "day" | "start">,
   catId: string,
-  length: SlotLength,
 ): { start: number; mins: number } | null => {
-  const mins = pickMins(cats, catId, length);
+  const mins = placeMins(cats, catId);
   if (!mins) return null;
   return resolvePlacement(blocks, tap.day, tap.start, mins, null);
 };

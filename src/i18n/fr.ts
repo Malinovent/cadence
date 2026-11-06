@@ -68,6 +68,10 @@ export const fr: Messages = {
     description: "description…",
     add: (name) => `Ajouter ${name}`,
     remove: (name) => `Retirer ${name}`,
+    tasks: "Tâches",
+    noTasks: "Aucune tâche ouverte.",
+    addTask: (name) => `Ajouter « ${name} » à ce bloc`,
+    removeTask: (name) => `Retirer « ${name} » de ce bloc`,
     delete: "supprimer",
     done: "terminé",
   },
@@ -85,8 +89,6 @@ export const fr: Messages = {
   slot: {
     addAt: (day, time) => `Ajouter ${day} à ${time}`,
     close: "Fermer",
-    length: "Durée",
-    usual: "Habituelle",
     noRoom: "pas de place",
   },
   welcome: {
