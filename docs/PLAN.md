@@ -145,9 +145,9 @@ Note: tasks have no estimates (JP, 2026-11-04), so a task picked there makes a b
 Done on branch `s1-welcome`: card after 7+ days without an edit (judged from the edit time at opening, or a newer one from the account), one tap per template builds Week 1, says how many blocks it replaces, "Not now" changes nothing; answered once per absence, per device. Hidden while there are no templates (S1.8). Shipped to main 2026-11-04.
 ### [x] S1.8 Starter templates
 Done on branch `s1-starters`: work-heavy, family and recovery weeks, under-filled, a buffer a day; applying adds missing Rest/People (JP's choice: keep the person's own areas and limits); offered under Templates and in Welcome back. Shipped to main 2026-11-04.
-### [~] Audit fixes (2026-11-06)
-Done on branch `fix-sync-motion`: automatic task returns no longer count as edits (a stale device could overwrite newer account data), reduced-motion support. Left: JP's OK, ship.
-On branch `s1-add-polish` (on top of that fix): add window is a one-tap area grid with no length row; block popup can add and remove tasks. Left: JP's OK, ship.
+### [x] Audit fixes (2026-11-06)
+Done on branch `fix-sync-motion`: automatic task returns no longer count as edits (a stale device could overwrite newer account data), reduced-motion support. Shipped to main 2026-11-06.
+On branch `s1-add-polish` (on top of that fix): add window is a one-tap area grid with no length row; block popup can add and remove tasks. Shipped to main 2026-11-06.
 ### [~] S1.9 French and English
 Done on branch `s1-finish`: catalogues for every string (en/fr), lib wording passed in, detection + Settings switch (device-local), Quebec formats, default areas named in the person's language. Shipped to main 2026-11-04. Left: JP reviews the French.
 ### [x] S1.10 Neutral stats
