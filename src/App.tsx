@@ -9,6 +9,8 @@ import WeekBar from "./components/WeekBar";
 import WeekFooter from "./components/WeekFooter";
 import WeekGrid from "./components/WeekGrid";
 import WelcomeBack from "./components/WelcomeBack";
+import UndoBar from "./components/UndoBar";
+import { undoAvailable, type UndoOffer } from "./lib/undo";
 import { shouldWelcome } from "./lib/welcome";
 import { STARTERS } from "./lib/starters";
 import { readWelcomeAnswered, writeWelcomeAnswered } from "./state/welcomePrefs";
@@ -51,6 +53,7 @@ export default function App() {
   // automatic changes made after opening; and the absence the prompt was last answered for
   const [lastEdit, setLastEdit] = useState(() => store.getSnapshot().meta.updatedAt);
   const [welcomeAnswered, setWelcomeAnswered] = useState(readWelcomeAnswered);
+  const [undo, setUndo] = useState<UndoOffer | null>(null); // a week just replaced or rolled forward
   const [phoneDay, setPhoneDay] = useState(() => defaultDay(0, new Date())); // phone: the one day shown, Mon = 0
   const isPhone = useIsPhone();
   // S1.4: the areas-and-tasks panel hidden (desktop) or folded (phone); remembered on this device
@@ -112,9 +115,18 @@ export default function App() {
     setSlotTap(null);
   };
 
+  // one tap that replaces a week: do it, and keep what was there so it can be undone
+  const withUndo = (text: string, run: () => void) => {
+    const before = store.getSnapshot().data;
+    run();
+    const after = store.getSnapshot().data;
+    if (after !== before) setUndo({ before, after, text });
+  };
+  const replaceWeek = (week: WeekIndex, run: () => void) => withUndo(m.undo.replaced(m.week.names[week]), run);
+
   // week 2 becomes week 1, and the view jumps back to it
   const onAdvance = () => {
-    actions.advanceWeek();
+    withUndo(m.undo.rolled, () => actions.advanceWeek());
     changeWeek(0);
   };
 
@@ -178,12 +190,12 @@ export default function App() {
           templates={data.templates}
           blocksInWeek1={data.weeks[0].length}
           onUse={(id) => {
-            actions.applyTemplate(0, id);
+            replaceWeek(0, () => actions.applyTemplate(0, id));
             answerWelcome();
             changeWeek(0);
           }}
           onStarter={(id) => {
-            actions.applyStarter(0, id, { lang });
+            replaceWeek(0, () => actions.applyStarter(0, id, { lang }));
             answerWelcome();
             changeWeek(0);
           }}
@@ -231,7 +243,14 @@ export default function App() {
                     }
                   : {})}
               />
-              <WeekFooter data={data} week={activeWeek} actions={actions} onAdvance={onAdvance} />
+              <WeekFooter
+                data={data}
+                week={activeWeek}
+                actions={actions}
+                onApplyTemplate={(id) => replaceWeek(activeWeek, () => actions.applyTemplate(activeWeek, id))}
+                onApplyStarter={(id) => replaceWeek(activeWeek, () => actions.applyStarter(activeWeek, id, { lang }))}
+                onAdvance={onAdvance}
+              />
             </main>
           </div>
           {isPhone && <PhoneDock {...panel} folded={panelHidden} onShow={() => setHidden(false)} />}
@@ -250,6 +269,16 @@ export default function App() {
             />
           )}
         </>
+      )}
+      {undoAvailable(undo, data) && (
+        <UndoBar
+          text={undo.text}
+          onUndo={() => {
+            actions.replaceAll(undo.before);
+            setUndo(null);
+          }}
+          onDismiss={() => setUndo(null)}
+        />
       )}
       {view === "stats" && (
         <StatsView data={data} range={statsRange} setRange={setStatsRange} resetStats={actions.resetStats} />

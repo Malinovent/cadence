@@ -148,6 +148,8 @@ Done on branch `s1-starters`: work-heavy, family and recovery weeks, under-fille
 ### [x] Audit fixes (2026-11-06)
 Done on branch `fix-sync-motion`: automatic task returns no longer count as edits (a stale device could overwrite newer account data), reduced-motion support. Shipped to main 2026-11-06.
 On branch `s1-add-polish` (on top of that fix): add window is a one-tap area grid with no length row; block popup can add and remove tasks. Shipped to main 2026-11-06.
+### [x] Undo after a week is replaced (audit item 7)
+Shipped to main 2026-11-06. Audit items 3–6 wait on branch `audit-3-7`.
 ### [~] S1.9 French and English
 Done on branch `s1-finish`: catalogues for every string (en/fr), lib wording passed in, detection + Settings switch (device-local), Quebec formats, default areas named in the person's language. Shipped to main 2026-11-04. Left: JP reviews the French.
 ### [x] S1.10 Neutral stats

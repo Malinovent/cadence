@@ -48,6 +48,7 @@
 - `src/lib/words.fr.ts` — S1.9 the same in Canadian French (`LIB_FR`)
 - `src/lib/describe.ts` — S1.10 neutral sentences about last week's ticked time per area
 - `src/lib/earlyBird.ts` — S1.11 reading the entitlements row, matching emails, the remembered answer
+- `src/lib/undo.ts` — when Undo is still offered after a week is replaced
 - `src/lib/starters.ts` — S1.8 the three starter weeks, matching areas by name, adding missing ones, applying to a week
 - `src/lib/welcome.ts` — S1.7 when to welcome back (7+ days without an edit) and what a tap replaces
 - `src/lib/tasks.ts` — S1.5 task rules: add / tick / remove, attach to a block, single-task tick, return on tick, end or removal, done this week
@@ -82,6 +83,7 @@
 - `src/components/BalanceBar.tsx` — one area's guardrail bar with kind and partial-credit label
 - `src/components/SlotMenu.tsx` — S1.6 the add window (desktop, beside the slot) / floating sheet (phone): one-tap grid of areas and the buffer
 - `src/components/WelcomeBack.tsx` — S1.7 "Welcome back. Start this week fresh from a template?" card
+- `src/components/UndoBar.tsx` — the Undo bar after a week is replaced
 - `src/components/TaskList.tsx` — the one task list in the panel / phone Tasks tab: draggable rows (onto a block), tick, block colour dots + where it is, dismiss, done this week, add row
 - `src/components/WeekBar.tsx` — above the grid: Week 1 / Week 2 switch, compact balanced weeks card, "Show areas and tasks" when the panel is hidden
 - `src/components/WeekFooter.tsx` — below the grid: templates, save current week, starter weeks (S1.8), roll forward

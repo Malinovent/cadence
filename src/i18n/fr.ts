@@ -160,6 +160,12 @@ export const fr: Messages = {
     langAuto: "Langue de l'appareil",
     langNames: { fr: "Français", en: "English" },
   },
+  undo: {
+    replaced: (week) => `${week} remplacée.`,
+    rolled: "Semaine avancée.",
+    action: "Annuler",
+    dismiss: "Fermer",
+  },
   account: {
     title: "Compte et synchro",
     conflict: "Cet appareil et votre compte ont chacun un horaire.",

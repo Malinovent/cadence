@@ -158,6 +158,12 @@ export const en = {
     langAuto: "Device language",
     langNames: { fr: "Français", en: "English" },
   },
+  undo: {
+    replaced: (week: string) => `${week} replaced.`,
+    rolled: "Rolled forward.",
+    action: "Undo",
+    dismiss: "Dismiss",
+  },
   account: {
     title: "Account & sync",
     conflict: "This device and your account both have a schedule.",

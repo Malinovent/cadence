@@ -9,13 +9,15 @@ import { useI18n } from "../i18n/I18nProvider";
 type Props = {
   data: CadenceData;
   week: WeekIndex;
-  actions: Pick<CadenceActions, "saveTemplate" | "applyTemplate" | "deleteTemplate" | "applyStarter">;
+  actions: Pick<CadenceActions, "saveTemplate" | "deleteTemplate">;
+  onApplyTemplate: (id: string) => void; // replace the week; the app offers Undo
+  onApplyStarter: (id: string) => void;
   onAdvance: () => void;
 };
 
 /** S1.4: below the grid, templates, "Save current week" and roll forward. */
-export default function WeekFooter({ data, week, actions, onAdvance }: Props) {
-  const { m, lang } = useI18n();
+export default function WeekFooter({ data, week, actions, onApplyTemplate, onApplyStarter, onAdvance }: Props) {
+  const { m } = useI18n();
   const [naming, setNaming] = useState(false);
   const [name, setName] = useState("");
   const empty = data.weeks[week].length === 0;
@@ -71,7 +73,7 @@ export default function WeekFooter({ data, week, actions, onAdvance }: Props) {
         {data.templates.map((t) => (
           <div key={t.id} style={S.tplRow}>
             <span style={S.tplName}>{t.name}</span>
-            <button onClick={() => actions.applyTemplate(week, t.id)} style={S.tplApply}>
+            <button onClick={() => onApplyTemplate(t.id)} style={S.tplApply}>
               {m.footer.apply}
             </button>
             <button onClick={() => actions.deleteTemplate(t.id)} style={S.tplDel}>
@@ -80,7 +82,7 @@ export default function WeekFooter({ data, week, actions, onAdvance }: Props) {
           </div>
         ))}
       </div>
-      <StarterWeeks data={data} week={week} onApply={(id) => actions.applyStarter(week, id, { lang })} />
+      <StarterWeeks data={data} week={week} onApply={onApplyStarter} />
       <button onClick={onAdvance} style={{ ...S.advanceBtn, ...S.weekFooterAdvance }}>
         {m.footer.rollForward}
       </button>

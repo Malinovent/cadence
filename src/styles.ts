@@ -1076,6 +1076,44 @@ export const S = {
     fontFamily: "'Spline Sans Mono', monospace",
     flexShrink: 0
   },
+  // Undo after a week is replaced, above the phone dock
+  undoBar: {
+    position: "fixed",
+    left: "50%",
+    bottom: "calc(14px + env(safe-area-inset-bottom))",
+    transform: "translateX(-50%)",
+    zIndex: 30,
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    maxWidth: "calc(100vw - 24px)",
+    padding: "8px 10px 8px 14px",
+    borderRadius: 6,
+    background: ink,
+    color: paper,
+    fontSize: 14,
+    whiteSpace: "nowrap",
+    boxShadow: "0 6px 18px rgba(43, 38, 34, 0.25)"
+  },
+  undoBtn: {
+    minHeight: 32,
+    padding: "4px 10px",
+    border: `1.5px solid ${paper}`,
+    borderRadius: 3,
+    background: "transparent",
+    color: paper,
+    cursor: "pointer",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 600,
+    fontSize: 14
+  },
+  undoClose: {
+    border: "none",
+    background: "transparent",
+    color: paper,
+    cursor: "pointer",
+    fontSize: 13
+  },
   // S1.11 early bird: a small badge by the logo, and a thank-you in Settings
   earlyBadge: {
     display: "inline-block",

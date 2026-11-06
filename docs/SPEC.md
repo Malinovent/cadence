@@ -300,6 +300,9 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 - Supersedes the length row in S1.6. The add window asks for an area only: a grid of area buttons plus the buffer (dot and name, wrapping to two columns on a phone); one tap places the area's usual length (the buffer's 30 min) by the drop rule and closes; the person resizes it in the calendar. An area with no room is disabled. Desktop: 252px window with a small pop-in. Phone: a floating sheet with margins and rounded corners, not edge to edge. Both entrances are off under reduced motion.
 - The block popup (`BlockEditor`) gets a Tasks section: tasks in this block first (✓; tap to take one out, it goes back to the list without a "back from" note), then every other open task (＋; tap to add it, moving it if it's in another block, whose time it shows). The list scrolls past about five rows. "No open tasks." when there are none. So a task can now reach a block without dragging.
 
+### Undo after a week is replaced (2026-11-06)
+- Applying a template or starter week, and roll forward, stay one tap and offer "Undo" in a bar at the bottom (`UndoBar`, `src/lib/undo.ts`). Undo restores the whole document as it was (the week, areas a starter added, tasks sent back). The offer has no timer: it stands while the data is exactly what the action left, and ends with any other change, a copy from the account, or ✕.
+
 ## Phases
 1. Port + export/import + unit tests (this file's sections above).
 2. PWA + deploy: manifest, icons (incl. 180×180 apple-touch-icon, replace the emoji favicon), iOS meta tags, `viewport-fit=cover` + safe-area padding, service worker app-shell cache, self-hosted fonts, GitHub Pages workflow.
