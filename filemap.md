@@ -49,6 +49,8 @@
 - `src/lib/describe.ts` — S1.10 neutral sentences about last week's ticked time per area
 - `src/lib/earlyBird.ts` — S1.11 reading the entitlements row, matching emails, the remembered answer
 - `src/lib/undo.ts` — when Undo is still offered after a week is replaced
+- `src/lib/onboarding.ts` — who sees the onboarding; default areas following a language change
+- `src/lib/legal.ts` — links to the site's privacy policy and terms, by language
 - `src/lib/starters.ts` — S1.8 the three starter weeks, matching areas by name, adding missing ones, applying to a week
 - `src/lib/welcome.ts` — S1.7 when to welcome back (7+ days without an edit) and what a tap replaces
 - `src/lib/tasks.ts` — S1.5 task rules: add / tick / remove, attach to a block, single-task tick, return on tick, end or removal, done this week
@@ -60,6 +62,7 @@
 - `src/state/store.ts` — `createCadenceStore`: framework-free holder of data + meta; per-key persistence; `edit` (user edit, bumps `updatedAt`), `applyRemote` (no bump), `setMeta`
 - `src/state/useCadence.ts` — `useCadence` hook: renders from the store (`useSyncExternalStore`); data, meta, bound user actions, `store`
 - `src/sync/useEarlyBird.ts` — S1.11 is the signed-in email an early bird? (entitlements, remembered per device)
+- `src/state/onboardingPrefs.ts` — per device: the onboarding was finished or skipped (`cadence:ui:onboarded`)
 - `src/state/welcomePrefs.ts` — per-device: the absence the welcome-back card was answered for (`cadence:ui:welcomeAnswered`)
 - `src/state/panelPrefs.ts` — read/write the per-device panel hidden / tray folded choice (`cadence:ui:trayHidden`)
 - `src/state/balanceRules.ts` — read/write the per-device balanced-week rules (`cadence:ui:balanceRules`)
@@ -75,6 +78,7 @@
 - `src/i18n/en.ts`, `src/i18n/fr.ts` — S1.9 every string the app shows, English and Canadian French (same shape)
 - `src/i18n/lang.ts` — S1.9 detecting the language, the Settings choice (`cadence:ui:lang`), locales
 - `src/i18n/I18nProvider.tsx` — S1.9 `useI18n()`: the catalogue, language and locale for the app; keeps `<html lang>` and the title in step
+- `src/appName.ts` — the product name, in one place
 - `src/components/` — React view components
 - `src/components/Header.tsx` — logo, tagline, nav buttons (`View` type); sync status line under the nav when signed in (opens Settings)
 - `src/components/AreasPanel.tsx` — S1.4 desktop left panel: area chips with this week's balance, buffer, calm notes, tasks, hide; shared `PanelProps`, `armHint`, `BalanceNotes`
@@ -84,6 +88,7 @@
 - `src/components/SlotMenu.tsx` — S1.6 the add window (desktop, beside the slot) / floating sheet (phone): one-tap grid of areas and the buffer
 - `src/components/WelcomeBack.tsx` — S1.7 "Welcome back. Start this week fresh from a template?" card
 - `src/components/UndoBar.tsx` — the Undo bar after a week is replaced
+- `src/components/Onboarding.tsx` — the three onboarding screens (what it is, starter or empty week, how it works)
 - `src/components/TaskList.tsx` — the one task list in the panel / phone Tasks tab: draggable rows (onto a block), tick, block colour dots + where it is, dismiss, done this week, add row
 - `src/components/WeekBar.tsx` — above the grid: Week 1 / Week 2 switch, compact balanced weeks card, "Show areas and tasks" when the panel is hidden
 - `src/components/WeekFooter.tsx` — below the grid: templates, save current week, starter weeks (S1.8), roll forward

@@ -303,6 +303,18 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 ### Undo after a week is replaced (2026-11-06)
 - Applying a template or starter week, and roll forward, stay one tap and offer "Undo" in a bar at the bottom (`UndoBar`, `src/lib/undo.ts`). Undo restores the whole document as it was (the week, areas a starter added, tasks sent back). The offer has no timer: it stands while the data is exactly what the action left, and ends with any other change, a copy from the account, or ✕.
 
+### Onboarding (JP, 2026-11-07)
+- Three short screens for new people only (`shouldOnboard`: never edited on this device, nothing saved worth keeping, not seen here before; `cadence:ui:onboarded` per device). JP's friend and anyone with a week never see it. Settings → About → "Show the introduction again" replays it.
+- Every step can be left: "Skip" (steps 1–2), "Back" (steps 2–3), Escape. A modal card over the app (`Onboarding`), focus kept inside, the page behind doesn't scroll; on a phone each step opens at its top and the buttons stay pinned at the bottom.
+- Top row: "Step 1 of 3", dots, and an FR / EN switch (saved like Settings → Language). Picking a language while the areas are still the untouched defaults renames them (`relabelDefaults`, an automatic change, not an edit); areas anyone touched never change.
+- 1) "Welcome to Cadence." What it is: guardrails (floor, ceiling, range), place blocks and watch the balance, nothing moves unless you move it, weeks stay on this device unless you sign in. No medical-device line (JP: "It's clearly not a medical device"; the site's footer keeps it). When sync is set up and nobody is signed in: "Already use it on another device? Sign in instead" (ends the onboarding, opens Settings).
+- 2) "How would you like to start?" The three starter weeks as cards (name, blurb, a bar of how the week splits between areas, the guardrails the person would get: their own areas keep their own limits, `starterPreview`) and "Empty week" (the default). The main button names the choice ("Use Family week" / "Start with an empty week"); a starter is applied there and then, with "Adds Rest and People to your areas." beforehand. On a replay over a week with blocks it says what it replaces and offers Undo.
+- 3) "Three things to know": placing (drag or tap, or click empty time), ticking (balanced weeks count what's ticked), tasks into blocks; phone and desktop wording differ. "Start planning" closes it.
+
+### About in Settings, and audit items 3–5 (2026-11-07)
+- About: what the app is, "Show the introduction again", and privacy / terms links in the person's language once `VITE_SITE_URL` is set (`src/lib/legal.ts`). No medical-device line (JP).
+- The product name lives in `src/appName.ts` (screens, page title, install manifest); stored keys, the export's `app: "cadence"` and backup file names stay. The install description and page meta carry French first, then English; `<html lang>` starts as fr-CA. The sign-in email template in `docs/SUPABASE_SETUP.md` is bilingual, French first (pasted by hand in Supabase).
+
 ## Phases
 1. Port + export/import + unit tests (this file's sections above).
 2. PWA + deploy: manifest, icons (incl. 180×180 apple-touch-icon, replace the emoji favicon), iOS meta tags, `viewport-fit=cover` + safe-area padding, service worker app-shell cache, self-hosted fonts, GitHub Pages workflow.

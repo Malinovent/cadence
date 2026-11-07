@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import CategoriesView from "./components/CategoriesView";
 import Header, { type View } from "./components/Header";
 import SettingsView from "./components/SettingsView";
@@ -10,6 +10,9 @@ import WeekFooter from "./components/WeekFooter";
 import WeekGrid from "./components/WeekGrid";
 import WelcomeBack from "./components/WelcomeBack";
 import UndoBar from "./components/UndoBar";
+import Onboarding from "./components/Onboarding";
+import { relabelDefaults, shouldOnboard } from "./lib/onboarding";
+import { readOnboarded, writeOnboarded } from "./state/onboardingPrefs";
 import { undoAvailable, type UndoOffer } from "./lib/undo";
 import { shouldWelcome } from "./lib/welcome";
 import { STARTERS } from "./lib/starters";
@@ -54,6 +57,10 @@ export default function App() {
   const [lastEdit, setLastEdit] = useState(() => store.getSnapshot().meta.updatedAt);
   const [welcomeAnswered, setWelcomeAnswered] = useState(readWelcomeAnswered);
   const [undo, setUndo] = useState<UndoOffer | null>(null); // a week just replaced or rolled forward
+  // onboarding: new people only, judged once on opening; Settings → About replays it
+  const [onboarding, setOnboarding] = useState(() =>
+    shouldOnboard({ seen: readOnboarded(), lastEdit: store.getSnapshot().meta.updatedAt, data: store.getSnapshot().data }),
+  );
   const [phoneDay, setPhoneDay] = useState(() => defaultDay(0, new Date())); // phone: the one day shown, Mon = 0
   const isPhone = useIsPhone();
   // S1.4: the areas-and-tasks panel hidden (desktop) or folded (phone); remembered on this device
@@ -123,6 +130,30 @@ export default function App() {
     if (after !== before) setUndo({ before, after, text });
   };
   const replaceWeek = (week: WeekIndex, run: () => void) => withUndo(m.undo.replaced(m.week.names[week]), run);
+
+  // a language picked (onboarding or Settings) while the areas are still the untouched defaults:
+  // their names follow. Automatic, so not an edit.
+  const shownLang = useRef(lang);
+  useEffect(() => {
+    if (shownLang.current === lang) return;
+    shownLang.current = lang;
+    store.adjust((d) => relabelDefaults(d, lang));
+  }, [lang, store]);
+
+  const endOnboarding = () => {
+    writeOnboarded();
+    setOnboarding(false);
+  };
+  // onboarding step 2: a starter week (null = empty, nothing changes). On a replay with blocks in
+  // Week 1 it replaces them, so it offers Undo like any other replace.
+  const onboardStart = (starterId: string | null) => {
+    if (!starterId) return;
+    const run = () => actions.applyStarter(0, starterId, { lang });
+    if (data.weeks[0].length > 0) replaceWeek(0, run);
+    else run();
+    changeWeek(0);
+    changeView("calendar");
+  };
 
   // week 2 becomes week 1, and the view jumps back to it
   const onAdvance = () => {
@@ -284,7 +315,30 @@ export default function App() {
         <StatsView data={data} range={statsRange} setRange={setStatsRange} resetStats={actions.resetStats} />
       )}
       {view === "categories" && <CategoriesView cats={data.cats} actions={actions} />}
-      {view === "settings" && <SettingsView data={data} onReplace={onReplace} sync={sync.configured ? sync : null} earlyBird={earlyBird} />}
+      {view === "settings" && (
+        <SettingsView
+          data={data}
+          onReplace={onReplace}
+          sync={sync.configured ? sync : null}
+          earlyBird={earlyBird}
+          onReplayIntro={() => setOnboarding(true)}
+        />
+      )}
+      {onboarding && (
+        <Onboarding
+          phone={isPhone}
+          cats={data.cats}
+          blocksInWeek1={data.weeks[0].length}
+          canSignIn={sync.configured && !sync.session}
+          onStart={onboardStart}
+          onDone={endOnboarding}
+          onSkip={endOnboarding}
+          onSignIn={() => {
+            endOnboarding();
+            changeView("settings");
+          }}
+        />
+      )}
     </div>
   );
 }

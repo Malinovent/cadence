@@ -2,13 +2,20 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
+import { APP_NAME } from "./src/appName";
 
 const PAPER = "#f4ede1";
+// a manifest and the page's meta tags hold one text: French first, both languages (S1.9, audit item 4)
+const DESCRIPTION = "Équilibrez la semaine avant qu'elle vous déséquilibre. Balance the week before the week balances you.";
 
 export default defineConfig({
   base: "/cadence/",
   plugins: [
     react(),
+    {
+      name: "app-name-in-html",
+      transformIndexHtml: (html) => html.replaceAll("%APP_NAME%", APP_NAME).replaceAll("%APP_DESCRIPTION%", DESCRIPTION),
+    },
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: "auto",
@@ -16,9 +23,9 @@ export default defineConfig({
       includeManifestIcons: false,
       devOptions: { enabled: false },
       manifest: {
-        name: "Cadence",
-        short_name: "Cadence",
-        description: "Balance the week before the week balances you.",
+        name: APP_NAME,
+        short_name: APP_NAME,
+        description: DESCRIPTION,
         display: "standalone",
         start_url: "/cadence/",
         scope: "/cadence/",

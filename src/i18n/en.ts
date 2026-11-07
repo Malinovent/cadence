@@ -1,10 +1,11 @@
 // S1.9: every string the app shows, in English. The French twin is fr.ts (same shape, checked by
 // the types and by a test). Lib wording lives in src/lib/words.ts and is reached through `lib`.
+import { APP_NAME } from "../appName";
 import { LIB_EN } from "../lib/words";
 
 export const en = {
   lib: LIB_EN,
-  docTitle: "Cadence — Weekly Time Balancer",
+  docTitle: `${APP_NAME} — Weekly Time Balancer`,
   header: {
     tagline: "Balance the week before the week balances you.",
     nav: { calendar: "calendar", stats: "stats", categories: "categories", settings: "settings" },
@@ -140,12 +141,12 @@ export const en = {
       "A copy of your data from before targets became floors, ceilings and ranges is kept on this device.",
     beforeTasks: "A copy of your data from before the November tasks update is kept on this device.",
     download: "Download it",
-    replaceWarn: "This replaces everything in Cadence on this device.",
+    replaceWarn: `This replaces everything in ${APP_NAME} on this device.`,
     replaceYes: "Yes, replace",
     cancel: "Cancel",
     imported: "Imported. Your week is back.",
-    notBackup: "That file doesn't look like a Cadence backup.",
-    newerVersion: "This backup is from a newer version of Cadence.",
+    notBackup: `That file doesn't look like a ${APP_NAME} backup.`,
+    newerVersion: `This backup is from a newer version of ${APP_NAME}.`,
     rulesTitle: "Balanced weeks",
     rulesIntro:
       "A week counts as balanced when every floor is met at least this much and no ceiling is passed by more than this. Only ticked blocks count. Saved on this device.",
@@ -153,11 +154,51 @@ export const en = {
     ceilingsPassed: "Ceilings passed by (%)",
     rulesBack: "Back to 80% and 10%",
     earlyThanks:
-      "Thank you for believing in Cadence early. Your early-bird purchase is linked to this account, and Pro is yours for life when it arrives.",
+      `Thank you for believing in ${APP_NAME} early. Your early-bird purchase is linked to this account, and Pro is yours for life when it arrives.`,
     langTitle: "Language",
-    langIntro: "Cadence follows your device's language. Choose one to keep it. Saved on this device.",
+    langIntro: `${APP_NAME} follows your device's language. Choose one to keep it. Saved on this device.`,
     langAuto: "Device language",
     langNames: { fr: "Français", en: "English" },
+    aboutTitle: "About",
+    aboutText: `${APP_NAME} plans two weeks at a time and keeps them in balance across the parts of your life, from work to rest. Your weeks stay on this device unless you sign in to sync them.`,
+    replayIntro: "Show the introduction again",
+    privacy: "Privacy policy",
+    terms: "Terms",
+  },
+  onboard: {
+    step: (n: number, total: number) => `Step ${n} of ${total}`,
+    language: "Language",
+    skip: "Skip",
+    next: "Next",
+    back: "Back",
+    welcomeTitle: `Welcome to ${APP_NAME}.`,
+    welcomeLead: "A two-week planner that keeps your time in balance across the parts of your life.",
+    welcomePoints: [
+      "Give each area a guardrail: a floor to protect, like rest, a ceiling to cap, like work, or a range in between.",
+      "Place blocks of time in your week and watch each area's balance fill in.",
+      "Nothing moves unless you move it. Your weeks stay on this device unless you sign in to sync them.",
+    ],
+    signIn: "Already use it on another device? Sign in instead",
+    startTitle: "How would you like to start?",
+    startLead:
+      "Pick a starter week to see what a balanced week can look like, or start empty. You can change everything later.",
+    emptyName: "Empty week",
+    emptyBlurb: "A blank week with your own areas.",
+    useStarter: (name: string) => `Use ${name}`,
+    startEmpty: "Start with an empty week",
+    tipsTitle: "Three things to know",
+    tips: {
+      place: {
+        desktop: "Drag an area onto the week, or click empty time and pick one.",
+        phone: "Tap an area, then tap a time. Or tap empty time and pick one.",
+      },
+      tick: "Tick the circle on a block when it's done. Balanced weeks count what you tick.",
+      tasks: {
+        desktop: "Drag a task onto a block, or open a block and add it there.",
+        phone: "Hold a task and drag it onto a block, or open a block and add it there.",
+      },
+    },
+    finish: "Start planning",
   },
   undo: {
     replaced: (week: string) => `${week} replaced.`,

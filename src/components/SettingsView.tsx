@@ -4,9 +4,17 @@ import { downloadText } from "../lib/download";
 import { droppedLine, importSummaryLine } from "../lib/format";
 import type { CadenceData } from "../lib/model";
 import { loadPremigrationCopy, PREMIGRATION_KEYS } from "../lib/storage";
-import { buildExport, exportFilename, NEWER_VERSION, NOT_A_BACKUP, parseImport, type ImportResult } from "../lib/transfer";
+import {
+  buildExport,
+  exportFilename,
+  NEWER_VERSION,
+  NOT_A_BACKUP,
+  parseImport,
+  type ImportResult,
+} from "../lib/transfer";
 import { clampRules, DEFAULT_RULES, type BalanceRules } from "../lib/balancedWeeks";
 import { readBalanceRules, writeBalanceRules } from "../state/balanceRules";
+import { legalLinks } from "../lib/legal";
 import { S } from "../styles";
 import { useI18n } from "../i18n/I18nProvider";
 import type { LangChoice } from "../i18n/lang";
@@ -38,6 +46,7 @@ export default function SettingsView({
   onReplace,
   sync,
   earlyBird = false,
+  onReplayIntro,
 }: {
   data: CadenceData;
   onReplace: (next: CadenceData) => void;
@@ -45,6 +54,8 @@ export default function SettingsView({
   sync: AccountSyncProps | null;
   /** S1.11: show the early-bird thank-you */
   earlyBird?: boolean;
+  /** Settings → About: show the onboarding again */
+  onReplayIntro: () => void;
 }) {
   const { m } = useI18n();
   const [status, setStatus] = useState<Status>({ kind: "idle" });
@@ -84,7 +95,8 @@ export default function SettingsView({
 
   const dropped = status.kind === "pending" ? droppedLine(status.result.dropped, m.lib) : null;
   // the lib reports import errors in English; show them in the person's language
-  const errorText = (msg: string) => (msg === NOT_A_BACKUP ? m.settings.notBackup : msg === NEWER_VERSION ? m.settings.newerVersion : msg);
+  const errorText = (msg: string) =>
+    msg === NOT_A_BACKUP ? m.settings.notBackup : msg === NEWER_VERSION ? m.settings.newerVersion : msg;
   // untouched copies kept before an update migrated the saved data (S1.2 guardrails, S1.5 tasks)
   const [copies] = useState(() =>
     BEFORE_UPDATES.map((c) => ({ ...c, text: loadPremigrationCopy(c.key) })).filter(
@@ -103,7 +115,13 @@ export default function SettingsView({
         <button style={{ ...S.catAdd, marginTop: 0 }} onClick={onPickClick}>
           {m.settings.import}
         </button>
-        <input ref={fileRef} type="file" accept=".json,application/json" style={{ display: "none" }} onChange={onFile} />
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".json,application/json"
+          style={{ display: "none" }}
+          onChange={onFile}
+        />
       </div>
       {copies.map((c) => (
         <div key={c.key} style={{ ...note, color: "#7a6e5e", marginTop: 12 }}>
@@ -132,7 +150,9 @@ export default function SettingsView({
           </div>
         </div>
       )}
-      {status.kind === "error" && <div style={{ ...note, color: "#b54", marginTop: 12 }}>{errorText(status.message)}</div>}
+      {status.kind === "error" && (
+        <div style={{ ...note, color: "#b54", marginTop: 12 }}>{errorText(status.message)}</div>
+      )}
       {status.kind === "success" && (
         <div style={{ ...note, color: "#1FA98A", marginTop: 12 }}>{m.settings.imported}</div>
       )}
@@ -147,6 +167,7 @@ export default function SettingsView({
         </div>
       )}
       {sync && <AccountSync {...sync} />}
+      <AboutSection onReplayIntro={onReplayIntro} />
     </div>
   );
 }
@@ -168,7 +189,15 @@ function BalanceRulesSection() {
       <div style={{ ...row, marginTop: 12, alignItems: "flex-end" }}>
         <label style={S.catField}>
           <span>{m.settings.floorsMet}</span>
-          <input type="number" min="0" max="100" step="5" value={rules.floorPct} onChange={(e) => set({ floorPct: +e.target.value })} style={S.catNum} />
+          <input
+            type="number"
+            min="0"
+            max="100"
+            step="5"
+            value={rules.floorPct}
+            onChange={(e) => set({ floorPct: +e.target.value })}
+            style={S.catNum}
+          />
         </label>
         <label style={S.catField}>
           <span>{m.settings.ceilingsPassed}</span>
@@ -192,7 +221,6 @@ function BalanceRulesSection() {
   );
 }
 
-
 /** S1.9: the language, following the device unless one is chosen. Saved on this device. */
 function LanguageSection() {
   const { m, choice, setChoice } = useI18n();
@@ -205,7 +233,11 @@ function LanguageSection() {
     <div style={{ marginTop: 32 }}>
       <h2 style={S.statsTitle}>{m.settings.langTitle}</h2>
       <div style={S.catIntro}>{m.settings.langIntro}</div>
-      <div style={{ ...S.kindGroup, marginTop: 12, display: "inline-flex" }} role="group" aria-label={m.settings.langTitle}>
+      <div
+        style={{ ...S.kindGroup, marginTop: 12, display: "inline-flex" }}
+        role="group"
+        aria-label={m.settings.langTitle}
+      >
         {options.map((o) => (
           <button
             key={o.value}
@@ -218,6 +250,33 @@ function LanguageSection() {
             {o.label}
           </button>
         ))}
+      </div>
+    </div>
+  );
+}
+
+/** What the app is, the introduction again, and the legal pages (once the site has its address). */
+function AboutSection({ onReplayIntro }: { onReplayIntro: () => void }) {
+  const { m, lang } = useI18n();
+  const links = legalLinks(import.meta.env.VITE_SITE_URL, lang);
+  return (
+    <div style={{ marginTop: 32 }}>
+      <h2 style={S.statsTitle}>{m.settings.aboutTitle}</h2>
+      <div style={S.catIntro}>{m.settings.aboutText}</div>
+      <div style={{ ...row, marginTop: 12, alignItems: "center" }}>
+        <button type="button" style={{ ...S.catAdd, marginTop: 0 }} onClick={onReplayIntro}>
+          {m.settings.replayIntro}
+        </button>
+        {links && (
+          <>
+            <a href={links.privacy} target="_blank" rel="noreferrer" style={S.aboutLink}>
+              {m.settings.privacy}
+            </a>
+            <a href={links.terms} target="_blank" rel="noreferrer" style={S.aboutLink}>
+              {m.settings.terms}
+            </a>
+          </>
+        )}
       </div>
     </div>
   );

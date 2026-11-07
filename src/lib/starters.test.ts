@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { DAY_END, DAY_START, DEFAULT_CATEGORIES, STEP } from "./constants";
 import { balance } from "./guardrail";
 import { defaultData, normalizeData, type CadenceData, type Task } from "./model";
-import { addedNote, applyStarter, matchArea, missingAreas, STARTERS } from "./starters";
+import { addedNote, applyStarter, matchArea, missingAreas, STARTERS, starterPreview } from "./starters";
 
 const ids = () => {
   let n = 0;
@@ -131,5 +131,14 @@ describe("applying a starter", () => {
     // a French name matches the English starter area too, and the other way round
     expect(missingAreas(fr.cats, STARTERS[2])).toEqual([]);
     expect(missingAreas(applyStarter(defaultData(), 0, STARTERS[0].id, ids()).cats, STARTERS[0])).toEqual([]);
+  });
+
+  it("previews what a starter leaves: the person's own Work keeps its limit, added areas get theirs", () => {
+    const rows = starterPreview(STARTERS[0], defaultData().cats);
+    const work = rows.find((r) => r.key === "work")!;
+    expect(work).toMatchObject({ name: "Work", limit: { kind: "floor", min: 1200 }, mins: 1800, added: false });
+    expect(rows.find((r) => r.key === "rest")).toMatchObject({ name: "Rest", color: "#9B4DCA", added: true });
+    const fr = starterPreview(STARTERS[0], defaultData("fr").cats, "fr");
+    expect(fr.map((r) => r.name)).toEqual(["Travail", "Repos", "Proches", "Exercice"]);
   });
 });

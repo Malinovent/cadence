@@ -64,21 +64,27 @@ Cadence signs you in with your email, with no password. Each email has a sign-in
          - **Username**: your full Gmail address. **Password**: the 16-character app password (no spaces)
       4. Click **Save**. The **Templates** tab is now editable. Sign-in emails will come from your Gmail address.
       5. Optional: under **Authentication → Rate Limits**, the email limit can be raised (for example to 30 per hour) now that your own account sends them.
-16. Open the **Magic Link** template.
-    - **Subject**: `Your Cadence sign-in`
+16. Open the **Magic Link** template. A template holds one text, so it carries both languages, French first (the brief's French-first rule).
+    - **Subject**: `Votre connexion à Cadence / Your Cadence sign-in`
     - Replace the whole **body** (switch to the source/HTML view if you see one) with:
 
     ```html
-    <h2>Your Cadence sign-in</h2>
-    <p>Here's your way back to your week.</p>
-    <p>On this device, tap the link:</p>
-    <p><a href="{{ .ConfirmationURL }}">Sign in to Cadence</a></p>
-    <p>Or type this code in Cadence:</p>
+    <h2>Votre connexion à Cadence</h2>
+    <p>Voici le chemin de retour vers votre semaine.</p>
+    <p>Sur cet appareil, touchez le lien :</p>
+    <p><a href="{{ .ConfirmationURL }}">Se connecter à Cadence</a></p>
+    <p>Ou entrez ce code dans Cadence :</p>
     <p style="font-size:28px;letter-spacing:6px;font-family:monospace;"><strong>{{ .Token }}</strong></p>
+    <p>Vous utilisez Cadence depuis l'écran d'accueil de votre iPhone? Entrez le code. Le lien ouvrirait Safari.</p>
+    <p>Le code ne fonctionne qu'une fois et expire bientôt. Si vous n'avez rien demandé, ignorez ce courriel.</p>
+    <hr>
+    <h2>Your Cadence sign-in</h2>
+    <p>Here's your way back to your week. Tap the link above, or type the same code in Cadence.</p>
     <p>Using Cadence from your iPhone home screen? Type the code. The link would open Safari instead.</p>
     <p>The code works once and expires soon. If you didn't ask for this, you can ignore this email.</p>
     ```
 
+    - If the name changes, replace "Cadence" in the subject and body here too.
     - Click **Save**.
 17. Open the **Confirm signup** template and replace its subject and body the same way, with the exact same text. The very first time you sign in, Supabase sends this email instead of the Magic Link one, so it needs the code too.
 

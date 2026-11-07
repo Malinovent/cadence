@@ -1,3 +1,4 @@
+import { APP_NAME } from "../appName";
 import { normalizeData, SCHEMA_VERSION, type CadenceData } from "./model";
 import { DATA_KEYS, STORAGE_KEYS, type DataKey } from "./storage";
 
@@ -13,8 +14,8 @@ export type ImportResult =
   | { ok: true; data: CadenceData; dropped: number; summary: ImportSummary }
   | { ok: false; error: string };
 
-export const NOT_A_BACKUP = "That file doesn't look like a Cadence backup.";
-export const NEWER_VERSION = "This backup is from a newer version of Cadence.";
+export const NOT_A_BACKUP = `That file doesn't look like a ${APP_NAME} backup.`;
+export const NEWER_VERSION = `This backup is from a newer version of ${APP_NAME}.`;
 
 export const buildExport = (data: CadenceData, now: Date = new Date()): ExportEnvelope => ({
   app: "cadence",

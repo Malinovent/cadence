@@ -1,11 +1,12 @@
 // S1.9: every string the app shows, in Canadian French (Quebec usage: « courriel », « fin de
 // semaine », 24-hour times). JP reviews the French. Same shape as en.ts.
+import { APP_NAME } from "../appName";
 import { LIB_FR } from "../lib/words.fr";
 import type { Messages } from "./en";
 
 export const fr: Messages = {
   lib: LIB_FR,
-  docTitle: "Cadence — L'équilibre de la semaine",
+  docTitle: `${APP_NAME} — L'équilibre de la semaine`,
   header: {
     tagline: "Équilibrez la semaine avant qu'elle vous déséquilibre.",
     nav: { calendar: "calendrier", stats: "stats", categories: "domaines", settings: "réglages" },
@@ -141,12 +142,12 @@ export const fr: Messages = {
       "Une copie de vos données d'avant le passage des cibles aux planchers, plafonds et fourchettes est gardée sur cet appareil.",
     beforeTasks: "Une copie de vos données d'avant la mise à jour des tâches de novembre est gardée sur cet appareil.",
     download: "La télécharger",
-    replaceWarn: "Cela remplace tout ce que Cadence contient sur cet appareil.",
+    replaceWarn: `Cela remplace tout ce que ${APP_NAME} contient sur cet appareil.`,
     replaceYes: "Oui, remplacer",
     cancel: "Annuler",
     imported: "Importé. Votre semaine est de retour.",
-    notBackup: "Ce fichier ne ressemble pas à une sauvegarde de Cadence.",
-    newerVersion: "Cette sauvegarde vient d'une version plus récente de Cadence.",
+    notBackup: `Ce fichier ne ressemble pas à une sauvegarde de ${APP_NAME}.`,
+    newerVersion: `Cette sauvegarde vient d'une version plus récente de ${APP_NAME}.`,
     rulesTitle: "Semaines équilibrées",
     rulesIntro:
       "Une semaine compte comme équilibrée quand chaque plancher est atteint au moins à ce point et qu'aucun plafond n'est dépassé de plus que cela. Seuls les blocs cochés comptent. Enregistré sur cet appareil.",
@@ -154,12 +155,52 @@ export const fr: Messages = {
     ceilingsPassed: "Plafonds dépassés de (%)",
     rulesBack: "Revenir à 80 % et 10 %",
     earlyThanks:
-      "Merci d'avoir cru en Cadence dès le début. Votre achat lève-tôt est lié à ce compte, et Pro est à vous pour la vie dès son arrivée.",
+      `Merci d'avoir cru en ${APP_NAME} dès le début. Votre achat lève-tôt est lié à ce compte, et Pro est à vous pour la vie dès son arrivée.`,
     langTitle: "Langue",
     langIntro:
-      "Cadence suit la langue de votre appareil. Choisissez-en une pour la garder. Enregistré sur cet appareil.",
+      `${APP_NAME} suit la langue de votre appareil. Choisissez-en une pour la garder. Enregistré sur cet appareil.`,
     langAuto: "Langue de l'appareil",
     langNames: { fr: "Français", en: "English" },
+    aboutTitle: "À propos",
+    aboutText: `${APP_NAME} planifie deux semaines à la fois et les garde en équilibre entre les différentes parts de votre vie, du travail au repos. Vos semaines restent sur cet appareil, sauf si vous vous connectez pour les synchroniser.`,
+    replayIntro: "Revoir l'introduction",
+    privacy: "Politique de confidentialité",
+    terms: "Conditions",
+  },
+  onboard: {
+    step: (n, total) => `Étape ${n} sur ${total}`,
+    language: "Langue",
+    skip: "Passer",
+    next: "Suivant",
+    back: "Retour",
+    welcomeTitle: `Bienvenue dans ${APP_NAME}.`,
+    welcomeLead: "Un planificateur sur deux semaines qui garde votre temps en équilibre entre les différentes parts de votre vie.",
+    welcomePoints: [
+      "Donnez à chaque domaine un garde-fou : un plancher à protéger, comme le repos, un plafond à ne pas dépasser, comme le travail, ou une fourchette entre les deux.",
+      "Placez des blocs de temps dans votre semaine et voyez l'équilibre de chaque domaine se remplir.",
+      "Rien ne bouge à moins que vous ne le déplaciez. Vos semaines restent sur cet appareil, sauf si vous vous connectez pour les synchroniser.",
+    ],
+    signIn: "Vous l'utilisez déjà sur un autre appareil? Connectez-vous plutôt",
+    startTitle: "Comment voulez-vous commencer?",
+    startLead:
+      "Choisissez une semaine de départ pour voir à quoi peut ressembler une semaine équilibrée, ou partez de zéro. Vous pourrez tout changer ensuite.",
+    emptyName: "Semaine vide",
+    emptyBlurb: "Une semaine vierge avec vos propres domaines.",
+    useStarter: (name) => `Utiliser « ${name} »`,
+    startEmpty: "Commencer avec une semaine vide",
+    tipsTitle: "Trois choses à savoir",
+    tips: {
+      place: {
+        desktop: "Glissez un domaine dans la semaine, ou cliquez sur une case vide et choisissez-en un.",
+        phone: "Touchez un domaine, puis une heure. Ou touchez une case vide et choisissez-en un.",
+      },
+      tick: "Cochez le cercle d'un bloc quand c'est fait. Les semaines équilibrées comptent ce que vous cochez.",
+      tasks: {
+        desktop: "Glissez une tâche sur un bloc, ou ouvrez un bloc pour l'y ajouter.",
+        phone: "Maintenez une tâche et glissez-la sur un bloc, ou ouvrez un bloc pour l'y ajouter.",
+      },
+    },
+    finish: "Commencer à planifier",
   },
   undo: {
     replaced: (week) => `${week} remplacée.`,

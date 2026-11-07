@@ -1,6 +1,7 @@
 import { statusBadge } from "../lib/syncUi";
 import type { SyncStatus } from "../sync/engine";
 import { S } from "../styles";
+import { APP_NAME } from "../appName";
 import { useI18n } from "../i18n/I18nProvider";
 
 // S1.4: no Tasks view any more, tasks live in the areas-and-tasks panel beside the grid
@@ -35,7 +36,7 @@ export default function Header({
     <header style={S.header}>
       <div>
         <h1 style={S.logo}>
-          Cadence
+          {APP_NAME}
           {earlyBird && <span style={S.earlyBadge}>{m.header.earlyBird}</span>}
         </h1>
         <p style={S.tagline}>{m.header.tagline}</p>

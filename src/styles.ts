@@ -1126,6 +1126,225 @@ export const S = {
     cursor: "pointer",
     fontSize: 13
   },
+  aboutLink: {
+    color: ink,
+    fontSize: 14
+  },
+  // ---- onboarding (2026-11-07): three short screens for new people ----
+  onboardBackdrop: {
+    position: "fixed",
+    inset: 0,
+    zIndex: 60,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 12,
+    background: "rgba(43, 38, 34, 0.35)"
+  },
+  onboardCard: {
+    width: "100%",
+    maxWidth: 600,
+    maxHeight: "100%",
+    overflowY: "auto",
+    display: "flex",
+    flexDirection: "column",
+    gap: 16,
+    padding: "22px 24px",
+    background: paper,
+    color: ink,
+    border: `1.5px solid ${ink}`,
+    borderRadius: 10,
+    boxShadow: "0 12px 32px rgba(43, 38, 34, 0.25)",
+    animation: "cadence-pop 160ms ease-out"
+  },
+  onboardCardPhone: {
+    padding: "18px 16px",
+    borderRadius: 14
+  },
+  onboardTop: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10
+  },
+  onboardStep: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 11,
+    letterSpacing: "0.1em",
+    textTransform: "uppercase",
+    color: "#7a6e5e"
+  },
+  onboardDots: {
+    display: "flex",
+    gap: 5,
+    flex: 1
+  },
+  onboardDot: {
+    width: 8,
+    height: 8,
+    borderRadius: "50%",
+    border: `1.5px solid ${ink}`,
+    boxSizing: "border-box"
+  },
+  onboardDotOn: {
+    background: ink
+  },
+  onboardLang: {
+    display: "flex",
+    border: `1.5px solid ${ink}`,
+    borderRadius: 3,
+    overflow: "hidden"
+  },
+  onboardLangBtn: {
+    minWidth: 40,
+    minHeight: 32,
+    padding: "2px 8px",
+    border: "none",
+    background: "transparent",
+    color: ink,
+    cursor: "pointer",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 11,
+    letterSpacing: "0.08em"
+  },
+  onboardLangOn: {
+    background: ink,
+    color: paper
+  },
+  onboardTitle: {
+    margin: 0,
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 900,
+    fontSize: 28,
+    lineHeight: 1.1
+  },
+  onboardLead: {
+    margin: 0,
+    fontSize: 16,
+    lineHeight: 1.45
+  },
+  onboardList: {
+    margin: 0,
+    padding: 0,
+    listStyle: "none",
+    display: "flex",
+    flexDirection: "column",
+    gap: 10
+  },
+  onboardItem: {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: 10,
+    fontSize: 15,
+    lineHeight: 1.45
+  },
+  onboardBullet: {
+    flexShrink: 0,
+    width: 8,
+    height: 8,
+    marginTop: 7,
+    borderRadius: "50%",
+    background: ink
+  },
+  onboardNum: {
+    flexShrink: 0,
+    width: 24,
+    height: 24,
+    borderRadius: "50%",
+    border: `1.5px solid ${ink}`,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 12
+  },
+  onboardCards: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))",
+    gap: 10
+  },
+  onboardOption: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "stretch",
+    gap: 6,
+    padding: "12px 14px",
+    border: `1.5px solid ${line}`,
+    borderRadius: 8,
+    background: "#fbf6ec",
+    color: ink,
+    cursor: "pointer",
+    textAlign: "left",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif"
+  },
+  onboardOptionOn: {
+    borderColor: ink,
+    boxShadow: `inset 0 0 0 1px ${ink}`
+  },
+  onboardOptionName: {
+    fontWeight: 700,
+    fontSize: 16
+  },
+  onboardOptionBlurb: {
+    fontSize: 13,
+    lineHeight: 1.35,
+    color: "#5c5247"
+  },
+  onboardMix: {
+    display: "flex",
+    height: 8,
+    borderRadius: 4,
+    overflow: "hidden",
+    gap: 2
+  },
+  onboardLimits: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 2,
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 10,
+    color: "#5c5247"
+  },
+  onboardNote: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 11,
+    color: "#7a6e5e"
+  },
+  // pinned to the bottom of the card while a long step scrolls (phones)
+  onboardActions: {
+    position: "sticky",
+    bottom: -18,
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 14,
+    margin: "4px -4px -4px",
+    padding: "10px 4px 4px",
+    background: paper,
+    borderTop: `1px dashed ${line}`
+  },
+  onboardPrimary: {
+    marginLeft: "auto",
+    minHeight: 44,
+    padding: "10px 18px",
+    border: "none",
+    borderRadius: 4,
+    background: ink,
+    color: paper,
+    cursor: "pointer",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 600,
+    fontSize: 15
+  },
+  onboardQuiet: {
+    padding: "6px 0",
+    border: "none",
+    background: "transparent",
+    color: "#5c5247",
+    cursor: "pointer",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontSize: 14,
+    textDecoration: "underline"
+  },
   // S1.11 early bird: a small badge by the logo, and a thank-you in Settings
   earlyBadge: {
     display: "inline-block",
