@@ -2243,6 +2243,35 @@ export const S = {
     cursor: "pointer",
     fontSize: 15
   },
+  // phone: the toast a size up and nearly edge to edge (JP: "a bit bigger on mobile")
+  questToastPhone: {
+    width: "calc(100vw - 16px)",
+    gap: 12,
+    padding: "14px 4px 14px 16px",
+    borderRadius: 14
+  },
+  questLabelPhone: {
+    fontSize: 12
+  },
+  questItemPhone: {
+    fontSize: 18
+  },
+  questPipPhone: {
+    width: 14,
+    height: 14
+  },
+  questNextPhone: {
+    fontSize: 15
+  },
+  questShowPhone: {
+    minHeight: 44,
+    fontSize: 14
+  },
+  questClosePhone: {
+    width: 44,
+    height: 44,
+    fontSize: 18
+  },
   // ---- five of five: the finale card ----
   finaleBackdrop: {
     position: "fixed",
@@ -2311,6 +2340,44 @@ export const S = {
     gap: 9,
     fontSize: 14,
     animation: "cadence-land 260ms ease-out both"
+  },
+  // phone: the finale a size up, its button full width
+  finaleBackdropPhone: {
+    padding: 12
+  },
+  finaleCardPhone: {
+    width: "min(420px, 100%)",
+    gap: 16,
+    padding: "30px 22px 22px",
+    borderRadius: 18
+  },
+  finaleTitlePhone: {
+    fontSize: 32
+  },
+  finaleTextPhone: {
+    fontSize: 16
+  },
+  finaleListPhone: {
+    gap: 11
+  },
+  finaleItemPhone: {
+    gap: 12,
+    fontSize: 17
+  },
+  finaleTickPhone: {
+    width: 26,
+    height: 26,
+    fontSize: 15
+  },
+  finaleBitPhone: {
+    width: 12,
+    height: 12
+  },
+  finaleStartPhone: {
+    alignSelf: "stretch",
+    marginLeft: 0,
+    minHeight: 52,
+    fontSize: 17
   },
   finaleTick: {
     flexShrink: 0,

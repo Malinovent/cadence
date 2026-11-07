@@ -12,6 +12,7 @@ type Props = {
   next: CheckItem | null; // the first step still open
   onShow: (item: CheckItem) => void; // "Show me" for the next step
   onClose: () => void;
+  phone?: boolean; // a size up (JP)
 };
 
 const draw = (ms: number, delay: number): React.CSSProperties => ({
@@ -24,7 +25,7 @@ const draw = (ms: number, delay: number): React.CSSProperties => ({
  * "Next" leads on. At the top, clear of the phone tray, the keyboard and the Undo bar. Never takes
  * focus; stays while hovered, focused or touched; gone after five seconds.
  */
-export default function QuestToast({ items, done, next, onShow, onClose }: Props) {
+export default function QuestToast({ items, done, next, onShow, onClose, phone = false }: Props) {
   const { m } = useI18n();
   const [held, setHeld] = useState(false);
   const closeRef = useRef(onClose);
@@ -37,12 +38,15 @@ export default function QuestToast({ items, done, next, onShow, onClose }: Props
     return () => window.clearTimeout(t);
   }, [held]);
 
+  const big = (base: React.CSSProperties, up: React.CSSProperties): React.CSSProperties =>
+    phone ? { ...base, ...up } : base;
+  const check = phone ? 36 : 28;
   const hold = () => setHeld(true);
   const release = () => setHeld(false);
   return (
     <div
       role="status"
-      style={S.questToast}
+      style={big(S.questToast, S.questToastPhone)}
       onMouseEnter={hold}
       onMouseLeave={release}
       onFocus={hold}
@@ -50,7 +54,7 @@ export default function QuestToast({ items, done, next, onShow, onClose }: Props
       onTouchStart={hold}
       onTouchEnd={release}
     >
-      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true" style={S.questCheck}>
+      <svg width={check} height={check} viewBox="0 0 28 28" aria-hidden="true" style={S.questCheck}>
         <path
           d="M14 2a12 12 0 1 1 0 24a12 12 0 1 1 0-24"
           fill="none"
@@ -73,11 +77,11 @@ export default function QuestToast({ items, done, next, onShow, onClose }: Props
         />
       </svg>
       <div style={S.questBody}>
-        <span style={S.questLabel}>
+        <span style={big(S.questLabel, S.questLabelPhone)}>
           {m.checklist.title} · {m.checklist.progress(doneCount(done), CHECK_ITEMS.length)}
         </span>
         {items.map((i) => (
-          <span key={i} style={S.questItem}>
+          <span key={i} style={big(S.questItem, S.questItemPhone)}>
             <span style={S.srOnly}>{m.checklist.doneSr} </span>
             {m.checklist.items[i]}
             <span aria-hidden="true" style={S.questStrike} />
@@ -87,18 +91,21 @@ export default function QuestToast({ items, done, next, onShow, onClose }: Props
           {CHECK_ITEMS.map((i) => (
             <span
               key={i}
-              style={{ ...S.questPip, ...(done[i] ? (items.includes(i) ? S.questPipNew : S.questPipOn) : {}) }}
+              style={{
+                ...big(S.questPip, S.questPipPhone),
+                ...(done[i] ? (items.includes(i) ? S.questPipNew : S.questPipOn) : {}),
+              }}
             />
           ))}
         </span>
         {next && (
-          <span style={S.questNext}>
+          <span style={big(S.questNext, S.questNextPhone)}>
             <span>
               {m.checklist.next} {m.checklist.items[next]}
             </span>
             <button
               type="button"
-              style={S.questShow}
+              style={big(S.questShow, S.questShowPhone)}
               onClick={() => {
                 onClose();
                 onShow(next);
@@ -112,7 +119,7 @@ export default function QuestToast({ items, done, next, onShow, onClose }: Props
       <button
         type="button"
         className="cadence-hit44"
-        style={S.questClose}
+        style={big(S.questClose, S.questClosePhone)}
         onClick={onClose}
         aria-label={m.checklist.close}
       >

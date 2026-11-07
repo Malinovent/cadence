@@ -410,10 +410,11 @@ export default function App() {
           next={onb.next}
           onShow={onb.show}
           onClose={onb.closeNews}
+          phone={isPhone}
         />
       )}
       {onb.finale && !onb.guide && !onb.intro && (
-        <QuestFinale colors={data.cats.map((c) => c.color)} onClose={onb.endFinale} />
+        <QuestFinale colors={data.cats.map((c) => c.color)} onClose={onb.endFinale} phone={isPhone} />
       )}
       {onb.intro && (
         <PurposePage

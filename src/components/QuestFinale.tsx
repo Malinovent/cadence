@@ -12,7 +12,15 @@ const BITS = 14;
  * motion: at rest they're hidden). "Start planning", Escape or a tap outside closes it, and the
  * checklist with it.
  */
-export default function QuestFinale({ colors, onClose }: { colors: string[]; onClose: () => void }) {
+export default function QuestFinale({
+  colors,
+  onClose,
+  phone = false,
+}: {
+  colors: string[];
+  onClose: () => void;
+  phone?: boolean; // a size up, the button full width (JP)
+}) {
   const { m } = useI18n();
   const start = useRef<HTMLButtonElement>(null);
   const closeRef = useRef(onClose);
@@ -33,13 +41,16 @@ export default function QuestFinale({ colors, onClose }: { colors: string[]; onC
   }, []);
 
   const palette = colors.length ? colors : [doneGreen];
+  const big = (base: React.CSSProperties, up: React.CSSProperties): React.CSSProperties =>
+    phone ? { ...base, ...up } : base;
+  const spread = phone ? 21 : 17; // how far apart the squares fly
   return (
-    <div style={S.finaleBackdrop} onClick={onClose}>
+    <div style={big(S.finaleBackdrop, S.finaleBackdropPhone)} onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="finale-title"
-        style={S.finaleCard}
+        style={big(S.finaleCard, S.finaleCardPhone)}
         onClick={(e) => e.stopPropagation()}
       >
         <div aria-hidden="true" style={S.finaleBurst}>
@@ -47,32 +58,32 @@ export default function QuestFinale({ colors, onClose }: { colors: string[]; onC
             <span
               key={i}
               style={{
-                ...S.finaleBit,
+                ...big(S.finaleBit, S.finaleBitPhone),
                 background: palette[i % palette.length],
                 animationDelay: `${(i % 4) * 30}ms`,
                 ...({
-                  "--dx": `${Math.round((i - (BITS - 1) / 2) * 17)}px`,
+                  "--dx": `${Math.round((i - (BITS - 1) / 2) * spread)}px`,
                   "--dy": `${-110 - (i % 3) * 30}px`,
                 } as React.CSSProperties),
               }}
             />
           ))}
         </div>
-        <h2 id="finale-title" style={S.finaleTitle}>
+        <h2 id="finale-title" style={big(S.finaleTitle, S.finaleTitlePhone)}>
           {m.checklist.allDone}
         </h2>
-        <p style={S.finaleText}>{m.checklist.finaleBody}</p>
-        <ul style={S.finaleList}>
+        <p style={big(S.finaleText, S.finaleTextPhone)}>{m.checklist.finaleBody}</p>
+        <ul style={big(S.finaleList, S.finaleListPhone)}>
           {CHECK_ITEMS.map((i, k) => (
-            <li key={i} style={{ ...S.finaleItem, animationDelay: `${180 + k * 110}ms` }}>
-              <span aria-hidden="true" style={S.finaleTick}>
+            <li key={i} style={{ ...big(S.finaleItem, S.finaleItemPhone), animationDelay: `${180 + k * 110}ms` }}>
+              <span aria-hidden="true" style={big(S.finaleTick, S.finaleTickPhone)}>
                 ✓
               </span>
               {m.checklist.items[i]}
             </li>
           ))}
         </ul>
-        <button ref={start} type="button" style={S.onboardPrimary} onClick={onClose}>
+        <button ref={start} type="button" style={big(S.onboardPrimary, S.finaleStartPhone)} onClick={onClose}>
           {m.checklist.finaleStart}
         </button>
       </div>
