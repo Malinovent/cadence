@@ -1,7 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { addCat, addTag, placeBlock, removeCat, saveTemplate, toggleDone, updateCat } from "./actions";
 import { BUFFER_ID } from "./constants";
-import { coachPosition, countIn, guideArea, nextGuide, outOfView, progress, tickTarget } from "./guide";
+import {
+  coachPosition,
+  countIn,
+  earned,
+  feedbackFor,
+  guideArea,
+  nextGuide,
+  nextItem,
+  outOfView,
+  progress,
+  tickTarget,
+} from "./guide";
 import { defaultData, type CadenceData } from "./model";
 import { relabelDefaults } from "./onboarding";
 import { applyStarter, STARTERS } from "./starters";
@@ -100,6 +111,27 @@ describe("the getting-started checklist", () => {
     expect(nextGuide({ step: "template" }, d, { template: true })).toBeNull();
     const placed = { step: "placed" as const, catId: "exercise", week: 0 as const };
     expect(nextGuide(placed, d, { place: true })).toBe(placed); // waits for "Next"
+  });
+});
+
+describe("feedback when a step is done", () => {
+  it("names only what's new, in checklist order", () => {
+    expect(earned({ place: true }, { template: true, place: true, tick: true })).toEqual(["tick", "template"]);
+    expect(earned({ place: true }, { place: true })).toEqual([]);
+  });
+  it("points Next at the first open item", () => {
+    expect(nextItem({})).toBe("place");
+    expect(nextItem({ place: true, tick: true })).toBe("area");
+    expect(nextItem({ place: true, tick: true, area: true, task: true, template: true })).toBeNull();
+  });
+  it("a toast when the board can't be seen; the board itself when it can; the finale at five", () => {
+    const some = { place: true, tick: true } as const;
+    expect(feedbackFor(some, false, null)).toBe("toast");
+    expect(feedbackFor(some, true, null)).toBe("board");
+    expect(feedbackFor({ place: true }, false, { step: "drag", catId: "work", week: 0, before: 0 })).toBe("board");
+    expect(feedbackFor(some, false, { step: "area" })).toBe("toast"); // "Show me" on another page
+    const all = { place: true, tick: true, area: true, task: true, template: true } as const;
+    expect(feedbackFor(all, true, null)).toBe("finale");
   });
 });
 

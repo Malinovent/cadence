@@ -154,6 +154,8 @@ Shipped to main 2026-11-06. Audit items 3–6 (name in one file, bilingual insta
 Shipped to main 2026-11-06.
 ### [x] Onboarding + About, plain words, block count (2026-11-07)
 Done on branch `onboarding`: words A (At least / At most / Between); visual B (each area's week counted in blocks, with under / over warnings in ink); onboarding path 1 (purpose page, then a guided first block: drag, its count, tick) with the "Getting started" checklist taking over after the first block; replay from Settings → About; About without the medical line; carries audit items 3–5 (name in one file, bilingual install details, bilingual email template). Shipped to main 2026-11-07. Same day, on branch `checklist-replay`: the checklist counts what's done from when it starts, and a replay restarts it at 0 of 5 (JP saw 5 of 5 on a replay); shipped. Left for JP: test on a real iPhone; paste the email template in Supabase, set the name and the `VITE_SITE_URL` variable.
+### [x] Quest feedback and the phone block sheet (2026-11-07)
+On branch `quest-feedback`: a toast at the top when a step is done away from the checklist, the cross-off on the checklist when it's seen, the finale card at five of five; on a phone a block opens in a sheet with no keyboard, 44 px controls, Delete and Done at the top; deleting a block can be undone. Shipped to main 2026-11-07. Left: test on a real iPhone (keyboard and sheet).
 ### [~] S1.9 French and English
 Done on branch `s1-finish`: catalogues for every string (en/fr), lib wording passed in, detection + Settings switch (device-local), Quebec formats, default areas named in the person's language. Shipped to main 2026-11-04. Left: JP reviews the French.
 ### [x] S1.10 Neutral stats

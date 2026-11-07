@@ -7,7 +7,7 @@ import { fmtLeft } from "../lib/now";
 import { fmtDur, fmtTime } from "../lib/time";
 import type { CadenceActions } from "../state/useCadence";
 import { BUFFER_COLOR } from "../lib/constants";
-import { ink, nowRing, S } from "../styles";
+import { ink, nowRing, paper, S } from "../styles";
 import BlockEditor from "./BlockEditor";
 import { useI18n } from "../i18n/I18nProvider";
 
@@ -17,6 +17,7 @@ type Props = {
   block: BlockT;
   cats: Category[];
   isEditing: boolean;
+  sheet?: boolean; // phone: the block opens in the sheet (App), so it isn't edited inline
   setEditingId: (id: string | null) => void;
   engine: InteractionEngine;
   rowH: number; // px per 30-min row
@@ -56,6 +57,7 @@ export default function Block({
   block: p,
   cats: allCats,
   isEditing,
+  sheet = false,
   setEditingId,
   engine,
   rowH,
@@ -137,8 +139,9 @@ export default function Block({
   // Show description once there's room beneath the title row, time last. Thresholds are
   // the legacy px values for 26px rows, compared in rows so they scale with rowH.
   const text = blockText(height, rowH, !!p.desc);
-  const showDesc = !isEditing && text.desc;
-  const showTime = !isEditing && text.time;
+  const inline = isEditing && !sheet; // the editor sits in the block (desktop, tablet)
+  const showDesc = !inline && text.desc;
+  const showTime = !inline && text.time;
   // the "Now · 38 min left" line gets its own row in blocks of an hour or more; shorter blocks
   // show it in place of the duration
   const nowRoom = tallerThan(height, rowH, 46);
@@ -183,7 +186,7 @@ export default function Block({
     <>
       <div
         data-block-id={p.id}
-        className={isEditing ? "cadence-block" : "cadence-src cadence-block"}
+        className={inline ? "cadence-block" : "cadence-src cadence-block"}
         data-press={pressed ? "" : undefined}
         onPointerDown={(e) => {
           // the open editor's own controls must never pick the block up
@@ -191,9 +194,7 @@ export default function Block({
         }}
         onClick={() => onTap(p)}
         onContextMenu={(e) => onContextMenu(e, p)}
-        title={
-          buffer ? m.block.bufferTitle : m.block.title
-        }
+        title={buffer ? m.block.bufferTitle : m.block.title}
         style={{
           ...S.placedBlock,
           top,
@@ -202,17 +203,19 @@ export default function Block({
           // keep text inset identical whether the ring is a real border or the masked overlay
           padding: multi ? "6.5px 8.5px" : "5px 7px",
           color: onColor,
-          cursor: isEditing ? "default" : "grab",
-          zIndex: isEditing ? 20 : isNow ? 3 : 2,
-          boxShadow: isNow ? nowRing : S.placedBlock.boxShadow,
-          overflow: isEditing ? "visible" : "hidden",
+          cursor: inline ? "default" : "grab",
+          zIndex: inline ? 20 : isNow ? 3 : 2,
+          // open in the phone sheet: a double ring says which block it is
+          boxShadow:
+            isEditing && sheet ? `0 0 0 2px ${paper}, 0 0 0 4px ${ink}` : isNow ? nowRing : S.placedBlock.boxShadow,
+          overflow: inline ? "visible" : "hidden",
           transition: "background 0.15s, transform 0.12s, opacity 0.12s",
           opacity: lifted ? 0.35 : undefined,
           outline: tagColor ? `2px solid ${tagColor}` : undefined,
         }}
       >
         {ringOverlay}
-        {!isEditing && edgeHandle("top")}
+        {!inline && edgeHandle("top")}
         {minsLeft !== null && nowRoom && (
           <div style={S.nowBadge}>
             <span style={S.nowTag}>{m.block.now}</span>
@@ -263,7 +266,7 @@ export default function Block({
             )}
           </div>
         </div>
-        {isEditing ? (
+        {inline ? (
           <BlockEditor
             block={p}
             cats={allCats}
@@ -306,9 +309,7 @@ export default function Block({
               </ul>
             )}
             {showDesc && todos.length === 0 && (
-              <div style={{ ...S.placedDesc, opacity: 0.75, WebkitLineClamp: text.descLines }}>
-                {p.desc}
-              </div>
+              <div style={{ ...S.placedDesc, opacity: 0.75, WebkitLineClamp: text.descLines }}>{p.desc}</div>
             )}
             {showTime && todos.length === 0 && (
               <div style={{ ...S.placedTime, opacity: 0.65 }}>
@@ -317,14 +318,20 @@ export default function Block({
             )}
           </>
         )}
-        {!isEditing && edgeHandle("bottom")}
+        {!inline && edgeHandle("bottom")}
       </div>
-      {!isEditing && (
+      {!inline && (
         <>
           {outsideZone("top")}
           {outsideZone("bottom")}
-          <div className="cadence-grip" style={{ ...S.gripBar, top: top - 2, background: gripColor, opacity: gripFade }} />
-          <div className="cadence-grip" style={{ ...S.gripBar, top: top + height - 2, background: gripColor, opacity: gripFade }} />
+          <div
+            className="cadence-grip"
+            style={{ ...S.gripBar, top: top - 2, background: gripColor, opacity: gripFade }}
+          />
+          <div
+            className="cadence-grip"
+            style={{ ...S.gripBar, top: top + height - 2, background: gripColor, opacity: gripFade }}
+          />
         </>
       )}
     </>

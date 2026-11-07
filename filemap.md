@@ -50,7 +50,8 @@
 - `src/lib/earlyBird.ts` — S1.11 reading the entitlements row, matching emails, the remembered answer
 - `src/lib/undo.ts` — when Undo is still offered after a week is replaced
 - `src/lib/onboarding.ts` — who sees the onboarding; default areas following a language change
-- `src/lib/guide.ts` — onboarding path 1 + checklist: the guided steps and what ends each, what each change to the data did for the checklist (`progress`), where a hint bubble sits, when its target needs scrolling
+- `src/lib/guide.ts` — onboarding path 1 + checklist: the guided steps and what ends each, what each change to the data did for the checklist (`progress`), what's newly earned, the next open step and how to show it (toast, board or finale: `earned`, `nextItem`, `feedbackFor`), where a hint bubble sits, when its target needs scrolling
+- `src/lib/sheet.ts` — the phone block sheet: how far the keyboard covers the screen (`keyboardInset`), the header's day and time (`blockWhen`)
 - `src/lib/blockCount.ts` — visual B: an area's week as squares (one per block of its goal), blocks to go / left / over, rounded to halves, the status words
 - `src/lib/legal.ts` — links to the site's privacy policy and terms, by language
 - `src/lib/starters.ts` — S1.8 the three starter weeks, matching areas by name, adding missing ones, applying to a week
@@ -66,7 +67,7 @@
 - `src/sync/useEarlyBird.ts` — S1.11 is the signed-in email an early bird? (entitlements, remembered per device)
 - `src/state/onboardingPrefs.ts` — per device: the purpose page was finished or skipped (`cadence:ui:onboarded`)
 - `src/state/checklistPrefs.ts` — per device: the getting-started checklist shown, closed, folded, and what's been done since it started (`cadence:ui:checklist`); `restartChecklist` for a replay; `checklistPrefs.test.ts`
-- `src/state/useOnboarding.ts` — `useOnboarding`: purpose page, the guided step in progress, the checklist and its "Show me" for each item, replay
+- `src/state/useOnboarding.ts` — `useOnboarding`: purpose page, the guided step in progress, the checklist and its "Show me" for each item, replay; steps just done (`earn`) and their feedback: toast news, board cross-offs, the finale
 - `src/state/welcomePrefs.ts` — per-device: the absence the welcome-back card was answered for (`cadence:ui:welcomeAnswered`)
 - `src/state/panelPrefs.ts` — read/write the per-device panel hidden / tray folded choice (`cadence:ui:trayHidden`)
 - `src/state/balanceRules.ts` — read/write the per-device balanced-week rules (`cadence:ui:balanceRules`)
@@ -94,13 +95,17 @@
 - `src/components/UndoBar.tsx` — the Undo bar after a week is replaced
 - `src/components/PurposePage.tsx` — the purpose page for new people: what it's for, an example week, sign in, Skip / Show me how
 - `src/components/Coach.tsx` — one guided hint: a ring around its `data-coach` target and a small bubble beside it; never blocks the page
-- `src/components/Checklist.tsx` — "Getting started": five items that tick themselves, "Show me" for each open one, fold and close
+- `src/components/Checklist.tsx` — "Getting started": five items that tick themselves, "Show me" for each open one, fold and close; crosses off fresh steps when on screen and says whether it is
+- `src/components/QuestToast.tsx` — a step done away from the checklist: the toast at the top (check, strike, five squares, Next · Show me)
+- `src/components/QuestFinale.tsx` — five of five: the finale card with rising squares and "Start planning"
 - `src/components/TaskList.tsx` — the one task list in the panel / phone Tasks tab: draggable rows (onto a block), tick, block colour dots + where it is, dismiss, done this week, add row
 - `src/components/WeekBar.tsx` — above the grid: Week 1 / Week 2 switch, compact balanced weeks card, "Show areas and tasks" when the panel is hidden
 - `src/components/WeekFooter.tsx` — below the grid: templates, save current week, starter weeks (S1.8), roll forward
 - `src/components/WeekGrid.tsx` — day grid (`rowH` and `days` props; `phone` prop: Mon–Sun day strip instead of the head row, 52px time column, swipe to change day), drop preview / tag highlight, current-time line and clock tag, tap-to-place, block taps and right-click
 - `src/components/Block.tsx` — one placed block (states, gradient ring, round done tick, done tint, Now ring + minutes left, press/lift/tag-target looks, mouse edge handles, touch grips)
-- `src/components/BlockEditor.tsx` — inline title/description/tags editor, tasks to add or take out; touch-only day chips and delete
+- `src/components/BlockEditor.tsx` — inline title/description/tags editor (desktop, tablet), tasks to add or take out; touch-only day chips and delete; the title takes the cursor only with a mouse
+- `src/components/BlockSheet.tsx` — phone: a block in a floating sheet (day and time, Delete, Done on top; 44 px controls; rides above the keyboard)
+- `src/components/BlockTasks.tsx` — a block's tasks and the open tasks to add or move into it, shared by the popup and the sheet
 - `src/components/BalancedWeeksCard.tsx` — "N balanced weeks this season" card with a square per week
 - `src/components/StatsView.tsx` — balanced weeks card, hours chart, reset
 - `src/components/CategoriesView.tsx` — areas editor: name, At least / At most / Between and its hours, block length, colour

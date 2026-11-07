@@ -1,10 +1,12 @@
 import { useEffect, useRef } from "react";
 import type { Block, Category, Task } from "../lib/model";
-import { taskDots, taskNote } from "../lib/panel";
-import { blockPicker } from "../lib/tasks";
 import type { CadenceActions } from "../state/useCadence";
 import { ink, paper, S } from "../styles";
 import { useI18n } from "../i18n/I18nProvider";
+import BlockTasks from "./BlockTasks";
+
+// the title takes the cursor only with a mouse: on touch that would open the keyboard at once (JP)
+const finePointer = (): boolean => typeof window !== "undefined" && !!window.matchMedia?.("(pointer: fine)").matches;
 
 type Props = {
   block: Block;
@@ -30,7 +32,6 @@ export default function BlockEditor({
   actions,
 }: Props) {
   const { m } = useI18n();
-  const { inBlock, free, elsewhere } = blockPicker(tasks, p.id);
   const editorRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef(onClose);
   useEffect(() => {
@@ -51,7 +52,7 @@ export default function BlockEditor({
   return (
     <div ref={editorRef} onClick={(e) => e.stopPropagation()} style={S.editWrap}>
       <input
-        autoFocus
+        autoFocus={finePointer()}
         defaultValue={p.label}
         placeholder={m.editor.title}
         onChange={(e) => actions.updateBlock(p.id, { label: e.target.value })}
@@ -107,63 +108,7 @@ export default function BlockEditor({
         })}
       </div>
       {/* the block's tasks, and the open tasks to add to it */}
-      <div style={S.editTasks}>
-        <span style={S.editTasksLabel}>{m.editor.tasks}</span>
-        <div style={S.editTaskList}>
-          {inBlock.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              aria-label={m.editor.removeTask(t.name)}
-              title={m.editor.removeTask(t.name)}
-              onClick={() => actions.detachTask(t.id)}
-              style={{ ...S.editTask, ...S.editTaskOn }}
-            >
-              <span aria-hidden="true">✓</span>
-              <span style={{ ...S.editTaskName, ...(t.done ? S.taskNameDone : {}) }}>{t.name}</span>
-            </button>
-          ))}
-          {free.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              aria-label={m.editor.addTask(t.name)}
-              title={m.editor.addTask(t.name)}
-              onClick={() => actions.attachTask(t.id, p.id)}
-              style={S.editTask}
-            >
-              <span aria-hidden="true">＋</span>
-              <span style={S.editTaskName}>{t.name}</span>
-            </button>
-          ))}
-          {/* already in another block: its colours and time; a tap moves it here */}
-          {elsewhere.map((t) => {
-            const where = taskNote(t, weeks, m.lib);
-            return (
-              <button
-                key={t.id}
-                type="button"
-                aria-label={m.editor.moveTask(t.name, where)}
-                title={m.editor.moveTask(t.name, where)}
-                onClick={() => actions.attachTask(t.id, p.id)}
-                style={{ ...S.editTask, ...S.editTaskElsewhere }}
-              >
-                <span aria-hidden="true">↪</span>
-                <span style={S.editTaskName}>{t.name}</span>
-                <span style={S.editTaskWhere}>
-                  {taskDots(t, { weeks, cats }).map((c, i) => (
-                    <span key={i} style={{ ...S.dot, ...S.taskDot, background: c }} aria-hidden="true" />
-                  ))}
-                  {where}
-                </span>
-              </button>
-            );
-          })}
-          {inBlock.length === 0 && free.length === 0 && elsewhere.length === 0 && (
-            <span style={S.tplEmpty}>{m.editor.noTasks}</span>
-          )}
-        </div>
-      </div>
+      <BlockTasks block={p} cats={cats} tasks={tasks} weeks={weeks} actions={actions} />
       <div style={S.editActions}>
         <button className="cadence-coarse-only" onClick={onDelete} style={{ ...S.editDone, background: "#b54" }}>
           {m.editor.delete}

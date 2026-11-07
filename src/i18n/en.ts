@@ -75,6 +75,11 @@ export const en = {
     removeTask: (name: string) => `Take "${name}" out of this block`,
     delete: "delete",
     done: "done",
+    // the phone sheet (JP, 2026-11-07)
+    sheet: "Block",
+    deleteBlock: "Delete this block",
+    days: "Day",
+    areas: "Areas",
   },
   footer: {
     templates: "Templates",
@@ -214,10 +219,16 @@ export const en = {
     show: "show",
     close: "Close",
     allDone: "You're all set.",
+    // a step just done (JP, 2026-11-07): the toast, and the card at five of five
+    next: "Next:",
+    doneSr: "Done:",
+    finaleBody: "That's the basics. The rest of the week is yours to plan.",
+    finaleStart: "Start planning",
   },
   undo: {
     replaced: (week: string) => `${week} replaced.`,
     rolled: "Rolled forward.",
+    deleted: "Block deleted.",
     action: "Undo",
     dismiss: "Dismiss",
   },

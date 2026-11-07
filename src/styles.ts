@@ -20,6 +20,15 @@ export const FONT_IMPORT = `
 @keyframes cadence-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
 @keyframes cadence-pop { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: none; } }
 @keyframes cadence-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+/* a step just done (JP, 2026-11-07): the toast drops in, the check draws itself, a line strikes the
+   step through, a square pops; at five of five the finale's squares rise. Under reduced motion (above)
+   none of it moves and the end state shows. */
+@keyframes cadence-drop { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
+@keyframes cadence-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes cadence-strike { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes cadence-bump { 0% { transform: scale(0.4); } 60% { transform: scale(1.25); } 100% { transform: scale(1); } }
+@keyframes cadence-burst { from { opacity: 1; transform: translate(0, 0) rotate(0deg); } to { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(200deg); } }
+@keyframes cadence-land { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .cadence-slot-pick:not(:disabled):hover { background-color: var(--cadence-hover) !important; }
 /* no double-tap zoom (pinch zoom stays) */
 html, body { touch-action: manipulation; }
@@ -58,6 +67,8 @@ export const ink = "#2b2622";
 export const paper = "#f4ede1";
 export const paper2 = "#ece2d2";
 export const line = "#d8cbb8";
+// "done" in a step's feedback: the roll-forward green, never alone (a check and words go with it)
+export const doneGreen = "#1FA98A";
 // the block happening now: heavier ink outline drawn as a box-shadow (keeps its layout)
 export const nowRing = `0 0 0 2px ${ink}`;
 export const S = {
@@ -1444,6 +1455,7 @@ export const S = {
     height: 18,
     borderRadius: "50%",
     border: `1.5px solid ${ink}`,
+    transition: "background-color 400ms, border-color 400ms",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -1452,6 +1464,26 @@ export const S = {
   },
   checkMarkOn: {
     background: ink
+  },
+  // a step just crossed off on the board: the mark pops green, a line strikes the words
+  checkMarkFresh: {
+    background: doneGreen,
+    borderColor: doneGreen,
+    animation: "cadence-bump 420ms ease-out both"
+  },
+  checkWords: {
+    position: "relative",
+    display: "inline-block"
+  },
+  checkStrike: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: "55%",
+    height: 1.5,
+    background: "#9a8d7d",
+    transformOrigin: "left center",
+    animation: "cadence-strike 380ms 180ms ease-out both"
   },
   checkLabel: {
     flex: 1,
@@ -2107,5 +2139,339 @@ export const S = {
   taskNameDone: {
     textDecoration: "line-through",
     color: "#9a8d7d"
+  },
+  // ---- a step just done, away from the board: a toast at the top (JP, 2026-11-07) ----
+  questToast: {
+    position: "fixed",
+    top: "calc(10px + env(safe-area-inset-top))",
+    left: 0,
+    right: 0,
+    margin: "0 auto",
+    width: "min(380px, calc(100vw - 20px))",
+    zIndex: 62,
+    display: "flex",
+    alignItems: "flex-start",
+    gap: 10,
+    padding: "10px 4px 10px 12px",
+    background: paper,
+    border: `1.5px solid ${ink}`,
+    borderRadius: 12,
+    boxShadow: "0 8px 24px rgba(43, 38, 34, 0.22)",
+    color: ink,
+    animation: "cadence-drop 320ms ease-out both"
+  },
+  questCheck: {
+    flexShrink: 0,
+    marginTop: 2
+  },
+  questBody: {
+    flex: 1,
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: 4
+  },
+  questLabel: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 11,
+    color: "#7a6e5e"
+  },
+  questItem: {
+    position: "relative",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 600,
+    fontSize: 15,
+    lineHeight: 1.25
+  },
+  questStrike: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: "55%",
+    height: 1.5,
+    background: ink,
+    transformOrigin: "left center",
+    animation: "cadence-strike 360ms 520ms ease-out both"
+  },
+  questPips: {
+    display: "flex",
+    gap: 4,
+    marginTop: 2
+  },
+  questPip: {
+    width: 10,
+    height: 10,
+    borderRadius: 2,
+    border: `1.5px solid ${ink}`
+  },
+  questPipOn: {
+    background: ink
+  },
+  questPipNew: {
+    background: doneGreen,
+    borderColor: doneGreen,
+    animation: "cadence-bump 420ms 700ms ease-out both"
+  },
+  questNext: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "baseline",
+    gap: "0 6px",
+    marginTop: 2,
+    fontSize: 13,
+    color: "#5c5247"
+  },
+  questShow: {
+    minHeight: 32,
+    padding: "4px 0",
+    border: "none",
+    background: "transparent",
+    color: ink,
+    cursor: "pointer",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 12,
+    textDecoration: "underline"
+  },
+  questClose: {
+    flexShrink: 0,
+    width: 36,
+    height: 36,
+    border: "none",
+    background: "transparent",
+    color: "#7a6e5e",
+    cursor: "pointer",
+    fontSize: 15
+  },
+  // ---- five of five: the finale card ----
+  finaleBackdrop: {
+    position: "fixed",
+    inset: 0,
+    zIndex: 64,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+    background: "rgba(43, 38, 34, 0.35)"
+  },
+  finaleCard: {
+    position: "relative",
+    width: "min(340px, 100%)",
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+    padding: "22px 20px 18px",
+    background: paper,
+    border: `1.5px solid ${ink}`,
+    borderRadius: 14,
+    boxShadow: "0 12px 32px rgba(43, 38, 34, 0.28)",
+    color: ink,
+    animation: "cadence-pop 220ms ease-out both"
+  },
+  // the squares rise from the top of the card; hidden at rest, so reduced motion shows none
+  finaleBurst: {
+    position: "absolute",
+    left: "50%",
+    top: 36,
+    width: 0,
+    height: 0,
+    pointerEvents: "none"
+  },
+  finaleBit: {
+    position: "absolute",
+    width: 9,
+    height: 9,
+    borderRadius: 2,
+    opacity: 0,
+    animation: "cadence-burst 1100ms ease-out both"
+  },
+  finaleTitle: {
+    margin: 0,
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 800,
+    fontSize: 24,
+    letterSpacing: "-0.01em"
+  },
+  finaleText: {
+    margin: 0,
+    fontSize: 14,
+    lineHeight: 1.45,
+    color: "#5c5247"
+  },
+  finaleList: {
+    listStyle: "none",
+    margin: 0,
+    padding: 0,
+    display: "grid",
+    gap: 7
+  },
+  finaleItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: 9,
+    fontSize: 14,
+    animation: "cadence-land 260ms ease-out both"
+  },
+  finaleTick: {
+    flexShrink: 0,
+    width: 20,
+    height: 20,
+    borderRadius: "50%",
+    background: doneGreen,
+    color: "#fff",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: 12
+  },
+  // ---- phone: a block opens in a sheet like the add window (JP, 2026-11-07) ----
+  sheetBackdrop: {
+    position: "fixed",
+    inset: 0,
+    zIndex: 45,
+    background: "rgba(43, 38, 34, 0.25)"
+  },
+  blockSheet: {
+    position: "fixed",
+    left: 10,
+    right: 10,
+    maxWidth: 460,
+    margin: "0 auto",
+    zIndex: 46,
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden",
+    background: paper,
+    border: `1.5px solid ${ink}`,
+    borderRadius: 14,
+    boxShadow: "0 8px 24px rgba(43, 38, 34, 0.22)",
+    color: ink,
+    animation: "cadence-rise 160ms ease-out"
+  },
+  sheetHead: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    padding: "8px 8px 8px 14px",
+    borderBottom: `1px dashed ${line}`
+  },
+  sheetWhen: {
+    flex: 1,
+    minWidth: 0,
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 12,
+    color: "#5c5247",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis"
+  },
+  sheetIconBtn: {
+    flexShrink: 0,
+    width: 44,
+    height: 44,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    border: `1.5px solid ${ink}`,
+    borderRadius: 8,
+    background: "transparent",
+    color: ink,
+    cursor: "pointer"
+  },
+  sheetDone: {
+    flexShrink: 0,
+    height: 44,
+    marginLeft: 4,
+    padding: "0 16px",
+    border: "none",
+    borderRadius: 8,
+    background: ink,
+    color: paper,
+    cursor: "pointer",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 14
+  },
+  sheetBody: {
+    overflowY: "auto",
+    overscrollBehavior: "contain",
+    padding: 14,
+    display: "flex",
+    flexDirection: "column",
+    gap: 14
+  },
+  sheetTitle: {
+    width: "100%",
+    minHeight: 44,
+    padding: "6px 0",
+    border: "none",
+    borderBottom: "1.5px solid",
+    background: "transparent",
+    outline: "none",
+    color: ink,
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontStyle: "italic",
+    fontSize: 18
+  },
+  sheetDesc: {
+    width: "100%",
+    minHeight: 64,
+    padding: "8px 10px",
+    border: "1px solid",
+    borderRadius: 8,
+    background: "#fff",
+    outline: "none",
+    color: ink,
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontSize: 16,
+    resize: "vertical"
+  },
+  sheetLabel: {
+    marginBottom: 6,
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 10,
+    letterSpacing: "0.08em",
+    textTransform: "uppercase",
+    color: "#7a6e5e"
+  },
+  sheetChips: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 8
+  },
+  sheetChip: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 7,
+    minHeight: 44,
+    padding: "0 14px",
+    borderRadius: 22,
+    border: "1.5px solid",
+    background: "transparent",
+    color: ink,
+    cursor: "pointer",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 13
+  },
+  sheetDays: {
+    display: "grid",
+    gridTemplateColumns: "repeat(7, minmax(0, 1fr))",
+    gap: 4
+  },
+  sheetDay: {
+    height: 44,
+    padding: 0,
+    border: `1.5px solid ${ink}`,
+    borderRadius: 8,
+    cursor: "pointer",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 12
+  },
+  sheetTask: {
+    minHeight: 44,
+    padding: "6px 10px",
+    fontSize: 14
   }
 } satisfies Record<string, React.CSSProperties>;

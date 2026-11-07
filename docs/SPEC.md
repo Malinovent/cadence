@@ -319,6 +319,19 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 - A hint scrolls its target into view only when it's hidden (off screen, or under the phone tray), with no smooth scrolling; the bubble sits under its target, or above when there's no room.
 - No data change: what's new is per-device UI state (`cadence:ui:checklist`: shown, closed, folded, done; never synced).
 
+### Feedback when a step is done (JP, 2026-11-07)
+- JP's ask: a step done in another tab only showed as crossed off on coming back. JP's ideas were to scroll up to the checklist and animate the cross-off, or a pop-in screen on the phone. Chosen design (JP: "Build both"): the page never scrolls to the checklist (nothing moves unless you move it), and a pop-in for every step would interrupt by the third, so:
+- Away from the checklist (another page, scrolled away, the list folded): a toast drops in at the top (`QuestToast`), clear of the phone tray, the keyboard and the Undo bar. The check draws itself in green (`doneGreen`, the roll-forward green), the step is struck through, its square pops among five ("Getting started · 3 of 5"), and "Next: <first open step> · Show me" leads on. Several steps at once (a starter week: placed and tried) share one toast, in checklist order. It never takes focus, stays while hovered, focused or touched, closes after 5 s or with ✕.
+- With the checklist on screen (at least half of it, unfolded): no toast; the step crosses off there (the mark pops green, a line strikes the words, then the usual done look). A step done elsewhere crosses off there the next time the list is seen. During the guided first block the coach explains the step instead of a toast.
+- Five of five: the finale card (`QuestFinale`): "You're all set.", "That's the basics. The rest of the week is yours to plan.", the five steps landing one by one, small squares in the person's area colours rising from the card, and "Start planning", which closes it and the checklist for good (Escape or a tap outside too).
+- Rules in `src/lib/guide.ts` (`earned`, `nextItem`, `feedbackFor`), tested. Under reduced motion nothing moves and the end state shows; the squares stay hidden.
+
+### Phone block sheet (JP, 2026-11-07)
+- On a phone, tapping a block opens it in a floating sheet like the add window (`BlockSheet`) instead of the editor squeezed into the block; the block gets a double ink ring underneath. Nothing is focused, so no keyboard until a field is tapped (the desktop popup still puts the cursor in the title with a mouse; on touch it no longer does).
+- Header: the block's colour(s) and "Sat · 2pm–4pm" (`blockWhen`, `src/lib/sheet.ts`), then Delete (trash icon, 44 px, labelled "Delete this block") and Done (44 px), 12 px apart. Body: title (18 px), description (16 px), Areas (44 px chips: a solid tinted chip with ✓ when on, dashed when off), Day (seven 44 px buttons in one row; the day view follows the block), Tasks (44 px rows; the sheet scrolls, not the list). Enter in the title only closes the keyboard.
+- While typing, the sheet sits above the on-screen keyboard (`keyboardInset` from the visual viewport) and fits the height left, so Done stays in reach. Not yet checked on a real iPhone.
+- Deleting a block (the sheet, desktop right-click, the touch popup) can be undone: "Block deleted. Undo" in the Undo bar.
+
 ### About in Settings, and audit items 3–5 (2026-11-07)
 - About: what the app is, "Show the introduction again", and privacy / terms links in the person's language once `VITE_SITE_URL` is set (`src/lib/legal.ts`). No medical-device line (JP).
 - The product name lives in `src/appName.ts` (screens, page title, install manifest); stored keys, the export's `app: "cadence"` and backup file names stay. The install description and page meta carry French first, then English; `<html lang>` starts as fr-CA. The sign-in email template in `docs/SUPABASE_SETUP.md` is bilingual, French first (pasted by hand in Supabase).

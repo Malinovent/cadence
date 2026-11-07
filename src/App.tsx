@@ -13,6 +13,9 @@ import UndoBar from "./components/UndoBar";
 import PurposePage from "./components/PurposePage";
 import Coach, { type CoachAction } from "./components/Coach";
 import Checklist from "./components/Checklist";
+import QuestToast from "./components/QuestToast";
+import QuestFinale from "./components/QuestFinale";
+import BlockSheet from "./components/BlockSheet";
 import { relabelDefaults } from "./lib/onboarding";
 import type { Guide } from "./lib/guide";
 import { useOnboarding } from "./state/useOnboarding";
@@ -121,13 +124,15 @@ export default function App() {
     setSlotTap(null);
   };
 
-  // one tap that replaces a week: do it, and keep what was there so it can be undone
+  // one tap that replaces a week, or deletes a block: do it, and keep what was there so it can be undone
   const withUndo = (text: string, run: () => void) => {
     const before = store.getSnapshot().data;
     run();
     const after = store.getSnapshot().data;
     if (after !== before) setUndo({ before, after, text });
   };
+  // a block deleted (phone sheet, desktop right-click, touch popup) can be undone (JP, 2026-11-07)
+  const deleteBlock = (id: string) => withUndo(m.undo.deleted, () => actions.removeBlock(id));
   const replaceWeek = (week: WeekIndex, run: () => void) => {
     withUndo(m.undo.replaced(m.week.names[week]), run);
     onb.markTried(); // the checklist's "Try a starter week"
@@ -226,6 +231,7 @@ export default function App() {
     actions,
   };
   const showSide = !isPhone && !panelHidden;
+  const editingBlock = editingId ? (data.weeks[activeWeek].find((b) => b.id === editingId) ?? null) : null;
   const welcome = shouldWelcome({
     lastEdit,
     now: now.getTime(),
@@ -284,6 +290,9 @@ export default function App() {
                   onToggle={onb.toggleChecklist}
                   onShow={onb.show}
                   onClose={onb.closeChecklist}
+                  fresh={onb.fresh}
+                  onCrossedOff={onb.crossedOff}
+                  onInView={onb.setBoardInView}
                 />
               )}
               <WeekBar
@@ -304,7 +313,7 @@ export default function App() {
                 interaction={interaction}
                 armedCatId={armedCatId}
                 onPlaced={() => setArmedCatId(null)}
-                actions={actions}
+                actions={{ ...actions, removeBlock: deleteBlock }}
                 onMoveToDay={onMoveToDay}
                 onEmptyTap={setSlotTap}
                 slotMark={slotTap}
@@ -349,6 +358,23 @@ export default function App() {
           )}
         </>
       )}
+      {/* phone: the block being edited, in a sheet over the day */}
+      {view === "calendar" && isPhone && editingBlock && (
+        <BlockSheet
+          key={editingBlock.id}
+          block={editingBlock}
+          cats={data.cats}
+          tasks={data.tasks}
+          weeks={data.weeks}
+          onClose={() => setEditingId(null)}
+          onDelete={() => {
+            setEditingId(null);
+            deleteBlock(editingBlock.id);
+          }}
+          onMoveToDay={(day) => onMoveToDay(editingBlock, day)}
+          actions={actions}
+        />
+      )}
       {undoAvailable(undo, data) && (
         <UndoBar
           text={undo.text}
@@ -374,6 +400,20 @@ export default function App() {
       )}
       {onb.guide && !onb.intro && (
         <Coach key={JSON.stringify(onb.guide)} {...coachFor(onb.guide)} onClose={onb.endGuide} />
+      )}
+      {/* a step just done away from the board; five of five gets the finale (JP, 2026-11-07) */}
+      {onb.news && !onb.intro && !onb.finale && (
+        <QuestToast
+          key={onb.news.id}
+          items={onb.news.items}
+          done={onb.done}
+          next={onb.next}
+          onShow={onb.show}
+          onClose={onb.closeNews}
+        />
+      )}
+      {onb.finale && !onb.guide && !onb.intro && (
+        <QuestFinale colors={data.cats.map((c) => c.color)} onClose={onb.endFinale} />
       )}
       {onb.intro && (
         <PurposePage

@@ -81,6 +81,26 @@ export function progress(prev: CadenceData, next: CadenceData): CheckDone {
 
 export const doneCount = (done: CheckDone): number => CHECK_ITEMS.filter((i) => done[i]).length;
 
+/** What a change earned: the items in `got` not done yet, in checklist order. */
+export const earned = (done: CheckDone, got: CheckDone): CheckItem[] => CHECK_ITEMS.filter((i) => got[i] && !done[i]);
+
+/** The first item still open: what the toast's "Next" points at. */
+export const nextItem = (done: CheckDone): CheckItem | null => CHECK_ITEMS.find((i) => !done[i]) ?? null;
+
+export type Feedback = "finale" | "board" | "toast";
+
+/**
+ * How a step just done is shown (JP, 2026-11-07). The fifth one opens the finale card. The board
+ * crosses it off itself when it's on screen, or while the guided first block is explaining it.
+ * Anywhere else (another page, scrolled away, the board folded): a toast at the top. The page is
+ * never scrolled to the board: nothing moves unless you move it.
+ */
+export function feedbackFor(doneNow: CheckDone, boardInView: boolean, guide: Guide | null): Feedback {
+  if (doneCount(doneNow) === CHECK_ITEMS.length) return "finale";
+  if (boardInView || guide?.step === "drag" || guide?.step === "placed") return "board";
+  return "toast";
+}
+
 /**
  * The step after this one, given the data now: a drag that placed a block moves on to explaining
  * its count; a tick, an area made one's own, a task in a block or a template tried ends its step.

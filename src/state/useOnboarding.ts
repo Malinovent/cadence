@@ -1,11 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CHECK_ITEMS,
   countIn,
+  earned,
+  feedbackFor,
   guideArea,
   nextGuide,
+  nextItem,
   progress,
   tickTarget,
+  type CheckDone,
   type CheckItem,
   type Guide,
 } from "../lib/guide";
@@ -18,6 +22,8 @@ import type { CadenceStore } from "./store";
 type WeekIndex = 0 | 1;
 /** a tab the phone tray should switch to; `n` changes each time, so asking twice works */
 export type TabRequest = { tab: "areas" | "tasks"; n: number };
+/** steps just done, for the toast; `id` changes each time, so the toast plays again */
+export type QuestNews = { items: CheckItem[]; id: number };
 
 type Go = {
   calendar: () => void;
@@ -63,14 +69,55 @@ export function useOnboarding({
 
   useEffect(() => writeChecklist(check), [check]);
 
-  // what each change did, kept once earned: the checklist counts what's done from when it started
+  // feedback for steps just done (JP, 2026-11-07): crossed off on the board when it's on screen,
+  // a toast at the top when it isn't, the finale card at five of five
+  const [fresh, setFresh] = useState<CheckItem[]>([]); // not crossed off on the board yet
+  const [news, setNews] = useState<QuestNews | null>(null);
+  const [finale, setFinale] = useState(false);
+  const doneRef = useRef(check.done);
+  const guideRef = useRef(guide);
+  const boardInView = useRef(false); // reported by the board
+  useEffect(() => {
+    doneRef.current = check.done;
+    guideRef.current = guide;
+  });
+
+  /** Steps just done: kept for good, then shown the one way that fits. */
+  const earn = useCallback((got: CheckDone) => {
+    const items = earned(doneRef.current, got);
+    if (items.length === 0) return;
+    const now = { ...doneRef.current, ...got };
+    doneRef.current = now; // a second step in the same moment sees this one
+    setCheck((c) => ({ ...c, done: { ...c.done, ...got } }));
+    setFresh((f) => [...f, ...items.filter((i) => !f.includes(i))]);
+    const how = feedbackFor(now, boardInView.current, guideRef.current);
+    if (how === "finale") {
+      setNews(null);
+      setFinale(true);
+    } else if (how === "toast") {
+      // a toast still showing takes the new step too (a starter week: placed and tried at once)
+      setNews((n) => ({
+        items: CHECK_ITEMS.filter((i) => items.includes(i) || n?.items.includes(i)), // in checklist order
+        id: (n?.id ?? 0) + 1,
+      }));
+    }
+  }, []);
+
+  /** the board crossed these off */
+  const crossedOff = useCallback((items: CheckItem[]) => setFresh((f) => f.filter((i) => !items.includes(i))), []);
+  /** whether the board's list can be seen now (on screen, unfolded) */
+  const setBoardInView = useCallback((v: boolean) => {
+    boardInView.current = v;
+  }, []);
+  const closeNews = useCallback(() => setNews(null), []);
+
+  // what each change did: the checklist counts what's done from when it started
   const seen = useRef(data);
   useEffect(() => {
     const got = progress(seen.current, data);
     seen.current = data;
-    if (CHECK_ITEMS.some((i) => got[i]))
-      setCheck((c) => (CHECK_ITEMS.every((i) => !got[i] || c.done[i]) ? c : { ...c, done: { ...c.done, ...got } }));
-  }, [data]);
+    earn(got);
+  }, [data, earn]);
   const done = check.done;
 
   // a step that has done its job moves on (the drag landed, the block got ticked...)
@@ -152,9 +199,25 @@ export function useOnboarding({
     replay: () => {
       setIntro(true);
       setCheck(restartChecklist);
+      setFresh([]);
+      setNews(null);
+      setFinale(false);
     },
     /** a starter week or template was applied */
-    markTried: () => setCheck((c) => (c.done.template ? c : { ...c, done: { ...c.done, template: true } })),
+    markTried: () => earn({ template: true }),
+    fresh,
+    news,
+    finale,
+    next: nextItem(done),
+    crossedOff,
+    setBoardInView,
+    closeNews,
+    /** "Start planning": the finale and the checklist close for good on this device */
+    endFinale: () => {
+      setFinale(false);
+      setFresh([]);
+      setCheck((c) => ({ ...c, dismissed: true }));
+    },
     closeChecklist: () => setCheck((c) => ({ ...c, dismissed: true })),
     toggleChecklist: () => setCheck((c) => ({ ...c, collapsed: !c.collapsed })),
   };

@@ -216,6 +216,7 @@ export default function WeekGrid({
                   block={p}
                   cats={cats}
                   isEditing={editingId === p.id}
+                  sheet={!!phone}
                   setEditingId={setEditingId}
                   engine={engine}
                   rowH={rowH}
@@ -235,7 +236,9 @@ export default function WeekGrid({
                   weeks={weeks}
                 />
               ))}
-            {preview && preview.day === di && <div style={{ ...S.dropPreview, ...blockBox(preview.start, preview.mins, rowH) }} />}
+            {preview && preview.day === di && (
+              <div style={{ ...S.dropPreview, ...blockBox(preview.start, preview.mins, rowH) }} />
+            )}
             {slotMark && slotMark.day === di && (
               <div style={{ ...S.slotMark, ...blockBox(slotMark.start, STEP, rowH) }} aria-hidden="true" />
             )}
