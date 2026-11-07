@@ -50,7 +50,7 @@
 - `src/lib/earlyBird.ts` — S1.11 reading the entitlements row, matching emails, the remembered answer
 - `src/lib/undo.ts` — when Undo is still offered after a week is replaced
 - `src/lib/onboarding.ts` — who sees the onboarding; default areas following a language change
-- `src/lib/guide.ts` — onboarding path 1 + checklist: the guided steps and what ends each, the checklist items done from the data (sticky), where a hint bubble sits, when its target needs scrolling
+- `src/lib/guide.ts` — onboarding path 1 + checklist: the guided steps and what ends each, what each change to the data did for the checklist (`progress`), where a hint bubble sits, when its target needs scrolling
 - `src/lib/blockCount.ts` — visual B: an area's week as squares (one per block of its goal), blocks to go / left / over, rounded to halves, the status words
 - `src/lib/legal.ts` — links to the site's privacy policy and terms, by language
 - `src/lib/starters.ts` — S1.8 the three starter weeks, matching areas by name, adding missing ones, applying to a week
@@ -65,7 +65,7 @@
 - `src/state/useCadence.ts` — `useCadence` hook: renders from the store (`useSyncExternalStore`); data, meta, bound user actions, `store`
 - `src/sync/useEarlyBird.ts` — S1.11 is the signed-in email an early bird? (entitlements, remembered per device)
 - `src/state/onboardingPrefs.ts` — per device: the purpose page was finished or skipped (`cadence:ui:onboarded`)
-- `src/state/checklistPrefs.ts` — per device: the getting-started checklist shown, closed, folded, and what's been done (`cadence:ui:checklist`)
+- `src/state/checklistPrefs.ts` — per device: the getting-started checklist shown, closed, folded, and what's been done since it started (`cadence:ui:checklist`); `restartChecklist` for a replay; `checklistPrefs.test.ts`
 - `src/state/useOnboarding.ts` — `useOnboarding`: purpose page, the guided step in progress, the checklist and its "Show me" for each item, replay
 - `src/state/welcomePrefs.ts` — per-device: the absence the welcome-back card was answered for (`cadence:ui:welcomeAnswered`)
 - `src/state/panelPrefs.ts` — read/write the per-device panel hidden / tray folded choice (`cadence:ui:trayHidden`)

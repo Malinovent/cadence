@@ -1,17 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  checkDone,
+  CHECK_ITEMS,
   countIn,
-  doneCount,
   guideArea,
   nextGuide,
+  progress,
   tickTarget,
   type CheckItem,
   type Guide,
 } from "../lib/guide";
 import type { CadenceData } from "../lib/model";
 import { shouldOnboard } from "../lib/onboarding";
-import { readChecklist, writeChecklist, type ChecklistPrefs } from "./checklistPrefs";
+import { readChecklist, restartChecklist, writeChecklist, type ChecklistPrefs } from "./checklistPrefs";
 import { readOnboarded, writeOnboarded } from "./onboardingPrefs";
 import type { CadenceStore } from "./store";
 
@@ -55,7 +55,7 @@ export function useOnboarding({
   );
   const [check, setCheck] = useState<ChecklistPrefs>(() => {
     const saved = readChecklist();
-    return intro ? { ...saved, shown: true, dismissed: false } : saved; // new people get the checklist after
+    return intro ? restartChecklist(saved) : saved; // new people get the checklist after, from 0
   });
   const [guide, setGuide] = useState<Guide | null>(null);
   const [tab, setTab] = useState<TabRequest | null>(null);
@@ -63,19 +63,22 @@ export function useOnboarding({
 
   useEffect(() => writeChecklist(check), [check]);
 
-  // what's done, kept once earned
-  const done = checkDone(data, check.done);
+  // what each change did, kept once earned: the checklist counts what's done from when it started
+  const seen = useRef(data);
   useEffect(() => {
-    if (doneCount(checkDone(data, check.done)) !== doneCount(check.done))
-      setCheck((c) => ({ ...c, done: checkDone(data, c.done) }));
-  }, [data, check.done]);
+    const got = progress(seen.current, data);
+    seen.current = data;
+    if (CHECK_ITEMS.some((i) => got[i]))
+      setCheck((c) => (CHECK_ITEMS.every((i) => !got[i] || c.done[i]) ? c : { ...c, done: { ...c.done, ...got } }));
+  }, [data]);
+  const done = check.done;
 
   // a step that has done its job moves on (the drag landed, the block got ticked...)
   useEffect(() => {
     if (!guide) return;
-    const next = nextGuide(guide, data, checkDone(data, check.done));
+    const next = nextGuide(guide, data, done);
     if (next !== guide) setGuide(next);
-  }, [guide, data, check.done]);
+  }, [guide, data, done]);
 
   const show = (item: CheckItem): void => {
     if (item === "place") {
@@ -145,10 +148,10 @@ export function useOnboarding({
       leaveIntro();
       go.settings();
     },
-    /** Settings → About: the purpose page again, and the checklist back */
+    /** Settings → About: the purpose page again, and the checklist back, starting over at 0 */
     replay: () => {
       setIntro(true);
-      setCheck((c) => ({ ...c, shown: true, dismissed: false }));
+      setCheck(restartChecklist);
     },
     /** a starter week or template was applied */
     markTried: () => setCheck((c) => (c.done.template ? c : { ...c, done: { ...c.done, template: true } })),

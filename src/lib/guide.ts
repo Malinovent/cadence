@@ -1,8 +1,9 @@
 // Onboarding path 1 + checklist (JP, 2026-11-07): after a short purpose page, the app teaches
 // one thing at a time in the real app (drag one area in, tick it), then a "Getting started"
 // checklist takes over at the person's own pace, ending with templates. Pure rules only.
+// The checklist counts what's done from the moment it starts (JP: a replay showed 5 of 5 at once).
 import { defaultCategories } from "./constants";
-import type { Block, CadenceData } from "./model";
+import type { Block, CadenceData, Category } from "./model";
 import { jsonEqual } from "./syncLogic";
 
 type WeekIndex = 0 | 1;
@@ -34,21 +35,48 @@ export function tickTarget(data: CadenceData, week: WeekIndex, catId?: string): 
   return mine[mine.length - 1] ?? open[0] ?? null;
 }
 
+const allBlocks = (d: CadenceData): Block[] => [...d.weeks[0], ...d.weeks[1]];
+const untouchedDefaults = (cats: Category[]): boolean =>
+  jsonEqual(cats, defaultCategories("en")) || jsonEqual(cats, defaultCategories("fr"));
+
 /**
- * What the checklist shows as done: worked out from the data, and sticky (once done it stays
- * ticked, so un-ticking a block never takes a check away). "template" also comes from trying
- * a starter week or applying a template, which the app reports as it happens.
+ * What one change to the data did, for the checklist. Judged change by change (the app keeps what's
+ * earned), so the checklist counts what the person does from the moment it starts, or starts over,
+ * whatever their weeks already hold:
+ * - place: a block of an area that wasn't one before (placed, or a buffer filled);
+ * - tick: an open block ticked (not one brought back already ticked by Undo);
+ * - area: an area renamed or changed, or one added or deleted on its own; not the areas a starter
+ *   week (or its Undo) brings or takes, and never a language switch of the untouched defaults;
+ * - task: a task put into a block that was already there (not tasks Undo brings back);
+ * - template: a template saved. Trying a starter week or applying a template the app reports itself.
  */
-export function checkDone(data: CadenceData, stored: CheckDone): CheckDone {
-  const blocks = [...data.weeks[0], ...data.weeks[1]].filter((b) => !b.buffer);
-  const done: CheckDone = { ...stored };
-  if (blocks.length > 0 || data.history.length > 0) done.place = true;
-  if (data.history.length > 0 || blocks.some((b) => b.done)) done.tick = true;
-  if (!jsonEqual(data.cats, defaultCategories("en")) && !jsonEqual(data.cats, defaultCategories("fr")))
-    done.area = true;
-  if (data.tasks.some((t) => t.blockId !== undefined || t.done)) done.task = true;
-  if (data.templates.length > 0) done.template = true;
-  return done;
+export function progress(prev: CadenceData, next: CadenceData): CheckDone {
+  const got: CheckDone = {};
+  if (prev === next) return got;
+  const before = new Map(allBlocks(prev).map((b) => [b.id, b]));
+  const after = allBlocks(next);
+  const wasArea = (id: string) => {
+    const b = before.get(id);
+    return !!b && !b.buffer;
+  };
+  if (after.some((b) => !b.buffer && !wasArea(b.id))) got.place = true;
+  if (after.some((b) => b.done && before.get(b.id)?.done === false)) got.tick = true;
+
+  if (!jsonEqual(prev.cats, next.cats) && !untouchedDefaults(next.cats)) {
+    const old = new Map(prev.cats.map((c) => [c.id, c]));
+    const edited = next.cats.some((c) => old.has(c.id) && !jsonEqual(old.get(c.id), c));
+    const sameAreas = next.cats.length === prev.cats.length && next.cats.every((c) => old.has(c.id));
+    const noNewBlocks = after.every((b) => before.has(b.id)); // a starter week or Undo brings new ones
+    if (edited || (!sameAreas && noNewBlocks)) got.area = true;
+  }
+
+  const wasIn = new Map(prev.tasks.map((t) => [t.id, t.blockId]));
+  if (next.tasks.some((t) => t.blockId !== undefined && t.blockId !== wasIn.get(t.id) && before.has(t.blockId)))
+    got.task = true;
+
+  const saved = new Set(prev.templates.map((t) => t.id));
+  if (next.templates.some((t) => !saved.has(t.id))) got.template = true;
+  return got;
 }
 
 export const doneCount = (done: CheckDone): number => CHECK_ITEMS.filter((i) => done[i]).length;

@@ -1,11 +1,20 @@
-// Onboarding checklist: whether it's showing, dismissed or folded, and what's been done, per
-// device (not synced). Done items are kept here so a check never disappears once earned.
+// Onboarding checklist: whether it's showing, dismissed or folded, and what's been done since it
+// started, per device (not synced). Done items are kept here so a check never disappears once earned.
 import { CHECK_ITEMS, type CheckDone } from "../lib/guide";
 
 export type ChecklistPrefs = { shown: boolean; dismissed: boolean; collapsed: boolean; done: CheckDone };
 export const DEFAULT_CHECKLIST: ChecklistPrefs = { shown: false, dismissed: false, collapsed: false, done: {} };
 
 const KEY = "cadence:ui:checklist";
+
+/** "Show the introduction again": the checklist back, open, and starting over at 0 of 5. */
+export const restartChecklist = (c: ChecklistPrefs): ChecklistPrefs => ({
+  ...c,
+  shown: true,
+  dismissed: false,
+  collapsed: false,
+  done: {},
+});
 
 export function parseChecklist(raw: string | null): ChecklistPrefs {
   try {

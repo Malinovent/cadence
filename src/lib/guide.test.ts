@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { placeBlock, saveTemplate, toggleDone, updateCat } from "./actions";
-import { checkDone, coachPosition, countIn, doneCount, guideArea, nextGuide, outOfView, tickTarget } from "./guide";
+import { addCat, addTag, placeBlock, removeCat, saveTemplate, toggleDone, updateCat } from "./actions";
+import { BUFFER_ID } from "./constants";
+import { coachPosition, countIn, guideArea, nextGuide, outOfView, progress, tickTarget } from "./guide";
 import { defaultData, type CadenceData } from "./model";
+import { relabelDefaults } from "./onboarding";
+import { applyStarter, STARTERS } from "./starters";
 import { addTask, attachTask } from "./tasks";
 
 const ids = () => {
@@ -43,21 +46,51 @@ describe("the guided first block", () => {
 });
 
 describe("the getting-started checklist", () => {
-  it("ticks items from what the person did", () => {
-    expect(doneCount(checkDone(defaultData(), {}))).toBe(0);
-    const placed = withBlock();
-    expect(checkDone(placed, {})).toEqual({ place: true });
-    expect(checkDone(toggleDone(placed, 0, "b1"), {})).toMatchObject({ place: true, tick: true });
-    expect(checkDone(updateCat(placed, "work", { name: "Job" }), {})).toMatchObject({ area: true });
-    const task = attachTask(addTask(placed, "Stretch", { uid: () => "t" }), "t", "b1");
-    expect(checkDone(task, {})).toMatchObject({ task: true });
-    expect(checkDone(saveTemplate(placed, 0, "Mine"), {})).toMatchObject({ template: true });
+  // what someone already using the app has: blocks, a tick, their own areas, a task in a block, a template
+  const busy = (): CadenceData => {
+    let d = toggleDone(withBlock(), 0, "b1");
+    d = updateCat(d, "work", { name: "Job" });
+    d = attachTask(addTask(d, "Stretch", { uid: () => "t" }), "t", "b1");
+    return saveTemplate(d, 0, "Mine", { uid: () => "tpl" });
+  };
+  it("counts what's done from now on, not what the weeks already hold (a replay starts at 0)", () => {
+    const d = busy();
+    expect(progress(d, d)).toEqual({});
+    expect(progress(d, { ...d, weeks: [[...d.weeks[0]], [...d.weeks[1]]] })).toEqual({});
   });
-  it("keeps what was done, even after it's undone", () => {
-    expect(checkDone(defaultData(), { tick: true, template: true })).toEqual({ tick: true, template: true });
+  it("a block of an area placed, or a buffer filled; a buffer alone isn't", () => {
+    const d = defaultData();
+    expect(progress(d, withBlock(d))).toEqual({ place: true });
+    const buffer = placeBlock(d, 0, BUFFER_ID, 0, 540, undefined, { uid: () => "f" });
+    expect(progress(d, buffer)).toEqual({});
+    expect(progress(buffer, addTag(buffer, "f", "work"))).toEqual({ place: true });
   });
-  it("untouched default areas in French aren't 'made your own'", () => {
-    expect(checkDone(defaultData("fr"), {}).area).toBeUndefined();
+  it("an open block ticked; not one that comes back already ticked", () => {
+    const d = withBlock();
+    expect(progress(d, toggleDone(d, 0, "b1"))).toEqual({ tick: true });
+    expect(progress(defaultData(), toggleDone(d, 0, "b1"))).toEqual({ place: true }); // Undo bringing it back
+  });
+  it("an area made one's own; not a starter's areas or their Undo, nor a language switch", () => {
+    const d = withBlock();
+    expect(progress(d, updateCat(d, "work", { name: "Job" }))).toEqual({ area: true });
+    expect(progress(d, addCat(d, { uid: () => "new" }))).toEqual({ area: true });
+    expect(progress(d, removeCat(d, "learn"))).toEqual({ area: true });
+    let n = 0;
+    const starter = applyStarter(d, 0, STARTERS[1].id, { uid: () => `s${++n}` });
+    expect(starter.cats.length).toBeGreaterThan(d.cats.length); // it added areas
+    expect(progress(d, starter).area).toBeUndefined();
+    expect(progress(starter, d).area).toBeUndefined();
+    expect(progress(defaultData(), relabelDefaults(defaultData(), "fr"))).toEqual({});
+  });
+  it("a task put into a block; not one that comes back with its block", () => {
+    const d = addTask(withBlock(), "Stretch", { uid: () => "t" });
+    expect(progress(d, attachTask(d, "t", "b1"))).toEqual({ task: true });
+    const noBlock = addTask(defaultData(), "Stretch", { uid: () => "t" });
+    expect(progress(noBlock, attachTask(d, "t", "b1"))).toEqual({ place: true });
+  });
+  it("a template saved", () => {
+    const d = withBlock();
+    expect(progress(d, saveTemplate(d, 0, "Mine", { uid: () => "tpl" }))).toEqual({ template: true });
   });
   it("ends the area, task and template steps once each is done", () => {
     const d = defaultData();
