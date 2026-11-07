@@ -16,7 +16,8 @@ export const FONT_IMPORT = `
   *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
   .cadence-tray-item[data-press], .cadence-block[data-press] { transform: none !important; }
 }
-/* S1.6 add window: a quick, small entrance (off under reduced motion, above) */
+/* S1.6 add window: a quick, small entrance; the guide's outline breathes (both off under reduced motion, above) */
+@keyframes cadence-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
 @keyframes cadence-pop { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: none; } }
 @keyframes cadence-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 .cadence-slot-pick:not(:disabled):hover { background-color: var(--cadence-hover) !important; }
@@ -353,86 +354,6 @@ export const S = {
     width: 70,
     textAlign: "right",
     flexShrink: 0
-  },
-  // S1.2 guardrail balance (replaces the quota rows): name, kind, partial credit, then the bar
-  balanceList: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 10
-  },
-  balanceHead: {
-    display: "flex",
-    alignItems: "baseline",
-    gap: 6,
-    marginBottom: 4
-  },
-  balanceName: {
-    fontSize: 13,
-    fontWeight: 600,
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap"
-  },
-  balanceKind: {
-    fontFamily: "'Spline Sans Mono', monospace",
-    fontSize: 9,
-    letterSpacing: "0.06em",
-    textTransform: "uppercase",
-    color: "#7a6e5e",
-    whiteSpace: "nowrap"
-  },
-  balanceCount: {
-    marginLeft: "auto",
-    fontFamily: "'Spline Sans Mono', monospace",
-    fontSize: 10,
-    color: ink,
-    whiteSpace: "nowrap"
-  },
-  balanceTrack: {
-    position: "relative",
-    height: 7,
-    background: paper2,
-    borderRadius: 4
-  },
-  balanceFill: {
-    position: "absolute",
-    left: 0,
-    top: 0,
-    bottom: 0,
-    borderRadius: 4,
-    transition: "width 0.3s"
-  },
-  // "still to plan": the gap up to a floor or range, in grey, never red
-  balanceGap: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    background: "#cabfb2"
-  },
-  balanceBand: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    background: line
-  },
-  balanceMark: {
-    position: "absolute",
-    top: -3,
-    width: 2,
-    height: 13,
-    marginLeft: -1,
-    background: ink
-  },
-  balanceNotes: {
-    background: paper2,
-    borderRadius: 4,
-    padding: "8px 10px",
-    marginTop: 12,
-    fontSize: 12,
-    lineHeight: 1.45,
-    display: "flex",
-    flexDirection: "column",
-    gap: 4
   },
   completionCard: {
     background: ink,
@@ -1166,28 +1087,6 @@ export const S = {
     alignItems: "center",
     gap: 10
   },
-  onboardStep: {
-    fontFamily: "'Spline Sans Mono', monospace",
-    fontSize: 11,
-    letterSpacing: "0.1em",
-    textTransform: "uppercase",
-    color: "#7a6e5e"
-  },
-  onboardDots: {
-    display: "flex",
-    gap: 5,
-    flex: 1
-  },
-  onboardDot: {
-    width: 8,
-    height: 8,
-    borderRadius: "50%",
-    border: `1.5px solid ${ink}`,
-    boxSizing: "border-box"
-  },
-  onboardDotOn: {
-    background: ink
-  },
   onboardLang: {
     display: "flex",
     border: `1.5px solid ${ink}`,
@@ -1221,93 +1120,6 @@ export const S = {
     margin: 0,
     fontSize: 16,
     lineHeight: 1.45
-  },
-  onboardList: {
-    margin: 0,
-    padding: 0,
-    listStyle: "none",
-    display: "flex",
-    flexDirection: "column",
-    gap: 10
-  },
-  onboardItem: {
-    display: "flex",
-    alignItems: "flex-start",
-    gap: 10,
-    fontSize: 15,
-    lineHeight: 1.45
-  },
-  onboardBullet: {
-    flexShrink: 0,
-    width: 8,
-    height: 8,
-    marginTop: 7,
-    borderRadius: "50%",
-    background: ink
-  },
-  onboardNum: {
-    flexShrink: 0,
-    width: 24,
-    height: 24,
-    borderRadius: "50%",
-    border: `1.5px solid ${ink}`,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontFamily: "'Spline Sans Mono', monospace",
-    fontSize: 12
-  },
-  onboardCards: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))",
-    gap: 10
-  },
-  onboardOption: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "stretch",
-    gap: 6,
-    padding: "12px 14px",
-    border: `1.5px solid ${line}`,
-    borderRadius: 8,
-    background: "#fbf6ec",
-    color: ink,
-    cursor: "pointer",
-    textAlign: "left",
-    fontFamily: "'Fraunces Variable', 'Fraunces', serif"
-  },
-  onboardOptionOn: {
-    borderColor: ink,
-    boxShadow: `inset 0 0 0 1px ${ink}`
-  },
-  onboardOptionName: {
-    fontWeight: 700,
-    fontSize: 16
-  },
-  onboardOptionBlurb: {
-    fontSize: 13,
-    lineHeight: 1.35,
-    color: "#5c5247"
-  },
-  onboardMix: {
-    display: "flex",
-    height: 8,
-    borderRadius: 4,
-    overflow: "hidden",
-    gap: 2
-  },
-  onboardLimits: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 2,
-    fontFamily: "'Spline Sans Mono', monospace",
-    fontSize: 10,
-    color: "#5c5247"
-  },
-  onboardNote: {
-    fontFamily: "'Spline Sans Mono', monospace",
-    fontSize: 11,
-    color: "#7a6e5e"
   },
   // pinned to the bottom of the card while a long step scrolls (phones)
   onboardActions: {
@@ -1344,6 +1156,323 @@ export const S = {
     fontFamily: "'Fraunces Variable', 'Fraunces', serif",
     fontSize: 14,
     textDecoration: "underline"
+  },
+  // visual B: an area's week counted in blocks
+  countRow: {
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: "4px 8px",
+    marginTop: 5,
+    padding: "0 2px"
+  },
+  squares: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 2
+  },
+  square: {
+    position: "relative",
+    width: 11,
+    height: 11,
+    flexShrink: 0,
+    borderRadius: 3,
+    boxSizing: "border-box",
+    overflow: "hidden"
+  },
+  squareFill: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0
+  },
+  // past what "at most" / "between" allows: striped ink, never red
+  squareExtra: {
+    border: `1.5px dashed ${ink}`,
+    background: `repeating-linear-gradient(45deg, ${ink} 0 1.5px, transparent 1.5px 4px)`
+  },
+  countBarWrap: {
+    flex: "1 1 120px",
+    display: "flex",
+    alignItems: "center"
+  },
+  countBar: {
+    position: "relative",
+    flex: 1,
+    height: 8,
+    borderRadius: 4,
+    background: paper2
+  },
+  countBarFill: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    borderRadius: 4
+  },
+  countBarExtra: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    background: `repeating-linear-gradient(45deg, ${ink} 0 1.5px, transparent 1.5px 4px)`
+  },
+  countBarMark: {
+    position: "absolute",
+    top: -3,
+    width: 2,
+    height: 14,
+    marginLeft: -1,
+    background: ink
+  },
+  countStatus: {
+    marginLeft: "auto",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 10,
+    lineHeight: "16px",
+    whiteSpace: "nowrap",
+    borderRadius: 10
+  },
+  countCalm: {
+    color: "#7a6e5e"
+  },
+  countDone: {
+    color: ink,
+    fontWeight: 600
+  },
+  // "under": needs more. An outlined ink tag, the softer warning
+  countUnder: {
+    color: ink,
+    border: `1px dashed ${ink}`,
+    padding: "0 6px"
+  },
+  // "over": past what it allows. A solid ink tag, the stronger warning
+  countOver: {
+    color: paper,
+    background: ink,
+    padding: "0 6px"
+  },
+  countBang: {
+    fontWeight: 700,
+    marginRight: 4
+  },
+  srOnly: {
+    position: "absolute",
+    width: 1,
+    height: 1,
+    padding: 0,
+    margin: -1,
+    overflow: "hidden",
+    clip: "rect(0 0 0 0)",
+    whiteSpace: "nowrap",
+    border: 0
+  },
+  // onboarding, the purpose page's example week
+  introFigure: {
+    margin: 0,
+    padding: 14,
+    borderRadius: 8,
+    background: paper2,
+    display: "flex",
+    flexDirection: "column",
+    gap: 10
+  },
+  introWeek: {
+    display: "grid",
+    gridTemplateColumns: "repeat(7, minmax(0, 1fr))",
+    gap: 5,
+    height: 104
+  },
+  introDay: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 3,
+    minWidth: 0
+  },
+  introDayName: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 9,
+    color: "#7a6e5e",
+    textAlign: "center"
+  },
+  introBlock: {
+    display: "block",
+    border: "1.5px solid",
+    borderRadius: 3,
+    boxSizing: "border-box"
+  },
+  introChips: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 6
+  },
+  introChip: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    padding: "3px 8px",
+    border: `1px solid ${ink}`,
+    borderRadius: 999,
+    background: "#fbf6ec",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 11
+  },
+  introPromise: {
+    margin: 0,
+    fontSize: 13,
+    lineHeight: 1.45,
+    color: "#5c5247"
+  },
+  // a guided step: an outline that lets clicks through, and a small bubble beside it
+  coachRing: {
+    position: "fixed",
+    zIndex: 55,
+    border: `2px solid ${ink}`,
+    borderRadius: 9,
+    boxShadow: `0 0 0 3px ${paper}`,
+    pointerEvents: "none",
+    animation: "cadence-pulse 1.6s ease-in-out infinite"
+  },
+  coachBubble: {
+    position: "fixed",
+    zIndex: 56,
+    width: "min(300px, calc(100vw - 24px))",
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+    padding: "12px 14px",
+    background: paper,
+    color: ink,
+    border: `1.5px solid ${ink}`,
+    borderRadius: 8,
+    boxShadow: "0 8px 22px rgba(43, 38, 34, 0.22)",
+    animation: "cadence-pop 140ms ease-out"
+  },
+  coachTitle: {
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 700,
+    fontSize: 15,
+    lineHeight: 1.25
+  },
+  coachBody: {
+    fontSize: 13,
+    lineHeight: 1.45,
+    color: "#5c5247"
+  },
+  coachActions: {
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: 12,
+    marginTop: 2
+  },
+  coachPrimary: {
+    minHeight: 36,
+    padding: "6px 14px",
+    border: "none",
+    borderRadius: 4,
+    background: ink,
+    color: paper,
+    cursor: "pointer",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 600,
+    fontSize: 14
+  },
+  coachQuiet: {
+    minHeight: 36,
+    padding: "6px 2px",
+    border: "none",
+    background: "transparent",
+    color: "#5c5247",
+    cursor: "pointer",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontSize: 14,
+    textDecoration: "underline"
+  },
+  // the getting-started checklist, above the week
+  checkCard: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 8,
+    padding: "10px 14px",
+    border: `1.5px solid ${ink}`,
+    borderRadius: 6,
+    background: "#fbf6ec"
+  },
+  checkHead: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10
+  },
+  checkHeading: {
+    flex: 1,
+    minWidth: 0,
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "baseline",
+    columnGap: 10,
+    rowGap: 2
+  },
+  checkTitle: {
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 700,
+    fontSize: 15,
+    whiteSpace: "nowrap"
+  },
+  checkProgress: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 11,
+    color: "#7a6e5e",
+    whiteSpace: "nowrap"
+  },
+  checkItems: {
+    margin: 0,
+    padding: 0,
+    listStyle: "none",
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))",
+    gap: "4px 16px"
+  },
+  checkItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    minHeight: 30,
+    fontSize: 14
+  },
+  checkMark: {
+    flexShrink: 0,
+    width: 18,
+    height: 18,
+    borderRadius: "50%",
+    border: `1.5px solid ${ink}`,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: 11,
+    color: paper
+  },
+  checkMarkOn: {
+    background: ink
+  },
+  checkLabel: {
+    flex: 1,
+    minWidth: 0
+  },
+  checkShow: {
+    flexShrink: 0,
+    padding: "2px 0",
+    border: "none",
+    background: "transparent",
+    color: ink,
+    cursor: "pointer",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 11,
+    textDecoration: "underline"
+  },
+  checkAllDone: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    fontSize: 14
   },
   // S1.11 early bird: a small badge by the logo, and a thank-you in Settings
   earlyBadge: {
@@ -1594,10 +1723,6 @@ export const S = {
     display: "flex",
     flexDirection: "column",
     gap: 12
-  },
-  areaBalance: {
-    marginTop: 5,
-    padding: "0 2px"
   },
   trayName: {
     overflow: "hidden",

@@ -17,15 +17,15 @@ const proj = cat("proj", "Project", { kind: "range", min: h(4), max: h(8) });
 
 describe("neutral week descriptions", () => {
   it("describes floors, ceilings and ranges without judging", () => {
-    expect(describeArea(rest, h(5))).toBe("Rest was lighter than your floor (5 of 8 h).");
-    expect(describeArea(rest, h(9))).toBe("Rest reached your floor (9 of 8 h).");
+    expect(describeArea(rest, h(5))).toBe("Rest was under its 8 h (5 h).");
+    expect(describeArea(rest, h(9))).toBe("Rest reached at least 8 h (9 h).");
     expect(describeArea(rest, 0)).toBe("No Rest blocks were ticked.");
-    expect(describeArea(work, h(32))).toBe("Work stayed under your ceiling (32 of 40 h).");
-    expect(describeArea(work, 0)).toBe("Work stayed under your ceiling (0 of 40 h).");
-    expect(describeArea(work, h(43))).toBe("Work went 3 h past your ceiling (43 of 40 h).");
-    expect(describeArea(proj, h(5))).toBe("Project landed in your range (5 h, 4–8 h).");
-    expect(describeArea(proj, h(2))).toBe("Project was lighter than your range (2 h, 4–8 h).");
-    expect(describeArea(proj, h(9))).toBe("Project went 1 h past your range (9 of 8 h).");
+    expect(describeArea(work, h(32))).toBe("Work stayed within its 40 h (32 h).");
+    expect(describeArea(work, 0)).toBe("Work stayed within its 40 h (0 h).");
+    expect(describeArea(work, h(43))).toBe("Work went 3 h over its 40 h (43 h).");
+    expect(describeArea(proj, h(5))).toBe("Project landed between 4 and 8 h (5 h).");
+    expect(describeArea(proj, h(2))).toBe("Project was under its 4 to 8 h (2 h).");
+    expect(describeArea(proj, h(9))).toBe("Project went 1 h over its 8 h (9 h).");
   });
   it("never uses judging words", () => {
     const all = [0, 1, 5, 9, 43].flatMap((n) => [rest, work, proj].map((c) => describeArea(c, h(n))));
@@ -42,8 +42,8 @@ describe("neutral week descriptions", () => {
     ];
     const lines = describeLastWeek([rest, work], history, now);
     expect(lines.map((l) => l.text)).toEqual([
-      "Rest was lighter than your floor (5 of 8 h).",
-      "Work stayed under your ceiling (0 of 40 h).",
+      "Rest was under its 8 h (5 h).",
+      "Work stayed within its 40 h (0 h).",
     ]);
   });
 });

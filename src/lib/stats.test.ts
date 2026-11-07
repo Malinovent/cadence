@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { defaultData, type Block, type CadenceData } from "./model";
 import * as A from "./actions";
-import { completion, hoursToBlockMins, hoursToTargetMins, maxHours, quotaStatus, statsByCat, weekBalance } from "./stats";
+import {
+  completion,
+  hoursToBlockMins,
+  hoursToTargetMins,
+  maxHours,
+  quotaStatus,
+  statsByCat,
+  weekBalance,
+} from "./stats";
 
 const blk = (id: string, over: Partial<Block> = {}): Block => ({
   id,
@@ -89,13 +97,14 @@ describe("hour -> minute conversions", () => {
 
 describe("weekBalance", () => {
   it("balances planned minutes against each guardrail, per week", () => {
-    const d = A.updateCat(
-      A.updateCat(defaultData(), "work", { limit: { kind: "ceiling", max: 120 } }),
-      "learn",
-      { limit: { kind: "range", min: 60, max: 120 } },
-    );
+    const d = A.updateCat(A.updateCat(defaultData(), "work", { limit: { kind: "ceiling", max: 120 } }), "learn", {
+      limit: { kind: "range", min: 60, max: 120 },
+    });
     const b = (id: string, catIds: string[], day: number, mins: number) => blk(id, { catIds, day, mins });
-    const data: CadenceData = { ...d, weeks: [[b("a", ["work", "learn"], 0, 180), b("b", ["exercise"], 1, 60)], [b("c", ["work"], 0, 60)]] };
+    const data: CadenceData = {
+      ...d,
+      weeks: [[b("a", ["work", "learn"], 0, 180), b("b", ["exercise"], 1, 60)], [b("c", ["work"], 0, 60)]],
+    };
     const w1 = weekBalance(data, 0);
     expect(w1.map((x) => [x.cat.id, x.balance.state, x.balance.plannedMins])).toEqual([
       ["exercise", "short", 60],
@@ -103,9 +112,7 @@ describe("weekBalance", () => {
       ["learn", "over", 180],
       ["play", "short", 0],
     ]);
-    expect(w1[1].note).toBe("Work is 1 h past your ceiling this week.");
     // week 2 starts fresh: nothing carries over from week 1
     expect(weekBalance(data, 1)[1].balance).toMatchObject({ state: "within", plannedMins: 60 });
   });
 });
-

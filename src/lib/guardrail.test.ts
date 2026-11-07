@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   balance,
-  balanceLabel,
-  balanceNote,
-  barGeometry,
   changeKind,
   floorFromTarget,
   fmtH,
@@ -26,7 +23,15 @@ describe("parseLimit", () => {
   });
   it("turns a backwards range round", () => expect(parseLimit({ kind: "range", min: 480, max: 240 })).toEqual(range48));
   it("rejects junk", () => {
-    for (const v of [null, 5, [], { kind: "floor" }, { kind: "floor", min: -1 }, { kind: "cap", max: 1 }, { kind: "range", min: 1 }])
+    for (const v of [
+      null,
+      5,
+      [],
+      { kind: "floor" },
+      { kind: "floor", min: -1 },
+      { kind: "cap", max: 1 },
+      { kind: "range", min: 1 },
+    ])
       expect(parseLimit(v)).toBeNull();
   });
 });
@@ -80,44 +85,8 @@ describe("wording", () => {
     expect(fmtH(0)).toBe("0");
   });
   it("labels limits like the wireframe", () => {
-    expect(limitLabel(floor10)).toBe("Floor 10 h");
-    expect(limitLabel(ceil40)).toBe("Ceiling 40 h");
-    expect(limitLabel(range48)).toBe("Range 4–8 h");
+    expect(limitLabel(floor10)).toBe("At least 10 h");
+    expect(limitLabel(ceil40)).toBe("At most 40 h");
+    expect(limitLabel(range48)).toBe("Between 4 and 8 h");
   });
-  it("always shows partial credit", () => {
-    expect(balanceLabel(balance(floor10, h(7)))).toBe("7 of 10 h");
-    expect(balanceLabel(balance(ceil40, h(38)))).toBe("38 of 40 h max");
-    expect(balanceLabel(balance(range48, h(6)))).toBe("6 h, in range");
-    expect(balanceLabel(balance(range48, h(3)))).toBe("3 of 4–8 h");
-    expect(balanceLabel(balance(range48, h(9.5)))).toBe("9.5 h, past 8 h");
-  });
-  it("notes describe, never judge", () => {
-    expect(balanceNote("Rest", balance(floor10, h(7)))).toBe("Rest is lighter than your floor this week.");
-    expect(balanceNote("Work", balance(ceil40, h(42)))).toBe("Work is 2 h past your ceiling this week.");
-    expect(balanceNote("Projects", balance(range48, h(2)))).toBe("Projects is lighter than your range this week.");
-    expect(balanceNote("Projects", balance(range48, h(6)))).toBeNull();
-    expect(balanceNote("Work", balance(ceil40, h(10)))).toBeNull();
-  });
-});
-
-describe("barGeometry", () => {
-  it("floor: fill, still-to-plan gap and one mark at 1/1.2 of the track", () => {
-    const g = barGeometry(balance(floor10, h(7)));
-    expect(g.marks).toEqual([83.3]);
-    expect(g.fill).toBe(58.3);
-    expect(g.gap).toEqual({ left: 58.3, width: 25 });
-    expect(g.band).toBeNull();
-  });
-  it("range: band between two marks", () => {
-    const g = barGeometry(balance(range48, h(6)));
-    expect(g.marks).toEqual([41.7, 83.3]);
-    expect(g.band).toEqual({ left: 41.7, width: 41.6 });
-    expect(g.gap).toBeNull();
-  });
-  it("grows the track when the plan passes it", () => {
-    const g = barGeometry(balance(ceil40, h(60)));
-    expect(g.fill).toBe(100);
-    expect(g.marks[0]).toBeCloseTo(66.7);
-  });
-  it("handles a zero floor", () => expect(barGeometry(balance({ kind: "floor", min: 0 }, 0)).marks).toEqual([0]));
 });

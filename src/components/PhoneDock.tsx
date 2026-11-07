@@ -3,22 +3,30 @@ import { DOCK_ATTR } from "../interaction/dom";
 import { openCount } from "../lib/panel";
 import { S } from "../styles";
 import AreaChip from "./AreaChip";
-import { BalanceNotes, type PanelProps } from "./AreasPanel";
+import type { PanelProps } from "./AreasPanel";
+import type { TabRequest } from "../state/useOnboarding";
 import { useI18n } from "../i18n/I18nProvider";
 import TaskList from "./TaskList";
-import BalanceBar from "./BalanceBar";
+import BlockCount from "./BlockCount";
 
-type Tab = "areas" | "tasks";
+export type Tab = "areas" | "tasks";
 
 /**
  * S1.4 phone: areas and tasks share one tray docked at the bottom, with Areas and Tasks tabs.
  * One tap folds it into a slim "Show areas and tasks" bar (remembered on the device by the caller).
  * A spacer in the page flow keeps the end of the page reachable above the dock.
  */
-export default function PhoneDock(props: PanelProps & { folded: boolean; onShow: () => void }) {
-  const { areas, notes, data, now, interaction, armedCatId, onArm, onHide, onShow, folded, actions } = props;
+export default function PhoneDock(
+  props: PanelProps & { folded: boolean; onShow: () => void; forceTab?: TabRequest | null },
+) {
+  const { areas, data, now, interaction, armedCatId, onArm, onHide, onShow, folded, actions } = props;
   const { m } = useI18n();
   const [tab, setTab] = useState<Tab>("areas");
+  // the guided steps can ask for a tab (Areas to drag one, Tasks to add one)
+  const { forceTab } = props;
+  useEffect(() => {
+    if (forceTab) setTab(forceTab.tab);
+  }, [forceTab]);
   const dockRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(0);
 
@@ -77,12 +85,10 @@ export default function PhoneDock(props: PanelProps & { folded: boolean; onShow:
                     {areas.map((a) => (
                       <div key={a.id}>
                         <AreaChip area={a} interaction={interaction} armed={armedCatId === a.id} onArm={onArm} />
-                        {a.balance && <BalanceBar balance={a.balance} color={a.color} kind={null} />}
+                        <BlockCount area={a} />
                       </div>
                     ))}
                   </div>
-                  {/* the calm notes sit below the chips: the tray scrolls to them, its height stays capped */}
-                  <BalanceNotes notes={notes} />
                 </>
               ) : (
                 <TaskList data={data} interaction={interaction} actions={actions} now={now} />

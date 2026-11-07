@@ -94,7 +94,7 @@ export default function WeekFooter({ data, week, actions, onApplyTemplate, onApp
 function StarterWeeks({ data, week, onApply }: { data: CadenceData; week: WeekIndex; onApply: (id: string) => void }) {
   const { m } = useI18n();
   return (
-    <div style={{ ...S.tplSection, ...S.weekFooterTpl }}>
+    <div data-coach="starters" style={{ ...S.tplSection, ...S.weekFooterTpl }}>
       <div style={S.panelLabel}>{m.footer.starters}</div>
       {STARTERS.map((st) => {
         const note = addedNote(missingAreas(data.cats, st).map((a) => areaName(a, m.lib)), m.lib);

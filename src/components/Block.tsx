@@ -242,6 +242,7 @@ export default function Block({
               <button
                 type="button"
                 className="cadence-tick cadence-hit44"
+                data-coach={`tick-${p.id}`}
                 aria-pressed={done}
                 aria-label={done ? m.block.markOpen : m.block.markDone}
                 title={done ? m.block.doneTitle : m.block.markDone}

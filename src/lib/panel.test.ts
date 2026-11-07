@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { BUFFER_COLOR, BUFFER_ID, BUFFER_MINS } from "./constants";
 import { defaultData, type CadenceData, type Task } from "./model";
-import { openCount, panelAreas, panelNotes, taskDots, taskNote } from "./panel";
+import { openCount, panelAreas, taskDots, taskNote } from "./panel";
 
 const data = (): CadenceData => ({
   ...defaultData(),
@@ -60,7 +60,6 @@ describe("panel", () => {
   });
   it("judges the week asked for", () => {
     expect(panelAreas(data(), 1)[0].balance?.state).toBe("short");
-    expect(panelNotes(data(), 0).length).toBe(1);
   });
   it("counts open tasks", () => {
     expect(

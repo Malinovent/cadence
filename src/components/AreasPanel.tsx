@@ -5,11 +5,10 @@ import { S } from "../styles";
 import { useI18n } from "../i18n/I18nProvider";
 import AreaChip from "./AreaChip";
 import TaskList, { type TaskActions } from "./TaskList";
-import BalanceBar from "./BalanceBar";
+import BlockCount from "./BlockCount";
 
 export type PanelProps = {
   areas: PanelArea[];
-  notes: string[];
   data: CadenceData;
   now: Date;
   interaction: Interaction;
@@ -20,22 +19,9 @@ export type PanelProps = {
 };
 
 
-/** The calm notes for what's off this week ("Rest is 3 h short of its floor"). */
-export function BalanceNotes({ notes }: { notes: string[] }) {
-  if (notes.length === 0) return null;
-  return (
-    <div style={S.balanceNotes} role="status">
-      {notes.map((n) => (
-        <span key={n}>{n}</span>
-      ))}
-    </div>
-  );
-}
-
 /** S1.4 desktop: the left panel. Each area: its drag handle and this week's balance; one task list below. */
 export default function AreasPanel({
   areas,
-  notes,
   data,
   now,
   interaction,
@@ -59,11 +45,10 @@ export default function AreasPanel({
         {areas.map((a) => (
           <div key={a.id}>
             <AreaChip area={a} interaction={interaction} armed={armedCatId === a.id} onArm={onArm} />
-            {a.balance && <BalanceBar balance={a.balance} color={a.color} kind={a.limitText} />}
+            <BlockCount area={a} />
           </div>
         ))}
       </div>
-      <BalanceNotes notes={notes} />
 
       <div style={S.panelSection}>
         <div style={S.panelLabel}>{m.panel.tasksHead}</div>

@@ -18,33 +18,21 @@ export type DescribeWords = {
 
 export const DESCRIBE_EN: DescribeWords = {
   noTicks: (n) => `No ${n} blocks were ticked.`,
-  floorMet: (n, d, min) => `${n} reached your floor (${d} of ${min} h).`,
-  floorShort: (n, d, min) => `${n} was lighter than your floor (${d} of ${min} h).`,
-  ceilingWithin: (n, d, max) => `${n} stayed under your ceiling (${d} of ${max} h).`,
-  ceilingOver: (n, o, d, max) => `${n} went ${o} h past your ceiling (${d} of ${max} h).`,
-  rangeIn: (n, d, min, max) => `${n} landed in your range (${d} h, ${min}–${max} h).`,
-  rangeShort: (n, d, min, max) => `${n} was lighter than your range (${d} h, ${min}–${max} h).`,
-  rangeOver: (n, o, d, max) => `${n} went ${o} h past your range (${d} of ${max} h).`,
+  floorMet: (n, d, min) => `${n} reached at least ${min} h (${d} h).`,
+  floorShort: (n, d, min) => `${n} was under its ${min} h (${d} h).`,
+  ceilingWithin: (n, d, max) => `${n} stayed within its ${max} h (${d} h).`,
+  ceilingOver: (n, o, d, max) => `${n} went ${o} h over its ${max} h (${d} h).`,
+  rangeIn: (n, d, min, max) => `${n} landed between ${min} and ${max} h (${d} h).`,
+  rangeShort: (n, d, min, max) => `${n} was under its ${min} to ${max} h (${d} h).`,
+  rangeOver: (n, o, d, max) => `${n} went ${o} h over its ${max} h (${d} h).`,
 };
 
 export type LibWords = {
   lang: Lang;
   /** Mon..Sun, short */
   days: readonly [string, string, string, string, string, string, string];
-  // guardrails (S1.2)
+  // weekly time per area (S1.2), in plain words: at least / at most / between (JP, 2026-11-07)
   limit: { floor: (h: string) => string; ceiling: (h: string) => string; range: (lo: string, hi: string) => string };
-  balance: {
-    floor: (p: string, min: string) => string;
-    ceiling: (p: string, max: string) => string;
-    inRange: (p: string) => string;
-    rangeShort: (p: string, lo: string, hi: string) => string;
-    rangeOver: (p: string, hi: string) => string;
-  };
-  note: {
-    thisArea: string;
-    short: (who: string, range: boolean) => string;
-    over: (who: string, h: string, range: boolean) => string;
-  };
   describe: DescribeWords;
   // import / conflict summaries
   summary: {
@@ -63,6 +51,16 @@ export type LibWords = {
     auth: { invalid_code: string; rate_limited: string; offline: string; failed: string };
   };
   now: { left: (h: number, m: number) => string };
+  /** visual B: an area's week counted in its blocks */
+  count: {
+    plural: (n: number) => boolean;
+    toGo: (n: string, plural: boolean) => string;
+    room: (n: string, plural: boolean) => string;
+    over: (n: string, plural: boolean) => string;
+    atLimit: string;
+    reached: string;
+    inRange: string;
+  };
   panel: { untitled: string; buffer: string; nextWeek: string; backFrom: (day: string) => string };
   welcome: { replaces: (n: number) => string };
   starters: {
@@ -80,21 +78,9 @@ export const LIB_EN: LibWords = {
   lang: "en",
   days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
   limit: {
-    floor: (h) => `Floor ${h} h`,
-    ceiling: (h) => `Ceiling ${h} h`,
-    range: (lo, hi) => `Range ${lo}–${hi} h`,
-  },
-  balance: {
-    floor: (p, min) => `${p} of ${min} h`,
-    ceiling: (p, max) => `${p} of ${max} h max`,
-    inRange: (p) => `${p} h, in range`,
-    rangeShort: (p, lo, hi) => `${p} of ${lo}–${hi} h`,
-    rangeOver: (p, hi) => `${p} h, past ${hi} h`,
-  },
-  note: {
-    thisArea: "This area",
-    short: (who, range) => `${who} is lighter than your ${range ? "range" : "floor"} this week.`,
-    over: (who, h, range) => `${who} is ${h} h past your ${range ? "range" : "ceiling"} this week.`,
+    floor: (h) => `At least ${h} h`,
+    ceiling: (h) => `At most ${h} h`,
+    range: (lo, hi) => `Between ${lo} and ${hi} h`,
   },
   describe: DESCRIBE_EN,
   summary: {
@@ -120,6 +106,15 @@ export const LIB_EN: LibWords = {
       offline: "You're offline. Connect and try again.",
       failed: "Something went wrong. Try again.",
     },
+  },
+  count: {
+    plural: (n) => n > 1,
+    toGo: (n, pl) => `${n} more ${pl ? "blocks" : "block"}`,
+    room: (n, pl) => `${n} ${pl ? "blocks" : "block"} left`,
+    over: (n, pl) => `${n} ${pl ? "blocks" : "block"} over`,
+    atLimit: "at the limit",
+    reached: "reached",
+    inRange: "in range",
   },
   now: {
     left: (h, m) => (!h ? `${m} min left` : m ? `${h} h ${String(m).padStart(2, "0")} left` : `${h} h left`),

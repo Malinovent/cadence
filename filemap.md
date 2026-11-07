@@ -50,11 +50,13 @@
 - `src/lib/earlyBird.ts` — S1.11 reading the entitlements row, matching emails, the remembered answer
 - `src/lib/undo.ts` — when Undo is still offered after a week is replaced
 - `src/lib/onboarding.ts` — who sees the onboarding; default areas following a language change
+- `src/lib/guide.ts` — onboarding path 1 + checklist: the guided steps and what ends each, the checklist items done from the data (sticky), where a hint bubble sits, when its target needs scrolling
+- `src/lib/blockCount.ts` — visual B: an area's week as squares (one per block of its goal), blocks to go / left / over, rounded to halves, the status words
 - `src/lib/legal.ts` — links to the site's privacy policy and terms, by language
 - `src/lib/starters.ts` — S1.8 the three starter weeks, matching areas by name, adding missing ones, applying to a week
 - `src/lib/welcome.ts` — S1.7 when to welcome back (7+ days without an edit) and what a tap replaces
 - `src/lib/tasks.ts` — S1.5 task rules: add / tick / remove, attach to a block, single-task tick, return on tick, end or removal, done this week
-- `src/lib/panel.ts` — S1.4/S1.5: the panel's area rows (area + this week's balance, buffer last), notes, open task count, where a task is, its block's colour dots
+- `src/lib/panel.ts` — S1.4/S1.5: the panel's area rows (area + this week's balance, buffer last), open task count, where a task is, its block's colour dots
 - `src/lib/balancedWeeks.ts` — S1.3: calendar weeks and weather seasons, ticked minutes per week from history, `limitKept` / `weekBalanced` with `BalanceRules`, `season` (marks + count)
 - `src/lib/now.ts` — "now" on the grid: `nowPoint`, `isNowBlock`, `minutesLeft`, `fmtLeft`, `nowLineTop`, `fmtClock`, `msToNextMinute`
 - `src/lib/dayview.ts` — phone day view maths: `defaultDay`, `swipeDay`, `daysWithBlocks`; row-height-scaled block text thresholds (`tallerThan`, `blockText`)
@@ -62,7 +64,9 @@
 - `src/state/store.ts` — `createCadenceStore`: framework-free holder of data + meta; per-key persistence; `edit` (user edit, bumps `updatedAt`), `applyRemote` (no bump), `setMeta`
 - `src/state/useCadence.ts` — `useCadence` hook: renders from the store (`useSyncExternalStore`); data, meta, bound user actions, `store`
 - `src/sync/useEarlyBird.ts` — S1.11 is the signed-in email an early bird? (entitlements, remembered per device)
-- `src/state/onboardingPrefs.ts` — per device: the onboarding was finished or skipped (`cadence:ui:onboarded`)
+- `src/state/onboardingPrefs.ts` — per device: the purpose page was finished or skipped (`cadence:ui:onboarded`)
+- `src/state/checklistPrefs.ts` — per device: the getting-started checklist shown, closed, folded, and what's been done (`cadence:ui:checklist`)
+- `src/state/useOnboarding.ts` — `useOnboarding`: purpose page, the guided step in progress, the checklist and its "Show me" for each item, replay
 - `src/state/welcomePrefs.ts` — per-device: the absence the welcome-back card was answered for (`cadence:ui:welcomeAnswered`)
 - `src/state/panelPrefs.ts` — read/write the per-device panel hidden / tray folded choice (`cadence:ui:trayHidden`)
 - `src/state/balanceRules.ts` — read/write the per-device balanced-week rules (`cadence:ui:balanceRules`)
@@ -81,14 +85,16 @@
 - `src/appName.ts` — the product name, in one place
 - `src/components/` — React view components
 - `src/components/Header.tsx` — logo, tagline, nav buttons (`View` type); sync status line under the nav when signed in (opens Settings)
-- `src/components/AreasPanel.tsx` — S1.4 desktop left panel: area chips with this week's balance, buffer, calm notes, tasks, hide; shared `PanelProps`, `armHint`, `BalanceNotes`
+- `src/components/AreasPanel.tsx` — S1.4 desktop left panel: area chips each with its block count, buffer, tasks, hide; shared `PanelProps`, `armHint`
 - `src/components/PhoneDock.tsx` — S1.4 phone tray docked at the bottom: Areas / Tasks tabs, fold to a slim "Show areas and tasks" bar, page spacer, `data-cadence-dock`
 - `src/components/AreaChip.tsx` — one draggable area (or buffer) chip: drag source, press/hold feedback, tap-to-place arming
-- `src/components/BalanceBar.tsx` — one area's guardrail bar with kind and partial-credit label
+- `src/components/BlockCount.tsx` — one area's count under its chip: a square per block of its goal, filled as planned, and what's left; under / over read as ink warnings
 - `src/components/SlotMenu.tsx` — S1.6 the add window (desktop, beside the slot) / floating sheet (phone): one-tap grid of areas and the buffer
 - `src/components/WelcomeBack.tsx` — S1.7 "Welcome back. Start this week fresh from a template?" card
 - `src/components/UndoBar.tsx` — the Undo bar after a week is replaced
-- `src/components/Onboarding.tsx` — the three onboarding screens (what it is, starter or empty week, how it works)
+- `src/components/PurposePage.tsx` — the purpose page for new people: what it's for, an example week, sign in, Skip / Show me how
+- `src/components/Coach.tsx` — one guided hint: a ring around its `data-coach` target and a small bubble beside it; never blocks the page
+- `src/components/Checklist.tsx` — "Getting started": five items that tick themselves, "Show me" for each open one, fold and close
 - `src/components/TaskList.tsx` — the one task list in the panel / phone Tasks tab: draggable rows (onto a block), tick, block colour dots + where it is, dismiss, done this week, add row
 - `src/components/WeekBar.tsx` — above the grid: Week 1 / Week 2 switch, compact balanced weeks card, "Show areas and tasks" when the panel is hidden
 - `src/components/WeekFooter.tsx` — below the grid: templates, save current week, starter weeks (S1.8), roll forward
@@ -97,8 +103,8 @@
 - `src/components/BlockEditor.tsx` — inline title/description/tags editor, tasks to add or take out; touch-only day chips and delete
 - `src/components/BalancedWeeksCard.tsx` — "N balanced weeks this season" card with a square per week
 - `src/components/StatsView.tsx` — balanced weeks card, hours chart, reset
-- `src/components/CategoriesView.tsx` — category editor: name, Floor/Ceiling/Range guardrail and its hours, block length, colour
-- `src/components/SettingsView.tsx` — "Your data": export / import with summary + confirm, download of the pre-guardrails copy, balanced-week rules; hosts "Account & sync" when sync is configured
+- `src/components/CategoriesView.tsx` — areas editor: name, At least / At most / Between and its hours, block length, colour
+- `src/components/SettingsView.tsx` — "Your data": export / import with summary + confirm, download of the pre-guardrails copy, balanced-week rules, language; hosts "Account & sync" when sync is configured; About (what it is, show the introduction again, privacy and terms)
 - `src/components/AccountSync.tsx` — Settings "Account & sync": conflict card, signed-out email form → code entry, signed-in email + status + sign out
 - `.github/workflows/deploy.yml` — CI: test, lint, build, deploy to GitHub Pages
 - `handoff/INSTALL-IPHONE.md` — one-page install + sign-in note for the end user

@@ -8,7 +8,7 @@
 import { BUFFER_MINS, PALETTE } from "./constants";
 import type { Limit } from "./guardrail";
 import { legacyTarget } from "./guardrail";
-import { defaultData, type Block, type CadenceData, type Category, type Weeks } from "./model";
+import type { Block, CadenceData, Category, Weeks } from "./model";
 import { releaseRemoved } from "./tasks";
 import { uid as defaultUid } from "./uid";
 import { LIB_EN, type Lang, type LibWords } from "./words";
@@ -203,29 +203,4 @@ export function applyStarter(data: CadenceData, week: WeekIndex, starterId: stri
   const weeks: Weeks = [data.weeks[0], data.weeks[1]];
   weeks[week] = blocks;
   return releaseRemoved(data, { ...data, cats, weeks });
-}
-
-/** One area as a starter week would leave it for this person: theirs if they have it, else the one it adds. */
-export type PreviewArea = {
-  key: StarterAreaKey;
-  name: string;
-  color: string;
-  limit: Limit;
-  mins: number;
-  added: boolean;
-};
-
-/**
- * What a starter would do to these areas, worked out by applying it to a scratch copy, so the
- * colours, names and guardrails shown are exactly the ones the person gets (their own Work keeps
- * its own limit). For the onboarding's cards.
- */
-export function starterPreview(st: Starter, cats: readonly Category[], lang: Lang = "en"): PreviewArea[] {
-  const after = applyStarter({ ...defaultData(), cats: [...cats] }, 0, st.id, { lang, uid: () => "preview" });
-  return st.areas.map((a) => {
-    const had = matchArea(cats, a);
-    const cat = matchArea(after.cats, a)!;
-    const mins = st.blocks.filter((b) => b.area === a.key).reduce((t, b) => t + b.mins, 0);
-    return { key: a.key, name: cat.name, color: cat.color, limit: cat.limit, mins, added: !had };
-  });
 }

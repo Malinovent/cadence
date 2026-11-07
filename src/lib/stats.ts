@@ -1,8 +1,7 @@
-import { LIB_EN, type LibWords } from "./words";
 // Derived numbers for the sidebar and the stats view (pure).
 import type { CadenceData, Category } from "./model";
 import type { WeekIndex } from "./actions";
-import { balance, balanceNote, type Balance } from "./guardrail";
+import { balance, type Balance } from "./guardrail";
 
 export type StatsRange = "month" | "quarter" | "year";
 export const RANGE_DAYS: Record<StatsRange, number> = { month: 30, quarter: 90, year: 365 };
@@ -20,15 +19,14 @@ export const quotaStatus = (data: CadenceData, week: WeekIndex): QuotaStatus[] =
   });
 };
 
-export type AreaBalance = { cat: Category; balance: Balance; note: string | null };
+export type AreaBalance = { cat: Category; balance: Balance };
 
 /** S1.2: this week's guardrail balance per area, from planned minutes. Each week stands alone. */
-export const weekBalance = (data: CadenceData, week: WeekIndex, w: LibWords = LIB_EN): AreaBalance[] => {
+export const weekBalance = (data: CadenceData, week: WeekIndex): AreaBalance[] => {
   const blocks = data.weeks[week];
   return data.cats.map((cat) => {
     const planned = blocks.filter((p) => p.catIds.includes(cat.id)).reduce((s, p) => s + p.mins, 0);
-    const b = balance(cat.limit, planned);
-    return { cat, balance: b, note: balanceNote(cat.name, b, w) };
+    return { cat, balance: balance(cat.limit, planned) };
   });
 };
 

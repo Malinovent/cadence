@@ -7,34 +7,22 @@ const c = (h: string) => h.replace(".", ",");
 
 const DESCRIBE_FR: DescribeWords = {
   noTicks: (n) => `Aucun bloc ${n} coché.`,
-  floorMet: (n, d, min) => `${n} a atteint votre plancher (${c(d)} h sur ${c(min)} h).`,
-  floorShort: (n, d, min) => `${n} était sous votre plancher (${c(d)} h sur ${c(min)} h).`,
-  ceilingWithin: (n, d, max) => `${n} est resté sous votre plafond (${c(d)} h sur ${c(max)} h).`,
-  ceilingOver: (n, o, d, max) => `${n} a dépassé votre plafond de ${c(o)} h (${c(d)} h sur ${c(max)} h).`,
-  rangeIn: (n, d, min, max) => `${n} est dans votre fourchette (${c(d)} h, ${c(min)} à ${c(max)} h).`,
-  rangeShort: (n, d, min, max) => `${n} était sous votre fourchette (${c(d)} h, ${c(min)} à ${c(max)} h).`,
-  rangeOver: (n, o, d, max) => `${n} a dépassé votre fourchette de ${c(o)} h (${c(d)} h sur ${c(max)} h).`,
+  floorMet: (n, d, min) => `${n} : au moins ${c(min)} h atteintes (${c(d)} h).`,
+  floorShort: (n, d, min) => `${n} : sous les ${c(min)} h visées (${c(d)} h).`,
+  ceilingWithin: (n, d, max) => `${n} : dans la limite de ${c(max)} h (${c(d)} h).`,
+  ceilingOver: (n, o, d, max) => `${n} : ${c(o)} h au-delà de ${c(max)} h (${c(d)} h).`,
+  rangeIn: (n, d, min, max) => `${n} : entre ${c(min)} et ${c(max)} h (${c(d)} h).`,
+  rangeShort: (n, d, min, max) => `${n} : sous les ${c(min)} à ${c(max)} h visées (${c(d)} h).`,
+  rangeOver: (n, o, d, max) => `${n} : ${c(o)} h au-delà de ${c(max)} h (${c(d)} h).`,
 };
 
 export const LIB_FR: LibWords = {
   lang: "fr",
   days: ["lun.", "mar.", "mer.", "jeu.", "ven.", "sam.", "dim."],
   limit: {
-    floor: (h) => `Plancher ${c(h)} h`,
-    ceiling: (h) => `Plafond ${c(h)} h`,
-    range: (lo, hi) => `Fourchette ${c(lo)} à ${c(hi)} h`,
-  },
-  balance: {
-    floor: (p, min) => `${c(p)} h sur ${c(min)} h`,
-    ceiling: (p, max) => `${c(p)} h sur ${c(max)} h max.`,
-    inRange: (p) => `${c(p)} h, dans la fourchette`,
-    rangeShort: (p, lo, hi) => `${c(p)} h sur ${c(lo)} à ${c(hi)} h`,
-    rangeOver: (p, hi) => `${c(p)} h, au-delà de ${c(hi)} h`,
-  },
-  note: {
-    thisArea: "Ce domaine",
-    short: (who, range) => `${who} est sous votre ${range ? "fourchette" : "plancher"} cette semaine.`,
-    over: (who, h, range) => `${who} dépasse votre ${range ? "fourchette" : "plafond"} de ${c(h)} h cette semaine.`,
+    floor: (h) => `Au moins ${c(h)} h`,
+    ceiling: (h) => `Au plus ${c(h)} h`,
+    range: (lo, hi) => `Entre ${c(lo)} et ${c(hi)} h`,
   },
   describe: DESCRIBE_FR,
   summary: {
@@ -61,6 +49,15 @@ export const LIB_FR: LibWords = {
       offline: "Vous êtes hors ligne. Connectez-vous et réessayez.",
       failed: "Quelque chose n'a pas fonctionné. Réessayez.",
     },
+  },
+  count: {
+    plural: (n) => n >= 2,
+    toGo: (n, pl) => `encore ${n} ${pl ? "blocs" : "bloc"}`,
+    room: (n, pl) => `reste ${n} ${pl ? "blocs" : "bloc"}`,
+    over: (n, pl) => `${n} ${pl ? "blocs" : "bloc"} de trop`,
+    atLimit: "à la limite",
+    reached: "atteint",
+    inRange: "entre les deux",
   },
   now: {
     left: (h, m) => (!h ? `encore ${m} min` : m ? `encore ${h} h ${String(m).padStart(2, "0")}` : `encore ${h} h`),

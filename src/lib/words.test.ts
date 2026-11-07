@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { defaultCategories, DEFAULT_CATEGORIES } from "./constants";
 import { describeArea } from "./describe";
 import { droppedLine, importSummaryLine } from "./format";
-import { balanceLabel, balanceNote, balance, limitLabel } from "./guardrail";
+import { limitLabel } from "./guardrail";
 import { defaultData, normalizeData } from "./model";
 import { fmtLeft } from "./now";
 import { isEmptyData } from "./syncLogic";
@@ -25,17 +25,14 @@ describe("French (Canada) wording of the lib", () => {
     expect(fmtLeft(65, LIB_FR)).toBe("encore 1 h 05");
     expect(fmtLeft(38, LIB_FR)).toBe("encore 38 min");
   });
-  it("labels guardrails and balance", () => {
-    expect(limitLabel({ kind: "floor", min: h(10) }, LIB_FR)).toBe("Plancher 10 h");
-    expect(limitLabel({ kind: "range", min: h(4), max: h(8) }, LIB_FR)).toBe("Fourchette 4 à 8 h");
-    expect(balanceLabel(balance({ kind: "floor", min: h(10) }, h(7)), LIB_FR)).toBe("7 h sur 10 h");
-    expect(balanceNote("Repos", balance({ kind: "floor", min: h(10) }, h(7)), LIB_FR)).toBe(
-      "Repos est sous votre plancher cette semaine.",
-    );
+  it("labels the weekly time", () => {
+    expect(limitLabel({ kind: "floor", min: h(10) }, LIB_FR)).toBe("Au moins 10 h");
+    expect(limitLabel({ kind: "range", min: h(4), max: h(8) }, LIB_FR)).toBe("Entre 4 et 8 h");
+    expect(limitLabel({ kind: "ceiling", max: h(40) }, LIB_FR)).toBe("Au plus 40 h");
   });
   it("describes without judging, in French too", () => {
     const rest = { ...DEFAULT_CATEGORIES[0], name: "Repos", limit: { kind: "floor" as const, min: h(8) } };
-    expect(describeArea(rest, h(5), LIB_FR.describe)).toBe("Repos était sous votre plancher (5 h sur 8 h).");
+    expect(describeArea(rest, h(5), LIB_FR.describe)).toBe("Repos : sous les 8 h visées (5 h).");
   });
   it("summarises imports and sync states", () => {
     const sum = { categories: 1, blocks: 4, templates: 0, sessions: 2, streaks: 0, tasks: 3 };
@@ -74,8 +71,7 @@ describe("default areas in the person's language", () => {
 describe("French decimals", () => {
   it("writes hours with a decimal comma", async () => {
     const { fmtHours } = await import("./time");
-    expect(limitLabel({ kind: "floor", min: 150 }, LIB_FR)).toBe("Plancher 2,5 h");
-    expect(balanceLabel(balance({ kind: "floor", min: 600 }, 450), LIB_FR)).toBe("7,5 h sur 10 h");
+    expect(limitLabel({ kind: "floor", min: 150 }, LIB_FR)).toBe("Au moins 2,5 h");
     expect(fmtHours("3.0", "fr")).toBe("3,0 h");
     expect(fmtHours("3.0")).toBe("3.0h");
   });

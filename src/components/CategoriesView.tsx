@@ -54,13 +54,23 @@ function GuardrailField({ cat, onChange }: { cat: Category; onChange: (limit: Li
 
 function LimitHours({ limit: l, onChange }: { limit: Limit; onChange: (limit: Limit) => void }) {
   const { m } = useI18n();
-  if (l.kind === "floor") return <HoursInput label={m.categories.atLeast} mins={l.min} onChange={(min) => onChange({ ...l, min })} />;
-  if (l.kind === "ceiling") return <HoursInput label={m.categories.atMost} mins={l.max} onChange={(max) => onChange({ ...l, max })} />;
+  if (l.kind === "floor")
+    return <HoursInput label={m.categories.atLeast} mins={l.min} onChange={(min) => onChange({ ...l, min })} />;
+  if (l.kind === "ceiling")
+    return <HoursInput label={m.categories.atMost} mins={l.max} onChange={(max) => onChange({ ...l, max })} />;
   // keep the range the right way round as either end moves
   return (
     <>
-      <HoursInput label={m.categories.from} mins={l.min} onChange={(min) => onChange({ ...l, min, max: Math.max(min, l.max) })} />
-      <HoursInput label={m.categories.to} mins={l.max} onChange={(max) => onChange({ ...l, max, min: Math.min(max, l.min) })} />
+      <HoursInput
+        label={m.categories.from}
+        mins={l.min}
+        onChange={(min) => onChange({ ...l, min, max: Math.max(min, l.max) })}
+      />
+      <HoursInput
+        label={m.categories.to}
+        mins={l.max}
+        onChange={(max) => onChange({ ...l, max, min: Math.min(max, l.min) })}
+      />
     </>
   );
 }
@@ -76,7 +86,11 @@ export default function CategoriesView({ cats, actions }: Props) {
           const setLimit = (limit: Limit) => actions.updateCat(c.id, { limit });
           return (
             <div key={c.id} style={{ ...S.catRow, borderLeft: `6px solid ${c.color}` }}>
-              <input value={c.name} onChange={(e) => actions.updateCat(c.id, { name: e.target.value })} style={S.catNameInput} />
+              <input
+                value={c.name}
+                onChange={(e) => actions.updateCat(c.id, { name: e.target.value })}
+                style={S.catNameInput}
+              />
               <GuardrailField cat={c} onChange={setLimit} />
               <LimitHours limit={c.limit} onChange={setLimit} />
               <label style={S.catField}>
@@ -103,7 +117,7 @@ export default function CategoriesView({ cats, actions }: Props) {
           );
         })}
       </div>
-      <button onClick={() => actions.addCat(undefined, m.categories.newName)} style={S.catAdd}>
+      <button data-coach="areas-page" onClick={() => actions.addCat(undefined, m.categories.newName)} style={S.catAdd}>
         {m.categories.add}
       </button>
     </div>

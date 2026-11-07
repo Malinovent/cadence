@@ -40,7 +40,10 @@ export function parseLimit(v: unknown): Limit | null {
 }
 
 /** Existing targets become floors (the brief: "Migrate existing quotas to floors"). */
-export const floorFromTarget = (targetMins: number): Limit => ({ kind: "floor", min: Math.max(0, Math.round(targetMins) || 0) });
+export const floorFromTarget = (targetMins: number): Limit => ({
+  kind: "floor",
+  min: Math.max(0, Math.round(targetMins) || 0),
+});
 
 /**
  * The legacy `targetMins` kept beside the limit, so an older copy of the app (another device not
@@ -84,7 +87,12 @@ export function balance(limit: Limit, plannedMins: number): Balance {
   const base = { limit, plannedMins: p, shortMins: 0, overMins: 0 };
   if (limit.kind === "floor") {
     const short = Math.max(0, limit.min - p);
-    return { ...base, state: short ? "short" : "met", credit: limit.min ? Math.min(1, p / limit.min) : 1, shortMins: short };
+    return {
+      ...base,
+      state: short ? "short" : "met",
+      credit: limit.min ? Math.min(1, p / limit.min) : 1,
+      shortMins: short,
+    };
   }
   if (limit.kind === "ceiling") {
     const over = Math.max(0, p - limit.max);
@@ -106,56 +114,9 @@ export function balance(limit: Limit, plannedMins: number): Balance {
 /** 450 -> "7.5", 600 -> "10", 0 -> "0" */
 export const fmtH = (m: number): string => String(Math.round((m / 60) * 100) / 100);
 
-/** "Floor 10 h", "Ceiling 40 h", "Range 4–8 h" */
+/** "At least 10 h", "At most 40 h", "Between 4 and 8 h" */
 export function limitLabel(l: Limit, w: LibWords = LIB_EN): string {
   if (l.kind === "floor") return w.limit.floor(fmtH(l.min));
   if (l.kind === "ceiling") return w.limit.ceiling(fmtH(l.max));
   return w.limit.range(fmtH(l.min), fmtH(l.max));
-}
-
-/** Partial credit, always shown: "7 of 10 h", "38 of 40 h max", "6 h, in range", "3 of 4–8 h". */
-export function balanceLabel(b: Balance, w: LibWords = LIB_EN): string {
-  const p = fmtH(b.plannedMins);
-  const l = b.limit;
-  if (l.kind === "floor") return w.balance.floor(p, fmtH(l.min));
-  if (l.kind === "ceiling") return w.balance.ceiling(p, fmtH(l.max));
-  if (b.state === "inRange") return w.balance.inRange(p);
-  if (b.state === "short") return w.balance.rangeShort(p, fmtH(l.min), fmtH(l.max));
-  return w.balance.rangeOver(p, fmtH(l.max));
-}
-
-/** A calm sentence when something is off this week, or null. Never "missed", never red. */
-export function balanceNote(name: string, b: Balance, w: LibWords = LIB_EN): string | null {
-  const who = name.trim() || w.note.thisArea;
-  const range = b.limit.kind === "range";
-  if (b.state === "short") return w.note.short(who, range);
-  if (b.state === "over") return w.note.over(who, fmtH(b.overMins), range);
-  return null;
-}
-
-// ---------------------------------------------------------------- the bar
-
-export type BarGeometry = {
-  /** % widths/positions along the track */
-  fill: number;
-  /** "still to plan": from the fill to the floor / range low end */
-  gap: { left: number; width: number } | null;
-  /** the range band */
-  band: { left: number; width: number } | null;
-  /** ink markers: the floor, the ceiling, or both range ends */
-  marks: number[];
-};
-
-/** The track spans 1.2x the highest limit (or the planned time, if more), as in the wireframe. */
-export function barGeometry(b: Balance): BarGeometry {
-  const l = b.limit;
-  const top = l.kind === "floor" ? l.min : l.max;
-  const scale = Math.max(top * 1.2, b.plannedMins, 60);
-  const pct = (m: number) => Math.round((m / scale) * 1000) / 10;
-  const fill = pct(b.plannedMins);
-  const low = l.kind === "ceiling" ? null : l.min;
-  const gap = low !== null && b.plannedMins < low ? { left: fill, width: Math.round((pct(low) - fill) * 10) / 10 } : null;
-  const band = l.kind === "range" ? { left: pct(l.min), width: Math.round((pct(l.max) - pct(l.min)) * 10) / 10 } : null;
-  const marks = l.kind === "floor" ? [pct(l.min)] : l.kind === "ceiling" ? [pct(l.max)] : [pct(l.min), pct(l.max)];
-  return { fill, gap, band, marks };
 }

@@ -10,9 +10,12 @@ import WeekFooter from "./components/WeekFooter";
 import WeekGrid from "./components/WeekGrid";
 import WelcomeBack from "./components/WelcomeBack";
 import UndoBar from "./components/UndoBar";
-import Onboarding from "./components/Onboarding";
-import { relabelDefaults, shouldOnboard } from "./lib/onboarding";
-import { readOnboarded, writeOnboarded } from "./state/onboardingPrefs";
+import PurposePage from "./components/PurposePage";
+import Coach, { type CoachAction } from "./components/Coach";
+import Checklist from "./components/Checklist";
+import { relabelDefaults } from "./lib/onboarding";
+import type { Guide } from "./lib/guide";
+import { useOnboarding } from "./state/useOnboarding";
 import { undoAvailable, type UndoOffer } from "./lib/undo";
 import { shouldWelcome } from "./lib/welcome";
 import { STARTERS } from "./lib/starters";
@@ -28,7 +31,7 @@ import { isRemoteApply } from "./lib/syncUi";
 import type { Block, CadenceData } from "./lib/model";
 import { completion, type StatsRange } from "./lib/stats";
 import { season } from "./lib/balancedWeeks";
-import { panelAreas, panelNotes } from "./lib/panel";
+import { panelAreas } from "./lib/panel";
 import { readBalanceRules } from "./state/balanceRules";
 import { readPanelHidden, writePanelHidden } from "./state/panelPrefs";
 import { returnEnded } from "./lib/tasks";
@@ -57,10 +60,6 @@ export default function App() {
   const [lastEdit, setLastEdit] = useState(() => store.getSnapshot().meta.updatedAt);
   const [welcomeAnswered, setWelcomeAnswered] = useState(readWelcomeAnswered);
   const [undo, setUndo] = useState<UndoOffer | null>(null); // a week just replaced or rolled forward
-  // onboarding: new people only, judged once on opening; Settings → About replays it
-  const [onboarding, setOnboarding] = useState(() =>
-    shouldOnboard({ seen: readOnboarded(), lastEdit: store.getSnapshot().meta.updatedAt, data: store.getSnapshot().data }),
-  );
   const [phoneDay, setPhoneDay] = useState(() => defaultDay(0, new Date())); // phone: the one day shown, Mon = 0
   const isPhone = useIsPhone();
   // S1.4: the areas-and-tasks panel hidden (desktop) or folded (phone); remembered on this device
@@ -129,7 +128,10 @@ export default function App() {
     const after = store.getSnapshot().data;
     if (after !== before) setUndo({ before, after, text });
   };
-  const replaceWeek = (week: WeekIndex, run: () => void) => withUndo(m.undo.replaced(m.week.names[week]), run);
+  const replaceWeek = (week: WeekIndex, run: () => void) => {
+    withUndo(m.undo.replaced(m.week.names[week]), run);
+    onb.markTried(); // the checklist's "Try a starter week"
+  };
 
   // a language picked (onboarding or Settings) while the areas are still the untouched defaults:
   // their names follow. Automatic, so not an edit.
@@ -140,19 +142,48 @@ export default function App() {
     store.adjust((d) => relabelDefaults(d, lang));
   }, [lang, store]);
 
-  const endOnboarding = () => {
-    writeOnboarded();
-    setOnboarding(false);
-  };
-  // onboarding step 2: a starter week (null = empty, nothing changes). On a replay with blocks in
-  // Week 1 it replaces them, so it offers Undo like any other replace.
-  const onboardStart = (starterId: string | null) => {
-    if (!starterId) return;
-    const run = () => actions.applyStarter(0, starterId, { lang });
-    if (data.weeks[0].length > 0) replaceWeek(0, run);
-    else run();
-    changeWeek(0);
-    changeView("calendar");
+  // onboarding (JP, 2026-11-07): purpose page, the guided first block, then the checklist
+  const onb = useOnboarding({
+    store,
+    data,
+    week: activeWeek,
+    isPhone,
+    go: {
+      calendar: () => changeView("calendar"),
+      areas: () => changeView("categories"),
+      settings: () => changeView("settings"),
+      showPanel: () => setHidden(false),
+      day: (d) => setPhoneDay(d),
+    },
+  });
+  const areaName = (id: string) => data.cats.find((c) => c.id === id)?.name || m.lib.panel.untitled;
+  const device = isPhone ? "phone" : "desktop";
+  const coachFor = (g: Guide): { target: string; title: string; body?: string; actions: CoachAction[] } => {
+    const gotIt: CoachAction = { label: m.guide.gotIt, primary: true, onClick: onb.endGuide };
+    switch (g.step) {
+      case "drag":
+        return {
+          target: `area-${g.catId}`,
+          title: m.guide.drag[device](areaName(g.catId)),
+          body: m.guide.dragBody[device],
+          actions: [{ label: m.guide.notNow, onClick: onb.endGuide }],
+        };
+      case "placed":
+        return {
+          target: `count-${g.catId}`,
+          title: m.guide.placedTitle(areaName(g.catId)),
+          body: m.guide.placedBody,
+          actions: [{ label: m.guide.next, primary: true, onClick: onb.afterPlaced }],
+        };
+      case "tick":
+        return { target: `tick-${g.blockId}`, title: m.guide.tickTitle, body: m.guide.tickBody, actions: [gotIt] };
+      case "area":
+        return { target: "areas-page", title: m.guide.areaTitle, body: m.guide.areaBody, actions: [gotIt] };
+      case "task":
+        return { target: "add-task", title: m.guide.taskTitle, body: m.guide.taskBody[device], actions: [gotIt] };
+      default:
+        return { target: "starters", title: m.guide.templateTitle, body: m.guide.templateBody, actions: [gotIt] };
+    }
   };
 
   // week 2 becomes week 1, and the view jumps back to it
@@ -186,7 +217,6 @@ export default function App() {
   const done = completion(data, activeWeek);
   const panel = {
     areas: panelAreas(data, activeWeek, m.lib),
-    notes: panelNotes(data, activeWeek, m.lib),
     data,
     now,
     interaction,
@@ -196,7 +226,12 @@ export default function App() {
     actions,
   };
   const showSide = !isPhone && !panelHidden;
-  const welcome = shouldWelcome({ lastEdit, now: now.getTime(), dismissedFor: welcomeAnswered, templates: data.templates.length + STARTERS.length });
+  const welcome = shouldWelcome({
+    lastEdit,
+    now: now.getTime(),
+    dismissedFor: welcomeAnswered,
+    templates: data.templates.length + STARTERS.length,
+  });
   const answerWelcome = () => {
     writeWelcomeAnswered(lastEdit);
     setWelcomeAnswered(lastEdit);
@@ -206,8 +241,12 @@ export default function App() {
   return (
     <div style={S.root}>
       <style>{FONT_IMPORT}</style>
-      <Header view={view} setView={changeView} syncStatus={sync.configured && sync.session ? sync.status : null}
-        earlyBird={earlyBird} />
+      <Header
+        view={view}
+        setView={changeView}
+        syncStatus={sync.configured && sync.session ? sync.status : null}
+        earlyBird={earlyBird}
+      />
       {view === "calendar" && sync.conflict && (
         <div style={S.conflictBanner}>
           <span>{m.conflict.banner}</span>
@@ -238,6 +277,15 @@ export default function App() {
           <div style={showSide ? S.body : S.bodySolo}>
             {showSide && <AreasPanel {...panel} />}
             <main style={S.mainCol}>
+              {onb.checklistVisible && (
+                <Checklist
+                  done={onb.done}
+                  collapsed={onb.checklist.collapsed}
+                  onToggle={onb.toggleChecklist}
+                  onShow={onb.show}
+                  onClose={onb.closeChecklist}
+                />
+              )}
               <WeekBar
                 week={activeWeek}
                 setWeek={changeWeek}
@@ -284,7 +332,7 @@ export default function App() {
               />
             </main>
           </div>
-          {isPhone && <PhoneDock {...panel} folded={panelHidden} onShow={() => setHidden(false)} />}
+          {isPhone && <PhoneDock {...panel} folded={panelHidden} onShow={() => setHidden(false)} forceTab={onb.tab} />}
           {slotTap && (
             <SlotMenu
               key={`${slotTap.day}-${slotTap.start}`}
@@ -321,22 +369,19 @@ export default function App() {
           onReplace={onReplace}
           sync={sync.configured ? sync : null}
           earlyBird={earlyBird}
-          onReplayIntro={() => setOnboarding(true)}
+          onReplayIntro={onb.replay}
         />
       )}
-      {onboarding && (
-        <Onboarding
+      {onb.guide && !onb.intro && (
+        <Coach key={JSON.stringify(onb.guide)} {...coachFor(onb.guide)} onClose={onb.endGuide} />
+      )}
+      {onb.intro && (
+        <PurposePage
           phone={isPhone}
-          cats={data.cats}
-          blocksInWeek1={data.weeks[0].length}
           canSignIn={sync.configured && !sync.session}
-          onStart={onboardStart}
-          onDone={endOnboarding}
-          onSkip={endOnboarding}
-          onSignIn={() => {
-            endOnboarding();
-            changeView("settings");
-          }}
+          onStart={onb.startTour}
+          onSkip={onb.skipIntro}
+          onSignIn={onb.signIn}
         />
       )}
     </div>

@@ -137,7 +137,7 @@ function AddTask({ actions }: { actions: TaskActions }) {
   const inputRef = useRef<HTMLInputElement>(null);
   if (!adding)
     return (
-      <button type="button" style={S.taskDoneToggle} onClick={() => setAdding(true)}>
+      <button type="button" data-coach="add-task" style={S.taskDoneToggle} onClick={() => setAdding(true)}>
         {m.tasks.add}
       </button>
     );
@@ -153,7 +153,7 @@ function AddTask({ actions }: { actions: TaskActions }) {
     inputRef.current?.focus();
   };
   return (
-    <form style={S.panelTaskAdd} onSubmit={add}>
+    <form data-coach="add-task" style={S.panelTaskAdd} onSubmit={add}>
       <input
         ref={inputRef}
         autoFocus

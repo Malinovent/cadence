@@ -152,8 +152,8 @@ On branch `s1-add-polish` (on top of that fix): add window is a one-tap area gri
 Shipped to main 2026-11-06. Audit items 3–6 wait on branch `audit-3-7`.
 ### [x] Block popup: mark assigned tasks
 Shipped to main 2026-11-06.
-### [~] Onboarding + About (2026-11-07)
-Done on branch `onboarding`: three skippable screens for new people (what it is, starter or empty week, how it works), FR/EN switch, replay from Settings → About; About without the medical line; carries audit items 3–5 (name in one file, bilingual install details, bilingual email template). Left: JP's OK, ship; JP pastes the email template, sets the name and `VITE_SITE_URL`.
+### [~] Onboarding + About, plain words, block count (2026-11-07)
+Done on branch `onboarding`: words A (At least / At most / Between); visual B (each area's week counted in blocks, with under / over warnings in ink); onboarding path 1 (purpose page, then a guided first block: drag, its count, tick) with the "Getting started" checklist taking over after the first block; replay from Settings → About; About without the medical line; carries audit items 3–5 (name in one file, bilingual install details, bilingual email template). Left: JP's OK, ship; JP pastes the email template, sets the name and `VITE_SITE_URL`.
 ### [~] S1.9 French and English
 Done on branch `s1-finish`: catalogues for every string (en/fr), lib wording passed in, detection + Settings switch (device-local), Quebec formats, default areas named in the person's language. Shipped to main 2026-11-04. Left: JP reviews the French.
 ### [x] S1.10 Neutral stats

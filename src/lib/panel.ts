@@ -19,7 +19,7 @@ export type PanelArea = {
 
 /** Areas in their own order, then the buffer last. */
 export function panelAreas(data: CadenceData, week: WeekIndex, w: LibWords = LIB_EN): PanelArea[] {
-  const rows: PanelArea[] = weekBalance(data, week, w).map(({ cat, balance }) => ({
+  const rows: PanelArea[] = weekBalance(data, week).map(({ cat, balance }) => ({
     id: cat.id,
     name: cat.name || w.panel.untitled,
     color: cat.color,
@@ -37,12 +37,6 @@ export function panelAreas(data: CadenceData, week: WeekIndex, w: LibWords = LIB
   });
   return rows;
 }
-
-/** The calm notes under the areas ("Rest is 3 h short of its floor"), only the ones that apply. */
-export const panelNotes = (data: CadenceData, week: WeekIndex, w: LibWords = LIB_EN): string[] =>
-  weekBalance(data, week, w)
-    .map((r) => r.note)
-    .filter((n): n is string => !!n);
 
 /** How many tasks are still open (the phone Tasks tab shows it). */
 export const openCount = (tasks: readonly Task[]): number => tasks.filter((t) => !t.done).length;

@@ -30,6 +30,7 @@ export default function AreaChip({ area: a, interaction, armed, onArm }: Props) 
   return (
     <div
       className="cadence-src cadence-tray-item"
+      data-coach={`area-${a.id}`}
       data-press={pressed ? "" : undefined}
       data-holding={pressed && press.hold ? "" : undefined}
       data-armed={armed ? "" : undefined}
