@@ -72,6 +72,7 @@
 - `src/state/panelPrefs.ts` — read/write the per-device panel hidden / tray folded choice (`cadence:ui:trayHidden`)
 - `src/state/balanceRules.ts` — read/write the per-device balanced-week rules (`cadence:ui:balanceRules`)
 - `src/state/useNow.ts` — `useNow()`: current time, refreshed each whole minute and when the page becomes visible
+- `src/state/useKeyboard.ts` — `useKeyboard()`: how far the on-screen keyboard covers the bottom (visual viewport), so the block sheet and the phone tray rise above it
 - `src/state/useIsPhone.ts` — `useIsPhone()`: matchMedia `(max-width: 899px)`, live, SSR default false
 - `src/sync/client.ts` — Supabase client from env, or `null` (local-only)
 - `src/sync/supabaseClient.ts` — `SyncClient` adapter over supabase-js (OTP auth, row select, `push_state` RPC, error mapping); `syncClient` (null when unconfigured)
@@ -98,7 +99,7 @@
 - `src/components/Checklist.tsx` — "Getting started": five items that tick themselves, "Show me" for each open one, fold and close; crosses off fresh steps when on screen and says whether it is
 - `src/components/QuestToast.tsx` — a step done away from the checklist: the toast at the top (check, strike, five squares, Next · Show me)
 - `src/components/QuestFinale.tsx` — five of five: the finale card with rising squares and "Start planning"
-- `src/components/TaskList.tsx` — the one task list in the panel / phone Tasks tab: draggable rows (onto a block), tick, block colour dots + where it is, dismiss, done this week, add row
+- `src/components/TaskList.tsx` — the one task list in the panel / phone Tasks tab: "＋ Add a task" first (44 px; new tasks land on top), draggable rows (onto a block), tick, block colour dots + where it is, dismiss, done this week
 - `src/components/WeekBar.tsx` — above the grid: Week 1 / Week 2 switch, compact balanced weeks card, "Show areas and tasks" when the panel is hidden
 - `src/components/WeekFooter.tsx` — below the grid: templates, save current week, starter weeks (S1.8), roll forward
 - `src/components/WeekGrid.tsx` — day grid (`rowH` and `days` props; `phone` prop: Mon–Sun day strip instead of the head row, 52px time column, swipe to change day), drop preview / tag highlight, current-time line and clock tag, tap-to-place, block taps and right-click

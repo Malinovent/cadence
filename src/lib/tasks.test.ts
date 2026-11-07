@@ -151,6 +151,17 @@ describe("list edits", () => {
     const blank = base();
     expect(addTask(blank, "  ", deps)).toBe(blank);
   });
+  it("puts a new task on top, the others keeping their order", () => {
+    let n = 0;
+    const ids = { uid: () => `t${++n}`, now: () => 5000 };
+    const d = addTask(addTask(addTask(base(), "First", ids), "Second", ids), "Third", ids);
+    expect(d.tasks.map((x) => [x.name, x.order])).toEqual([
+      ["Third", 0],
+      ["Second", 1],
+      ["First", 2],
+    ]);
+    expect(normalizeData(d).data.tasks.map((x) => x.name)).toEqual(["Third", "Second", "First"]); // reloads the same
+  });
   it("keeps an area given to a task earlier, though nothing shows it", () => {
     const d = normalizeData({ ...base(), tasks: [task("a", { catId: "learn" })] }).data;
     expect(t(d, "a").catId).toBe("learn");

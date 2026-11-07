@@ -1769,10 +1769,51 @@ export const S = {
     borderTop: `1px dashed ${line}`,
     paddingTop: 12
   },
-  panelTaskAdd: {
+  // "＋ Add a task": first in the list, full width, 44px (JP, 2026-11-07)
+  taskAdd: {
     display: "flex",
-    gap: 6,
-    alignItems: "center"
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    minHeight: 44,
+    padding: "8px 12px",
+    border: `1.5px dashed ${ink}`,
+    borderRadius: 8,
+    background: "transparent",
+    color: ink,
+    cursor: "pointer",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 600,
+    fontSize: 15
+  },
+  taskAddForm: {
+    display: "flex",
+    gap: 8,
+    alignItems: "stretch"
+  },
+  taskAddInput: {
+    flex: 1,
+    minWidth: 0,
+    minHeight: 44,
+    padding: "8px 10px",
+    border: `1.5px solid ${ink}`,
+    borderRadius: 8,
+    background: "#fff",
+    color: ink,
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontSize: 15
+  },
+  taskAddSubmit: {
+    flexShrink: 0,
+    minHeight: 44,
+    padding: "0 14px",
+    border: "none",
+    borderRadius: 8,
+    background: ink,
+    color: paper,
+    cursor: "pointer",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 13
   },
   panelTaskList: {
     display: "flex",

@@ -90,10 +90,11 @@ export const addTask = (data: CadenceData, name: string, deps: Deps = {}): Caden
     name: trimmed,
     catId: null,
     done: false,
-    order: data.tasks.length,
+    order: 0,
     createdAt: (deps.now ?? Date.now)(),
   };
-  return { ...data, tasks: [...data.tasks, task] };
+  // on top, right under the add row (JP, 2026-11-07); the others keep their order
+  return { ...data, tasks: [task, ...data.tasks].map((t, i) => (t.order === i ? t : { ...t, order: i })) };
 };
 
 /** Tick or untick a task. Finished tasks leave the list (they stay ticked inside their block, if any). */
@@ -201,7 +202,10 @@ export const unsortArea = (data: CadenceData, catId: string): CadenceData =>
 export const openTasks = (tasks: readonly Task[]): Task[] => tasks.filter((t) => !t.done);
 
 /** The block popup's task list: in this block, free to add, and already in another block (they'd move). */
-export const blockPicker = (tasks: readonly Task[], blockId: string): { inBlock: Task[]; free: Task[]; elsewhere: Task[] } => {
+export const blockPicker = (
+  tasks: readonly Task[],
+  blockId: string,
+): { inBlock: Task[]; free: Task[]; elsewhere: Task[] } => {
   const open = openTasks(tasks).filter((t) => t.blockId !== blockId);
   return {
     inBlock: blockTasks(tasks, blockId),
@@ -215,4 +219,3 @@ export const doneThisWeek = (tasks: readonly Task[], now: Date): Task[] => {
   const from = mondayOf(now).getTime();
   return tasks.filter((t) => t.done && (t.doneAt ?? 0) >= from);
 };
-

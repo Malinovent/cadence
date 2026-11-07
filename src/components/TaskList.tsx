@@ -37,6 +37,8 @@ export default function TaskList({ data, interaction, actions, now }: Props) {
   const done = doneThisWeek(data.tasks, now);
   return (
     <div style={S.areaTasks}>
+      {/* first and big (JP, 2026-11-07): new tasks land right under it */}
+      <AddTask actions={actions} />
       {open.length === 0 && done.length === 0 && <div style={S.tplEmpty}>{m.tasks.empty}</div>}
       {open.length > 0 && (
         <div style={S.panelTaskList}>
@@ -57,7 +59,6 @@ export default function TaskList({ data, interaction, actions, now }: Props) {
           ))}
         </div>
       )}
-      <AddTask actions={actions} />
     </div>
   );
 }
@@ -137,11 +138,11 @@ function AddTask({ actions }: { actions: TaskActions }) {
   const inputRef = useRef<HTMLInputElement>(null);
   if (!adding)
     return (
-      <button type="button" data-coach="add-task" style={S.taskDoneToggle} onClick={() => setAdding(true)}>
+      <button type="button" data-coach="add-task" style={S.taskAdd} onClick={() => setAdding(true)}>
         {m.tasks.add}
       </button>
     );
-  // Enter or "＋": add, clear, keep focus; an empty Enter or Escape closes the row
+  // Enter or "Add task": add, clear, keep focus; an empty Enter, Escape, or leaving it empty closes the row
   const add = (e: FormEvent) => {
     e.preventDefault();
     if (!draft.trim()) {
@@ -153,24 +154,28 @@ function AddTask({ actions }: { actions: TaskActions }) {
     inputRef.current?.focus();
   };
   return (
-    <form data-coach="add-task" style={S.panelTaskAdd} onSubmit={add}>
+    <form data-coach="add-task" style={S.taskAddForm} onSubmit={add}>
       <input
         ref={inputRef}
         autoFocus
         value={draft}
+        enterKeyHint="done"
         onKeyDown={(e) => {
           if (e.key === "Escape") {
             setDraft("");
             setAdding(false);
           }
         }}
+        onBlur={() => {
+          if (!draft.trim()) setAdding(false);
+        }}
         onChange={(e) => setDraft(e.target.value)}
         placeholder={m.tasks.placeholder}
         aria-label={m.tasks.newTask}
-        style={S.tplNameInput}
+        style={S.taskAddInput}
       />
-      <button type="submit" style={S.tplApply} aria-label={m.tasks.addButton}>
-        ＋
+      <button type="submit" style={S.taskAddSubmit}>
+        {m.tasks.addButton}
       </button>
     </form>
   );

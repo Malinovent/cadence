@@ -5,6 +5,7 @@ import { S } from "../styles";
 import AreaChip from "./AreaChip";
 import type { PanelProps } from "./AreasPanel";
 import type { TabRequest } from "../state/useOnboarding";
+import { useKeyboard } from "../state/useKeyboard";
 import { useI18n } from "../i18n/I18nProvider";
 import TaskList from "./TaskList";
 import BlockCount from "./BlockCount";
@@ -29,6 +30,7 @@ export default function PhoneDock(
   }, [forceTab]);
   const dockRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(0);
+  const kb = useKeyboard(); // typing a task: the tray sits above the keyboard (JP, 2026-11-07)
 
   useEffect(() => {
     const el = dockRef.current;
@@ -42,7 +44,13 @@ export default function PhoneDock(
   return (
     <>
       <div style={{ height }} aria-hidden="true" />
-      <div ref={dockRef} {...{ [DOCK_ATTR]: "" }} style={S.dock} role="region" aria-label={m.panel.region}>
+      <div
+        ref={dockRef}
+        {...{ [DOCK_ATTR]: "" }}
+        style={{ ...S.dock, bottom: kb.inset }}
+        role="region"
+        aria-label={m.panel.region}
+      >
         {folded ? (
           <button type="button" onClick={onShow} style={S.dockBar} aria-expanded={false}>
             {m.panel.showBar}
@@ -80,7 +88,9 @@ export default function PhoneDock(
             <div style={S.dockBody}>
               {tab === "areas" ? (
                 <>
-                  {armedCatId && <div style={{ ...S.panelLabel, marginTop: 0, marginBottom: 6 }}>{m.panel.armedHint}</div>}
+                  {armedCatId && (
+                    <div style={{ ...S.panelLabel, marginTop: 0, marginBottom: 6 }}>{m.panel.armedHint}</div>
+                  )}
                   <div style={S.dockAreas}>
                     {areas.map((a) => (
                       <div key={a.id}>

@@ -177,7 +177,7 @@ describe("sync engine: launch", () => {
     await vi.advanceTimersByTimeAsync(1500);
     await flush();
     expect(backend.pushes).toHaveLength(1);
-    expect(backend.pushes[0].data.tasks[0].returnedFrom).toBe(1);
+    expect(backend.pushes[0].data.tasks.find((x) => x.id === "t")?.returnedFrom).toBe(1); // new tasks go on top
   });
 
   it("signed out: local only, nothing is sent", async () => {

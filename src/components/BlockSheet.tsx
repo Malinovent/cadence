@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { BUFFER_COLOR } from "../lib/constants";
 import { withAlpha } from "../lib/gesture";
 import type { Block, Category, Task } from "../lib/model";
-import { blockWhen, keyboardInset } from "../lib/sheet";
+import { blockWhen } from "../lib/sheet";
 import type { CadenceActions } from "../state/useCadence";
+import { useKeyboard } from "../state/useKeyboard";
 import { ink, paper, S } from "../styles";
 import { useI18n } from "../i18n/I18nProvider";
 import BlockTasks from "./BlockTasks";
@@ -18,30 +19,6 @@ type Props = {
   onMoveToDay: (day: number) => void;
   actions: Pick<CadenceActions, "updateBlock" | "addTag" | "removeTag" | "attachTask" | "detachTask">;
 };
-
-/** How far the on-screen keyboard covers the bottom, and the height left above it. */
-function readKeyboard(): { inset: number; height: number } {
-  const vv = window.visualViewport;
-  return vv
-    ? { inset: keyboardInset(window.innerHeight, vv.height, vv.offsetTop), height: vv.height }
-    : { inset: 0, height: window.innerHeight };
-}
-
-function useKeyboard() {
-  const [kb, setKb] = useState(readKeyboard);
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
-    const on = () => setKb(readKeyboard());
-    vv.addEventListener("resize", on);
-    vv.addEventListener("scroll", on);
-    return () => {
-      vv.removeEventListener("resize", on);
-      vv.removeEventListener("scroll", on);
-    };
-  }, []);
-  return kb;
-}
 
 const Trash = () => (
   <svg
