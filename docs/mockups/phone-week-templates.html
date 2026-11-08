@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phone week mockup</title>
+<style>
+:root{--bg:#f4ede1;--card:#faf6ee;--ink:#2a2420;--muted:#7a6f63;--line:#ddd3c4}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,serif;padding:16px}
+h1{font-size:20px;margin:0 0 4px}.lead{color:var(--muted);font-size:14px;margin:0 0 16px}
+.wrap{display:grid;gap:24px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));max-width:1000px}
+.ph{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;font-size:13px}
+.cap{font-size:14px;color:var(--muted);margin:8px 2px 0;line-height:1.4}
+.seg{display:flex;border:1.5px solid var(--ink);border-radius:6px;overflow:hidden;margin-bottom:8px}
+.seg span{flex:1;text-align:center;padding:6px 0}.seg .on{background:var(--ink);color:var(--card)}
+.wk{display:grid;grid-template-columns:20px repeat(7,1fr);gap:3px}
+.col{position:relative;height:300px;background:#fff;border-radius:3px}
+.b{position:absolute;left:1px;right:1px;border-radius:3px;text-align:center;padding-top:2px;font-size:12px}
+.p{background:#EEEDFE;color:#3C3489;border-left:3px solid #534AB7}.t{background:#E1F5EE;color:#085041;border-left:3px solid #0F6E56}.c{background:#FAECE7;color:#712B13;border-left:3px solid #993C1D}
+.hd{text-align:center;color:var(--muted)}.today{color:var(--ink);font-weight:bold;text-decoration:underline}
+.hrs{font-size:11px;color:var(--muted);display:flex;flex-direction:column;justify-content:space-between;height:300px}
+.day{position:relative;height:240px;background:#fff;border-radius:4px;margin-left:24px}
+.db{position:absolute;left:4px;right:4px;border-radius:4px;padding:4px 8px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.btn{border:1.5px solid var(--ink);border-radius:6px;padding:6px 10px;text-align:center}
+.pri{background:var(--ink);color:var(--card)}
+.ov{background:rgba(0,0,0,.45);border-radius:14px;padding:48px 10px 10px;min-height:440px;box-sizing:border-box}
+.card{background:var(--card);border-radius:12px;padding:12px}
+.mini{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin:8px 0}
+.mc{position:relative;height:80px;background:#fff;border-radius:2px}
+.mb{position:absolute;left:1px;right:1px;border-radius:2px}
+</style>
+</head>
+<body>
+<h1>Cadence on the phone: three ideas</h1>
+<p class="lead">A mockup only. Colours and icons are placeholders.</p>
+<div class="wrap">
+<div>
+<div class="ph">
+<div class="seg"><span>Day</span><span class="on">Week</span></div>
+<div class="wk">
+<div></div><div class="hd">M</div><div class="hd">T</div><div class="hd today">W</div><div class="hd">T</div><div class="hd">F</div><div class="hd">S</div><div class="hd">S</div>
+<div class="hrs"><span>7</span><span>12</span><span>17</span><span>22</span></div>
+<div class="col"><div class="b p" style="top:24px;height:84px">💼</div><div class="b t" style="top:204px;height:36px">👥</div></div>
+<div class="col"><div class="b p" style="top:24px;height:108px">💼</div><div class="b c" style="top:180px;height:24px">🏋</div></div>
+<div class="col"><div class="b p" style="top:24px;height:84px">💼</div><div class="b t" style="top:228px;height:48px">👥</div></div>
+<div class="col"><div class="b p" style="top:36px;height:96px">💼</div></div>
+<div class="col"><div class="b p" style="top:24px;height:72px">💼</div><div class="b c" style="top:156px;height:24px">🏋</div></div>
+<div class="col"><div class="b t" style="top:72px;height:108px">👥</div></div>
+<div class="col"><div class="b c" style="top:48px;height:36px">🏋</div></div>
+</div>
+</div>
+<p class="cap">1. Whole week. Blocks become slim bars with the area's icon. Tap a day to open it; tap a block to edit it. Dragging stays in Day view.</p>
+</div>
+<div>
+<div class="ph">
+<div class="seg"><span class="on">Day</span><span>Week</span></div>
+<div style="font-weight:bold;margin:2px 0 8px">Wednesday</div>
+<div style="position:relative"><div style="position:absolute;left:0;top:0;bottom:0;font-size:11px;color:var(--muted);display:flex;flex-direction:column;justify-content:space-between"><span>7</span><span>12</span><span>17</span><span>22</span></div>
+<div class="day"><div class="db p" style="top:18px;height:72px">Work</div><div class="db c" style="top:114px;height:26px">Exercise</div><div class="db t" style="top:180px;height:40px">People</div></div></div>
+<div style="margin-top:12px;font-weight:bold">Day templates</div>
+<div class="row"><span>Office day</span><span class="btn">Preview</span></div>
+<div class="row"><span>Rest day</span><span class="btn">Preview</span></div>
+<div class="btn" style="margin-top:8px">+ Save Wednesday as a day</div>
+</div>
+<p class="cap">2. Day templates, under the day on the phone. Save the day shown; use one on any day. On a computer they sit beside week templates.</p>
+</div>
+<div>
+<div class="ph" style="padding:0">
+<div class="ov"><div class="card">
+<div style="font-weight:bold;font-size:15px">Work-heavy week</div>
+<div style="color:var(--muted)">Into Week 1</div>
+<div class="mini">
+<div class="mc"><div class="mb p" style="top:6px;height:28px"></div><div class="mb t" style="top:56px;height:12px"></div></div>
+<div class="mc"><div class="mb p" style="top:6px;height:34px"></div></div>
+<div class="mc"><div class="mb p" style="top:6px;height:28px"></div><div class="mb c" style="top:46px;height:9px"></div></div>
+<div class="mc"><div class="mb p" style="top:9px;height:32px"></div></div>
+<div class="mc"><div class="mb p" style="top:6px;height:25px"></div><div class="mb t" style="top:56px;height:14px"></div></div>
+<div class="mc"><div class="mb t" style="top:22px;height:34px"></div></div>
+<div class="mc"><div class="mb c" style="top:14px;height:12px"></div></div>
+</div>
+<div class="row"><span>💼 Work</span><span>32 h</span></div>
+<div class="row"><span>👥 People</span><span>6 h</span></div>
+<div class="row"><span>🏋 Exercise</span><span>2 h</span></div>
+<div style="color:var(--muted);margin:8px 0">Replaces the 9 blocks in Week 1. You can undo.</div>
+<div style="display:flex;gap:8px"><span class="btn pri" style="flex:1">Use it</span><span class="btn" style="flex:1">Cancel</span></div>
+</div></div>
+</div>
+<p class="cap">3. Preview before applying: the week in miniature, hours per area, what it replaces. A day template shows one day and a day picker.</p>
+</div>
+</div>
+</body>
+</html>

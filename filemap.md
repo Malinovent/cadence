@@ -122,6 +122,10 @@
 - `src/components/AccountSync.tsx` — Settings "Account & sync": conflict card, signed-out email form → code entry, signed-in email + status + sign out, "Delete my account" (asked first)
 - `src/lib/icons.ts` — the area icon names (`AREA_ICONS`, `isAreaIcon`)
 - `src/components/AreaIconView.tsx` — an area's icon (lucide) in its colour, or its colour dot (`AreaMark`)
+- `src/lib/templatePreview.ts` — what a template, starter or day template would do (`previewChange`), and the miniature's hours
+- `src/components/MiniCal.tsx` — a week or a day in miniature (template preview, the phone's week view)
+- `src/components/TemplatePreview.tsx` — the card shown before a template is used
+- `src/state/phoneViewPrefs.ts` — the phone shows Day or Week (`cadence:ui:phoneView`)
 - `src/components/SetRow.tsx` — one Settings row: name and short hint on the left, the control on the right
 - `src/components/AreaRows.tsx` — one short row per area (name, hours, target, ✓), for the week review and Stats → Last week
 - `src/components/WeekReview.tsx` — the card after roll forward: the week's lines, a fanfare and rising squares when balanced

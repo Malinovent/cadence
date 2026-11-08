@@ -28,6 +28,8 @@ const makeActions = (store: CadenceStore) => {
     toggleDone: b(A.toggleDone),
     saveTemplate: b(A.saveTemplate),
     applyTemplate: b(A.applyTemplate),
+    saveDayTemplate: b(A.saveDayTemplate),
+    applyDayTemplate: b(A.applyDayTemplate),
     applyStarter: b(applyStarter),
     deleteTemplate: b(A.deleteTemplate),
     advanceWeek: b(A.advanceWeek),

@@ -87,9 +87,15 @@ export const en = {
     save: "save",
     noTemplates: "No templates of your own yet.",
     templateName: (n: number) => `Template ${n}`,
-    apply: "apply",
+    apply: "preview",
     starters: "Starter weeks",
-    applyStarter: (name: string, week: number) => `Apply ${name} to Week ${week}`,
+    applyStarter: (name: string, week: number) => `Preview ${name} for Week ${week}`,
+    // day templates (JP, 2026-11-08)
+    dayTemplates: "Day templates",
+    saveDay: "＋ Save a day",
+    dayTemplateName: (n: number) => `Day ${n}`,
+    noDayTemplates: "Save a day you like, then use it on any day.",
+    whichDay: "Day",
     rollForward: "⟳ Roll forward → next week becomes Week 1",
   },
   slot: {
@@ -259,8 +265,24 @@ export const en = {
     kept: "kept",
     start: "Start the new week",
   },
+  // before a template is used: what it will do (JP, 2026-11-08)
+  preview: {
+    into: (week: string) => `Into ${week}`,
+    intoDay: (week: string, day: string) => `Into ${day}, ${week}`,
+    replacesWeek: (n: number, week: string) =>
+      n === 0 ? `${week} is empty.` : `Replaces the ${n === 1 ? "block" : `${n} blocks`} in ${week}. You can undo.`,
+    replacesDay: (n: number, day: string) =>
+      n === 0 ? `${day} is empty.` : `Replaces the ${n === 1 ? "block" : `${n} blocks`} on ${day}. You can undo.`,
+    empty: "No blocks.",
+    use: "Use it",
+    cancel: "Cancel",
+    days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+  },
+  // the phone: one day, or the whole week at a glance (JP, 2026-11-08)
+  phoneView: { label: "Show", day: "Day", week: "Week", openDay: (day: string) => `Open ${day}` },
   undo: {
     replaced: (week: string) => `${week} replaced.`,
+    replacedDay: (day: string) => `${day} replaced.`,
     rolled: "Rolled forward.",
     deleted: "Block deleted.",
     action: "Undo",

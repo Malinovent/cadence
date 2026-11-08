@@ -9,21 +9,37 @@ import { useI18n } from "../i18n/I18nProvider";
 type Props = {
   data: CadenceData;
   week: WeekIndex;
-  actions: Pick<CadenceActions, "saveTemplate" | "deleteTemplate">;
-  onApplyTemplate: (id: string) => void; // replace the week; the app offers Undo
+  actions: Pick<CadenceActions, "saveTemplate" | "deleteTemplate" | "saveDayTemplate">;
+  onApplyTemplate: (id: string) => void; // opens its preview; using it replaces the week (Undo offered)
   onApplyStarter: (id: string) => void;
+  onApplyDay: (id: string) => void; // a day template: its preview, which asks the day
+  /** the day "＋ Save a day" starts on (the phone's day, else today) */
+  day: number;
+  /** the phone puts day templates first */
+  phone?: boolean;
   onAdvance: () => void;
 };
 
 /** S1.4: below the grid, templates, "Save current week" and roll forward. */
-export default function WeekFooter({ data, week, actions, onApplyTemplate, onApplyStarter, onAdvance }: Props) {
+export default function WeekFooter({
+  data,
+  week,
+  actions,
+  onApplyTemplate,
+  onApplyStarter,
+  onApplyDay,
+  day,
+  phone = false,
+  onAdvance,
+}: Props) {
   const { m } = useI18n();
   const [naming, setNaming] = useState(false);
   const [name, setName] = useState("");
   const empty = data.weeks[week].length === 0;
+  const weekTemplates = data.templates.filter((t) => !t.day);
 
   const save = (n: string) => {
-    actions.saveTemplate(week, n.trim() || m.footer.templateName(data.templates.length + 1));
+    actions.saveTemplate(week, n.trim() || m.footer.templateName(weekTemplates.length + 1));
     setNaming(false);
     setName("");
   };
@@ -32,8 +48,10 @@ export default function WeekFooter({ data, week, actions, onApplyTemplate, onApp
     setName("");
   };
 
+  const days = <DayTemplates data={data} week={week} day={day} actions={actions} onApply={onApplyDay} />;
   return (
     <div style={S.weekFooter}>
+      {phone && days}
       <div style={{ ...S.tplSection, ...S.weekFooterTpl }}>
         <div style={S.panelLabel}>{m.footer.templates}</div>
         {naming ? (
@@ -41,7 +59,7 @@ export default function WeekFooter({ data, week, actions, onApplyTemplate, onApp
             <input
               autoFocus
               value={name}
-              placeholder={m.footer.templateName(data.templates.length + 1)}
+              placeholder={m.footer.templateName(weekTemplates.length + 1)}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") save(name);
@@ -69,8 +87,8 @@ export default function WeekFooter({ data, week, actions, onApplyTemplate, onApp
             {m.footer.saveWeek}
           </button>
         )}
-        {data.templates.length === 0 && !naming && <div style={S.tplEmpty}>{m.footer.noTemplates}</div>}
-        {data.templates.map((t) => (
+        {weekTemplates.length === 0 && !naming && <div style={S.tplEmpty}>{m.footer.noTemplates}</div>}
+        {weekTemplates.map((t) => (
           <div key={t.id} style={S.tplRow}>
             <span style={S.tplName}>{t.name}</span>
             <button onClick={() => onApplyTemplate(t.id)} style={S.tplApply}>
@@ -82,10 +100,109 @@ export default function WeekFooter({ data, week, actions, onApplyTemplate, onApp
           </div>
         ))}
       </div>
+      {!phone && days}
       <StarterWeeks data={data} week={week} onApply={onApplyStarter} />
       <button onClick={onAdvance} style={{ ...S.advanceBtn, ...S.weekFooterAdvance }}>
         {m.footer.rollForward}
       </button>
+    </div>
+  );
+}
+
+/** Day templates (JP, 2026-11-08): save one day of the week, use it on any day. */
+function DayTemplates({
+  data,
+  week,
+  day,
+  actions,
+  onApply,
+}: {
+  data: CadenceData;
+  week: WeekIndex;
+  day: number;
+  actions: Pick<CadenceActions, "saveDayTemplate" | "deleteTemplate">;
+  onApply: (id: string) => void;
+}) {
+  const { m } = useI18n();
+  const [naming, setNaming] = useState(false);
+  const [name, setName] = useState("");
+  const [from, setFrom] = useState(day);
+  const list = data.templates.filter((t) => t.day);
+  const fallback = m.footer.dayTemplateName(list.length + 1);
+  const hasBlocks = (d: number) => data.weeks[week].some((b) => b.day === d);
+  const open = () => {
+    setFrom(day);
+    setNaming(true);
+  };
+  const save = () => {
+    actions.saveDayTemplate(week, from, name.trim() || fallback);
+    setNaming(false);
+    setName("");
+  };
+  const cancel = () => {
+    setNaming(false);
+    setName("");
+  };
+  return (
+    <div style={{ ...S.tplSection, ...S.weekFooterTpl }}>
+      <div style={S.panelLabel}>{m.footer.dayTemplates}</div>
+      {naming ? (
+        <div style={{ ...S.tplNameRow, flexWrap: "wrap" }}>
+          <select
+            value={from}
+            aria-label={m.footer.whichDay}
+            onChange={(e) => setFrom(Number(e.target.value))}
+            style={{ ...S.setSelect, minWidth: 0 }}
+          >
+            {m.preview.days.map((d, i) => (
+              <option key={d} value={i} disabled={!hasBlocks(i)}>
+                {d}
+              </option>
+            ))}
+          </select>
+          <input
+            autoFocus
+            value={name}
+            placeholder={fallback}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && hasBlocks(from)) save();
+              if (e.key === "Escape") cancel();
+            }}
+            style={{ ...S.tplNameInput, flex: "1 1 120px" }}
+          />
+          <button onClick={save} disabled={!hasBlocks(from)} style={S.tplSaveConfirm}>
+            {m.footer.save}
+          </button>
+          <button onClick={cancel} style={S.tplDel}>
+            ✕
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={open}
+          disabled={data.weeks[week].length === 0}
+          style={{
+            ...S.tplSave,
+            opacity: data.weeks[week].length === 0 ? 0.4 : 1,
+            cursor: data.weeks[week].length === 0 ? "not-allowed" : "pointer",
+          }}
+        >
+          {m.footer.saveDay}
+        </button>
+      )}
+      {list.length === 0 && !naming && <div style={S.tplEmpty}>{m.footer.noDayTemplates}</div>}
+      {list.map((t) => (
+        <div key={t.id} style={S.tplRow}>
+          <span style={S.tplName}>{t.name}</span>
+          <button onClick={() => onApply(t.id)} style={S.tplApply}>
+            {m.footer.apply}
+          </button>
+          <button onClick={() => actions.deleteTemplate(t.id)} style={S.tplDel}>
+            ✕
+          </button>
+        </div>
+      ))}
     </div>
   );
 }

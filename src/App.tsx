@@ -17,18 +17,22 @@ import QuestToast from "./components/QuestToast";
 import QuestFinale from "./components/QuestFinale";
 import BlockSheet from "./components/BlockSheet";
 import WeekReview from "./components/WeekReview";
+import TemplatePreview from "./components/TemplatePreview";
+import MiniCal from "./components/MiniCal";
+import { previewChange } from "./lib/templatePreview";
+import { readPhoneView, writePhoneView, type PhoneView } from "./state/phoneViewPrefs";
 import { hasReview, weekReview, type WeekReview as Review } from "./lib/review";
 import { relabelDefaults } from "./lib/onboarding";
 import type { Guide } from "./lib/guide";
 import { useOnboarding } from "./state/useOnboarding";
 import { undoAvailable, type UndoOffer } from "./lib/undo";
 import { shouldWelcome } from "./lib/welcome";
-import { STARTERS } from "./lib/starters";
+import { addedNote, applyStarter, STARTERS, starterText } from "./lib/starters";
 import { readWelcomeAnswered, writeWelcomeAnswered } from "./state/welcomePrefs";
 import SlotMenu from "./components/SlotMenu";
 import type { SlotTap } from "./lib/slotMenu";
 import { useInteraction } from "./interaction/useInteraction";
-import { moveBlock as moveBlockTo, type WeekIndex } from "./lib/actions";
+import { applyDayTemplate, applyTemplate, moveBlock as moveBlockTo, type WeekIndex } from "./lib/actions";
 import { ROW_H_PHONE } from "./lib/constants";
 import { defaultDay } from "./lib/dayview";
 import { resolveDrop } from "./lib/gesture";
@@ -71,6 +75,18 @@ export default function App() {
   const [undo, setUndo] = useState<UndoOffer | null>(null);
   const [review, setReview] = useState<Review | null>(null); // roll forward: how that week went // a week just replaced or rolled forward
   const [phoneDay, setPhoneDay] = useState(() => defaultDay(0, new Date())); // phone: the one day shown, Mon = 0
+  // the phone: one day or the whole week at a glance (JP, 2026-11-08)
+  const [phoneView, setPhoneViewState] = useState<PhoneView>(readPhoneView);
+  const setPhoneView = (v: PhoneView) => {
+    setPhoneViewState(v);
+    writePhoneView(v);
+  };
+  // a template, starter week or day template being previewed before it's used (JP, 2026-11-08)
+  const [pending, setPending] = useState<
+    | { kind: "week" | "starter"; id: string; week: WeekIndex; welcome?: boolean }
+    | { kind: "day"; id: string; week: WeekIndex; day: number }
+    | null
+  >(null);
   // the hours the calendar shows (Settings → Your day, per device), widened to hold every block
   const [dayHours, setDayHoursState] = useState<Bounds>(readDayHours);
   const setDayHours = (h: Bounds) => {
@@ -302,6 +318,76 @@ export default function App() {
   };
   const closeSlotMenu = useCallback(() => setSlotTap(null), []);
 
+  // the day a day template starts on: the phone's day, else today (Monday for Week 2)
+  const shownDay = isPhone ? phoneDay : defaultDay(activeWeek, now);
+  // the preview of what a template will do; "Use it" does exactly that, with Undo
+  const templatePreview = (() => {
+    if (!pending) return null;
+    const weekName = m.week.names[pending.week];
+    const close = () => setPending(null);
+    if (pending.kind === "day") {
+      const tpl = data.templates.find((t) => t.id === pending.id);
+      if (!tpl) return null;
+      const dayName = m.preview.days[pending.day];
+      const p = previewChange(
+        data,
+        applyDayTemplate(data, pending.week, pending.id, pending.day),
+        pending.week,
+        pending.day,
+      );
+      return (
+        <TemplatePreview
+          title={tpl.name}
+          where={m.preview.intoDay(weekName, dayName)}
+          replaces={m.preview.replacesDay(p.replaces, dayName)}
+          preview={p}
+          addedNote={null}
+          hours={bounds}
+          day={pending.day}
+          onDay={(d) => setPending({ ...pending, day: d })}
+          onUse={() => {
+            const { id, week, day } = pending;
+            close();
+            withUndo(m.undo.replacedDay(dayName), () => actions.applyDayTemplate(week, id, day));
+            changeWeek(week);
+            setPhoneDay(day);
+          }}
+          onCancel={close}
+          phone={isPhone}
+        />
+      );
+    }
+    const starter = pending.kind === "starter" ? STARTERS.find((s) => s.id === pending.id) : undefined;
+    const tpl = pending.kind === "week" ? data.templates.find((t) => t.id === pending.id) : undefined;
+    const title = starter ? starterText(starter, m.lib).name : tpl?.name;
+    if (!title) return null;
+    const after = starter
+      ? applyStarter(data, pending.week, pending.id, { lang })
+      : applyTemplate(data, pending.week, pending.id);
+    const p = previewChange(data, after, pending.week);
+    return (
+      <TemplatePreview
+        title={title}
+        where={m.preview.into(weekName)}
+        replaces={m.preview.replacesWeek(p.replaces, weekName)}
+        preview={p}
+        addedNote={p.added.length ? addedNote(p.added, m.lib) : null}
+        hours={bounds}
+        onUse={() => {
+          const { id, week, kind } = pending;
+          close();
+          replaceWeek(week, () =>
+            kind === "starter" ? actions.applyStarter(week, id, { lang }) : actions.applyTemplate(week, id),
+          );
+          if (pending.welcome) answerWelcome();
+          changeWeek(week);
+        }}
+        onCancel={close}
+        phone={isPhone}
+      />
+    );
+  })();
+
   return (
     <div style={S.root}>
       <style>{FONT_IMPORT}</style>
@@ -321,18 +407,10 @@ export default function App() {
       )}
       {view === "calendar" && welcome && (
         <WelcomeBack
-          templates={data.templates}
+          templates={data.templates.filter((t) => !t.day)}
           blocksInWeek1={data.weeks[0].length}
-          onUse={(id) => {
-            replaceWeek(0, () => actions.applyTemplate(0, id));
-            answerWelcome();
-            changeWeek(0);
-          }}
-          onStarter={(id) => {
-            replaceWeek(0, () => actions.applyStarter(0, id, { lang }));
-            answerWelcome();
-            changeWeek(0);
-          }}
+          onUse={(id) => setPending({ kind: "week", id, week: 0, welcome: true })}
+          onStarter={(id) => setPending({ kind: "starter", id, week: 0, welcome: true })}
           onNotNow={answerWelcome}
         />
       )}
@@ -360,42 +438,83 @@ export default function App() {
                 footnote={m.week.ticked(done.done, done.total)}
                 onShowPanel={!isPhone && panelHidden ? () => setHidden(false) : null}
               />
-              <WeekGrid
-                week={activeWeek}
-                blocks={data.weeks[activeWeek]}
-                cats={data.cats}
-                tasks={data.tasks}
-                weeks={data.weeks}
-                editingId={editingId}
-                setEditingId={setEditingId}
-                interaction={interaction}
-                armedCatId={armedCatId}
-                onPlaced={() => setArmedCatId(null)}
-                actions={live}
-                onMoveToDay={onMoveToDay}
-                onEmptyTap={setSlotTap}
-                slotMark={slotTap}
-                bounds={bounds}
-                {...(isPhone
-                  ? {
-                      rowH: ROW_H_PHONE,
-                      days: [phoneDay],
-                      phone: {
-                        day: phoneDay,
-                        setDay: (d: number) => {
-                          setPhoneDay(d);
-                          setSlotTap(null);
+              {isPhone && (
+                <div role="group" aria-label={m.phoneView.label} style={S.phoneViewToggle}>
+                  {(["day", "week"] as const).map((v) => (
+                    <button
+                      key={v}
+                      type="button"
+                      aria-pressed={phoneView === v}
+                      onClick={() => {
+                        setPhoneView(v);
+                        setSlotTap(null);
+                      }}
+                      style={{ ...S.kindBtn, ...S.setSeg, ...(phoneView === v ? S.kindBtnActive : {}) }}
+                    >
+                      {m.phoneView[v]}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {isPhone && phoneView === "week" ? (
+                <div style={S.phoneWeek}>
+                  <MiniCal
+                    blocks={data.weeks[activeWeek]}
+                    cats={data.cats}
+                    days={[0, 1, 2, 3, 4, 5, 6]}
+                    height={460}
+                    hours={bounds}
+                    heads={m.lib.days}
+                    today={activeWeek === 0 ? (now.getDay() + 6) % 7 : null}
+                    onBlock={(b) => setEditingId(b.id)}
+                    onDay={(d) => {
+                      setPhoneDay(d);
+                      setPhoneView("day");
+                    }}
+                    dayLabel={(d) => m.phoneView.openDay(m.preview.days[d])}
+                  />
+                </div>
+              ) : (
+                <WeekGrid
+                  week={activeWeek}
+                  blocks={data.weeks[activeWeek]}
+                  cats={data.cats}
+                  tasks={data.tasks}
+                  weeks={data.weeks}
+                  editingId={editingId}
+                  setEditingId={setEditingId}
+                  interaction={interaction}
+                  armedCatId={armedCatId}
+                  onPlaced={() => setArmedCatId(null)}
+                  actions={live}
+                  onMoveToDay={onMoveToDay}
+                  onEmptyTap={setSlotTap}
+                  slotMark={slotTap}
+                  bounds={bounds}
+                  {...(isPhone
+                    ? {
+                        rowH: ROW_H_PHONE,
+                        days: [phoneDay],
+                        phone: {
+                          day: phoneDay,
+                          setDay: (d: number) => {
+                            setPhoneDay(d);
+                            setSlotTap(null);
+                          },
                         },
-                      },
-                    }
-                  : {})}
-              />
+                      }
+                    : {})}
+                />
+              )}
               <WeekFooter
                 data={data}
                 week={activeWeek}
                 actions={actions}
-                onApplyTemplate={(id) => replaceWeek(activeWeek, () => actions.applyTemplate(activeWeek, id))}
-                onApplyStarter={(id) => replaceWeek(activeWeek, () => actions.applyStarter(activeWeek, id, { lang }))}
+                onApplyTemplate={(id) => setPending({ kind: "week", id, week: activeWeek })}
+                onApplyStarter={(id) => setPending({ kind: "starter", id, week: activeWeek })}
+                onApplyDay={(id) => setPending({ kind: "day", id, week: activeWeek, day: shownDay })}
+                day={shownDay}
+                phone={isPhone}
                 onAdvance={onAdvance}
               />
             </main>
@@ -475,6 +594,7 @@ export default function App() {
           phone={isPhone}
         />
       )}
+      {templatePreview}
       {review && <WeekReview review={review} onClose={() => setReview(null)} phone={isPhone} />}
       {onb.finale && !onb.guide && !onb.intro && (
         <QuestFinale colors={data.cats.map((c) => c.color)} onClose={onb.endFinale} phone={isPhone} />

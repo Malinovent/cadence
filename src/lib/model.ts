@@ -28,7 +28,9 @@ export type Block = {
   sourceTaskId?: string; // S1.5: the block was made by dropping this task on empty time
 };
 export type TemplateBlock = Omit<Block, "id" | "done">;
-export type Template = { id: string; name: string; blocks: TemplateBlock[] };
+// `day: true` (JP, 2026-11-08): a day template, its blocks all on day 0 and used on any one day.
+// An older copy of the app drops the flag and shows it as a week template with Monday only.
+export type Template = { id: string; name: string; blocks: TemplateBlock[]; day?: true };
 export type HistoryEntry = { id: string /* block id */; catId: string; mins: number; date: number /* ms epoch */ };
 export type Streaks = Record<string, { count: number; lastWeek?: number }>;
 export type Weeks = [Block[], Block[]];
@@ -220,7 +222,9 @@ export const normalizeData = (partial: unknown, lang: "en" | "fr" = "en"): { dat
       templates.push({
         id: typeof tpl.id === "string" && tpl.id ? tpl.id : uid(),
         name: typeof tpl.name === "string" ? tpl.name : `Template ${i + 1}`,
-        blocks,
+        // a day template keeps its blocks on day 0
+        blocks: tpl.day === true ? blocks.map((b) => (b.day === 0 ? b : { ...b, day: 0 })) : blocks,
+        ...(tpl.day === true ? { day: true as const } : {}),
       });
     });
   }

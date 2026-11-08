@@ -85,11 +85,16 @@ export const fr: Messages = {
     templates: "Modèles",
     saveWeek: "＋ Enregistrer cette semaine",
     save: "enregistrer",
+    dayTemplates: "Modèles de journée",
+    saveDay: "＋ Enregistrer une journée",
+    dayTemplateName: (n) => `Journée ${n}`,
+    noDayTemplates: "Enregistrez une journée qui vous plaît, puis utilisez-la n'importe quel jour.",
+    whichDay: "Jour",
     noTemplates: "Aucun modèle à vous pour l'instant.",
     templateName: (n) => `Modèle ${n}`,
-    apply: "appliquer",
+    apply: "aperçu",
     starters: "Semaines de départ",
-    applyStarter: (name, week) => `Appliquer ${name} à la semaine ${week}`,
+    applyStarter: (name, week) => `Aperçu de ${name} pour la semaine ${week}`,
     rollForward: "⟳ Avancer → la semaine prochaine devient la semaine 1",
   },
   slot: {
@@ -255,7 +260,25 @@ export const fr: Messages = {
     kept: "tenu",
     start: "Commencer la nouvelle semaine",
   },
+  preview: {
+    into: (week) => `Dans la ${week.toLowerCase()}`,
+    intoDay: (week, day) => `Le ${day.toLowerCase()}, ${week.toLowerCase()}`,
+    replacesWeek: (n, week) =>
+      n === 0
+        ? `La ${week.toLowerCase()} est vide.`
+        : `Remplace ${n === 1 ? "le bloc" : `les ${n} blocs`} de la ${week.toLowerCase()}. Vous pourrez annuler.`,
+    replacesDay: (n, day) =>
+      n === 0
+        ? `Le ${day.toLowerCase()} est vide.`
+        : `Remplace ${n === 1 ? "le bloc" : `les ${n} blocs`} du ${day.toLowerCase()}. Vous pourrez annuler.`,
+    empty: "Aucun bloc.",
+    use: "L'utiliser",
+    cancel: "Annuler",
+    days: ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"],
+  },
+  phoneView: { label: "Afficher", day: "Jour", week: "Semaine", openDay: (day) => `Ouvrir ${day.toLowerCase()}` },
   undo: {
+    replacedDay: (day) => `${day} remplacé.`,
     replaced: (week) => `${week} remplacée.`,
     rolled: "Semaine avancée.",
     deleted: "Bloc supprimé.",

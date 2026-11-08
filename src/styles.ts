@@ -2552,6 +2552,135 @@ export const S = {
     gap: 8,
     minWidth: 0
   },
+  // the miniature calendar (template preview, phone week view) (JP, 2026-11-08)
+  miniCol: {
+    position: "relative",
+    background: "var(--c-field)",
+    border: `1px solid ${line}`,
+    borderRadius: 3,
+    overflow: "hidden"
+  },
+  miniBar: {
+    position: "absolute",
+    left: 1,
+    right: 1,
+    boxSizing: "border-box",
+    borderRadius: 3,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "flex-start",
+    paddingTop: 2,
+    overflow: "hidden"
+  },
+  miniRule: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    borderTop: `1px dotted ${line}`
+  },
+  miniHead: {
+    minHeight: 32,
+    padding: 0,
+    border: "none",
+    background: "transparent",
+    color: "var(--c-muted)",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 600,
+    fontSize: 12,
+    textAlign: "center",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer"
+  },
+  miniHeadToday: {
+    color: ink,
+    textDecoration: "underline",
+    textUnderlineOffset: 3
+  },
+  miniHour: {
+    position: "absolute",
+    right: 2,
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 10,
+    color: "var(--c-muted)"
+  },
+  // before a template is used: its preview
+  previewCard: {
+    width: "min(400px, 100%)",
+    maxHeight: "calc(100dvh - 32px)",
+    overflowY: "auto",
+    gap: 12
+  },
+  previewTitle: {
+    margin: 0,
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 800,
+    fontSize: 22
+  },
+  previewWhere: {
+    margin: "2px 0 0",
+    fontSize: 14,
+    color: "var(--c-muted)"
+  },
+  previewDays: {
+    display: "grid",
+    gridTemplateColumns: "repeat(7, 1fr)",
+    border: `1.5px solid ${ink}`,
+    borderRadius: 4,
+    overflow: "hidden"
+  },
+  previewDay: {
+    minHeight: 40,
+    padding: 0,
+    border: "none",
+    background: "transparent",
+    color: ink,
+    cursor: "pointer",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 600,
+    fontSize: 12
+  },
+  previewRows: {
+    listStyle: "none",
+    margin: 0,
+    padding: 0,
+    display: "grid",
+    gridTemplateColumns: "16px minmax(0, 1fr) max-content",
+    columnGap: 10,
+    rowGap: 6
+  },
+  previewRow: {
+    display: "grid",
+    gridTemplateColumns: "subgrid",
+    gridColumn: "1 / -1",
+    alignItems: "center"
+  },
+  previewNote: {
+    margin: 0,
+    fontSize: 13,
+    color: "var(--c-muted)"
+  },
+  previewBtns: {
+    display: "flex",
+    gap: 10,
+    marginTop: 4
+  },
+  // the phone: Day / Week above the calendar
+  phoneViewToggle: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    border: `1.5px solid ${ink}`,
+    borderRadius: 4,
+    overflow: "hidden",
+    marginBottom: 8
+  },
+  phoneWeek: {
+    padding: "6px 6px 8px",
+    border: `1.5px solid ${ink}`,
+    borderRadius: 4,
+    background: "var(--c-card)"
+  },
   // Settings as short rows: name on the left, its control on the right (JP, 2026-11-08)
   setGroup: {
     marginTop: 28

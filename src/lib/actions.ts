@@ -203,6 +203,60 @@ export const applyTemplate = (data: CadenceData, week: WeekIndex, templateId: st
   return releaseRemoved(data, withWeek(data, week, blocks)); // S1.5: the replaced blocks' tasks go back
 };
 
+// Day templates (JP, 2026-11-08): one day of a week, saved to be used on any day.
+export const saveDayTemplate = (
+  data: CadenceData,
+  week: WeekIndex,
+  day: number,
+  name?: string,
+  deps: Deps = {},
+): CadenceData => {
+  const finalName = (name && name.trim()) || `Day ${data.templates.filter((t) => t.day).length + 1}`;
+  const tpl: Template = {
+    id: (deps.uid ?? defaultUid)(),
+    name: finalName,
+    day: true,
+    blocks: data.weeks[week]
+      .filter((p) => p.day === day)
+      .map((p) => ({
+        catIds: [...p.catIds],
+        day: 0,
+        start: p.start,
+        mins: p.mins,
+        label: p.label,
+        desc: p.desc || "",
+        ...(isBuffer(p) ? { buffer: true as const } : {}),
+      })),
+  };
+  return { ...data, templates: [...data.templates, tpl] };
+};
+
+// the day's blocks are replaced by fresh copies of the day template's; the rest of the week stays.
+// Tags of areas deleted since the save are stripped, untagged blocks dropped (like applyTemplate).
+export const applyDayTemplate = (
+  data: CadenceData,
+  week: WeekIndex,
+  templateId: string,
+  day: number,
+  deps: Deps = {},
+): CadenceData => {
+  const tpl = data.templates.find((t) => t.id === templateId);
+  if (!tpl || day < 0 || day > 6) return data;
+  const makeId = deps.uid ?? defaultUid;
+  const known = new Set(data.cats.map((c) => c.id));
+  const fresh: Block[] = [];
+  for (const b of tpl.blocks) {
+    if (isBuffer(b)) {
+      fresh.push({ ...b, day, catIds: [], id: makeId(), done: false });
+      continue;
+    }
+    const catIds = b.catIds.filter((c) => known.has(c));
+    if (catIds.length) fresh.push({ ...b, day, catIds, id: makeId(), done: false });
+  }
+  const kept = data.weeks[week].filter((p) => p.day !== day);
+  return releaseRemoved(data, withWeek(data, week, [...kept, ...fresh]));
+};
+
 export const deleteTemplate = (data: CadenceData, id: string): CadenceData =>
   data.templates.some((t) => t.id === id) ? { ...data, templates: data.templates.filter((t) => t.id !== id) } : data;
 
