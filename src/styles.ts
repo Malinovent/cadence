@@ -1234,7 +1234,7 @@ export const S = {
     width: 11,
     height: 11,
     flexShrink: 0,
-    borderRadius: 3,
+    borderRadius: 2, // small enough that a filled square reads as full at 11 px
     boxSizing: "border-box",
     overflow: "hidden"
   },

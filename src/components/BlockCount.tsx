@@ -68,7 +68,9 @@ export default function BlockCount({ area: a }: { area: PanelArea }) {
     const done = Math.max(0, Math.min(fill, c.done - i)); // the solid part, then the striped rest
     // room, not need, looks the same everywhere: all of an "at most", and a "between" past its low end
     const room = kind === "ceiling" || (kind === "range" && i >= c.needed);
-    const border = `1.5px solid ${room ? withAlpha(a.color, "99") : a.color}`;
+    // the lighter edge marks empty room only; once anything is in a square it looks the same as any
+    // other area's (JP, 2026-11-08: "the green fill looks different than the blue")
+    const border = `1.5px solid ${room && fill === 0 ? withAlpha(a.color, "99") : a.color}`;
     const square = (
       <span key={i} style={{ ...S.square, border }}>
         {done > 0 && <span style={{ ...S.squareFill, width: `${done * 100}%`, background: a.color }} />}
