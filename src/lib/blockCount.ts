@@ -1,8 +1,10 @@
-// Visual B (JP, 2026-11-07): each area's week counted in the blocks you drag, "3 more blocks",
-// with a calm warning when it's under what it needs or over what it allows. Never red: the
-// warnings are ink, an outlined tag for "under" and a solid one for "over", so they read without
-// colour and never look like another area.
+// Visual B (JP, 2026-11-07): each area's week drawn in the blocks you drag, with a calm warning
+// when it's under what it needs or over what it allows. Never red: the warnings are ink, an
+// outlined tag for "under" and a solid one for "over", so they read without colour and never look
+// like another area. The goal is time, not blocks (JP, 2026-11-08: "remove the blocks as a
+// target"): the squares stay as the picture, the words say the time, "3h to go".
 import type { Limit } from "./guardrail";
+import { fmtDur } from "./time";
 import { LIB_EN, type LibWords } from "./words";
 
 export type CountState = "toGo" | "reached" | "room" | "atLimit" | "inRange" | "over";
@@ -20,37 +22,27 @@ export type BlockCount = {
   extra: number;
   state: CountState;
   tone: CountTone;
-  /** the number in the words, to the nearest half: blocks to go, room left, or over */
-  blocks: number;
+  /** what the words say, in minutes: still to go, room left, or over */
+  mins: number;
   /** too many squares to draw (more than MAX_SQUARES): a thin bar instead, same words */
   bar: boolean;
 };
 
 export const MAX_SQUARES = 16;
 
-const halfUp = (n: number) => Math.ceil(n * 2 - 1e-9) / 2;
-const halfDown = (n: number) => Math.floor(n * 2 + 1e-9) / 2;
-
 export function blockCount(limit: Limit, plannedMins: number, blockMins: number): BlockCount {
   const b = Math.max(30, blockMins || 0);
   const p = Math.max(0, plannedMins);
   const filled = p / b;
   const toSquares = (mins: number) => Math.max(0, Math.ceil(mins / b - 1e-9)); // tolerant of float dust, never -0
-  const make = (
-    squares: number,
-    needed: number,
-    extra: number,
-    state: CountState,
-    tone: CountTone,
-    blocks: number,
-  ) => ({
+  const make = (squares: number, needed: number, extra: number, state: CountState, tone: CountTone, mins: number) => ({
     squares,
     needed,
     filled,
     extra,
     state,
     tone,
-    blocks,
+    mins,
     bar: squares + extra > MAX_SQUARES,
   });
 
@@ -58,44 +50,38 @@ export function blockCount(limit: Limit, plannedMins: number, blockMins: number)
     const squares = toSquares(limit.min);
     return p >= limit.min
       ? make(squares, squares, 0, "reached", "done", 0)
-      : make(squares, squares, 0, "toGo", "under", halfUp((limit.min - p) / b));
+      : make(squares, squares, 0, "toGo", "under", limit.min - p);
   }
 
   const squares = toSquares(limit.max);
   const needed = limit.kind === "range" ? toSquares(limit.min) : 0;
   if (p > limit.max) {
-    const over = (p - limit.max) / b;
-    return make(
-      squares,
-      needed,
-      Math.max(1, Math.ceil(over - 1e-9)),
-      "over",
-      "over",
-      Math.max(0.5, Math.round(over * 2) / 2),
-    );
+    // the striped squares count whole blocks past the top; the words say the time
+    const over = p - limit.max;
+    return make(squares, needed, Math.max(1, Math.ceil(over / b - 1e-9)), "over", "over", over);
   }
   if (limit.kind === "range") {
     return p < limit.min
-      ? make(squares, needed, 0, "toGo", "under", halfUp((limit.min - p) / b))
+      ? make(squares, needed, 0, "toGo", "under", limit.min - p)
       : make(squares, needed, 0, "inRange", "done", 0);
   }
-  const room = halfDown((limit.max - p) / b);
+  const room = limit.max - p;
   return room === 0 ? make(squares, 0, 0, "atLimit", "calm", 0) : make(squares, 0, 0, "room", "calm", room);
 }
 
 /**
- * The words under an area: "3 more blocks", "1.5 more blocks", "0.5 more blocks", "2 blocks left",
- * "at the limit", "1 block over", "reached", "in range". Halves are plain decimals (JP: "Just use 1
- * or 1.5 or 0.5"), never the "½" sign, which shrinks to dots in the small mono type.
+ * The words under an area, in the chip's own time format: "3h to go", "1h30 to go", "30m to go",
+ * "8h left", "at the limit", "1h over", "reached", "in range" (FR « encore 3 h », « reste 1 h 30 »,
+ * « 30 min de trop »). Never the "½" sign, which shrinks to dots in the small mono type.
  */
 export function countStatus(c: BlockCount, w: LibWords = LIB_EN): string {
   switch (c.state) {
     case "toGo":
-      return w.count.toGo(c.blocks);
+      return w.count.toGo(fmtDur(c.mins, w.lang));
     case "room":
-      return w.count.room(c.blocks);
+      return w.count.room(fmtDur(c.mins, w.lang));
     case "over":
-      return w.count.over(c.blocks);
+      return w.count.over(fmtDur(c.mins, w.lang));
     case "atLimit":
       return w.count.atLimit;
     case "reached":

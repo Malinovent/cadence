@@ -17,7 +17,6 @@ const DESCRIBE_FR: DescribeWords = {
 };
 
 /** « 0,5 bloc », « 1 bloc », « 1,5 bloc », « 2 blocs » (decimal comma, like the hours) */
-const frBlocs = (n: number): string => `${String(n).replace(".", ",")} ${n >= 2 ? "blocs" : "bloc"}`;
 
 export const LIB_FR: LibWords = {
   lang: "fr",
@@ -54,9 +53,9 @@ export const LIB_FR: LibWords = {
     },
   },
   count: {
-    toGo: (n) => `encore ${frBlocs(n)}`,
-    room: (n) => `reste ${frBlocs(n)}`,
-    over: (n) => `${frBlocs(n)} de trop`,
+    toGo: (d) => `encore ${d}`,
+    room: (d) => `reste ${d}`,
+    over: (d) => `${d} de trop`,
     atLimit: "à la limite",
     reached: "atteint",
     inRange: "entre les deux",

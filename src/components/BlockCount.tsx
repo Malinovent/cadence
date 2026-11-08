@@ -14,7 +14,7 @@ const TONE: Record<CountTone, React.CSSProperties> = {
 
 /**
  * Visual B (JP, 2026-11-07): under an area, a square per block of its goal, filled as you plan,
- * and what's left in blocks. "Under" and "over" read as warnings in ink (never red, never colour
+ * and what's left in time ("3h to go"; JP, 2026-11-08: the goal is time, the squares the picture). "Under" and "over" read as warnings in ink (never red, never colour
  * alone): an outlined tag with "!" for under, a solid one for over, and striped squares past
  * what an "at most" or "between" allows.
  */
