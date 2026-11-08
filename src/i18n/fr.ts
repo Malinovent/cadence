@@ -280,6 +280,7 @@ export const fr: Messages = {
     from: (week) => `De la ${week.toLowerCase()}`,
     fromDay: (week, day) => `Du ${day.toLowerCase()}, ${week.toLowerCase()}`,
     keeps: "Votre semaine ne change pas.",
+    whichWeek: "Semaine",
     save: "Enregistrer",
   },
   phoneView: { label: "Afficher", day: "Jour", week: "Semaine", openDay: (day) => `Ouvrir ${day.toLowerCase()}` },

@@ -23,6 +23,7 @@ export default function TemplatePreview({
   day,
   onDay,
   dayDisabled,
+  weeks,
   name,
   useLabel,
   useDisabled = false,
@@ -43,6 +44,8 @@ export default function TemplatePreview({
   onDay?: (day: number) => void;
   /** days that can't be picked (saving: days without blocks) */
   dayDisabled?: (day: number) => boolean;
+  /** saving: which week to save from (JP, 2026-11-08); empty weeks can't be picked */
+  weeks?: { value: number; names: readonly string[]; onChange: (w: number) => void; disabled: (w: number) => boolean };
   /** saving: the template's name, empty for the placeholder's */
   name?: { value: string; placeholder: string; onChange: (v: string) => void };
   useLabel?: string;
@@ -81,6 +84,30 @@ export default function TemplatePreview({
           </h2>
           <p style={S.previewWhere}>{where}</p>
         </div>
+        {weeks && (
+          <div
+            role="group"
+            aria-label={m.preview.whichWeek}
+            style={{ ...S.previewDays, gridTemplateColumns: "1fr 1fr" }}
+          >
+            {weeks.names.map((w, i) => (
+              <button
+                key={w}
+                type="button"
+                aria-pressed={weeks.value === i}
+                disabled={weeks.disabled(i)}
+                onClick={() => weeks.onChange(i)}
+                style={{
+                  ...S.previewDay,
+                  ...(weeks.value === i ? S.kindBtnActive : {}),
+                  ...(weeks.disabled(i) ? { opacity: 0.35, cursor: "not-allowed" } : {}),
+                }}
+              >
+                {w}
+              </button>
+            ))}
+          </div>
+        )}
         {isDay && onDay && (
           <div role="group" aria-label={m.footer.whichDay} style={S.previewDays}>
             {m.lib.days.map((d, i) => (

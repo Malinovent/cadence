@@ -35,7 +35,8 @@ export default function WeekFooter({
   onAdvance,
 }: Props) {
   const { m } = useI18n();
-  const empty = data.weeks[week].length === 0;
+  // nothing to save only when both weeks are empty: the popup can save from either (JP, 2026-11-08)
+  const empty = data.weeks.every((w) => w.length === 0);
   const weekTemplates = data.templates.filter((t) => !t.day);
   const dayTemplates = data.templates.filter((t) => t.day);
   const saveBtn = (onClick: () => void, label: string) => (

@@ -322,6 +322,12 @@ export default function App() {
 
   // the day a day template starts on: the phone's day, else today (Monday for Week 2)
   const shownDay = isPhone ? phoneDay : defaultDay(activeWeek, now);
+  // saving: the week shown unless it's empty; the day shown when it has blocks, else the first that has
+  const weekToSave: WeekIndex = data.weeks[activeWeek].length ? activeWeek : activeWeek === 0 ? 1 : 0;
+  const dayToSave = (week: WeekIndex, prefer: number) => {
+    const has = (d: number) => data.weeks[week].some((b) => b.day === d);
+    return has(prefer) ? prefer : ([0, 1, 2, 3, 4, 5, 6].find(has) ?? prefer);
+  };
   // the preview of what a template will do; "Use it" does exactly that, with Undo
   const templatePreview = (() => {
     if (!pending) return null;
@@ -345,6 +351,17 @@ export default function App() {
           day={day}
           onDay={pending.kind === "saveDay" ? (d) => setPending({ ...pending, day: d }) : undefined}
           dayDisabled={(d) => !hasBlocks(d)}
+          weeks={{
+            value: pending.week,
+            names: m.week.names,
+            disabled: (w) => data.weeks[w as WeekIndex].length === 0,
+            onChange: (w) =>
+              setPending(
+                pending.kind === "saveDay"
+                  ? { ...pending, week: w as WeekIndex, day: dayToSave(w as WeekIndex, pending.day) }
+                  : { ...pending, week: w as WeekIndex },
+              ),
+          }}
           name={{ value: pending.name, placeholder, onChange: (v) => setPending({ ...pending, name: v }) }}
           useLabel={m.preview.save}
           useDisabled={p.blocks.length === 0}
@@ -529,13 +546,10 @@ export default function App() {
                 onApplyTemplate={(id) => setPending({ kind: "week", id, week: activeWeek })}
                 onApplyStarter={(id) => setPending({ kind: "starter", id, week: activeWeek })}
                 onApplyDay={(id) => setPending({ kind: "day", id, week: activeWeek, day: shownDay })}
-                onSaveWeek={() => setPending({ kind: "saveWeek", week: activeWeek, name: "" })}
-                onSaveDay={() => {
-                  // the day shown when it has blocks, else the first that has some
-                  const has = (d: number) => data.weeks[activeWeek].some((b) => b.day === d);
-                  const day = has(shownDay) ? shownDay : ([0, 1, 2, 3, 4, 5, 6].find(has) ?? shownDay);
-                  setPending({ kind: "saveDay", week: activeWeek, day, name: "" });
-                }}
+                onSaveWeek={() => setPending({ kind: "saveWeek", week: weekToSave, name: "" })}
+                onSaveDay={() =>
+                  setPending({ kind: "saveDay", week: weekToSave, day: dayToSave(weekToSave, shownDay), name: "" })
+                }
                 onAdvance={onAdvance}
               />
             </main>

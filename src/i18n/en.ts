@@ -283,6 +283,7 @@ export const en = {
     from: (week: string) => `From ${week}`,
     fromDay: (week: string, day: string) => `From ${day}, ${week}`,
     keeps: "Your week stays as it is.",
+    whichWeek: "Week",
     save: "Save",
   },
   // the phone: one day, or the whole week at a glance (JP, 2026-11-08)
