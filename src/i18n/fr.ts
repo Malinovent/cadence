@@ -93,7 +93,6 @@ export const fr: Messages = {
     templateNameLabel: "Nom du modèle",
     remove: (name) => `Supprimer ${name}`,
     cancel: "Annuler",
-    dayTag: "journée",
     templateName: (n) => `Modèle ${n}`,
     apply: "aperçu",
     starters: "Semaines de départ",

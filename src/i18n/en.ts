@@ -89,7 +89,6 @@ export const en = {
     templateNameLabel: "Template name",
     remove: (name: string) => `Delete ${name}`,
     cancel: "Cancel",
-    dayTag: "day",
     templateName: (n: number) => `Template ${n}`,
     apply: "preview",
     starters: "Starter weeks",

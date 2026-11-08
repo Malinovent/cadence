@@ -87,14 +87,17 @@ export default function TemplatePreview({
           </div>
         )}
         {preview.blocks.length ? (
-          <MiniCal
-            blocks={preview.blocks}
-            cats={preview.cats}
-            days={isDay ? [day] : [0, 1, 2, 3, 4, 5, 6]}
-            height={isDay ? 150 : 110}
-            hours={hours}
-            heads={isDay ? undefined : m.lib.days}
-          />
+          // a day keeps a day's width, not the card's (JP, 2026-11-08)
+          <div style={isDay ? S.previewDayCal : undefined}>
+            <MiniCal
+              blocks={preview.blocks}
+              cats={preview.cats}
+              days={isDay ? [day] : [0, 1, 2, 3, 4, 5, 6]}
+              height={isDay ? 150 : 110}
+              hours={hours}
+              heads={isDay ? undefined : m.lib.days}
+            />
+          </div>
         ) : (
           <p style={S.previewWhere}>{m.preview.empty}</p>
         )}

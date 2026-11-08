@@ -448,14 +448,19 @@ export const S = {
     fontWeight: 500,
     color: ink
   },
-  // a day template's tag in the list (JP, 2026-11-08)
-  tplTag: {
-    marginLeft: 8,
-    fontFamily: "'Spline Sans Mono', monospace",
-    fontSize: 10,
-    letterSpacing: "0.06em",
-    textTransform: "uppercase",
-    color: "var(--c-muted)"
+  // week templates under "Save this week", day templates under "Save a day" (JP, 2026-11-08)
+  tplCols: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "flex-start",
+    gap: 6
+  },
+  tplCol: {
+    flex: "1 1 150px",
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: 6
   },
   tplNameRow: {
     display: "flex",
@@ -499,6 +504,8 @@ export const S = {
   },
   tplName: {
     flex: 1,
+    minWidth: 0,
+    overflowWrap: "anywhere",
     fontSize: 13
   },
   tplApply: {
@@ -2615,6 +2622,10 @@ export const S = {
     color: "var(--c-muted)"
   },
   // before a template is used: its preview
+  previewDayCal: {
+    width: 96,
+    alignSelf: "center"
+  },
   previewCard: {
     width: "min(400px, 100%)",
     maxHeight: "calc(100dvh - 32px)",
