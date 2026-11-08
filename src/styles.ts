@@ -1775,6 +1775,32 @@ export const S = {
     whiteSpace: "nowrap",
     flexShrink: 0
   },
+  areaSign: {
+    display: "inline-block",
+    width: 16,
+    marginRight: 5,
+    textAlign: "center",
+    // a system face: the mono one draws "↔" tiny
+    fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
+    fontWeight: 700,
+    fontSize: 15,
+    lineHeight: 1,
+    color: ink
+  },
+  areaSignBtn: {
+    fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
+    fontWeight: 700,
+    fontSize: 18,
+    lineHeight: 1
+  },
+  kindBtnStack: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 3,
+    minHeight: 52
+  },
   areaGoalWord: {
     fontWeight: 700,
     color: ink

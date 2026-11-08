@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Goal symbols mockup</title>
+<style>
+  :root { --paper:#f4efe4; --card:#fbf8f1; --ink:#2a2420; --muted:#7a7065; --line:#d9d0c1; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font-family:Georgia, 'Fraunces', serif; }
+  .wrap { display:flex; flex-wrap:wrap; gap:24px; justify-content:center; padding:20px 16px 12px; }
+  .col { width:340px; }
+  .cap { font:600 11px ui-monospace, monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 4px; }
+  .why { font-size:13px; color:var(--muted); margin:0 0 10px; min-height:36px; }
+  .list { border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--card); }
+  .row { display:flex; align-items:center; gap:12px; padding:12px 14px; border-top:1px solid var(--line); min-height:58px; }
+  .row:first-child { border-top:none; }
+  .ic { width:34px; height:34px; border-radius:8px; display:grid; place-items:center; color:#fff; font-weight:700; flex:none; }
+  .name { font-weight:700; font-size:15px; flex:1; }
+  .goal { display:flex; align-items:center; gap:7px; font:12px ui-monospace, monospace; color:var(--muted); white-space:nowrap; }
+  .goal b { color:var(--ink); }
+  .chev { color:var(--muted); }
+  .sym { font:700 15px ui-monospace, monospace; color:var(--ink); width:16px; text-align:center; }
+  .seg { margin-top:14px; display:grid; grid-template-columns:repeat(3,1fr); border:1.5px solid var(--ink); border-radius:4px; overflow:hidden; background:var(--card); }
+  .seg span { display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 0; font-size:12.5px; font-weight:600; }
+  .seg .on { background:var(--ink); color:var(--paper); }
+  .seg .on svg { stroke:var(--paper); }
+  .seg .on .shade { fill:var(--paper); }
+  svg { stroke:var(--ink); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+  .shade { fill:var(--ink); stroke:none; opacity:.35; }
+  .note { max-width:760px; margin:0 auto; padding:8px 16px 30px; font-size:14px; line-height:1.5; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <!-- B: edges on a time line -->
+    <symbol id="b-least" viewBox="0 0 24 14"><path d="M3 2v10M3 7h17M16 3.5L20 7l-4 3.5"/></symbol>
+    <symbol id="b-most" viewBox="0 0 24 14"><path d="M21 2v10M3 7h17M13 3.5L17 7l-4 3.5" transform="translate(1 0)"/></symbol>
+    <symbol id="b-range" viewBox="0 0 24 14"><path d="M3 2v10M21 2v10M3 7h18M7 4L4 7l3 3M17 4l3 3-3 3"/></symbol>
+    <!-- C: a little track with the zone that counts -->
+    <symbol id="c-least" viewBox="0 0 26 12"><rect class="shade" x="10" y="3" width="15" height="6" rx="1"/><path d="M1 6h24M10 1v10"/></symbol>
+    <symbol id="c-most" viewBox="0 0 26 12"><rect class="shade" x="1" y="3" width="15" height="6" rx="1"/><path d="M1 6h24M16 1v10"/></symbol>
+    <symbol id="c-range" viewBox="0 0 26 12"><rect class="shade" x="7" y="3" width="12" height="6" rx="1"/><path d="M1 6h24M7 1v10M19 1v10"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <div class="col">
+    <p class="cap">A · Signs</p>
+    <p class="why">The maths signs everyone already knows. The quietest option.</p>
+    <div class="list">
+      <div class="row"><span class="ic" style="background:#E8643C">E</span><span class="name">Exercise</span><span class="goal"><span class="sym">≥</span>4 h <b>at least</b></span><span class="chev">›</span></div>
+      <div class="row"><span class="ic" style="background:#3C6FE8">W</span><span class="name">Work</span><span class="goal"><span class="sym">≤</span>40 h <b>at most</b></span><span class="chev">›</span></div>
+      <div class="row"><span class="ic" style="background:#C9A227">P</span><span class="name">Play</span><span class="goal"><span class="sym">↔</span>2–5 h <b>between</b></span><span class="chev">›</span></div>
+    </div>
+    <div class="seg"><span class="on"><span class="sym" style="color:inherit">≥</span>At least</span><span><span class="sym">≤</span>At most</span><span><span class="sym">↔</span>Between</span></div>
+  </div>
+
+  <div class="col">
+    <p class="cap">B · Edges (my pick)</p>
+    <p class="why">A line with an arrow: from here on, up to here, or from here to there. Reads left to right, like the squares under each area.</p>
+    <div class="list">
+      <div class="row"><span class="ic" style="background:#E8643C">E</span><span class="name">Exercise</span><span class="goal"><svg width="22" height="13"><use href="#b-least"/></svg>4 h <b>at least</b></span><span class="chev">›</span></div>
+      <div class="row"><span class="ic" style="background:#3C6FE8">W</span><span class="name">Work</span><span class="goal"><svg width="22" height="13"><use href="#b-most"/></svg>40 h <b>at most</b></span><span class="chev">›</span></div>
+      <div class="row"><span class="ic" style="background:#C9A227">P</span><span class="name">Play</span><span class="goal"><svg width="22" height="13"><use href="#b-range"/></svg>2–5 h <b>between</b></span><span class="chev">›</span></div>
+    </div>
+    <div class="seg"><span class="on"><svg width="24" height="14"><use href="#b-least"/></svg>At least</span><span><svg width="24" height="14"><use href="#b-most"/></svg>At most</span><span><svg width="24" height="14"><use href="#b-range"/></svg>Between</span></div>
+  </div>
+
+  <div class="col">
+    <p class="cap">C · Zones</p>
+    <p class="why">A short track with the part that counts shaded: past the mark, up to the mark, or between two marks.</p>
+    <div class="list">
+      <div class="row"><span class="ic" style="background:#E8643C">E</span><span class="name">Exercise</span><span class="goal"><svg width="24" height="12"><use href="#c-least"/></svg>4 h <b>at least</b></span><span class="chev">›</span></div>
+      <div class="row"><span class="ic" style="background:#3C6FE8">W</span><span class="name">Work</span><span class="goal"><svg width="24" height="12"><use href="#c-most"/></svg>40 h <b>at most</b></span><span class="chev">›</span></div>
+      <div class="row"><span class="ic" style="background:#C9A227">P</span><span class="name">Play</span><span class="goal"><svg width="24" height="12"><use href="#c-range"/></svg>2–5 h <b>between</b></span><span class="chev">›</span></div>
+    </div>
+    <div class="seg"><span class="on"><svg width="26" height="12"><use href="#c-least"/></svg>At least</span><span><svg width="26" height="12"><use href="#c-most"/></svg>At most</span><span><svg width="26" height="12"><use href="#c-range"/></svg>Between</span></div>
+  </div>
+</div>
+<div class="note">
+  <p><b>In all three</b>, the number comes first and the key word follows in bold: "4 h <b>at least</b>". The symbol also goes on the At least / At most / Between buttons when you open an area, so you learn it there.</p>
+  <p>The symbols are ink, never colour, and always sit beside the words, so they help you scan without replacing the text. If you like it, the same symbol could later go in the tooltip on each area chip under the calendar.</p>
+</div>
+</body>
+</html>

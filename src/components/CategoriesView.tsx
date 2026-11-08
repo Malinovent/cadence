@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { changeKind, fmtH, limitLabel, type Limit, type LimitKind } from "../lib/guardrail";
+import { changeKind, fmtH, type Limit, type LimitKind } from "../lib/guardrail";
 import type { Category } from "../lib/model";
 import { PALETTE } from "../lib/constants";
 import { AreaIconView } from "./AreaIconView";
@@ -16,6 +16,8 @@ type Props = {
 
 const KINDS: LimitKind[] = ["floor", "ceiling", "range"];
 const STEP = 30; // half an hour
+// the kinds' signs (JP, 2026-11-08, option A): beside the words, never instead of them
+const SIGN: Record<LimitKind, string> = { floor: "≥", ceiling: "≤", range: "↔" };
 
 /** − 4 h ＋, in half hours: no keyboard on the phone (JP, 2026-11-08) */
 function Stepper({
@@ -83,16 +85,19 @@ function LimitHours({ limit: l, onChange }: { limit: Limit; onChange: (limit: Li
   );
 }
 
-/** "At least 4 h" with the key word in bold, so the kind reads first (JP, 2026-11-08) */
-function GoalText({ limit }: { limit: Limit }) {
+/** "≥ 4 h at least": the sign, the number first, then the key word in bold (JP, 2026-11-08) */
+function GoalText({ limit: l }: { limit: Limit }) {
   const { m } = useI18n();
-  const text = limitLabel(limit, m.lib);
-  const word = m.categories.kinds[limit.kind].label;
-  if (!text.startsWith(word)) return <>{text}</>;
+  const amount =
+    l.kind === "range"
+      ? m.categories.span(fmtH(l.min), fmtH(l.max))
+      : m.categories.hours(fmtH(l.kind === "floor" ? l.min : l.max));
   return (
     <>
-      <strong style={S.areaGoalWord}>{word}</strong>
-      {text.slice(word.length)}
+      <span aria-hidden="true" style={S.areaSign}>
+        {SIGN[l.kind]}
+      </span>
+      {amount} <strong style={S.areaGoalWord}>{m.categories.kinds[l.kind].word}</strong>
     </>
   );
 }
@@ -142,8 +147,11 @@ function AreaEditor({
               type="button"
               aria-pressed={c.limit.kind === k}
               onClick={() => setLimit(changeKind(c.limit, k, c.blockMins))}
-              style={{ ...S.previewDay, ...(c.limit.kind === k ? S.kindBtnActive : {}) }}
+              style={{ ...S.previewDay, ...S.kindBtnStack, ...(c.limit.kind === k ? S.kindBtnActive : {}) }}
             >
+              <span aria-hidden="true" style={S.areaSignBtn}>
+                {SIGN[k]}
+              </span>
               {m.categories.kinds[k].label}
             </button>
           ))}
