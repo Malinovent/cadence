@@ -158,6 +158,8 @@ Done on branch `onboarding`: words A (At least / At most / Between); visual B (e
 On branch `quest-feedback`: a toast at the top when a step is done away from the checklist, the cross-off on the checklist when it's seen, the finale card at five of five; on a phone a block opens in a sheet with no keyboard, 44 px controls, Delete and Done at the top; deleting a block can be undone. Shipped to main 2026-11-07. Then, on branch `quest-phone-size`, the toast and the finale a size up on a phone (JP); shipped. Left: test on a real iPhone (keyboard and sheet).
 ### [x] Add a task, bigger and on top (2026-11-07)
 On branch `task-add-top`: "＋ Add a task" first in the list as a full-width 44 px button, a 44 px field and "Add task" button, new tasks on top, the phone tray above the keyboard while typing (JP). Shipped to main 2026-11-07. Left: check the keyboard on a real iPhone.
+### [x] Readable halves in the block counts (2026-11-07)
+On branch `count-halves`: plain decimals, "0.5 more blocks", "1.5 more blocks" (FR « encore 0,5 bloc », « encore 1,5 bloc »), instead of the "½" sign, unreadable in the small mono type (JP: "Just use 1 or 1.5 or 0.5"). Shipped to main 2026-11-07.
 ### [~] S1.9 French and English
 Done on branch `s1-finish`: catalogues for every string (en/fr), lib wording passed in, detection + Settings switch (device-local), Quebec formats, default areas named in the person's language. Shipped to main 2026-11-04. Left: JP reviews the French.
 ### [x] S1.10 Neutral stats

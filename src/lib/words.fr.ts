@@ -16,6 +16,9 @@ const DESCRIBE_FR: DescribeWords = {
   rangeOver: (n, o, d, max) => `${n} : ${c(o)} h au-delà de ${c(max)} h (${c(d)} h).`,
 };
 
+/** « 0,5 bloc », « 1 bloc », « 1,5 bloc », « 2 blocs » (decimal comma, like the hours) */
+const frBlocs = (n: number): string => `${String(n).replace(".", ",")} ${n >= 2 ? "blocs" : "bloc"}`;
+
 export const LIB_FR: LibWords = {
   lang: "fr",
   days: ["lun.", "mar.", "mer.", "jeu.", "ven.", "sam.", "dim."],
@@ -51,10 +54,9 @@ export const LIB_FR: LibWords = {
     },
   },
   count: {
-    plural: (n) => n >= 2,
-    toGo: (n, pl) => `encore ${n} ${pl ? "blocs" : "bloc"}`,
-    room: (n, pl) => `reste ${n} ${pl ? "blocs" : "bloc"}`,
-    over: (n, pl) => `${n} ${pl ? "blocs" : "bloc"} de trop`,
+    toGo: (n) => `encore ${frBlocs(n)}`,
+    room: (n) => `reste ${frBlocs(n)}`,
+    over: (n) => `${frBlocs(n)} de trop`,
     atLimit: "à la limite",
     reached: "atteint",
     inRange: "entre les deux",

@@ -83,24 +83,19 @@ export function blockCount(limit: Limit, plannedMins: number, blockMins: number)
   return room === 0 ? make(squares, 0, 0, "atLimit", "calm", 0) : make(squares, 0, 0, "room", "calm", room);
 }
 
-/** "3", "1½", "½" */
-export const fmtBlocks = (n: number): string => {
-  const whole = Math.floor(n);
-  const half = n - whole >= 0.5;
-  return half ? `${whole || ""}½` : String(whole);
-};
-
-/** The words under an area: "3 more blocks", "2 blocks left", "at the limit", "1 block over", "reached", "in range". */
+/**
+ * The words under an area: "3 more blocks", "1.5 more blocks", "0.5 more blocks", "2 blocks left",
+ * "at the limit", "1 block over", "reached", "in range". Halves are plain decimals (JP: "Just use 1
+ * or 1.5 or 0.5"), never the "½" sign, which shrinks to dots in the small mono type.
+ */
 export function countStatus(c: BlockCount, w: LibWords = LIB_EN): string {
-  const n = fmtBlocks(c.blocks);
-  const plural = w.count.plural(c.blocks);
   switch (c.state) {
     case "toGo":
-      return w.count.toGo(n, plural);
+      return w.count.toGo(c.blocks);
     case "room":
-      return w.count.room(n, plural);
+      return w.count.room(c.blocks);
     case "over":
-      return w.count.over(n, plural);
+      return w.count.over(c.blocks);
     case "atLimit":
       return w.count.atLimit;
     case "reached":

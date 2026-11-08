@@ -52,11 +52,11 @@ export type LibWords = {
   };
   now: { left: (h: number, m: number) => string };
   /** visual B: an area's week counted in its blocks */
+  // blocks to the nearest half: 3, 1.5, 0.5
   count: {
-    plural: (n: number) => boolean;
-    toGo: (n: string, plural: boolean) => string;
-    room: (n: string, plural: boolean) => string;
-    over: (n: string, plural: boolean) => string;
+    toGo: (n: number) => string;
+    room: (n: number) => string;
+    over: (n: number) => string;
     atLimit: string;
     reached: string;
     inRange: string;
@@ -73,6 +73,9 @@ export type LibWords = {
 };
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
+/** "0.5 blocks", "1 block", "1.5 blocks" */
+const enBlocks = (n: number): string => `${n} ${n === 1 ? "block" : "blocks"}`;
 
 export const LIB_EN: LibWords = {
   lang: "en",
@@ -108,10 +111,9 @@ export const LIB_EN: LibWords = {
     },
   },
   count: {
-    plural: (n) => n > 1,
-    toGo: (n, pl) => `${n} more ${pl ? "blocks" : "block"}`,
-    room: (n, pl) => `${n} ${pl ? "blocks" : "block"} left`,
-    over: (n, pl) => `${n} ${pl ? "blocks" : "block"} over`,
+    toGo: (n) => `${n} more ${n === 1 ? "block" : "blocks"}`,
+    room: (n) => `${enBlocks(n)} left`,
+    over: (n) => `${enBlocks(n)} over`,
     atLimit: "at the limit",
     reached: "reached",
     inRange: "in range",
