@@ -149,10 +149,7 @@ export default function SettingsView({
           {copies.map((c) => (
             <div key={c.key} style={{ ...note, color: "var(--c-muted)", marginTop: 8 }}>
               {m.settings[c.line]}{" "}
-              <button
-                style={{ ...S.catDel, fontStyle: "normal", textDecoration: "underline", padding: 0 }}
-                onClick={() => downloadText(c.text, c.file)}
-              >
+              <button style={S.textLink} onClick={() => downloadText(c.text, c.file)}>
                 {m.settings.download}
               </button>
             </div>
@@ -163,11 +160,11 @@ export default function SettingsView({
               {dropped && <div style={{ ...note, color: "var(--c-faint)", marginTop: 4 }}>{dropped}</div>}
               <div style={{ ...S.resetWarn, marginTop: 8 }}>{m.settings.replaceWarn}</div>
               <div style={{ ...row, marginTop: 10 }}>
-                <button style={{ ...S.resetConfirm, background: "var(--c-done)" }} onClick={onConfirm}>
+                <button style={S.resetConfirm} onClick={onConfirm}>
                   {m.settings.replaceYes}
                 </button>
                 <button style={S.resetCancel} onClick={() => setStatus({ kind: "idle" })}>
-                  {m.settings.cancel}
+                  {m.settings.keepData}
                 </button>
               </div>
             </div>
@@ -263,7 +260,7 @@ function ResetStatsRow({ onReset }: { onReset: () => void }) {
                   {m.stats.resetYes}
                 </button>
                 <button style={S.resetCancel} onClick={() => setConfirming(false)}>
-                  {m.stats.cancel}
+                  {m.stats.keep}
                 </button>
               </div>
             </>
@@ -331,10 +328,7 @@ function BalanceRulesRow() {
             />
           </label>
           {changed && (
-            <button
-              style={{ ...S.catDel, fontSize: 13, textDecoration: "underline" }}
-              onClick={() => set(DEFAULT_RULES)}
-            >
+            <button style={S.textLink} onClick={() => set(DEFAULT_RULES)}>
               {m.settings.rulesBack}
             </button>
           )}

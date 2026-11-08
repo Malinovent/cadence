@@ -75,7 +75,7 @@ export default function Checklist({
         <button
           type="button"
           className="cadence-tray-toggle"
-          style={S.panelToggle}
+          style={{ ...S.panelToggle, ...S.toggleMono }}
           onClick={onToggle}
           aria-expanded={!collapsed}
         >
@@ -84,7 +84,7 @@ export default function Checklist({
         <button
           type="button"
           className="cadence-hit44"
-          style={S.catDel}
+          style={S.closeX}
           onClick={onClose}
           aria-label={m.checklist.close}
         >

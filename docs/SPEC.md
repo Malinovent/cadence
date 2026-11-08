@@ -382,6 +382,16 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 
 - One way to write time (JP, 2026-11-08: "it says 2h30 to go, but in the areas we say 2.5 … consistency"): every amount of time is written as the calendar writes it, `fmtDur`: "2h", "2h30", "45m", "0h" (FR « 2 h », « 2 h 30 », « 45 min », « 0 h »). That covers goals ("≥ 4h at least", "↔ 2h–5h between"), the − / ＋ steppers, Stats rows, template previews, the week review, the "now" badge ("1h30 left"), limit tooltips ("At least 4h") and the screen-reader sentences ("Rest was under its 8h (5h)."). No decimal hours anywhere. The block tooltip says "drag an area onto me", and the onboarding hint says the tag shows how much time is still needed.
 
+### Consistency pass (JP, 2026-11-08: "look for inconsistencies in the app and fix them")
+- Headings: every page or section heading is 20 px Fraunces 900 (the Areas title, Stats' week and trend headings, Settings' groups).
+- ✕: grey when it only closes (the checklist, the add window), red only when it deletes (a template, a task).
+- Quiet links that change nothing for good ("Download it", "Back to 80% and 10%") are ink and underlined, never red.
+- Every confirmation has one shape: the message in plain ink, the action filled in ink and named ("Delete Exercise", "Reset stats", "Replace my data", "Delete my account"), and an outlined "Keep …" ("Keep Exercise", "Keep my stats", "Keep my data", "Keep my account"); FR « Garder … ».
+- "hide" / "show" in a card's head look alike everywhere: small mono capitals, like the areas panel.
+- Adding reads the same: "＋ Add a task", "＋ Add an area" (FR « ＋ Ajouter un domaine »), matching the onboarding hint.
+- Counts read "3 of 7" (the week review said "3/7"); English quotes are curly, “Call the bank”, like the French « ».
+- The welcome example writes goals as the app does: "Rest · ≥ 10h at least".
+
 ### About in Settings, and audit items 3–5 (2026-11-07)
 - About: what the app is, "Show the introduction again", and privacy / terms links in the person's language once `VITE_SITE_URL` is set (`src/lib/legal.ts`). No medical-device line (JP).
 - The product name lives in `src/appName.ts` (screens, page title, install manifest); stored keys, the export's `app: "cadence"` and backup file names stay. The install description and page meta carry French first, then English; `<html lang>` starts as fr-CA. The sign-in email template in `docs/SUPABASE_SETUP.md` is bilingual, French first (pasted by hand in Supabase).

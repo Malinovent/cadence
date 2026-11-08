@@ -930,8 +930,9 @@ export const S = {
     flexWrap: "wrap",
     gap: 10
   },
+  // a page's title, the same size and weight as every section heading (consistency pass, 2026-11-08)
   statsTitle: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: 900,
     margin: 0
   },
@@ -1626,16 +1627,17 @@ export const S = {
     textTransform: "uppercase",
     letterSpacing: "0.06em"
   },
+  // every "are you sure?": the message plain, the action filled in ink, "Keep …" outlined
   resetWarn: {
-    fontSize: 13,
-    color: "var(--c-danger)",
-    fontStyle: "italic"
+    fontSize: 14,
+    color: ink
   },
   resetConfirm: {
+    minHeight: 40,
     padding: "8px 16px",
     border: "none",
-    background: "var(--c-danger)",
-    color: "#fff",
+    background: ink,
+    color: paper,
     borderRadius: 3,
     cursor: "pointer",
     fontFamily: "'Fraunces Variable', 'Fraunces', serif",
@@ -1643,6 +1645,7 @@ export const S = {
     fontSize: 13
   },
   resetCancel: {
+    minHeight: 40,
     padding: "8px 14px",
     border: `1.5px solid ${line}`,
     background: "transparent",
@@ -1711,6 +1714,34 @@ export const S = {
     cursor: "pointer",
     color: "var(--c-danger)",
     fontSize: 16
+  },
+  // ✕ that only closes something: grey; a red ✕ always deletes
+  closeX: {
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    color: "var(--c-muted)",
+    fontSize: 16
+  },
+  // a quiet link that changes nothing for good: ink, underlined
+  textLink: {
+    border: "none",
+    background: "transparent",
+    padding: 0,
+    cursor: "pointer",
+    color: ink,
+    fontFamily: "inherit",
+    fontSize: 13,
+    textDecoration: "underline",
+    textUnderlineOffset: 3
+  },
+  // "hide" / "show" in a card's head, like the areas panel's
+  toggleMono: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+    color: "var(--c-faint)"
   },
   // the Areas tab: a list, one area open to change (JP, 2026-11-08)
   areaBadge: {
@@ -1858,17 +1889,6 @@ export const S = {
     alignItems: "center",
     gap: 10,
     fontSize: 14
-  },
-  areaConfirmYes: {
-    minHeight: 40,
-    padding: "0 14px",
-    border: "none",
-    borderRadius: 4,
-    background: ink,
-    color: paper,
-    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
-    fontWeight: 600,
-    cursor: "pointer"
   },
   catAdd: {
     marginTop: 16,
@@ -2751,7 +2771,7 @@ export const S = {
   statsSubtitle: {
     margin: "0 0 10px",
     fontFamily: "'Fraunces Variable', 'Fraunces', serif",
-    fontWeight: 700,
+    fontWeight: 900,
     fontSize: 20
   },
   // rows share columns, so the numbers sit right by the names and line up (JP: "really far away")

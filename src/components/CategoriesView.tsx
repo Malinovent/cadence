@@ -218,12 +218,12 @@ function AreaEditor({
               actions.removeCat(c.id);
               onDeleted();
             }}
-            style={S.areaConfirmYes}
+            style={S.resetConfirm}
           >
             {m.categories.remove(c.name || m.categories.area)}
           </button>
-          <button type="button" onClick={() => setConfirming(false)} style={S.setLink}>
-            {m.categories.keep}
+          <button type="button" onClick={() => setConfirming(false)} style={S.resetCancel}>
+            {m.categories.keep(c.name || m.categories.area)}
           </button>
         </div>
       ) : (

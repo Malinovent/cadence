@@ -265,7 +265,7 @@ export default function Block({
                   ...S.narrowTick,
                   background: solidText ? SOLID_TICK : done ? ink : "transparent",
                   color: solidText ?? (done ? paper : ink),
-                  ...(solidText ? { borderColor: "transparent" } : {}),
+                  ...(solidText ? { border: "1.5px solid transparent" } : {}),
                 }}
               >
                 {done ? "✓" : ""}
@@ -316,7 +316,7 @@ export default function Block({
                     ...S.doneToggle,
                     background: solidText ? SOLID_TICK : done ? ink : "transparent",
                     color: solidText ?? (done ? paper : ink),
-                    ...(solidText ? { borderColor: "transparent" } : {}),
+                    ...(solidText ? { border: "1.5px solid transparent" } : {}),
                   }}
                 >
                   {done ? "✓" : ""}

@@ -77,7 +77,7 @@ export default function SlotMenu({ tap, blocks, cats, phone, bounds, onPick, onC
     >
       <div style={S.slotHead}>
         <span style={{ flex: 1 }}>{m.slot.addAt(m.lib.days[tap.day], fmtTime(tap.start, lang))}</span>
-        <button type="button" className="cadence-hit44" onClick={onClose} aria-label={m.slot.close} style={S.catDel}>
+        <button type="button" className="cadence-hit44" onClick={onClose} aria-label={m.slot.close} style={S.closeX}>
           ✕
         </button>
       </div>
