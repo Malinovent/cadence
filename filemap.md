@@ -29,6 +29,7 @@
 - `src/lib/constants.ts` — grid constants (`ROW_H` desktop, `ROW_H_PHONE`), `DEFAULT_CATEGORIES`, `PALETTE`, buffer constants (`BUFFER_ID`, `BUFFER_MINS`, `BUFFER_COLOR`)
 - `src/lib/uid.ts` — `uid()`
 - `src/lib/time.ts` — `fmtTime`, `fmtDur`
+- `src/lib/blend.ts` — `blendGradient`: the colour blend of a block in several areas (calendar and previews)
 - `src/lib/placement.ts` — `freeGaps`, `resolvePlacement`, `resizeBlock`
 - `src/lib/model.ts` — data types (incl. `Task`), `defaultData`, migrations, `normalizeData`
 - `src/lib/storage.ts` — localStorage load/save of the five legacy `cadence:*` keys plus `cadence:tasks`; pre-migration copies (`PREMIGRATION_KEYS`, `cadence:backup:before-guardrails`)

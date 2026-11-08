@@ -1,3 +1,4 @@
+import { blendGradient } from "../lib/blend";
 import type React from "react";
 import type { InteractionEngine } from "../interaction/engine";
 import { AreaIconView } from "./AreaIconView";
@@ -44,17 +45,6 @@ type Props = {
 // each side): the middle GRIP_SPAN of the block, at least GRIP_MIN_WIDTH, never wider than the
 // block. Same rule as gripSpan() in lib/gesture.ts, which the inside part uses.
 const GRIP_ZONE_WIDTH = `min(calc(100% - 6px), max(${GRIP_MIN_WIDTH}px, calc((100% - 6px) * ${GRIP_SPAN})))`;
-
-// Soft blend of the tagged category colors. Each color sits at a single stop
-// and CSS interpolates between them; stops are inset (15%..85%) so each color
-// reads solidly at its own end before the transition begins.
-const blendGradient = (colors: string[]): string =>
-  `linear-gradient(135deg, ${colors
-    .map((c, i) => {
-      const pct = colors.length === 1 ? 50 : Math.round(15 + (i / (colors.length - 1)) * 70);
-      return `${c} ${pct}%`;
-    })
-    .join(", ")})`;
 
 export default function Block({
   block: p,
@@ -245,7 +235,12 @@ export default function Block({
                   e.stopPropagation();
                   onToggleDone(p.id);
                 }}
-                style={{ ...S.doneToggle, ...S.narrowTick, background: done ? ink : "transparent", color: done ? paper : ink }}
+                style={{
+                  ...S.doneToggle,
+                  ...S.narrowTick,
+                  background: done ? ink : "transparent",
+                  color: done ? paper : ink,
+                }}
               >
                 {done ? "✓" : ""}
               </button>
@@ -259,55 +254,55 @@ export default function Block({
           </div>
         )}
         {!narrow && (
-        <div style={S.placedTop}>
-          <span style={S.placedNameWrap}>
-            {multi && (
-              <span style={S.pipRow}>
-                {colors.map((col, i) => (
-                  <span key={i} style={{ ...S.pip, background: col }} />
-                ))}
-              </span>
-            )}
-            {buffer ? (
-              <span style={{ ...S.placedName, ...S.bufferName }}>{m.lib.panel.buffer}</span>
-            ) : (
-              <span style={S.placedName}>
-                {!multi && cats[0]?.icon && (
-                  <AreaIconView icon={cats[0].icon} size={12} style={{ marginRight: 4, verticalAlign: "-2px" }} />
-                )}
-                {cats.map((c) => c.name).join(" + ") || "?"}
-              </span>
-            )}
-          </span>
-          <div style={S.placedTopRight}>
-            <span style={{ ...S.placedDur, color: isNow ? ink : baseColor }}>
-              {minsLeft !== null && !nowRoom ? `${m.block.now} · ${fmtLeft(minsLeft, m.lib)}` : fmtDur(p.mins, lang)}
+          <div style={S.placedTop}>
+            <span style={S.placedNameWrap}>
+              {multi && (
+                <span style={S.pipRow}>
+                  {colors.map((col, i) => (
+                    <span key={i} style={{ ...S.pip, background: col }} />
+                  ))}
+                </span>
+              )}
+              {buffer ? (
+                <span style={{ ...S.placedName, ...S.bufferName }}>{m.lib.panel.buffer}</span>
+              ) : (
+                <span style={S.placedName}>
+                  {!multi && cats[0]?.icon && (
+                    <AreaIconView icon={cats[0].icon} size={12} style={{ marginRight: 4, verticalAlign: "-2px" }} />
+                  )}
+                  {cats.map((c) => c.name).join(" + ") || "?"}
+                </span>
+              )}
             </span>
-            {!buffer && (
-              <button
-                type="button"
-                className="cadence-tick cadence-hit44"
-                data-coach={`tick-${p.id}`}
-                aria-pressed={done}
-                aria-label={done ? m.block.markOpen : m.block.markDone}
-                title={done ? m.block.doneTitle : m.block.markDone}
-                // a tap on the tick never picks the block up or starts a resize
-                onPointerDown={(e) => e.stopPropagation()}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleDone(p.id);
-                }}
-                style={{
-                  ...S.doneToggle,
-                  background: done ? ink : "transparent",
-                  color: done ? paper : ink,
-                }}
-              >
-                {done ? "✓" : ""}
-              </button>
-            )}
+            <div style={S.placedTopRight}>
+              <span style={{ ...S.placedDur, color: isNow ? ink : baseColor }}>
+                {minsLeft !== null && !nowRoom ? `${m.block.now} · ${fmtLeft(minsLeft, m.lib)}` : fmtDur(p.mins, lang)}
+              </span>
+              {!buffer && (
+                <button
+                  type="button"
+                  className="cadence-tick cadence-hit44"
+                  data-coach={`tick-${p.id}`}
+                  aria-pressed={done}
+                  aria-label={done ? m.block.markOpen : m.block.markDone}
+                  title={done ? m.block.doneTitle : m.block.markDone}
+                  // a tap on the tick never picks the block up or starts a resize
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleDone(p.id);
+                  }}
+                  style={{
+                    ...S.doneToggle,
+                    background: done ? ink : "transparent",
+                    color: done ? paper : ink,
+                  }}
+                >
+                  {done ? "✓" : ""}
+                </button>
+              )}
+            </div>
           </div>
-        </div>
         )}
         {narrow && !inline ? null : inline ? (
           <BlockEditor

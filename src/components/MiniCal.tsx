@@ -1,4 +1,5 @@
 import type React from "react";
+import { blendGradient } from "../lib/blend";
 import { BUFFER_COLOR } from "../lib/constants";
 import type { Block, Category } from "../lib/model";
 import type { Bounds } from "../lib/placement";
@@ -94,9 +95,9 @@ export default function MiniCal({
                   ...S.miniBar,
                   top: (b.start - from) * scale,
                   height: Math.max(4, b.mins * scale - 1),
-                  background: b.buffer ? "transparent" : color,
+                  // several areas: the same blend as the calendar's block
+                  background: b.buffer ? "transparent" : own[1] ? blendGradient(own.map((c) => c.color)) : color,
                   border: b.buffer ? `1px dashed ${color}` : "none",
-                  borderLeft: own[1] ? `3px solid ${own[1].color}` : undefined,
                   opacity: b.done ? 0.55 : 1,
                 };
                 const icon =
