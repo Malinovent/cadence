@@ -74,6 +74,8 @@ export const ink = "var(--c-ink)";
 export const paper = "var(--c-paper)";
 export const paper2 = "var(--c-paper2)";
 export const line = "var(--c-line)";
+// past an "at most" or "between" limit (JP, 2026-11-08: "make it red when it goes over"); never for shortfalls
+export const danger = "var(--c-danger)";
 // "done" in a step's feedback: the roll-forward green, never alone (a check and words go with it)
 export const doneGreen = "var(--c-done)";
 // the block happening now: heavier ink outline drawn as a box-shadow (keeps its layout)
@@ -1242,8 +1244,8 @@ export const S = {
   },
   // past what "at most" / "between" allows: striped ink, never red
   squareExtra: {
-    border: `1.5px dashed ${ink}`,
-    background: `repeating-linear-gradient(45deg, ${ink} 0 1.5px, transparent 1.5px 4px)`
+    border: `1.5px dashed ${danger}`,
+    background: `repeating-linear-gradient(45deg, ${danger} 0 1.5px, transparent 1.5px 4px)`
   },
   countBarWrap: {
     flex: "1 1 120px",
@@ -1268,7 +1270,7 @@ export const S = {
     position: "absolute",
     top: 0,
     bottom: 0,
-    background: `repeating-linear-gradient(45deg, ${ink} 0 1.5px, transparent 1.5px 4px)`
+    background: `repeating-linear-gradient(45deg, ${danger} 0 1.5px, transparent 1.5px 4px)`
   },
   countBarMark: {
     position: "absolute",
@@ -1301,8 +1303,8 @@ export const S = {
   },
   // "over": past what it allows. A solid ink tag, the stronger warning
   countOver: {
-    color: paper,
-    background: ink,
+    color: "#fff",
+    background: danger,
     padding: "0 6px"
   },
   countBang: {

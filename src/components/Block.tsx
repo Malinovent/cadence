@@ -9,7 +9,7 @@ import { fmtLeft } from "../lib/now";
 import { fmtDur, fmtTime } from "../lib/time";
 import type { CadenceActions } from "../state/useCadence";
 import { BUFFER_COLOR } from "../lib/constants";
-import { textOn } from "../lib/doneStyle";
+import { SOLID_TEXT, SOLID_TEXT_SOFT, SOLID_TICK } from "../lib/doneStyle";
 import { readDoneStyle } from "../state/doneStylePrefs";
 import { ink, nowRing, paper, S } from "../styles";
 import BlockEditor from "./BlockEditor";
@@ -81,9 +81,9 @@ export default function Block({
   const named = !!p.label;
   const baseColor = colors[0];
   const multi = colors.length > 1;
-  // Settings → Done blocks (JP, 2026-11-08): "solid" fills a ticked block with its colour, with
-  // white or dark text, whichever reads; "soft" (the default) keeps the light tint and ink text
-  const solidText = p.done && !buffer && readDoneStyle() === "solid" ? textOn(colors) : null;
+  // Settings → Done blocks (JP, 2026-11-08): "solid" fills a ticked block with its colour and white
+  // text, as the first version did; "soft" (the default) keeps the light tint and ink text
+  const solidText = p.done && !buffer && readDoneStyle() === "solid" ? SOLID_TEXT : null;
   // several areas: each area's icon in its colour, a dot for one without an icon (JP, 2026-11-08)
   const marks = (size: number, column = false) => (
     <span
@@ -264,8 +264,9 @@ export default function Block({
                 style={{
                   ...S.doneToggle,
                   ...S.narrowTick,
-                  background: done ? ink : "transparent",
-                  color: done ? paper : ink,
+                  background: solidText ? SOLID_TICK : done ? ink : "transparent",
+                  color: solidText ?? (done ? paper : ink),
+                  ...(solidText ? { borderColor: "transparent" } : {}),
                 }}
               >
                 {done ? "✓" : ""}
@@ -295,7 +296,7 @@ export default function Block({
               )}
             </span>
             <div style={S.placedTopRight}>
-              <span style={{ ...S.placedDur, color: solidText ?? (isNow ? ink : baseColor) }}>
+              <span style={{ ...S.placedDur, color: solidText ? SOLID_TEXT_SOFT : isNow ? ink : baseColor }}>
                 {minsLeft !== null && !nowRoom ? `${m.block.now} · ${fmtLeft(minsLeft, m.lib)}` : fmtDur(p.mins, lang)}
               </span>
               {!buffer && (
@@ -314,8 +315,9 @@ export default function Block({
                   }}
                   style={{
                     ...S.doneToggle,
-                    background: done ? ink : "transparent",
-                    color: done ? paper : ink,
+                    background: solidText ? SOLID_TICK : done ? ink : "transparent",
+                    color: solidText ?? (done ? paper : ink),
+                    ...(solidText ? { borderColor: "transparent" } : {}),
                   }}
                 >
                   {done ? "✓" : ""}

@@ -58,6 +58,8 @@ export type LibWords = {
     toGo: (dur: string) => string;
     room: (dur: string) => string;
     over: (dur: string) => string;
+    /** past an "at least" goal */
+    above: (dur: string) => string;
     /** a finished week that fell short (Stats) */
     short: (dur: string) => string;
     atLimit: string;
@@ -117,6 +119,7 @@ export const LIB_EN: LibWords = {
     room: (d) => `${d} left`,
     over: (d) => `${d} over`,
     short: (d) => `${d} short`,
+    above: (d) => `${d} above`,
     atLimit: "at the limit",
     reached: "reached",
     inRange: "in range",

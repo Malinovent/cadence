@@ -2,7 +2,7 @@ import type React from "react";
 import { blockCount, countStatus, type CountTone } from "../lib/blockCount";
 import { withAlpha } from "../lib/gesture";
 import type { PanelArea } from "../lib/panel";
-import { ink, S } from "../styles";
+import { danger, S } from "../styles";
 import { useI18n } from "../i18n/I18nProvider";
 
 const TONE: Record<CountTone, React.CSSProperties> = {
@@ -18,9 +18,10 @@ const placed = (color: string) => `repeating-linear-gradient(45deg, ${color} 0 1
 
 /**
  * Visual B (JP, 2026-11-07): under an area, a square per block of its goal, filled as you plan,
- * and what's left in time ("3h to go"; JP, 2026-11-08: the goal is time, the squares the picture). "Under" and "over" read as warnings in ink (never red, never colour
- * alone): an outlined tag with "!" for under, a solid one for over, and striped squares past
- * what an "at most" or "between" allows.
+ * and what's left in time ("3h to go"; JP, 2026-11-08: the goal is time, the squares the picture).
+ * Under: an outlined ink tag with "!" (never red). Past an "at most" or "between": red, a solid
+ * tag with "!" and striped squares, solid once done. Past an "at least": more squares in the area's
+ * colour, dashed, and "✓ 2h above".
  */
 export default function BlockCount({ area: a }: { area: PanelArea }) {
   const { m } = useI18n();
@@ -28,22 +29,23 @@ export default function BlockCount({ area: a }: { area: PanelArea }) {
   const c = blockCount(a.balance.limit, a.balance.plannedMins, a.mins, a.doneMins);
   const status = countStatus(c, m.lib);
   const kind = a.balance.limit.kind;
-  const total = c.squares + c.extra;
+  const total = c.squares + c.extra + c.above;
 
   const squares = Array.from({ length: total }, (_, i) => {
     // past the limit: ink stripes while placed, solid ink once done (JP, 2026-11-08: "when I complete
     // the task, it says hashed")
-    if (i >= c.squares) {
+    if (i >= c.squares && c.extra > 0) {
       const doneOver = Math.max(0, Math.min(1, c.done - i));
       return (
         <span key={i} style={{ ...S.square, ...S.squareExtra }}>
-          {doneOver > 0 && <span style={{ ...S.squareFill, width: `${doneOver * 100}%`, background: ink }} />}
+          {doneOver > 0 && <span style={{ ...S.squareFill, width: `${doneOver * 100}%`, background: danger }} />}
         </span>
       );
     }
     const fill = Math.max(0, Math.min(1, c.filled - i));
     const done = Math.max(0, Math.min(fill, c.done - i)); // the solid part, then the striped rest
-    const optional = kind === "range" && i >= c.needed; // "between": past the low end is room, not need
+    // "between": past the low end is room, not need; past an "at least" goal, extra
+    const optional = (kind === "range" && i >= c.needed) || i >= c.squares;
     const allowance = kind === "ceiling"; // "at most": allowed, not needed
     const border = `1.5px ${optional ? "dashed" : "solid"} ${allowance ? withAlpha(a.color, "99") : a.color}`;
     return (
@@ -70,16 +72,20 @@ export default function BlockCount({ area: a }: { area: PanelArea }) {
       <span
         style={{
           ...S.countBarFill,
-          width: `${(Math.min(c.filled, c.squares) / scale) * 100}%`,
+          width: `${((kind === "floor" ? c.filled : Math.min(c.filled, c.squares)) / scale) * 100}%`,
           background: placed(a.color),
         }}
       />
       {c.done > 0 && (
         <span
-          style={{ ...S.countBarFill, width: `${(Math.min(c.done, c.squares) / scale) * 100}%`, background: a.color }}
+          style={{
+            ...S.countBarFill,
+            width: `${((kind === "floor" ? c.done : Math.min(c.done, c.squares)) / scale) * 100}%`,
+            background: a.color,
+          }}
         />
       )}
-      {c.filled > c.squares && (
+      {kind !== "floor" && c.filled > c.squares && (
         <span
           style={{
             ...S.countBarExtra,
@@ -88,14 +94,14 @@ export default function BlockCount({ area: a }: { area: PanelArea }) {
           }}
         />
       )}
-      {c.done > c.squares && (
+      {kind !== "floor" && c.done > c.squares && (
         <span
           style={{
             ...S.countBarFill,
             borderRadius: 0,
             left: `${(c.squares / scale) * 100}%`,
             width: `${((c.done - c.squares) / scale) * 100}%`,
-            background: ink,
+            background: danger,
           }}
         />
       )}

@@ -16,7 +16,21 @@ describe("an area's week: squares in blocks, words in time", () => {
     expect(say(atLeast(10), 7, 1)).toBe("3h to go");
     expect(say(atLeast(10), 9, 1)).toBe("1h to go");
     expect(blockCount(atLeast(10), h(10), h(1))).toMatchObject({ state: "reached", tone: "done" });
-    expect(say(atLeast(10), 12, 1)).toBe("reached");
+    expect(say(atLeast(10), 10, 1)).toBe("reached");
+  });
+  it("at least: past the goal says how far above, with a square per block past it (JP)", () => {
+    expect(blockCount(atLeast(10), h(12), h(1))).toMatchObject({
+      squares: 10,
+      above: 2,
+      extra: 0,
+      state: "above",
+      tone: "done",
+      mins: h(2),
+    });
+    expect(say(atLeast(10), 12, 1)).toBe("2h above");
+    expect(say(atLeast(4), 4.5, 2)).toBe("30m above");
+    expect(blockCount(atLeast(4), h(4.5), h(2)).above).toBe(1);
+    expect(countStatus(blockCount(atLeast(4), h(5), h(1)), LIB_FR)).toBe("1 h de plus");
   });
   it("says exactly the time left, whatever the block length (JP: blocks aren't the target)", () => {
     expect(say(atLeast(4), 2.5, 1)).toBe("1h30 to go");

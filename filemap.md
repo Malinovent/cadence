@@ -59,7 +59,7 @@
 - `src/lib/sounds.ts` — the sounds as tones (place, tick, untick, remove, step, finale), quiet and short
 - `src/lib/statsWeeks.ts` — Stats week by week: `weekSpan`, `shiftWeek`, `weekRows`, `weekGap` / `gapText`, `rowBar`, `areaTrends`, `monthStarts`
 - `src/lib/review.ts` — roll forward: how Week 1 went (`weekReview`: balanced, ticked of total, a line per area)
-- `src/lib/doneStyle.ts` — how ticked blocks look: soft or solid; `textOn` picks white or dark text for a fill
+- `src/lib/doneStyle.ts` — how ticked blocks look: soft or solid (the first version's white-on-colour)
 - `src/lib/theme.ts` — the looks: paper, night, high contrast, device; each palette's colours by role, as CSS variables
 - `src/lib/dayHours.ts` — the hours the calendar shows: choices, the saved setting, and `gridBounds` (widened to hold every block)
 - `src/lib/starters.ts` — S1.8 the three starter weeks, matching areas by name, adding missing ones, applying to a week
