@@ -58,6 +58,19 @@ describe("panel", () => {
       limitText: null,
     });
   });
+  it("adds up this week's ticked time per area (JP: done squares)", () => {
+    const d = data();
+    d.weeks[0].push(
+      { id: "b2", day: 1, start: 540, mins: 60, catIds: ["rest", "work"], done: true, label: "", desc: "" },
+      { id: "b3", day: 2, start: 540, mins: 90, catIds: ["rest"], done: true, label: "", desc: "" },
+    );
+    expect(panelAreas(d, 0).map((r) => [r.id, r.doneMins])).toEqual([
+      ["rest", 150],
+      ["work", 60],
+      [BUFFER_ID, 0],
+    ]);
+    expect(panelAreas(d, 1)[0].doneMins).toBe(0);
+  });
   it("judges the week asked for", () => {
     expect(panelAreas(data(), 1)[0].balance?.state).toBe("short");
   });

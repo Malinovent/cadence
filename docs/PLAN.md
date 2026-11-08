@@ -166,6 +166,8 @@ On branch `consumer-ready` (JP): crash screen with download and reload; help and
 On branch `stats-clear` (JP, 2026-11-08): Stats shorter (last week as rows, bars with hours); rows and bars closer to their names; area icons (24, picked on the Areas page); Settings in four groups. Shipped to main 2026-11-08 (1a53c97). Then Settings as short rows, no paragraphs (JP: "more readable"), shipped 2026-11-08 (6dd0f91). Then the phone's week view, day templates and previews before a template is used. Left: update every device before picking icons or saving a day template.
 ### [x] Stats week by week (2026-11-08)
 JP picked suggestions 1, 2, 3, 5 and 6 of docs/mockups/stats.html: tappable season squares with months, any week with ‹ › and "short" / "over" tags, the last 12 weeks per area, Reset stats moved to Settings, an empty state. Time invested unchanged. Committed to main; push when JP says.
+### [x] Three states in the area squares (2026-11-08)
+JP: "the blocks on the left need 3 states: not placed, placed, and complete". Option C of docs/mockups/square-states.html: empty, striped in the area colour (placed), solid (ticked). Committed to main; push when JP says.
 ### [~] S1.9 French and English
 Done on branch `s1-finish`: catalogues for every string (en/fr), lib wording passed in, detection + Settings switch (device-local), Quebec formats, default areas named in the person's language. Shipped to main 2026-11-04. Left: JP reviews the French.
 ### [x] S1.10 Neutral stats

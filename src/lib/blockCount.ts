@@ -2,7 +2,8 @@
 // when it's under what it needs or over what it allows. Never red: the warnings are ink, an
 // outlined tag for "under" and a solid one for "over", so they read without colour and never look
 // like another area. The goal is time, not blocks (JP, 2026-11-08: "remove the blocks as a
-// target"): the squares stay as the picture, the words say the time, "3h to go".
+// target"): the squares stay as the picture, the words say the time, "3h to go". Three states
+// (JP, 2026-11-08, option C): an empty square is not placed, a striped one placed, a solid one done.
 import type { Limit } from "./guardrail";
 import { fmtDur } from "./time";
 import { LIB_EN, type LibWords } from "./words";
@@ -18,6 +19,8 @@ export type BlockCount = {
   needed: number;
   /** planned, in blocks; a fraction fills part of a square */
   filled: number;
+  /** of what's planned, how much is ticked done, in blocks (never more than `filled`) */
+  done: number;
   /** squares past the top ("at most", "between"), drawn striped */
   extra: number;
   state: CountState;
@@ -30,15 +33,17 @@ export type BlockCount = {
 
 export const MAX_SQUARES = 16;
 
-export function blockCount(limit: Limit, plannedMins: number, blockMins: number): BlockCount {
+export function blockCount(limit: Limit, plannedMins: number, blockMins: number, doneMins = 0): BlockCount {
   const b = Math.max(30, blockMins || 0);
   const p = Math.max(0, plannedMins);
   const filled = p / b;
+  const done = Math.min(p, Math.max(0, doneMins)) / b;
   const toSquares = (mins: number) => Math.max(0, Math.ceil(mins / b - 1e-9)); // tolerant of float dust, never -0
   const make = (squares: number, needed: number, extra: number, state: CountState, tone: CountTone, mins: number) => ({
     squares,
     needed,
     filled,
+    done,
     extra,
     state,
     tone,

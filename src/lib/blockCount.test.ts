@@ -58,6 +58,12 @@ describe("an area's week: squares in blocks, words in time", () => {
     expect(say(between(4, 8), 6, 2)).toBe("in range");
     expect(blockCount(between(4, 8), h(10), h(2))).toMatchObject({ state: "over", extra: 1, mins: h(2) });
   });
+  it("knows how much of what's placed is done, never more than placed (JP: three states)", () => {
+    expect(blockCount(atLeast(4), h(3), h(1), h(1))).toMatchObject({ filled: 3, done: 1 });
+    expect(blockCount(atLeast(4), h(3), h(1)).done).toBe(0);
+    expect(blockCount(atLeast(4), h(2), h(1), h(5)).done).toBe(2);
+    expect(blockCount(atLeast(4), h(3), h(2), h(1)).done).toBe(0.5);
+  });
   it("draws a bar instead when there would be too many squares", () => {
     expect(blockCount(atMost(40), h(10), h(0.5)).bar).toBe(true); // 80 squares
     expect(blockCount(atLeast(8), h(1), h(0.5)).bar).toBe(false); // 16

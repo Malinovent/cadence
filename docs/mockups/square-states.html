@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Square states mockup</title>
+<style>
+  :root { --paper:#f4efe4; --card:#fbf8f1; --ink:#2a2420; --muted:#7a7065; --line:#d9d0c1; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font-family:Georgia, 'Fraunces', serif; }
+  .wrap { display:flex; flex-wrap:wrap; gap:24px; justify-content:center; padding:20px 16px 12px; }
+  .col { width:300px; }
+  .cap { font:600 11px ui-monospace, monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 4px; }
+  .why { font-size:13px; color:var(--muted); margin:0 0 12px; min-height:54px; }
+  .chip { border:1.5px dashed var(--c); border-radius:4px; padding:7px 10px; display:flex; justify-content:space-between; align-items:center; color:var(--c); font-weight:700; font-size:15px; background:var(--card); }
+  .chip small { font:600 12px ui-monospace, monospace; }
+  .count { display:flex; align-items:center; gap:8px; margin:5px 2px 16px; }
+  .sq { display:flex; gap:3px; }
+  .sq i { position:relative; width:14px; height:14px; border-radius:3px; border:1.5px solid var(--c); display:block; overflow:hidden; }
+  .st { margin-left:auto; font:10px ui-monospace, monospace; white-space:nowrap; }
+  .under { border:1px dashed var(--ink); border-radius:10px; padding:0 6px; }
+  .done { font-weight:600; }
+  /* A: tint for placed, solid for done */
+  .A .p { background:color-mix(in srgb, var(--c) 32%, transparent); }
+  .A .d { background:var(--c); }
+  /* B: solid for placed, solid with a tick for done */
+  .B .p, .B .d { background:var(--c); }
+  .B .d::after { content:"✓"; position:absolute; inset:0; display:grid; place-items:center; color:#fff; font:700 10px/1 system-ui, sans-serif; }
+  /* C: stripes for placed, solid for done */
+  .C .p { background:repeating-linear-gradient(45deg, var(--c) 0 2px, transparent 2px 4.5px); }
+  .C .d { background:var(--c); }
+  .legend { display:flex; gap:14px; font:11px ui-monospace, monospace; color:var(--muted); margin:-6px 2px 8px; }
+  .legend span { display:flex; align-items:center; gap:5px; }
+  .legend i { width:12px; height:12px; }
+  .note { max-width:820px; margin:0 auto; padding:4px 16px 30px; font-size:14px; line-height:1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="col A" style="--c:#E8643C">
+    <p class="cap">A · Light, then solid (my pick)</p>
+    <p class="why">Placed is a light fill, done is solid, like a video's loaded part and played part. It reads as progress: empty → planned → done.</p>
+    <div class="legend"><span><i class="sq" style="display:inline-block;border:1.5px solid #E8643C;border-radius:3px"></i>not placed</span><span><i style="display:inline-block;border:1.5px solid #E8643C;border-radius:3px;background:color-mix(in srgb,#E8643C 32%,transparent)"></i>placed</span><span><i style="display:inline-block;border-radius:3px;background:#E8643C"></i>done</span></div>
+    <div class="chip"><span>Exercise</span><small>1h</small></div>
+    <div class="count"><span class="sq"><i></i><i></i><i></i><i></i></span><span class="st under">! 4h to go</span></div>
+    <div class="chip"><span>Exercise</span><small>1h</small></div>
+    <div class="count"><span class="sq"><i class="d"></i><i class="p"></i><i class="p"></i><i></i></span><span class="st under">! 1h to go</span></div>
+    <div class="chip"><span>Exercise</span><small>1h</small></div>
+    <div class="count"><span class="sq"><i class="d"></i><i class="d"></i><i class="d"></i><i class="p"></i></span><span class="st done">✓ reached</span></div>
+  </div>
+
+  <div class="col B" style="--c:#E8643C">
+    <p class="cap">B · Solid, then a tick</p>
+    <p class="why">Placed stays solid as today, and a done square gets a small ✓. The least change, but the tick is tiny at this size.</p>
+    <div class="legend"><span><i style="display:inline-block;border:1.5px solid #E8643C;border-radius:3px"></i>not placed</span><span><i style="display:inline-block;border-radius:3px;background:#E8643C"></i>placed</span><span><i style="display:inline-grid;place-items:center;border-radius:3px;background:#E8643C;color:#fff;font:700 9px system-ui">✓</i>done</span></div>
+    <div class="chip"><span>Exercise</span><small>1h</small></div>
+    <div class="count"><span class="sq"><i></i><i></i><i></i><i></i></span><span class="st under">! 4h to go</span></div>
+    <div class="chip"><span>Exercise</span><small>1h</small></div>
+    <div class="count"><span class="sq"><i class="d"></i><i class="p"></i><i class="p"></i><i></i></span><span class="st under">! 1h to go</span></div>
+    <div class="chip"><span>Exercise</span><small>1h</small></div>
+    <div class="count"><span class="sq"><i class="d"></i><i class="d"></i><i class="d"></i><i class="p"></i></span><span class="st done">✓ reached</span></div>
+  </div>
+
+  <div class="col C" style="--c:#E8643C">
+    <p class="cap">C · Stripes, then solid</p>
+    <p class="why">Placed is striped, done is solid. Clear on any screen, but stripes already mean "past the limit" (in ink), so the two could be confused.</p>
+    <div class="legend"><span><i style="display:inline-block;border:1.5px solid #E8643C;border-radius:3px"></i>not placed</span><span><i style="display:inline-block;border:1.5px solid #E8643C;border-radius:3px;background:repeating-linear-gradient(45deg,#E8643C 0 2px,transparent 2px 4.5px)"></i>placed</span><span><i style="display:inline-block;border-radius:3px;background:#E8643C"></i>done</span></div>
+    <div class="chip"><span>Exercise</span><small>1h</small></div>
+    <div class="count"><span class="sq"><i></i><i></i><i></i><i></i></span><span class="st under">! 4h to go</span></div>
+    <div class="chip"><span>Exercise</span><small>1h</small></div>
+    <div class="count"><span class="sq"><i class="d"></i><i class="p"></i><i class="p"></i><i></i></span><span class="st under">! 1h to go</span></div>
+    <div class="chip"><span>Exercise</span><small>1h</small></div>
+    <div class="count"><span class="sq"><i class="d"></i><i class="d"></i><i class="d"></i><i class="p"></i></span><span class="st done">✓ reached</span></div>
+  </div>
+</div>
+<div class="note">
+  <p><b>Each column shows the same week three times:</b> nothing placed yet; 3 of 4 hours placed with 1 done; all 4 placed with 3 done. Done squares always come first (left), then placed ones, then empty ones.</p>
+  <p><b>The words stay about planning</b> ("! 1h to go" means 1 h still to place), as today. Ticking shows only in the squares. The thin bar used when an area has more than 16 squares gets the same two shades.</p>
+</div>
+</body>
+</html>

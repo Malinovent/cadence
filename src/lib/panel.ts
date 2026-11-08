@@ -14,18 +14,22 @@ export type PanelArea = {
   color: string;
   mins: number; // the length a drop or tap places
   balance: Balance | null; // null for the buffer
+  doneMins: number; // this week's ticked time, for the done squares (JP, 2026-11-08); 0 for the buffer
   limitText: string | null;
   icon?: string; // the area's icon (none for the buffer)
 };
 
 /** Areas in their own order, then the buffer last. */
 export function panelAreas(data: CadenceData, week: WeekIndex, w: LibWords = LIB_EN): PanelArea[] {
+  const ticked = data.weeks[week].filter((b) => b.done);
   const rows: PanelArea[] = weekBalance(data, week).map(({ cat, balance }) => ({
     id: cat.id,
     name: cat.name || w.panel.untitled,
     color: cat.color,
     mins: cat.blockMins,
     balance,
+    // a block for several areas counts fully to each, as for planned time
+    doneMins: ticked.filter((b) => b.catIds.includes(cat.id)).reduce((s, b) => s + b.mins, 0),
     limitText: limitLabel(cat.limit, w),
     ...(cat.icon ? { icon: cat.icon } : {}),
   }));
@@ -35,6 +39,7 @@ export function panelAreas(data: CadenceData, week: WeekIndex, w: LibWords = LIB
     color: BUFFER_COLOR,
     mins: BUFFER_MINS,
     balance: null,
+    doneMins: 0,
     limitText: null,
   });
   return rows;

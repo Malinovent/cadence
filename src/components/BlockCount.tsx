@@ -12,6 +12,10 @@ const TONE: Record<CountTone, React.CSSProperties> = {
   over: S.countOver,
 };
 
+// placed but not yet done: fine stripes in the area's colour (JP, 2026-11-08, option C); the ink
+// stripes past a limit stay coarser and ink, so the two don't read alike
+const placed = (color: string) => `repeating-linear-gradient(45deg, ${color} 0 1.5px, transparent 1.5px 3.5px)`;
+
 /**
  * Visual B (JP, 2026-11-07): under an area, a square per block of its goal, filled as you plan,
  * and what's left in time ("3h to go"; JP, 2026-11-08: the goal is time, the squares the picture). "Under" and "over" read as warnings in ink (never red, never colour
@@ -21,7 +25,7 @@ const TONE: Record<CountTone, React.CSSProperties> = {
 export default function BlockCount({ area: a }: { area: PanelArea }) {
   const { m } = useI18n();
   if (!a.balance) return null;
-  const c = blockCount(a.balance.limit, a.balance.plannedMins, a.mins);
+  const c = blockCount(a.balance.limit, a.balance.plannedMins, a.mins, a.doneMins);
   const status = countStatus(c, m.lib);
   const kind = a.balance.limit.kind;
   const total = c.squares + c.extra;
@@ -29,12 +33,23 @@ export default function BlockCount({ area: a }: { area: PanelArea }) {
   const squares = Array.from({ length: total }, (_, i) => {
     if (i >= c.squares) return <span key={i} style={{ ...S.square, ...S.squareExtra }} />;
     const fill = Math.max(0, Math.min(1, c.filled - i));
+    const done = Math.max(0, Math.min(fill, c.done - i)); // the solid part, then the striped rest
     const optional = kind === "range" && i >= c.needed; // "between": past the low end is room, not need
     const allowance = kind === "ceiling"; // "at most": allowed, not needed
     const border = `1.5px ${optional ? "dashed" : "solid"} ${allowance ? withAlpha(a.color, "99") : a.color}`;
     return (
       <span key={i} style={{ ...S.square, border }}>
-        {fill > 0 && <span style={{ ...S.squareFill, width: `${fill * 100}%`, background: a.color }} />}
+        {done > 0 && <span style={{ ...S.squareFill, width: `${done * 100}%`, background: a.color }} />}
+        {fill > done && (
+          <span
+            style={{
+              ...S.squareFill,
+              left: `${done * 100}%`,
+              width: `${(fill - done) * 100}%`,
+              background: placed(a.color),
+            }}
+          />
+        )}
       </span>
     );
   });
@@ -44,8 +59,17 @@ export default function BlockCount({ area: a }: { area: PanelArea }) {
   const bar = (
     <span style={S.countBar}>
       <span
-        style={{ ...S.countBarFill, width: `${(Math.min(c.filled, c.squares) / scale) * 100}%`, background: a.color }}
+        style={{
+          ...S.countBarFill,
+          width: `${(Math.min(c.filled, c.squares) / scale) * 100}%`,
+          background: placed(a.color),
+        }}
       />
+      {c.done > 0 && (
+        <span
+          style={{ ...S.countBarFill, width: `${(Math.min(c.done, c.squares) / scale) * 100}%`, background: a.color }}
+        />
+      )}
       {c.filled > c.squares && (
         <span
           style={{
