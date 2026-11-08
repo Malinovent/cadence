@@ -20,9 +20,9 @@ describe("French (Canada) wording of the lib", () => {
     expect(fmtTime(810, "fr")).toBe("13 h 30");
     expect(fmtTime(810)).toBe("1:30pm");
     expect(fmtDur(120, "fr")).toBe("2 h");
-    expect(fmtDur(90, "fr")).toBe("1 h 30");
-    expect(fmtDur(30, "fr")).toBe("30 min");
-    expect(fmtLeft(65, LIB_FR)).toBe("encore 1 h 05");
+    expect(fmtDur(90, "fr")).toBe("1,5 h");
+    expect(fmtDur(30, "fr")).toBe("0,5 h");
+    expect(fmtLeft(65, LIB_FR)).toBe("encore 1,1 h");
     expect(fmtLeft(38, LIB_FR)).toBe("encore 38 min");
   });
   it("labels the weekly time", () => {
@@ -69,8 +69,8 @@ describe("default areas in the person's language", () => {
 });
 
 describe("one way to write time", () => {
-  it("half hours read 2 h 30, never 2,5 h (JP, 2026-11-08)", () => {
-    expect(limitLabel({ kind: "floor", min: 150 }, LIB_FR)).toBe("Au moins 2 h 30");
-    expect(limitLabel({ kind: "floor", min: 150 })).toBe("At least 2h30");
+  it("half hours read 2.5, never 2h30 (JP, 2026-11-08: \"I prefer 1.5 instead of 1h30\")", () => {
+    expect(limitLabel({ kind: "floor", min: 150 }, LIB_FR)).toBe("Au moins 2,5 h");
+    expect(limitLabel({ kind: "floor", min: 150 })).toBe("At least 2.5h");
   });
 });

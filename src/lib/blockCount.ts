@@ -89,7 +89,7 @@ export function blockCount(limit: Limit, plannedMins: number, blockMins: number,
 }
 
 /**
- * The words under an area, in the chip's own time format: "3h to go", "1h30 to go", "30m to go",
+ * The words under an area, in the chip's own time format: "3h to go", "1.5h to go", "0.5h to go",
  * "2h above", "8h left", "at the limit", "1h over", "reached", "in range" (FR « encore 3 h », « reste 1 h 30 »,
  * « 30 min de trop »). Never the "½" sign, which shrinks to dots in the small mono type.
  */

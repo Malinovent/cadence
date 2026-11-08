@@ -14,7 +14,7 @@ export type ReviewLine = {
   name: string;
   color: string;
   kept: boolean;
-  hours: string; // "4h", "1h30" (French « 1 h 30 »): the app's one way to write time
+  hours: string; // "4h", "1.5h" (French « 1,5 h »): the app's one way to write time
   limit: string; // "At least 4 h"
   goal: Limit; // drawn as "≥ 4 h at least", like the Areas list (JP, 2026-11-08)
   text: string; // "Rest reached at least 4 h (4 h)."

@@ -16,12 +16,14 @@ describe("fmtTime", () => {
 
 describe("fmtDur", () => {
   it("formats like the legacy app", () => {
-    expect(fmtDur(150)).toBe("2h30");
+    // decimal hours (JP, 2026-11-08: "I prefer 1.5 instead of 1h30")
+    expect(fmtDur(150)).toBe("2.5h");
     expect(fmtDur(120)).toBe("2h");
-    expect(fmtDur(45)).toBe("45m");
-    expect(fmtDur(30)).toBe("30m");
+    expect(fmtDur(45)).toBe("0.75h");
+    expect(fmtDur(30)).toBe("0.5h");
     expect(fmtDur(0)).toBe("0h");
     expect(fmtDur(0, "fr")).toBe("0 h");
+    expect(fmtDur(90, "fr")).toBe("1,5 h");
     expect(fmtDur(1200)).toBe("20h");
   });
 });

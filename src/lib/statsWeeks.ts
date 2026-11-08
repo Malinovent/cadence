@@ -31,7 +31,7 @@ export function weekGap(l: Limit, mins: number, rules: BalanceRules, open: boole
   return null;
 }
 
-/** "1h short", "30m over", "2h to go" (FR « il manque 1 h », « 30 min de trop », « encore 2 h »). */
+/** "1h short", "0.5h over", "2h to go" (FR « il manque 1 h », « 0,5 h de trop », « encore 2 h »). */
 export function gapText(g: Gap, w: LibWords = LIB_EN): string {
   const d = fmtDur(g.mins, w.lang);
   return g.kind === "over" ? w.count.over(d) : g.kind === "toGo" ? w.count.toGo(d) : w.count.short(d);

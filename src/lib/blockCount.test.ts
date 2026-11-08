@@ -28,14 +28,14 @@ describe("an area's week: squares in blocks, words in time", () => {
       mins: h(2),
     });
     expect(say(atLeast(10), 12, 1)).toBe("2h above");
-    expect(say(atLeast(4), 4.5, 2)).toBe("30m above");
+    expect(say(atLeast(4), 4.5, 2)).toBe("0.5h above");
     expect(blockCount(atLeast(4), h(4.5), h(2)).above).toBe(1);
     expect(countStatus(blockCount(atLeast(4), h(5), h(1)), LIB_FR)).toBe("1 h de plus");
   });
   it("says exactly the time left, whatever the block length (JP: blocks aren't the target)", () => {
-    expect(say(atLeast(4), 2.5, 1)).toBe("1h30 to go");
-    expect(say(atLeast(4), 3.5, 1)).toBe("30m to go");
-    expect(say(atLeast(4), 3.5, 2)).toBe("30m to go");
+    expect(say(atLeast(4), 2.5, 1)).toBe("1.5h to go");
+    expect(say(atLeast(4), 3.5, 1)).toBe("0.5h to go");
+    expect(say(atLeast(4), 3.5, 2)).toBe("0.5h to go");
     expect(say(atLeast(4), 3, 1)).toBe("1h to go");
     expect(say(atLeast(4), 3, 0.5)).toBe("1h to go");
   });
@@ -54,7 +54,7 @@ describe("an area's week: squares in blocks, words in time", () => {
     expect(over).toMatchObject({ state: "over", tone: "over", extra: 1, mins: h(4) });
     expect(say(atMost(40), 44, 4)).toBe("4h over");
     expect(say(atMost(40), 41, 4)).toBe("1h over");
-    expect(say(atMost(40), 40.5, 4)).toBe("30m over");
+    expect(say(atMost(40), 40.5, 4)).toBe("0.5h over");
   });
   it("still draws whole striped squares past the top", () => {
     expect(blockCount(atMost(40), h(41), h(4)).extra).toBe(1);
@@ -91,8 +91,8 @@ describe("an area's week: squares in blocks, words in time", () => {
     const fr = (l: Parameters<typeof blockCount>[0], p: number, b: number) =>
       countStatus(blockCount(l, h(p), h(b)), LIB_FR);
     expect(fr(atLeast(10), 7, 1)).toBe("encore 3 h");
-    expect(fr(atLeast(4), 2.5, 1)).toBe("encore 1 h 30");
-    expect(fr(atLeast(4), 3.5, 1)).toBe("encore 30 min");
+    expect(fr(atLeast(4), 2.5, 1)).toBe("encore 1,5 h");
+    expect(fr(atLeast(4), 3.5, 1)).toBe("encore 0,5 h");
     expect(fr(atMost(40), 41, 4)).toBe("1 h de trop");
     expect(fr(atMost(40), 34, 4)).toBe("reste 6 h");
     expect(fr(atMost(40), 40, 4)).toBe("à la limite");

@@ -22,8 +22,16 @@ export const isNowBlock = (b: Pick<Block, "day" | "start" | "mins">, week: WeekI
 export const minutesLeft = (b: Pick<Block, "start" | "mins">, p: NowPoint): number =>
   Math.max(1, Math.ceil(b.start + b.mins - p.mins));
 
-/** "38 min left", "1 h left", "1 h 20 left". */
-export const fmtLeft = (mins: number, w: LibWords = LIB_EN): string => w.now.left(Math.floor(mins / 60), mins % 60);
+/**
+ * The block under way: "38m left" under an hour, then decimal hours like the rest of the app,
+ * to one decimal since it counts down by the minute: "1.4h left", "2h left" (FR « encore 38 min »,
+ * « encore 1,4 h »).
+ */
+export const fmtLeft = (mins: number, w: LibWords = LIB_EN): string => {
+  if (mins < 60) return w.now.left(w.lang === "fr" ? `${mins} min` : `${mins}m`);
+  const h = String(Math.round((mins / 60) * 10) / 10);
+  return w.now.left(w.lang === "fr" ? `${h.replace(".", ",")} h` : `${h}h`);
+};
 
 /** px from the top of the day column for the current-time line, or null outside the grid's hours or on week 2. */
 export const nowLineTop = (

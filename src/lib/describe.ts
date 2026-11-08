@@ -15,7 +15,7 @@ export type WeekLine = { catId: string; name: string; color: string; balance: Ba
 export function describeArea(cat: Category, tickedMinutes: number, w: DescribeWords = DESCRIBE_EN): string {
   const name = cat.name.trim() || "?";
   const b = balance(cat.limit, tickedMinutes);
-  const h = (mins: number) => fmtDur(mins, w.lang); // "2h30", like the rest of the app
+  const h = (mins: number) => fmtDur(mins, w.lang); // "2.5h", like the rest of the app
   const d = h(b.plannedMins);
   const l = cat.limit;
   if (b.plannedMins === 0 && l.kind !== "ceiling") return w.noTicks(name);

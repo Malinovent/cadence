@@ -2,7 +2,7 @@
 import type { DescribeWords, LibWords } from "./words";
 
 const plural = (n: number, one: string, many: string) => `${n} ${n <= 1 ? one : many}`;
-// durations arrive already written the French way: « 2 h 30 » (fmtDur)
+// durations arrive already written the French way: « 1,5 h » (fmtDur)
 
 const DESCRIBE_FR: DescribeWords = {
   lang: "fr",
@@ -63,7 +63,7 @@ export const LIB_FR: LibWords = {
     inRange: "entre les deux",
   },
   now: {
-    left: (h, m) => (!h ? `encore ${m} min` : m ? `encore ${h} h ${String(m).padStart(2, "0")}` : `encore ${h} h`),
+    left: (d) => `encore ${d}`,
   },
   panel: { untitled: "Sans nom", buffer: "Tampon", nextWeek: "semaine prochaine", backFrom: (d) => `revenue de ${d}` },
   welcome: {

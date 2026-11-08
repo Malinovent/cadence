@@ -6,7 +6,7 @@ export type Lang = "en" | "fr";
 
 // S1.10 neutral week descriptions (describe.ts)
 export type DescribeWords = {
-  /** the durations in the sentences are written the app's one way ("2h30" / « 2 h 30 ») */
+  /** the durations in the sentences are written the app's one way ("2.5h" / « 2,5 h ») */
   lang: Lang;
   noTicks: (name: string) => string;
   floorMet: (name: string, done: string, min: string) => string;
@@ -53,10 +53,10 @@ export type LibWords = {
     sentence: { synced: string; syncing: string; offline: string; error: string };
     auth: { invalid_code: string; rate_limited: string; offline: string; failed: string };
   };
-  now: { left: (h: number, m: number) => string };
+  now: { left: (dur: string) => string };
   /** visual B: an area's week counted in its blocks */
   // blocks to the nearest half: 3, 1.5, 0.5
-  // what's left of an area's goal, given as a duration ("3h", "1h30"); JP: time, not blocks
+  // what's left of an area's goal, given as a duration ("3h", "1.5h"); JP: time, not blocks
   count: {
     toGo: (dur: string) => string;
     room: (dur: string) => string;
@@ -128,7 +128,7 @@ export const LIB_EN: LibWords = {
     inRange: "in range",
   },
   now: {
-    left: (h, m) => (!h ? `${m}m left` : m ? `${h}h${String(m).padStart(2, "0")} left` : `${h}h left`),
+    left: (d) => `${d} left`,
   },
   panel: { untitled: "Untitled", buffer: "Buffer", nextWeek: "next week", backFrom: (d) => `back from ${d}` },
   welcome: {

@@ -10,14 +10,10 @@ export const fmtTime = (mins: number, lang: Lang = "en"): string => {
   return `${hh}${m ? ":" + String(m).padStart(2, "0") : ""}${ap}`;
 };
 
-// minutes -> "2h", "2h30", "45m"; French: "2 h", "2 h 30", "45 min". The one way the app writes
-// an amount of time (JP, 2026-11-08: "2h30 to go … 2.5 as notation … consistency"); nothing is "0m"
+// minutes -> "2h", "1.5h", "0.5h"; French: "2 h", "1,5 h", "0,5 h". The one way the app writes an
+// amount of time, in decimal hours (JP, 2026-11-08: "I prefer 1.5 instead of 1h30"). Blocks snap to
+// half hours, so it is nearly always a whole or a half; anything finer keeps two decimals at most.
 export const fmtDur = (mins: number, lang: Lang = "en"): string => {
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  if (mins === 0) return lang === "fr" ? "0 h" : "0h";
-  if (lang === "fr") return h ? `${h} h${m ? " " + String(m).padStart(2, "0") : ""}` : `${m} min`;
-  if (h && m) return `${h}h${m}`;
-  if (h) return `${h}h`;
-  return `${m}m`;
+  const h = String(Math.round((mins / 60) * 100) / 100);
+  return lang === "fr" ? `${h.replace(".", ",")} h` : `${h}h`;
 };

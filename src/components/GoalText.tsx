@@ -12,7 +12,7 @@ export const SIGN: Record<LimitKind, string> = { floor: "≥", ceiling: "≤", r
  */
 export default function GoalText({ limit: l }: { limit: Limit }) {
   const { m, lang } = useI18n();
-  const d = (mins: number) => fmtDur(mins, lang); // "4h", "1h30": the app's one way to write time
+  const d = (mins: number) => fmtDur(mins, lang); // "4h", "1.5h": the app's one way to write time
   const amount = l.kind === "range" ? `${d(l.min)}–${d(l.max)}` : d(l.kind === "floor" ? l.min : l.max);
   return (
     <>

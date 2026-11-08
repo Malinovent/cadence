@@ -50,8 +50,8 @@ describe("what a week missed by", () => {
     expect(weekGap(exercise.limit, h(1), DEFAULT_RULES, true)).toEqual({ kind: "toGo", mins: h(3) });
   });
   it("in words, in the chip's format, in both languages", () => {
-    expect(gapText({ kind: "short", mins: h(1.5) })).toBe("1h30 short");
-    expect(gapText({ kind: "over", mins: 30 })).toBe("30m over");
+    expect(gapText({ kind: "short", mins: h(1.5) })).toBe("1.5h short");
+    expect(gapText({ kind: "over", mins: 30 })).toBe("0.5h over");
     expect(gapText({ kind: "toGo", mins: h(3) })).toBe("3h to go");
     expect(gapText({ kind: "short", mins: h(1) }, LIB_FR)).toBe("il manque 1 h");
     expect(gapText({ kind: "over", mins: h(2) }, LIB_FR)).toBe("2 h de trop");
