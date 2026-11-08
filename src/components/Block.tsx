@@ -79,6 +79,20 @@ export default function Block({
   const named = !!p.label;
   const baseColor = colors[0];
   const multi = colors.length > 1;
+  // several areas: each area's icon in its colour, a dot for one without an icon (JP, 2026-11-08)
+  const marks = (size: number, column = false) => (
+    <span
+      style={{ ...S.pipRow, gap: column ? 1 : 3, alignItems: "center", ...(column ? { flexDirection: "column" } : {}) }}
+    >
+      {cats.map((c) =>
+        c.icon ? (
+          <AreaIconView key={c.id} icon={c.icon} size={size} style={{ color: c.color }} />
+        ) : (
+          <span key={c.id} style={{ ...S.pip, background: c.color }} />
+        ),
+      )}
+    </span>
+  );
   // three states: empty -> dashed hollow | named -> solid hollow | done -> the area's tint, solid ring
   // (sprint 1: done blocks are tinted, no longer filled, so ink text stays readable on every colour)
   const done = p.done;
@@ -216,11 +230,7 @@ export default function Block({
             {buffer ? null : !multi && cats[0]?.icon ? (
               <AreaIconView icon={cats[0].icon} size={13} />
             ) : multi ? (
-              <span style={{ ...S.pipRow, flexDirection: "column", gap: 2 }}>
-                {colors.map((col, i) => (
-                  <span key={i} style={{ ...S.pip, background: col }} />
-                ))}
-              </span>
+              marks(11, true)
             ) : (
               <span style={S.narrowInitial}>{(cats[0]?.name ?? "?").slice(0, 1)}</span>
             )}
@@ -256,13 +266,7 @@ export default function Block({
         {!narrow && (
           <div style={S.placedTop}>
             <span style={S.placedNameWrap}>
-              {multi && (
-                <span style={S.pipRow}>
-                  {colors.map((col, i) => (
-                    <span key={i} style={{ ...S.pip, background: col }} />
-                  ))}
-                </span>
-              )}
+              {multi && marks(12)}
               {buffer ? (
                 <span style={{ ...S.placedName, ...S.bufferName }}>{m.lib.panel.buffer}</span>
               ) : (

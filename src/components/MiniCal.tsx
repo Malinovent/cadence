@@ -100,9 +100,20 @@ export default function MiniCal({
                   border: b.buffer ? `1px dashed ${color}` : "none",
                   opacity: b.done ? 0.55 : 1,
                 };
+                // every area's icon when there's room, side by side for a block in several (JP, 2026-11-08)
+                const withIcon = own.filter((c) => c.icon);
                 const icon =
-                  own.length === 1 && own[0].icon && b.mins * scale >= 16 ? (
-                    <AreaIconView icon={own[0].icon} size={12} style={{ color: "#fff" }} />
+                  withIcon.length && b.mins * scale >= 16 ? (
+                    <span style={{ display: "flex", gap: 1 }}>
+                      {withIcon.map((c) => (
+                        <AreaIconView
+                          key={c.id}
+                          icon={c.icon!}
+                          size={own.length > 1 ? 10 : 12}
+                          style={{ color: "#fff" }}
+                        />
+                      ))}
+                    </span>
                   ) : null;
                 const name = b.buffer ? "" : own.map((c) => c.name).join(" + ");
                 return onBlock ? (
