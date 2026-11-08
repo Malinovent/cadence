@@ -1243,10 +1243,13 @@ export const S = {
     top: 0,
     bottom: 0
   },
-  // past what "at most" / "between" allows: striped ink, never red
-  squareExtra: {
-    border: `1.5px dashed ${warn}`,
-    background: `repeating-linear-gradient(45deg, ${warn} 0 1.5px, transparent 1.5px 4px)`
+  // past an area's goal: a short line where the goal ends (JP, 2026-11-08, option B)
+  goalLine: {
+    width: 2,
+    height: 15,
+    borderRadius: 1,
+    margin: "0 2px",
+    flexShrink: 0
   },
   countBarWrap: {
     flex: "1 1 120px",
@@ -1271,7 +1274,7 @@ export const S = {
     position: "absolute",
     top: 0,
     bottom: 0,
-    background: `repeating-linear-gradient(45deg, ${warn} 0 1.5px, transparent 1.5px 4px)`
+    background: warn
   },
   countBarMark: {
     position: "absolute",
