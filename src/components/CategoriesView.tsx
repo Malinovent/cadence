@@ -97,7 +97,8 @@ function GoalText({ limit: l }: { limit: Limit }) {
       <span aria-hidden="true" style={S.areaSign}>
         {SIGN[l.kind]}
       </span>
-      {amount} <strong style={S.areaGoalWord}>{m.categories.kinds[l.kind].word}</strong>
+      <span style={S.areaGoalAmount}>{amount}</span>
+      <strong style={S.areaGoalWord}>{m.categories.kinds[l.kind].word}</strong>
     </>
   );
 }
