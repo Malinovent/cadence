@@ -57,7 +57,7 @@
 - `src/lib/legal.ts` — links to the site's privacy policy and terms, by language; help and feedback (`helpLinks`: the site's FAQ, a mail to VITE_SUPPORT_EMAIL)
 - `src/lib/crash.ts` — the crash screen's backup: the stored keys exactly as they are (`crashBackup`), importable
 - `src/lib/sounds.ts` — the sounds as tones (place, tick, untick, remove, step, finale), quiet and short
-- `src/lib/statsWeeks.ts` — Stats week by week: `weekSpan`, `shiftWeek`, `weekRows`, `weekGap` / `gapText`, `rowBar`, `areaTrends`, `monthStarts`
+- `src/lib/statsWeeks.ts` — Stats week by week: `weekSpan`, `shiftWeek`, `weekRows`, `weekGap` / `gapText`, `rowBar`, `areaTrends`, `areaLines` (trends), `monthStarts`
 - `src/lib/review.ts` — roll forward: how Week 1 went (`weekReview`: balanced, ticked of total, a line per area)
 - `src/lib/doneStyle.ts` — how ticked blocks look: soft or solid (the first version's white-on-colour)
 - `src/lib/theme.ts` — the looks: paper, night, high contrast, device; each palette's colours by role, as CSS variables
@@ -122,6 +122,7 @@
 - `src/components/BalancedWeeksCard.tsx` — "N balanced weeks this season" card with a square per week
 - `src/components/StatsView.tsx` — Stats: season card (tap a week), any week with ‹ ›, last 12 weeks, empty state
 - `src/components/WeekRows.tsx` — Stats, one week: per area a bar with its target, ✓ or "1h short" / "1h over"
+- `src/components/TrendLines.tsx` — Stats, Trends: a line per area over 12 weeks / 6 months / a year, its recent average and an arrow
 - `src/components/AreaTrends.tsx` — Stats, last 12 weeks: a column per week per area, the target dashed, "kept 5 of 7"
 - `src/components/GoalText.tsx` — an area's target, number first with its sign ("≥ 4 h at least"); the Areas list and Stats rows
 - `src/components/CategoriesView.tsx` — the Areas tab: a list (icon on colour, name, weekly goal); tap one to change its name, At least / At most / Between, hours and block length (− / ＋ in half hours), colour (palette or any), icon; delete asks first

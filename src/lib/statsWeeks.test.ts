@@ -1,7 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_RULES } from "./balancedWeeks";
 import type { Category, HistoryEntry } from "./model";
-import { areaTrends, gapText, monthStarts, rowBar, shiftWeek, weekGap, weekRows, weekSpan } from "./statsWeeks";
+import {
+  areaLines,
+  areaTrends,
+  gapText,
+  monthStarts,
+  rowBar,
+  shiftWeek,
+  weekGap,
+  weekRows,
+  weekSpan,
+} from "./statsWeeks";
 import { LIB_FR } from "./words.fr";
 
 const h = (n: number) => Math.round(n * 60);
@@ -118,5 +128,53 @@ describe("months under the season's squares", () => {
     expect(monthStarts(["2026-09-07", "2026-09-14", "2026-09-28", "2026-10-05", "2026-10-12", "2026-11-02"])).toEqual([
       0, 3, 5,
     ]);
+  });
+});
+
+describe("trends: a line per area, and which way it is going", () => {
+  // a tick on the Tuesday of the week `w` weeks before this one (this week starts Monday 9 November)
+  const weeksAgo = (w: number, catId: string, mins: number) => ({
+    id: `t${n++}`,
+    catId,
+    mins,
+    date: new Date(2026, 10, 10 - 7 * w, 18).getTime(),
+  });
+  const steps = (catId: string, first: number[], then: number[]) => [
+    ...first.map((mins, i) => weeksAgo(8 - i, catId, mins)),
+    ...then.map((mins, i) => weeksAgo(4 - i, catId, mins)),
+  ];
+  it("draws each finished week since the first tick, oldest first, and leaves this week out", () => {
+    const history = [
+      ...steps("exercise", [h(3), h(3), h(3), h(3)], [h(4.5), h(4.5), h(4.5), h(4.5)]),
+      weeksAgo(0, "exercise", h(9)),
+    ];
+    const [line] = areaLines([exercise], history, now, 12);
+    expect(line.points).toEqual([h(3), h(3), h(3), h(3), h(4.5), h(4.5), h(4.5), h(4.5)]);
+    expect(line).toMatchObject({ recent: h(4.5), direction: "up", change: h(1.5) });
+    expect(line.scale).toBe(h(5)); // past the 4 h target
+  });
+  it("says down, and steady within half an hour a week, whatever the area's kind", () => {
+    const down = areaLines([work], steps("work", [h(40), h(40), h(40), h(40)], [h(36), h(36), h(36), h(36)]), now, 26);
+    expect(down[0]).toMatchObject({ direction: "down", change: h(4), recent: h(36) });
+    const steady = areaLines(
+      [work],
+      steps("work", [h(38), h(38), h(38), h(38)], [h(38), h(38), h(38), h(38.25)]),
+      now,
+      26,
+    );
+    expect(steady[0]).toMatchObject({ direction: "steady", change: 0 });
+  });
+  it("needs 8 weeks before it compares, and draws what there is", () => {
+    const [line] = areaLines([exercise], [weeksAgo(3, "exercise", h(2)), weeksAgo(1, "exercise", h(4))], now, 12);
+    expect(line.points).toEqual([h(2), 0, h(4)]);
+    expect(line).toMatchObject({ direction: null, recent: h(2) });
+  });
+  it("has nothing to draw before the first tick", () => {
+    expect(areaLines([exercise], [], now, 52)[0].points).toEqual([]);
+  });
+  it("keeps to the range: 12 weeks, 6 months or a year", () => {
+    const history = [weeksAgo(40, "exercise", h(1)), weeksAgo(1, "exercise", h(1))];
+    expect(areaLines([exercise], history, now, 12)[0].points).toHaveLength(12);
+    expect(areaLines([exercise], history, now, 52)[0].points).toHaveLength(40);
   });
 });

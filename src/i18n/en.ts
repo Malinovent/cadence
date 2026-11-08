@@ -120,6 +120,19 @@ export const en = {
     earlier: "Earlier week",
     later: "Later week",
     trendTitle: "Last 12 weeks",
+    // trends, a line per area (JP, 2026-11-08, option A)
+    trendsTitle: "Trends",
+    trendsRange: "How far back",
+    ranges: { 12: "12 weeks", 26: "6 months", 52: "Year" },
+    aWeek: "a week",
+    steady: "steady",
+    trendsNote: "Arrow: the last 4 weeks against the 4 before. Dashed: the target.",
+    lineLabel: (name: string, avg: string, direction: "up" | "down" | "steady" | null, change: string) =>
+      direction === null
+        ? `${name}: ${avg} a week lately`
+        : direction === "steady"
+          ? `${name}: ${avg} a week lately, about the same as the 4 weeks before`
+          : `${name}: ${avg} a week lately, ${direction} ${change} from the 4 weeks before`,
     kept: "kept",
     keptOf: (n: number, total: number) => `${n} of ${total}`,
     trendLabel: (name: string, n: number, total: number) =>

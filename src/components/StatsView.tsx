@@ -1,13 +1,23 @@
 import { useState } from "react";
 import type { CadenceData } from "../lib/model";
 import { dayKey, mondayOf, season } from "../lib/balancedWeeks";
-import { areaTrends, fromKey, shiftWeek, weekRows, weekSpan } from "../lib/statsWeeks";
+import {
+  areaLines,
+  areaTrends,
+  fromKey,
+  shiftWeek,
+  TREND_RANGES,
+  weekRows,
+  weekSpan,
+  type TrendRange,
+} from "../lib/statsWeeks";
 import { readBalanceRules } from "../state/balanceRules";
 import { S } from "../styles";
 import { useI18n } from "../i18n/I18nProvider";
 import BalancedWeeksCard from "./BalancedWeeksCard";
 import WeekRows from "./WeekRows";
 import AreaTrends from "./AreaTrends";
+import TrendLines from "./TrendLines";
 
 type Props = {
   data: CadenceData;
@@ -15,8 +25,9 @@ type Props = {
 
 /**
  * Stats (JP, 2026-11-08, "more love"): the season's squares (tap one for its week), any week with
- * ‹ ›, each area's bar and what it missed by, the last 12 weeks per area. Time invested is gone
- * (JP, 2026-11-08). Before anything is ticked, a short empty state instead. Reset lives in Settings now.
+ * ‹ ›, each area's bar and what it missed by, the last 12 weeks per area, then Trends: a line per
+ * area over 12 weeks, 6 months or a year (JP, 2026-11-08, option A). Time invested is gone. Before
+ * anything is ticked, a short empty state instead. Reset lives in Settings now.
  */
 export default function StatsView({ data }: Props) {
   const { m, locale } = useI18n();
@@ -29,6 +40,8 @@ export default function StatsView({ data }: Props) {
   const week = picked < span.first ? span.first : picked > span.last ? span.last : picked;
   const open = week === span.last;
   const trends = areaTrends(data.cats, data.history, now, rules);
+  const [range, setRange] = useState<TrendRange>(26);
+  const lines = areaLines(data.cats, data.history, now, range);
   const empty = data.history.length === 0;
 
   const weekDate = fromKey(week).toLocaleDateString(locale, { month: "short", day: "numeric" });
@@ -100,6 +113,33 @@ export default function StatsView({ data }: Props) {
                 {m.stats.trendTitle}
               </h2>
               <AreaTrends trends={trends} />
+            </section>
+          )}
+
+          {lines.some((l) => l.points.length > 0) && (
+            <section style={S.statsSection} aria-labelledby="stats-lines">
+              <div style={{ ...S.statsHead, marginBottom: 6 }}>
+                <h2 id="stats-lines" style={{ ...S.statsSubtitle, margin: 0 }}>
+                  {m.stats.trendsTitle}
+                </h2>
+                <div style={S.kindGroup} role="group" aria-label={m.stats.trendsRange}>
+                  {TREND_RANGES.map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      aria-pressed={range === r}
+                      onClick={() => setRange(r)}
+                      style={{ ...S.kindBtn, ...S.setSeg, ...(range === r ? S.kindBtnActive : {}) }}
+                    >
+                      {m.stats.ranges[r]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <TrendLines lines={lines} />
+              {lines.some((l) => l.direction) && (
+                <p style={{ ...S.weekWhen, textAlign: "left" }}>{m.stats.trendsNote}</p>
+              )}
             </section>
           )}
 

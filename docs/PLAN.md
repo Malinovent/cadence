@@ -170,6 +170,8 @@ JP picked suggestions 1, 2, 3, 5 and 6 of docs/mockups/stats.html: tappable seas
 JP: "the blocks on the left need 3 states: not placed, placed, and complete". Option C of docs/mockups/square-states.html: empty, striped in the area colour (placed), solid (ticked). Committed to main; push when JP says.
 ### [x] Stats without Time invested; Done blocks soft or solid (2026-11-08)
 JP: Time invested removed from Stats; Settings → Done blocks: Soft (the tint) or Solid (the area's colour, readable text); done squares past an at-most limit turn solid ink instead of staying striped. Committed to main; push when JP says.
+### [x] Stats trends, decimal hours, consistency pass (2026-11-08)
+JP: durations as decimal hours everywhere (1.5h); a consistency pass (headings, close vs delete, one confirm pattern, hide toggles, wording); squares past a goal striped while placed; Stats → Trends, option A (a line per area over 12 weeks / 6 months / a year, with an arrow against the 4 weeks before). Committed to main; push when JP says.
 ### [~] S1.9 French and English
 Done on branch `s1-finish`: catalogues for every string (en/fr), lib wording passed in, detection + Settings switch (device-local), Quebec formats, default areas named in the person's language. Shipped to main 2026-11-04. Left: JP reviews the French.
 ### [x] S1.10 Neutral stats

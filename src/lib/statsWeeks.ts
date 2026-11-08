@@ -110,6 +110,64 @@ export function areaTrends(
   });
 }
 
+// ---------------------------------------------------------------- trends (JP, 2026-11-08, option A)
+
+/** How far back the trend lines go, in finished weeks: 12 weeks, 6 months, a year. */
+export type TrendRange = 12 | 26 | 52;
+export const TREND_RANGES: readonly TrendRange[] = [12, 26, 52];
+export type Direction = "up" | "down" | "steady";
+
+export type AreaLine = {
+  cat: Category;
+  /** minutes ticked in each finished week of the range since the first tick ever, oldest first */
+  points: number[];
+  /** the last 4 weeks' average, to the nearest half hour */
+  recent: number;
+  /** the last 4 weeks against the 4 before; null until there are 8 weeks to compare */
+  direction: Direction | null;
+  /** how much it changed, to the nearest half hour (0 when steady) */
+  change: number;
+  /** the hours the line is drawn against: the largest week, or a little past the target */
+  scale: number;
+};
+
+/** Less than half an hour a week either way reads as steady. */
+export const STEADY_MINS = 30;
+const toHalf = (mins: number) => Math.round(mins / 30) * 30;
+
+/**
+ * Each area's weekly ticked time over the range, for a line per area (Stats → Trends), with its
+ * recent average and which way it is going. Describes, never judges: up, down or steady, whatever
+ * the area's kind. This week, still open, is left out.
+ */
+export function areaLines(
+  cats: readonly Category[],
+  history: readonly HistoryEntry[],
+  now: Date,
+  range: TrendRange,
+): AreaLine[] {
+  const thisMonday = mondayOf(now);
+  const firstTick = history.length ? mondayOf(new Date(Math.min(...history.map((e) => e.date)))) : null;
+  const mondays = Array.from({ length: range }, (_, i) => addDays(thisMonday, -7 * (range - i))).filter(
+    (m) => firstTick !== null && m >= firstTick,
+  );
+  const ticked = mondays.map((m) => tickedMins(history, m));
+  const avg = (xs: readonly number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
+  return cats.map((cat) => {
+    const points = ticked.map((t) => t.get(cat.id) ?? 0);
+    const recentRaw = avg(points.slice(-4));
+    let direction: Direction | null = null;
+    let change = 0;
+    if (points.length >= 8) {
+      const d = recentRaw - avg(points.slice(-8, -4));
+      direction = Math.abs(d) < STEADY_MINS ? "steady" : d > 0 ? "up" : "down";
+      change = direction === "steady" ? 0 : toHalf(Math.abs(d));
+    }
+    const top = cat.limit.kind === "floor" ? cat.limit.min : cat.limit.max;
+    return { cat, points, recent: toHalf(recentRaw), direction, change, scale: Math.max(top * 1.25, ...points, 60) };
+  });
+}
+
 /** Under the season's squares: the index of each square that starts a month (the first always does). */
 export function monthStarts(mondays: readonly string[]): number[] {
   return mondays.flatMap((k, i) =>

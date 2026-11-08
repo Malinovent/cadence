@@ -2756,6 +2756,30 @@ export const S = {
     textAlign: "right",
     color: "var(--c-muted)"
   },
+  // Stats → Trends: a line per area (JP, 2026-11-08, option A)
+  lineRow: {
+    display: "grid",
+    gridTemplateColumns: "minmax(84px, 120px) 1fr 84px",
+    columnGap: 10,
+    alignItems: "center",
+    padding: "8px 0",
+    borderTop: `1px solid ${line}`
+  },
+  lineSvg: {
+    width: "100%",
+    height: 36,
+    overflow: "visible"
+  },
+  lineValue: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-end",
+    gap: 2,
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 11.5,
+    lineHeight: 1.3,
+    whiteSpace: "nowrap"
+  },
   // before anything is ticked
   statsEmpty: {
     border: `1px dashed ${line}`,

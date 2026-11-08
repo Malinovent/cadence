@@ -118,6 +118,18 @@ export const fr: Messages = {
     earlier: "Semaine précédente",
     later: "Semaine suivante",
     trendTitle: "Les 12 dernières semaines",
+    trendsTitle: "Tendances",
+    trendsRange: "Sur combien de temps",
+    ranges: { 12: "12 semaines", 26: "6 mois", 52: "Année" },
+    aWeek: "par semaine",
+    steady: "stable",
+    trendsNote: "Flèche : les 4 dernières semaines contre les 4 d'avant. Pointillé : la cible.",
+    lineLabel: (name, avg, direction, change) =>
+      direction === null
+        ? `${name} : ${avg} par semaine ces derniers temps`
+        : direction === "steady"
+          ? `${name} : ${avg} par semaine ces derniers temps, à peu près comme les 4 semaines d'avant`
+          : `${name} : ${avg} par semaine ces derniers temps, ${change} de ${direction === "up" ? "plus" : "moins"} que les 4 semaines d'avant`,
     kept: "tenu",
     keptOf: (n, total) => `${n} sur ${total}`,
     trendLabel: (name, n, total) => `${name} : tenu ${n} ${total <= 1 ? "semaine" : "semaines"} sur ${total}`,
