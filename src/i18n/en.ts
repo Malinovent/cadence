@@ -113,8 +113,6 @@ export const en = {
     notNow: "Not now",
   },
   stats: {
-    title: "Time invested",
-    ranges: { month: "month", quarter: "quarter", year: "year" },
     // Stats week by week (JP, 2026-11-08)
     weekOf: (date: string) => `Week of ${date}`,
     lastWeek: "last week",
@@ -129,7 +127,6 @@ export const en = {
     emptyTitle: "Nothing ticked yet",
     emptyText: "Tick a block on the calendar once you've done it. Your weeks, and how each area is going, show up here.",
     resetDone: "Stats cleared.",
-    sessions: (n: number) => `${n} ${n === 1 ? "session" : "sessions"}`,
     note: "Counts the blocks you tick. To clear them: Settings → Data and account.",
     resetWarn: "Clear all tracked hours and balanced weeks? This can't be undone.",
     resetYes: "Yes, reset",
@@ -198,6 +195,9 @@ export const en = {
     // the app's look (JP, 2026-11-08)
     lookTitle: "Look",
     looks: { paper: "Paper", night: "Night", contrast: "Contrast", device: "Auto" },
+    // how ticked blocks look (JP, 2026-11-08)
+    doneTitle: "Done blocks",
+    doneStyles: { soft: "Soft", solid: "Solid" },
     // the hours the calendar shows (JP, 2026-11-07)
     dayStart: "Day starts",
     dayEnd: "Day ends",

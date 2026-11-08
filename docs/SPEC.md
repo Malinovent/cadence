@@ -349,11 +349,11 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 - Rows and bars sit close to their names (JP: "numbers are really far away"): the rows are columns sized to their content, bars stop at 82% with the hours just after them.
 
 ### Stats, week by week (JP, 2026-11-08: "more love", "everything except 4"; mockup docs/mockups/stats.html)
-- Supersedes "Last week" above. Top to bottom: the season card, any week, the last 12 weeks, Time invested (unchanged), the note.
+- Supersedes "Last week" above. Top to bottom: the season card, any week, the last 12 weeks, the note. Time invested (hours per month / quarter / year) is gone (JP, 2026-11-08: "let's get rid of time invested").
 - Season card in Stats: squares 18 px, the month's short name under the first square of each month, each square a button that shows its week below (outlined when picked). The compact card above the calendar is unchanged.
 - Any week: ‹ "Week of Oct 26" › with "last week" or "this week, so far" under it; it opens on last week; the arrows stop at the week of the first tick and at this week (`weekSpan`). One row per area (`WeekRows`): name, a bar in the area colour with the target marked (two marks for between, striped ink past an at-most or between top; `rowBar`), the hours ticked, then ✓ when kept by the balanced-weeks rules, or what it missed by, exactly, in the chip's format: "! 1h30 short" (outlined), "! 1h over" (solid ink), and for this week, still open, a calm "2h to go" (`weekGap`, `gapText`; FR « il manque 1 h 30 », « 1 h de trop », « encore 2 h »). The target sits under the name ("≥ 4 h at least", `GoalText`). Screen readers hear the S1.10 sentence.
 - Last 12 weeks (`AreaTrends`, `areaTrends`): per area one column per finished week (not this one), the target as a dashed ink line (two for between), a missed week lighter, "kept 5 of 7". Weeks before the first tick ever are a faint stub and don't count. Hidden until a week has finished since the first tick.
-- Nothing ticked yet: the season card, then "Nothing ticked yet" and a line saying ticked blocks show up here, over faint example bars; no week rows, trend or Time invested.
+- Nothing ticked yet: the season card, then "Nothing ticked yet" and a line saying ticked blocks show up here, over faint example bars; no week rows or trend.
 - Weeks are calendar weeks of ticked time, as for balanced weeks: a block counts in the week it is ticked.
 - "Reset stats" moved to Settings → Data and account, a row that asks first ("Stats cleared." after). The Stats note: "Counts the blocks you tick. To clear them: Settings → Data and account."
 - Logic in `src/lib/statsWeeks.ts` (tested).
@@ -376,6 +376,9 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 
 ### Looks (JP, 2026-11-08)
 - Settings → Look: Paper (the app as it has always been, the default), Night, High contrast, or Match device (Night when the device is dark). Per device (`cadence:ui:theme`), applied before the first paint as `<html data-theme>`. Every colour of the app's own look is a CSS variable by role (`--c-ink`, `--c-paper`, `--c-card`, `--c-muted`…; palettes in `src/lib/theme.ts`, tested for text contrast: 4.5:1, 7:1 for ink in high contrast); area colours never change. Text on an ink fill uses paper, so filled buttons invert with the theme.
+
+- Done blocks (JP, 2026-11-08: "a setting that can toggle this solid color versus transparent"): Settings → Look and sound, "Done blocks: Soft | Solid" (FR « Blocs faits : Doux | Plein »), per device (`cadence:ui:doneStyle`, absent = Soft). Soft is the light tint with ink text, as since sprint 1. Solid fills a ticked block with its area's colour (the blend for several areas), with white or dark text and icons, whichever has the better contrast against the worst of its colours (`textOn`, `src/lib/doneStyle.ts`). Buffers are never filled.
+- Area squares past an "at most" or "between" limit: ink stripes while only placed, solid ink once ticked (JP: "when I complete the task, it says hashed"); the thin bar the same.
 
 ### About in Settings, and audit items 3–5 (2026-11-07)
 - About: what the app is, "Show the introduction again", and privacy / terms links in the person's language once `VITE_SITE_URL` is set (`src/lib/legal.ts`). No medical-device line (JP).

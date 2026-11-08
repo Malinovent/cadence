@@ -168,6 +168,8 @@ On branch `stats-clear` (JP, 2026-11-08): Stats shorter (last week as rows, bars
 JP picked suggestions 1, 2, 3, 5 and 6 of docs/mockups/stats.html: tappable season squares with months, any week with ‹ › and "short" / "over" tags, the last 12 weeks per area, Reset stats moved to Settings, an empty state. Time invested unchanged. Committed to main; push when JP says.
 ### [x] Three states in the area squares (2026-11-08)
 JP: "the blocks on the left need 3 states: not placed, placed, and complete". Option C of docs/mockups/square-states.html: empty, striped in the area colour (placed), solid (ticked). Committed to main; push when JP says.
+### [x] Stats without Time invested; Done blocks soft or solid (2026-11-08)
+JP: Time invested removed from Stats; Settings → Done blocks: Soft (the tint) or Solid (the area's colour, readable text); done squares past an at-most limit turn solid ink instead of staying striped. Committed to main; push when JP says.
 ### [~] S1.9 French and English
 Done on branch `s1-finish`: catalogues for every string (en/fr), lib wording passed in, detection + Settings switch (device-local), Quebec formats, default areas named in the person's language. Shipped to main 2026-11-04. Left: JP reviews the French.
 ### [x] S1.10 Neutral stats

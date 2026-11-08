@@ -9,6 +9,8 @@ import { fmtLeft } from "../lib/now";
 import { fmtDur, fmtTime } from "../lib/time";
 import type { CadenceActions } from "../state/useCadence";
 import { BUFFER_COLOR } from "../lib/constants";
+import { textOn } from "../lib/doneStyle";
+import { readDoneStyle } from "../state/doneStylePrefs";
 import { ink, nowRing, paper, S } from "../styles";
 import BlockEditor from "./BlockEditor";
 import { useI18n } from "../i18n/I18nProvider";
@@ -79,6 +81,9 @@ export default function Block({
   const named = !!p.label;
   const baseColor = colors[0];
   const multi = colors.length > 1;
+  // Settings → Done blocks (JP, 2026-11-08): "solid" fills a ticked block with its colour, with
+  // white or dark text, whichever reads; "soft" (the default) keeps the light tint and ink text
+  const solidText = p.done && !buffer && readDoneStyle() === "solid" ? textOn(colors) : null;
   // several areas: each area's icon in its colour, a dot for one without an icon (JP, 2026-11-08)
   const marks = (size: number, column = false) => (
     <span
@@ -86,9 +91,12 @@ export default function Block({
     >
       {cats.map((c) =>
         c.icon ? (
-          <AreaIconView key={c.id} icon={c.icon} size={size} style={{ color: c.color }} />
+          <AreaIconView key={c.id} icon={c.icon} size={size} style={{ color: solidText ?? c.color }} />
         ) : (
-          <span key={c.id} style={{ ...S.pip, background: c.color }} />
+          <span
+            key={c.id}
+            style={{ ...S.pip, background: c.color, ...(solidText ? { boxShadow: `0 0 0 1.5px ${solidText}` } : {}) }}
+          />
         ),
       )}
     </span>
@@ -96,7 +104,7 @@ export default function Block({
   // three states: empty -> dashed hollow | named -> solid hollow | done -> the area's tint, solid ring
   // (sprint 1: done blocks are tinted, no longer filled, so ink text stays readable on every colour)
   const done = p.done;
-  const onColor = done ? ink : baseColor;
+  const onColor = solidText ?? (done ? ink : baseColor);
   const gradient = multi ? blendGradient(colors) : null;
   const TINT = "2e"; // ~18% of the area colour over the grid background
   const tint = (c: string) => withAlpha(c, TINT);
@@ -109,13 +117,21 @@ export default function Block({
   if (!multi) {
     blockStyle = {
       // tint over the grid colour, so slot lines never show through
-      background: done ? `linear-gradient(${tint(baseColor)}, ${tint(baseColor)}), var(--c-card)` : "var(--c-card)",
+      background: solidText
+        ? baseColor
+        : done
+          ? `linear-gradient(${tint(baseColor)}, ${tint(baseColor)}), var(--c-card)`
+          : "var(--c-card)",
       border: (done || named) && !buffer ? `1.5px solid ${baseColor}` : `1.5px dashed ${baseColor}`,
     };
   } else {
     // multi-type: gradient ring drawn by an overlay; done adds the blended tint inside
     blockStyle = {
-      background: done ? `${blendGradient(colors.map(tint))}, var(--c-card)` : "var(--c-card)",
+      background: solidText
+        ? (gradient ?? baseColor)
+        : done
+          ? `${blendGradient(colors.map(tint))}, var(--c-card)`
+          : "var(--c-card)",
       border: "none",
     };
     // gaps punched along the ring to mimic a dashed border
@@ -279,7 +295,7 @@ export default function Block({
               )}
             </span>
             <div style={S.placedTopRight}>
-              <span style={{ ...S.placedDur, color: isNow ? ink : baseColor }}>
+              <span style={{ ...S.placedDur, color: solidText ?? (isNow ? ink : baseColor) }}>
                 {minsLeft !== null && !nowRoom ? `${m.block.now} · ${fmtLeft(minsLeft, m.lib)}` : fmtDur(p.mins, lang)}
               </span>
               {!buffer && (

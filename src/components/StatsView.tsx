@@ -1,30 +1,24 @@
 import { useState } from "react";
 import type { CadenceData } from "../lib/model";
-import { maxHours, statsByCat, type StatsRange } from "../lib/stats";
 import { dayKey, mondayOf, season } from "../lib/balancedWeeks";
 import { areaTrends, fromKey, shiftWeek, weekRows, weekSpan } from "../lib/statsWeeks";
 import { readBalanceRules } from "../state/balanceRules";
 import { S } from "../styles";
 import { useI18n } from "../i18n/I18nProvider";
 import BalancedWeeksCard from "./BalancedWeeksCard";
-import { hoursText } from "../lib/review";
 import WeekRows from "./WeekRows";
 import AreaTrends from "./AreaTrends";
 
 type Props = {
   data: CadenceData;
-  range: StatsRange;
-  setRange: (r: StatsRange) => void;
 };
-
-const RANGES: StatsRange[] = ["month", "quarter", "year"];
 
 /**
  * Stats (JP, 2026-11-08, "more love"): the season's squares (tap one for its week), any week with
- * ‹ ›, each area's bar and what it missed by, the last 12 weeks per area, then Time invested as
- * before. Before anything is ticked, a short empty state instead. Reset lives in Settings now.
+ * ‹ ›, each area's bar and what it missed by, the last 12 weeks per area. Time invested is gone
+ * (JP, 2026-11-08). Before anything is ticked, a short empty state instead. Reset lives in Settings now.
  */
-export default function StatsView({ data, range, setRange }: Props) {
+export default function StatsView({ data }: Props) {
   const { m, locale } = useI18n();
   const now = new Date();
   const thisWeek = dayKey(mondayOf(now));
@@ -34,13 +28,9 @@ export default function StatsView({ data, range, setRange }: Props) {
   const span = weekSpan(data.history, now);
   const week = picked < span.first ? span.first : picked > span.last ? span.last : picked;
   const open = week === span.last;
-  const stats = statsByCat(data, range, Date.now());
-  const max = maxHours(stats);
   const trends = areaTrends(data.cats, data.history, now, rules);
   const empty = data.history.length === 0;
 
-  // hours without a trailing ".0": "14 h", "1.5 h" / "1,5 h"
-  const hours = (h: string) => `${hoursText(Math.round(parseFloat(h) * 60), m.lib)} h`;
   const weekDate = fromKey(week).toLocaleDateString(locale, { month: "short", day: "numeric" });
 
   return (
@@ -112,45 +102,6 @@ export default function StatsView({ data, range, setRange }: Props) {
               <AreaTrends trends={trends} />
             </section>
           )}
-
-          <section style={S.statsSection} aria-labelledby="stats-time">
-            <div style={S.statsHead}>
-              <h2 id="stats-time" style={S.statsSubtitle}>
-                {m.stats.title}
-              </h2>
-              <div style={S.rangeToggle}>
-                {RANGES.map((r) => (
-                  <button
-                    key={r}
-                    aria-pressed={range === r}
-                    onClick={() => setRange(r)}
-                    style={{ ...S.rangeBtn, ...(range === r ? S.rangeBtnActive : {}) }}
-                  >
-                    {m.stats.ranges[r]}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div style={S.barChart}>
-              {stats.map((s) => (
-                <div key={s.cat.id} style={S.barRow} title={m.stats.sessions(s.sessions)}>
-                  <span style={S.barName}>{s.cat.name}</span>
-                  <div style={S.barTrackTight}>
-                    <div
-                      style={{
-                        ...S.barFill,
-                        minWidth: 6,
-                        height: 28,
-                        width: `${(parseFloat(s.hours) / max) * 82}%`,
-                        background: s.cat.color,
-                      }}
-                    />
-                    <span style={{ ...S.barHours, textAlign: "left" }}>{hours(s.hours)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
 
           <p style={S.statsNote}>{m.stats.note}</p>
         </>

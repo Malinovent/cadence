@@ -1,15 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { defaultData, type Block, type CadenceData } from "./model";
 import * as A from "./actions";
-import {
-  completion,
-  hoursToBlockMins,
-  hoursToTargetMins,
-  maxHours,
-  quotaStatus,
-  statsByCat,
-  weekBalance,
-} from "./stats";
+import { completion, hoursToBlockMins, hoursToTargetMins, quotaStatus, weekBalance } from "./stats";
 
 const blk = (id: string, over: Partial<Block> = {}): Block => ({
   id,
@@ -53,31 +45,6 @@ describe("completion", () => {
   it("rounds done/total", () => {
     const d = withWeeks([blk("a", { done: true }), blk("b", { day: 1 }), blk("c", { day: 2 })]);
     expect(completion(d, 0)).toEqual({ done: 1, total: 3, pct: 33 });
-  });
-});
-
-describe("statsByCat", () => {
-  const now = 1_000 * 86400000;
-  const d: CadenceData = {
-    ...defaultData(),
-    history: [
-      { id: "a", catId: "work", mins: 90, date: now - 10 * 86400000 },
-      { id: "b", catId: "work", mins: 60, date: now - 60 * 86400000 },
-      { id: "c", catId: "learn", mins: 30, date: now - 200 * 86400000 },
-    ],
-  };
-  it("filters by range and formats hours to one decimal", () => {
-    const m = statsByCat(d, "month", now);
-    expect(m.find((s) => s.cat.id === "work")).toMatchObject({ sessions: 1, hours: "1.5" });
-    expect(m.find((s) => s.cat.id === "learn")).toMatchObject({ sessions: 0, hours: "0.0" });
-    const q = statsByCat(d, "quarter", now);
-    expect(q.find((s) => s.cat.id === "work")).toMatchObject({ sessions: 2, hours: "2.5" });
-    const y = statsByCat(d, "year", now);
-    expect(y.find((s) => s.cat.id === "learn")).toMatchObject({ sessions: 1, hours: "0.5" });
-  });
-  it("maxHours is at least 1", () => {
-    expect(maxHours(statsByCat(defaultData(), "month", now))).toBe(1);
-    expect(maxHours(statsByCat(d, "quarter", now))).toBe(2.5);
   });
 });
 

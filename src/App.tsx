@@ -37,7 +37,7 @@ import { defaultDay } from "./lib/dayview";
 import { resolveDrop } from "./lib/gesture";
 import { isRemoteApply } from "./lib/syncUi";
 import type { Block, CadenceData } from "./lib/model";
-import { completion, type StatsRange } from "./lib/stats";
+import { completion } from "./lib/stats";
 import { season } from "./lib/balancedWeeks";
 import { panelAreas } from "./lib/panel";
 import { readBalanceRules } from "./state/balanceRules";
@@ -63,7 +63,6 @@ export default function App() {
   const earlyBird = useEarlyBird(sync.session?.email ?? null); // S1.11
   const [view, setView] = useState<View>("calendar");
   const [activeWeek, setActiveWeek] = useState<WeekIndex>(0); // 0 = this week, 1 = next week
-  const [statsRange, setStatsRange] = useState<StatsRange>("month");
   const [editingId, setEditingId] = useState<string | null>(null); // block open in the inline editor
   const [armedCatId, setArmedCatId] = useState<string | null>(null); // tap-to-place: armed tray category
   const [slotTap, setSlotTap] = useState<SlotTap | null>(null); // S1.6: the add window, open on this slot
@@ -600,7 +599,7 @@ export default function App() {
         />
       )}
       {view === "stats" && (
-        <StatsView data={data} range={statsRange} setRange={setStatsRange} />
+        <StatsView data={data} />
       )}
       {view === "categories" && <CategoriesView cats={data.cats} actions={actions} />}
       {view === "settings" && (

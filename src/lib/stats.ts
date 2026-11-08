@@ -3,9 +3,6 @@ import type { CadenceData, Category } from "./model";
 import type { WeekIndex } from "./actions";
 import { balance, type Balance } from "./guardrail";
 
-export type StatsRange = "month" | "quarter" | "year";
-export const RANGE_DAYS: Record<StatsRange, number> = { month: 30, quarter: 90, year: 365 };
-
 export type QuotaStatus = { cat: Category; placedMins: number; doneMins: number; met: boolean };
 
 // A block tagged with multiple categories counts its FULL duration toward each.
@@ -36,20 +33,6 @@ export const completion = (data: CadenceData, week: WeekIndex): { done: number; 
   const done = blocks.filter((p) => p.done).length;
   return { done, total: blocks.length, pct: blocks.length ? Math.round((done / blocks.length) * 100) : 0 };
 };
-
-export type CatStats = { cat: Category; sessions: number; hours: string };
-
-// hours is a one-decimal string, as legacy displays it
-export const statsByCat = (data: CadenceData, range: StatsRange, now: number): CatStats[] => {
-  const cutoff = now - RANGE_DAYS[range] * 86400000;
-  return data.cats.map((c) => {
-    const entries = data.history.filter((e) => e.catId === c.id && e.date >= cutoff);
-    const totalMins = entries.reduce((s, e) => s + e.mins, 0);
-    return { cat: c, sessions: entries.length, hours: (totalMins / 60).toFixed(1) };
-  });
-};
-
-export const maxHours = (stats: CatStats[]): number => Math.max(1, ...stats.map((s) => parseFloat(s.hours)));
 
 // categories editor inputs (hours) -> stored minutes
 export const hoursToTargetMins = (h: number): number => Math.round(h * 60);

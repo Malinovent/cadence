@@ -59,6 +59,7 @@
 - `src/lib/sounds.ts` — the sounds as tones (place, tick, untick, remove, step, finale), quiet and short
 - `src/lib/statsWeeks.ts` — Stats week by week: `weekSpan`, `shiftWeek`, `weekRows`, `weekGap` / `gapText`, `rowBar`, `areaTrends`, `monthStarts`
 - `src/lib/review.ts` — roll forward: how Week 1 went (`weekReview`: balanced, ticked of total, a line per area)
+- `src/lib/doneStyle.ts` — how ticked blocks look: soft or solid; `textOn` picks white or dark text for a fill
 - `src/lib/theme.ts` — the looks: paper, night, high contrast, device; each palette's colours by role, as CSS variables
 - `src/lib/dayHours.ts` — the hours the calendar shows: choices, the saved setting, and `gridBounds` (widened to hold every block)
 - `src/lib/starters.ts` — S1.8 the three starter weeks, matching areas by name, adding missing ones, applying to a week
@@ -81,6 +82,7 @@
 - `src/state/useNow.ts` — `useNow()`: current time, refreshed each whole minute and when the page becomes visible
 - `src/state/useKeyboard.ts` — `useKeyboard()`: how far the on-screen keyboard covers the bottom (visual viewport), so the block sheet and the phone tray rise above it
 - `src/state/sound.ts` — plays the sounds with Web Audio (unlocked on the first tap), the per-device volume (`cadence:ui:soundVolume`, 0 = off)
+- `src/state/doneStylePrefs.ts` — Done blocks per device (`cadence:ui:doneStyle`), kept in memory for every block
 - `src/state/themePrefs.ts` — the look per device (`cadence:ui:theme`), applied as `<html data-theme>`, following the device when asked
 - `src/state/dayHoursPrefs.ts` — the calendar's hours per device (`cadence:ui:dayHours`)
 - `src/state/useIsPhone.ts` — `useIsPhone()`: matchMedia `(max-width: 899px)`, live, SSR default false
@@ -118,7 +120,7 @@
 - `src/components/BlockSheet.tsx` — phone: a block in a floating sheet (day and time, Delete, Done on top; 44 px controls; rides above the keyboard)
 - `src/components/BlockTasks.tsx` — a block's tasks and the open tasks to add or move into it, shared by the popup and the sheet
 - `src/components/BalancedWeeksCard.tsx` — "N balanced weeks this season" card with a square per week
-- `src/components/StatsView.tsx` — Stats: season card (tap a week), any week with ‹ ›, last 12 weeks, hours chart, empty state
+- `src/components/StatsView.tsx` — Stats: season card (tap a week), any week with ‹ ›, last 12 weeks, empty state
 - `src/components/WeekRows.tsx` — Stats, one week: per area a bar with its target, ✓ or "1h short" / "1h over"
 - `src/components/AreaTrends.tsx` — Stats, last 12 weeks: a column per week per area, the target dashed, "kept 5 of 7"
 - `src/components/GoalText.tsx` — an area's target, number first with its sign ("≥ 4 h at least"); the Areas list and Stats rows

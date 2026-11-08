@@ -932,27 +932,6 @@ export const S = {
     fontWeight: 900,
     margin: 0
   },
-  rangeToggle: {
-    display: "flex",
-    gap: 0,
-    border: `1.5px solid ${ink}`,
-    borderRadius: 3,
-    overflow: "hidden"
-  },
-  rangeBtn: {
-    padding: "7px 16px",
-    border: "none",
-    background: "transparent",
-    cursor: "pointer",
-    fontFamily: "'Spline Sans Mono', monospace",
-    fontSize: 12,
-    textTransform: "uppercase",
-    color: ink
-  },
-  rangeBtnActive: {
-    background: ink,
-    color: paper
-  },
   streakRow: {
     display: "flex",
     gap: 12,
@@ -981,38 +960,12 @@ export const S = {
     color: "var(--c-faint)",
     marginTop: 2
   },
-  barChart: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 14
-  },
-  barRow: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12
-  },
-  barName: {
-    width: 90,
-    fontSize: 15,
-    fontWeight: 500,
-    flexShrink: 0
-  },
   barTrack: {
     flex: 1,
     background: paper2,
     borderRadius: 4,
     height: 32,
     overflow: "hidden"
-  },
-  barFill: {
-    height: "100%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "flex-end",
-    paddingRight: 8,
-    minWidth: 40,
-    transition: "width 0.4s",
-    borderRadius: 4
   },
   barVal: {
     color: "#fff",
@@ -2781,12 +2734,6 @@ export const S = {
     fontWeight: 700,
     fontSize: 20
   },
-  barHours: {
-    minWidth: 52,
-    textAlign: "right",
-    fontFamily: "'Spline Sans Mono', monospace",
-    fontSize: 13
-  },
   // rows share columns, so the numbers sit right by the names and line up (JP: "really far away")
   areaRows: {
     listStyle: "none",
@@ -2806,13 +2753,6 @@ export const S = {
     fontSize: 15
   },
   // Stats bars: the hours right after the bar's end, no long empty track
-  barTrackTight: {
-    flex: 1,
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    minWidth: 0
-  },
   // the miniature calendar (template preview, phone week view) (JP, 2026-11-08)
   miniCol: {
     position: "relative",

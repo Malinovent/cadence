@@ -19,6 +19,8 @@ import { readBalanceRules, writeBalanceRules } from "../state/balanceRules";
 import { helpLinks, legalLinks } from "../lib/legal";
 import { playSound, setSoundVolume, soundVolume } from "../state/sound";
 import { applyTheme, readTheme, writeTheme } from "../state/themePrefs";
+import { readDoneStyle, writeDoneStyle } from "../state/doneStylePrefs";
+import { DONE_STYLES, type DoneStyle } from "../lib/doneStyle";
 import { THEME_CHOICES, type ThemeChoice } from "../lib/theme";
 import { endChoices, startChoices, withEnd, withStart } from "../lib/dayHours";
 import type { Bounds } from "../lib/placement";
@@ -193,6 +195,7 @@ export default function SettingsView({
       <SettingsGroup id="look" title={m.settings.groups.look}>
         <div style={S.setCard}>
           <LookRow />
+          <DoneStyleRow />
           <SoundRow />
           <LanguageRow />
         </div>
@@ -423,6 +426,25 @@ function LookRow() {
 }
 
 /** Sounds: one volume slider, 0 for none (JP, 2026-11-08). Half by default; saved on this device. */
+/** Done blocks: the soft tint, or filled solid in the area's colour (JP, 2026-11-08). */
+function DoneStyleRow() {
+  const { m } = useI18n();
+  const [style, setStyle] = useState<DoneStyle>(readDoneStyle);
+  return (
+    <SetRow label={m.settings.doneTitle}>
+      <Choice
+        label={m.settings.doneTitle}
+        value={style}
+        options={DONE_STYLES.map((s) => ({ value: s, label: m.settings.doneStyles[s] }))}
+        onChoose={(s) => {
+          setStyle(s);
+          writeDoneStyle(s);
+        }}
+      />
+    </SetRow>
+  );
+}
+
 function SoundRow() {
   const { m } = useI18n();
   const [vol, setVol] = useState(soundVolume);

@@ -112,8 +112,6 @@ export const fr: Messages = {
     notNow: "Pas maintenant",
   },
   stats: {
-    title: "Temps investi",
-    ranges: { month: "mois", quarter: "trimestre", year: "année" },
     weekOf: (date) => `Semaine du ${date}`,
     lastWeek: "la semaine dernière",
     thisWeek: "cette semaine, jusqu'ici",
@@ -127,7 +125,6 @@ export const fr: Messages = {
     emptyText:
       "Cochez un bloc dans le calendrier une fois fait. Vos semaines, et où en est chaque domaine, apparaissent ici.",
     resetDone: "Stats effacées.",
-    sessions: (n) => `${n} ${n <= 1 ? "séance" : "séances"}`,
     note: "Compte les blocs que vous cochez. Pour les effacer : réglages → Données et compte.",
     resetWarn: "Effacer toutes les heures suivies et les semaines équilibrées? C'est irréversible.",
     resetYes: "Oui, effacer",
@@ -192,6 +189,8 @@ export const fr: Messages = {
     groups: { week: "Votre semaine", look: "Apparence et son", data: "Données et compte", help: "Aide" },
     lookTitle: "Apparence",
     looks: { paper: "Papier", night: "Nuit", contrast: "Contraste", device: "Auto" },
+    doneTitle: "Blocs faits",
+    doneStyles: { soft: "Doux", solid: "Plein" },
     dayStart: "Début de la journée",
     dayEnd: "Fin de la journée",
     midnight: "minuit",
