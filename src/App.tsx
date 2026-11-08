@@ -84,6 +84,9 @@ export default function App() {
   const [pending, setPending] = useState<
     | { kind: "week" | "starter"; id: string; week: WeekIndex; welcome?: boolean }
     | { kind: "day"; id: string; week: WeekIndex; day: number }
+    // saving: what's saved, its name and which day, before it is (JP, 2026-11-08)
+    | { kind: "saveWeek"; week: WeekIndex; name: string }
+    | { kind: "saveDay"; week: WeekIndex; day: number; name: string }
     | null
   >(null);
   // the hours the calendar shows (Settings → Your day, per device), widened to hold every block
@@ -324,6 +327,38 @@ export default function App() {
     if (!pending) return null;
     const weekName = m.week.names[pending.week];
     const close = () => setPending(null);
+    if (pending.kind === "saveWeek" || pending.kind === "saveDay") {
+      const isDay = pending.kind === "saveDay";
+      const day = pending.kind === "saveDay" ? pending.day : undefined;
+      const p = previewChange(data, data, pending.week, day);
+      const count = data.templates.filter((t) => !!t.day === isDay).length + 1;
+      const placeholder = isDay ? m.footer.dayTemplateName(count) : m.footer.templateName(count);
+      const hasBlocks = (d: number) => data.weeks[pending.week].some((b) => b.day === d);
+      return (
+        <TemplatePreview
+          title={isDay ? m.preview.saveDay : m.preview.saveWeek}
+          where={day === undefined ? m.preview.from(weekName) : m.preview.fromDay(weekName, m.preview.days[day])}
+          replaces={m.preview.keeps}
+          preview={p}
+          addedNote={null}
+          hours={bounds}
+          day={day}
+          onDay={pending.kind === "saveDay" ? (d) => setPending({ ...pending, day: d }) : undefined}
+          dayDisabled={(d) => !hasBlocks(d)}
+          name={{ value: pending.name, placeholder, onChange: (v) => setPending({ ...pending, name: v }) }}
+          useLabel={m.preview.save}
+          useDisabled={p.blocks.length === 0}
+          onUse={() => {
+            const name = pending.name.trim() || placeholder;
+            close();
+            if (pending.kind === "saveDay") actions.saveDayTemplate(pending.week, pending.day, name);
+            else actions.saveTemplate(pending.week, name);
+          }}
+          onCancel={close}
+          phone={isPhone}
+        />
+      );
+    }
     if (pending.kind === "day") {
       const tpl = data.templates.find((t) => t.id === pending.id);
       if (!tpl) return null;
@@ -494,7 +529,13 @@ export default function App() {
                 onApplyTemplate={(id) => setPending({ kind: "week", id, week: activeWeek })}
                 onApplyStarter={(id) => setPending({ kind: "starter", id, week: activeWeek })}
                 onApplyDay={(id) => setPending({ kind: "day", id, week: activeWeek, day: shownDay })}
-                day={shownDay}
+                onSaveWeek={() => setPending({ kind: "saveWeek", week: activeWeek, name: "" })}
+                onSaveDay={() => {
+                  // the day shown when it has blocks, else the first that has some
+                  const has = (d: number) => data.weeks[activeWeek].some((b) => b.day === d);
+                  const day = has(shownDay) ? shownDay : ([0, 1, 2, 3, 4, 5, 6].find(has) ?? shownDay);
+                  setPending({ kind: "saveDay", week: activeWeek, day, name: "" });
+                }}
                 onAdvance={onAdvance}
               />
             </main>

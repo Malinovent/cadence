@@ -84,7 +84,6 @@ export const fr: Messages = {
   footer: {
     templates: "Modèles",
     saveWeek: "＋ Enregistrer la semaine",
-    save: "enregistrer",
     dayTemplates: "Modèles de journée",
     saveDay: "＋ Enregistrer une journée",
     dayTemplateName: (n) => `Journée ${n}`,
@@ -92,7 +91,6 @@ export const fr: Messages = {
     noTemplates: "Aucun modèle à vous pour l'instant. Enregistrez une semaine, ou une journée à utiliser n'importe quel jour.",
     templateNameLabel: "Nom du modèle",
     remove: (name) => `Supprimer ${name}`,
-    cancel: "Annuler",
     templateName: (n) => `Modèle ${n}`,
     apply: "aperçu",
     starters: "Semaines de départ",
@@ -277,6 +275,12 @@ export const fr: Messages = {
     use: "L'utiliser",
     cancel: "Annuler",
     days: ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"],
+    saveWeek: "Enregistrer la semaine",
+    saveDay: "Enregistrer une journée",
+    from: (week) => `De la ${week.toLowerCase()}`,
+    fromDay: (week, day) => `Du ${day.toLowerCase()}, ${week.toLowerCase()}`,
+    keeps: "Votre semaine ne change pas.",
+    save: "Enregistrer",
   },
   phoneView: { label: "Afficher", day: "Jour", week: "Semaine", openDay: (day) => `Ouvrir ${day.toLowerCase()}` },
   undo: {

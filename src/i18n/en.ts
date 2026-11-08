@@ -84,11 +84,9 @@ export const en = {
   footer: {
     templates: "Templates",
     saveWeek: "＋ Save this week",
-    save: "save",
     noTemplates: "No templates of your own yet. Save a week, or a day to use on any day.",
     templateNameLabel: "Template name",
     remove: (name: string) => `Delete ${name}`,
-    cancel: "Cancel",
     templateName: (n: number) => `Template ${n}`,
     apply: "preview",
     starters: "Starter weeks",
@@ -279,6 +277,13 @@ export const en = {
     use: "Use it",
     cancel: "Cancel",
     days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    // saving a week or a day (JP, 2026-11-08)
+    saveWeek: "Save this week",
+    saveDay: "Save a day",
+    from: (week: string) => `From ${week}`,
+    fromDay: (week: string, day: string) => `From ${day}, ${week}`,
+    keeps: "Your week stays as it is.",
+    save: "Save",
   },
   // the phone: one day, or the whole week at a glance (JP, 2026-11-08)
   phoneView: { label: "Show", day: "Day", week: "Week", openDay: (day: string) => `Open ${day}` },

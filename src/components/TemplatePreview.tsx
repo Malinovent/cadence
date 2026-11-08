@@ -11,6 +11,7 @@ import MiniCal from "./MiniCal";
  * Before a template, a starter week or a day template is used (JP, 2026-11-08): what it will do.
  * The result in miniature, hours per area, the areas it adds, what it replaces; "Use it" or Cancel.
  * A day template also asks which day. Escape or a tap outside cancels.
+ * Saving a week or a day uses it too (JP, 2026-11-08): what's saved, its name, which day; "Save".
  */
 export default function TemplatePreview({
   title,
@@ -21,6 +22,10 @@ export default function TemplatePreview({
   hours,
   day,
   onDay,
+  dayDisabled,
+  name,
+  useLabel,
+  useDisabled = false,
   onUse,
   onCancel,
   phone = false,
@@ -36,6 +41,12 @@ export default function TemplatePreview({
   /** a day template: the day it goes on, and changing it */
   day?: number;
   onDay?: (day: number) => void;
+  /** days that can't be picked (saving: days without blocks) */
+  dayDisabled?: (day: number) => boolean;
+  /** saving: the template's name, empty for the placeholder's */
+  name?: { value: string; placeholder: string; onChange: (v: string) => void };
+  useLabel?: string;
+  useDisabled?: boolean;
   onUse: () => void;
   onCancel: () => void;
   phone?: boolean;
@@ -78,13 +89,30 @@ export default function TemplatePreview({
                 type="button"
                 aria-pressed={day === i}
                 aria-label={m.preview.days[i]}
+                disabled={dayDisabled?.(i)}
                 onClick={() => onDay(i)}
-                style={{ ...S.previewDay, ...(day === i ? S.kindBtnActive : {}) }}
+                style={{
+                  ...S.previewDay,
+                  ...(day === i ? S.kindBtnActive : {}),
+                  ...(dayDisabled?.(i) ? { opacity: 0.35, cursor: "not-allowed" } : {}),
+                }}
               >
                 {d}
               </button>
             ))}
           </div>
+        )}
+        {name && (
+          <input
+            value={name.value}
+            placeholder={name.placeholder}
+            aria-label={m.footer.templateNameLabel}
+            onChange={(e) => name.onChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !useDisabled) onUse();
+            }}
+            style={{ ...S.tplNameInput, flex: "none" }}
+          />
         )}
         {preview.blocks.length ? (
           // a day keeps a day's width, not the card's (JP, 2026-11-08)
@@ -115,8 +143,14 @@ export default function TemplatePreview({
         {addedNote && <p style={S.previewNote}>{addedNote}</p>}
         <p style={S.previewNote}>{replaces}</p>
         <div style={S.previewBtns}>
-          <button ref={use} type="button" style={{ ...S.onboardPrimary, marginLeft: 0, flex: 1 }} onClick={onUse}>
-            {m.preview.use}
+          <button
+            ref={use}
+            type="button"
+            disabled={useDisabled}
+            style={{ ...S.onboardPrimary, marginLeft: 0, flex: 1, ...(useDisabled ? { opacity: 0.4 } : {}) }}
+            onClick={onUse}
+          >
+            {useLabel ?? m.preview.use}
           </button>
           <button type="button" style={{ ...S.resetCancel, flex: 1, minHeight: 44 }} onClick={onCancel}>
             {m.preview.cancel}

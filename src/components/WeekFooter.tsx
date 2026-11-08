@@ -1,4 +1,3 @@
-import { useState } from "react";
 import type { WeekIndex } from "../lib/actions";
 import type { CadenceData } from "../lib/model";
 import { addedNote, areaName, missingAreas, STARTERS, starterText } from "../lib/starters";
@@ -9,19 +8,20 @@ import { useI18n } from "../i18n/I18nProvider";
 type Props = {
   data: CadenceData;
   week: WeekIndex;
-  actions: Pick<CadenceActions, "saveTemplate" | "deleteTemplate" | "saveDayTemplate">;
+  actions: Pick<CadenceActions, "deleteTemplate">;
   onApplyTemplate: (id: string) => void; // opens its preview; using it replaces the week (Undo offered)
   onApplyStarter: (id: string) => void;
   onApplyDay: (id: string) => void; // a day template: its preview, which asks the day
-  /** the day "＋ Save a day" starts on (the phone's day, else today) */
-  day: number;
+  /** "＋ Save this week" / "＋ Save a day": a popup shows what's saved, its name and (a day) which day */
+  onSaveWeek: () => void;
+  onSaveDay: () => void;
   onAdvance: () => void;
 };
 
 /**
  * S1.4: below the grid, templates and roll forward. Templates (JP, 2026-11-08): "＋ Save this week"
- * and "＋ Save a day" side by side, then the person's week templates and day templates, then the
- * starter weeks. Every "preview" opens what it would do first.
+ * with the week templates under it, "＋ Save a day" with the day templates under it, then the
+ * starter weeks. Saving and using both open a preview first.
  */
 export default function WeekFooter({
   data,
@@ -30,53 +30,20 @@ export default function WeekFooter({
   onApplyTemplate,
   onApplyStarter,
   onApplyDay,
-  day,
+  onSaveWeek,
+  onSaveDay,
   onAdvance,
 }: Props) {
   const { m } = useI18n();
-  const [naming, setNaming] = useState<"week" | "day" | null>(null);
-  const [name, setName] = useState("");
-  const [from, setFrom] = useState(day);
-  const blocks = data.weeks[week];
-  const empty = blocks.length === 0;
+  const empty = data.weeks[week].length === 0;
   const weekTemplates = data.templates.filter((t) => !t.day);
   const dayTemplates = data.templates.filter((t) => t.day);
-  const hasBlocks = (d: number) => blocks.some((b) => b.day === d);
-  const fallback =
-    naming === "day"
-      ? m.footer.dayTemplateName(dayTemplates.length + 1)
-      : m.footer.templateName(weekTemplates.length + 1);
-  const canSave = naming === "week" ? !empty : naming === "day" ? hasBlocks(from) : false;
-
-  const open = (kind: "week" | "day") => {
-    // a day to save: the day shown when it has blocks, else the first that has some
-    if (kind === "day") setFrom(hasBlocks(day) ? day : Math.max(0, [0, 1, 2, 3, 4, 5, 6].find(hasBlocks) ?? 0));
-    setName("");
-    setNaming(kind);
-  };
-  const cancel = () => {
-    setNaming(null);
-    setName("");
-  };
-  const save = () => {
-    if (!canSave) return;
-    const n = name.trim() || fallback;
-    if (naming === "day") actions.saveDayTemplate(week, from, n);
-    else actions.saveTemplate(week, n);
-    cancel();
-  };
-  const saveBtn = (kind: "week" | "day", label: string) => (
+  const saveBtn = (onClick: () => void, label: string) => (
     <button
       type="button"
-      onClick={() => open(kind)}
+      onClick={onClick}
       disabled={empty}
-      aria-pressed={naming === kind}
-      style={{
-        ...S.tplSave,
-        opacity: empty ? 0.4 : 1,
-        cursor: empty ? "not-allowed" : "pointer",
-        ...(naming === kind ? { borderStyle: "solid" } : {}),
-      }}
+      style={{ ...S.tplSave, opacity: empty ? 0.4 : 1, cursor: empty ? "not-allowed" : "pointer" }}
     >
       {label}
     </button>
@@ -92,43 +59,6 @@ export default function WeekFooter({
       </button>
     </div>
   );
-  const namingRow = (kind: "week" | "day") =>
-    naming === kind && (
-      <div style={{ ...S.tplNameRow, flexWrap: "wrap" }}>
-        {kind === "day" && (
-          <select
-            value={from}
-            aria-label={m.footer.whichDay}
-            onChange={(e) => setFrom(Number(e.target.value))}
-            style={{ ...S.setSelect, minWidth: 0, flex: "1 1 100%" }}
-          >
-            {m.preview.days.map((d, i) => (
-              <option key={d} value={i} disabled={!hasBlocks(i)}>
-                {d}
-              </option>
-            ))}
-          </select>
-        )}
-        <input
-          autoFocus
-          value={name}
-          placeholder={fallback}
-          aria-label={m.footer.templateNameLabel}
-          onChange={(e) => setName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") save();
-            if (e.key === "Escape") cancel();
-          }}
-          style={{ ...S.tplNameInput, flex: "1 1 90px", minWidth: 0 }}
-        />
-        <button onClick={save} disabled={!canSave} style={S.tplSaveConfirm}>
-          {m.footer.save}
-        </button>
-        <button onClick={cancel} style={S.tplDel} aria-label={m.footer.cancel}>
-          ✕
-        </button>
-      </div>
-    );
 
   return (
     <div style={S.weekFooter}>
@@ -137,19 +67,15 @@ export default function WeekFooter({
         {/* each kind in its own column, under its save button (JP, 2026-11-08) */}
         <div style={S.tplCols}>
           <div style={S.tplCol}>
-            {saveBtn("week", m.footer.saveWeek)}
-            {namingRow("week")}
+            {saveBtn(onSaveWeek, m.footer.saveWeek)}
             {weekTemplates.map((t) => row(t, () => onApplyTemplate(t.id)))}
           </div>
           <div style={S.tplCol}>
-            {saveBtn("day", m.footer.saveDay)}
-            {namingRow("day")}
+            {saveBtn(onSaveDay, m.footer.saveDay)}
             {dayTemplates.map((t) => row(t, () => onApplyDay(t.id)))}
           </div>
         </div>
-        {weekTemplates.length + dayTemplates.length === 0 && !naming && (
-          <div style={S.tplEmpty}>{m.footer.noTemplates}</div>
-        )}
+        {weekTemplates.length + dayTemplates.length === 0 && <div style={S.tplEmpty}>{m.footer.noTemplates}</div>}
       </div>
       <StarterWeeks data={data} week={week} onApply={onApplyStarter} />
       <button onClick={onAdvance} style={{ ...S.advanceBtn, ...S.weekFooterAdvance }}>

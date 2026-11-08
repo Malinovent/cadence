@@ -462,11 +462,6 @@ export const S = {
     flexDirection: "column",
     gap: 6
   },
-  tplNameRow: {
-    display: "flex",
-    alignItems: "center",
-    gap: 5
-  },
   tplNameInput: {
     flex: 1,
     padding: "7px 8px",
@@ -477,17 +472,6 @@ export const S = {
     background: "var(--c-field)",
     color: ink,
     minWidth: 0
-  },
-  tplSaveConfirm: {
-    padding: "7px 12px",
-    border: "none",
-    background: "var(--c-done)",
-    color: "#fff",
-    borderRadius: 3,
-    cursor: "pointer",
-    fontFamily: "'Spline Sans Mono', monospace",
-    fontSize: 11,
-    flexShrink: 0
   },
   tplEmpty: {
     fontSize: 12,
