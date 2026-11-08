@@ -1775,6 +1775,10 @@ export const S = {
     whiteSpace: "nowrap",
     flexShrink: 0
   },
+  areaGoalWord: {
+    fontWeight: 700,
+    color: ink
+  },
   areaEdit: {
     display: "flex",
     flexDirection: "column",

@@ -83,6 +83,20 @@ function LimitHours({ limit: l, onChange }: { limit: Limit; onChange: (limit: Li
   );
 }
 
+/** "At least 4 h" with the key word in bold, so the kind reads first (JP, 2026-11-08) */
+function GoalText({ limit }: { limit: Limit }) {
+  const { m } = useI18n();
+  const text = limitLabel(limit, m.lib);
+  const word = m.categories.kinds[limit.kind].label;
+  if (!text.startsWith(word)) return <>{text}</>;
+  return (
+    <>
+      <strong style={S.areaGoalWord}>{word}</strong>
+      {text.slice(word.length)}
+    </>
+  );
+}
+
 /** The area's icon, or its initial, on its colour */
 function AreaBadge({ cat }: { cat: Category }) {
   return (
@@ -269,7 +283,7 @@ export default function CategoriesView({ cats, actions }: Props) {
                   {c.name || m.categories.area}
                 </span>
                 <span style={S.areaGoal}>
-                  {limitLabel(c.limit, m.lib)}
+                  <GoalText limit={c.limit} />
                   <br />
                   {m.categories.blocks(fmtH(c.blockMins))}
                 </span>
