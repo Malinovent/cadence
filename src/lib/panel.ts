@@ -15,6 +15,7 @@ export type PanelArea = {
   mins: number; // the length a drop or tap places
   balance: Balance | null; // null for the buffer
   limitText: string | null;
+  icon?: string; // the area's icon (none for the buffer)
 };
 
 /** Areas in their own order, then the buffer last. */
@@ -26,6 +27,7 @@ export function panelAreas(data: CadenceData, week: WeekIndex, w: LibWords = LIB
     mins: cat.blockMins,
     balance,
     limitText: limitLabel(cat.limit, w),
+    ...(cat.icon ? { icon: cat.icon } : {}),
   }));
   rows.push({
     id: BUFFER_ID,

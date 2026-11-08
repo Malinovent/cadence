@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_RULES } from "./balancedWeeks";
 import { defaultData, type Block, type CadenceData } from "./model";
-import { hasReview, weekReview } from "./review";
+import { hasReview, lastWeekLines, weekReview } from "./review";
 
 const blk = (id: string, catIds: string[], mins: number, done: boolean, extra: Partial<Block> = {}): Block => ({
   id,
@@ -53,6 +53,24 @@ describe("the week in review", () => {
       DEFAULT_RULES,
     );
     expect(r).toMatchObject({ balanced: true, ticked: 1, total: 1 });
+  });
+  it("gives Stats the same rows for last week, from history", () => {
+    const d = data([]);
+    const now = new Date(2026, 10, 11); // a Wednesday
+    const lastWeek = new Date(2026, 10, 3, 10).getTime(); // last Tuesday
+    const rows = lastWeekLines(
+      d.cats,
+      [
+        { id: "x", catId: "rest", mins: 90, date: lastWeek },
+        { id: "y", catId: "rest", mins: 60, date: now.getTime() }, // this week: not counted
+      ],
+      now,
+      DEFAULT_RULES,
+    );
+    expect(rows.map((r) => [r.name, r.hours, r.limit, r.kept])).toEqual([
+      ["Rest", "1.5", "At least 2 h", false],
+      ["Work", "0", "At most 4 h", true],
+    ]);
   });
   it("has nothing to show for an empty week", () => {
     expect(hasReview(weekReview(data([]), DEFAULT_RULES))).toBe(false);

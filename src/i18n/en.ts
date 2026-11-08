@@ -111,7 +111,7 @@ export const en = {
     ranges: { month: "month", quarter: "quarter", year: "year" },
     lastWeek: "Last week",
     sessions: (n: number) => `${n} ${n === 1 ? "session" : "sessions"}`,
-    note: "Stats and balanced weeks count the blocks you tick. Every week starts fresh.",
+    note: "Counts the blocks you tick.",
     resetWarn: "Clear all tracked hours and balanced weeks? This can't be undone.",
     resetYes: "Yes, reset",
     cancel: "Cancel",
@@ -136,6 +136,8 @@ export const en = {
     add: "＋ Add an area",
     newName: "New",
     remove: (name: string) => `Delete ${name}`,
+    icon: (name: string) => `Icon for ${name}`,
+    noIcon: "None",
   },
   settings: {
     dataTitle: "Your data",
@@ -160,6 +162,9 @@ export const en = {
     rulesBack: "Back to 80% and 10%",
     earlyThanks:
       `Thank you for believing in ${APP_NAME} early. Your early-bird purchase is linked to this account, and Pro is yours for life when it arrives.`,
+    // Settings in four groups (JP, 2026-11-08)
+    groupsNav: "Settings sections",
+    groups: { week: "Your week", look: "Look and sound", data: "Data and account", help: "Help" },
     // the app's look (JP, 2026-11-08)
     lookTitle: "Look",
     lookIntro: "How the app looks on this device. Your areas keep their colours.",

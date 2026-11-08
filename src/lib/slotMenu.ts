@@ -37,8 +37,8 @@ export const canAddAt = (blocks: readonly Block[], day: number, start: number, b
 export const slotOptions = (
   cats: readonly Category[],
   w: LibWords = LIB_EN,
-): { id: string; name: string; color: string | null }[] => [
-  ...cats.map((c) => ({ id: c.id, name: c.name || w.panel.untitled, color: c.color })),
+): { id: string; name: string; color: string | null; icon?: string }[] => [
+  ...cats.map((c) => ({ id: c.id, name: c.name || w.panel.untitled, color: c.color, icon: c.icon })),
   { id: BUFFER_ID, name: w.panel.buffer, color: null },
 ];
 

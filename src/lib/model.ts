@@ -1,10 +1,20 @@
 import { defaultCategories, STEP } from "./constants";
 import { floorFromTarget, legacyTarget, parseLimit, type Limit } from "./guardrail";
 import { uid } from "./uid";
+import { isAreaIcon, type AreaIcon } from "./icons";
 
 // `limit` is the S1.2 guardrail; `targetMins` stays in the stored shape (= legacyTarget(limit)) so
 // older copies of the app still read a sensible weekly target.
-export type Category = { id: string; name: string; color: string; targetMins: number; blockMins: number; limit: Limit };
+// icon: optional (JP, 2026-11-08); an older copy of the app drops it, nothing else
+export type Category = {
+  id: string;
+  name: string;
+  color: string;
+  targetMins: number;
+  blockMins: number;
+  limit: Limit;
+  icon?: AreaIcon;
+};
 export type Block = {
   id: string;
   catIds: string[];
@@ -131,6 +141,7 @@ export const normalizeData = (partial: unknown, lang: "en" | "fr" = "en"): { dat
         targetMins: legacyTarget(limit),
         blockMins: Number.isFinite(block) ? Math.max(30, block) : 30,
         limit,
+        ...(isAreaIcon(c.icon) ? { icon: c.icon } : {}),
       });
     }
   } else {

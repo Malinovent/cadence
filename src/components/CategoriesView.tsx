@@ -1,5 +1,9 @@
+import { useState } from "react";
 import { changeKind, type Limit, type LimitKind } from "../lib/guardrail";
 import type { Category } from "../lib/model";
+import { Plus } from "lucide-react";
+import { AreaIconView } from "./AreaIconView";
+import { AREA_ICONS } from "../lib/icons";
 import { hoursToBlockMins, hoursToTargetMins } from "../lib/stats";
 import type { CadenceActions } from "../state/useCadence";
 import { S } from "../styles";
@@ -77,6 +81,7 @@ function LimitHours({ limit: l, onChange }: { limit: Limit; onChange: (limit: Li
 
 export default function CategoriesView({ cats, actions }: Props) {
   const { m } = useI18n();
+  const [picking, setPicking] = useState<string | null>(null); // the area whose icon grid is open
   return (
     <div style={S.catBody}>
       <h2 style={S.statsTitle}>{m.categories.title}</h2>
@@ -86,6 +91,16 @@ export default function CategoriesView({ cats, actions }: Props) {
           const setLimit = (limit: Limit) => actions.updateCat(c.id, { limit });
           return (
             <div key={c.id} style={{ ...S.catRow, borderLeft: `6px solid ${c.color}` }}>
+              <button
+                type="button"
+                aria-expanded={picking === c.id}
+                aria-label={m.categories.icon(c.name)}
+                title={m.categories.icon(c.name)}
+                onClick={() => setPicking(picking === c.id ? null : c.id)}
+                style={{ ...S.iconBtn, color: c.color }}
+              >
+                {c.icon ? <AreaIconView icon={c.icon} size={20} /> : <Plus size={18} aria-hidden="true" />}
+              </button>
               <input
                 value={c.name}
                 onChange={(e) => actions.updateCat(c.id, { name: e.target.value })}
@@ -113,6 +128,36 @@ export default function CategoriesView({ cats, actions }: Props) {
               <button onClick={() => actions.removeCat(c.id)} style={S.catDel} aria-label={m.categories.remove(c.name)}>
                 ✕
               </button>
+              {picking === c.id && (
+                <div role="group" aria-label={m.categories.icon(c.name)} style={S.iconGrid}>
+                  <button
+                    type="button"
+                    aria-pressed={!c.icon}
+                    onClick={() => {
+                      actions.updateCat(c.id, { icon: undefined });
+                      setPicking(null);
+                    }}
+                    style={{ ...S.iconPick, ...(c.icon ? {} : S.iconPickOn), fontSize: 12 }}
+                  >
+                    {m.categories.noIcon}
+                  </button>
+                  {AREA_ICONS.map((ic) => (
+                    <button
+                      key={ic}
+                      type="button"
+                      aria-pressed={c.icon === ic}
+                      aria-label={ic}
+                      onClick={() => {
+                        actions.updateCat(c.id, { icon: ic });
+                        setPicking(null);
+                      }}
+                      style={{ ...S.iconPick, color: c.color, ...(c.icon === ic ? S.iconPickOn : {}) }}
+                    >
+                      <AreaIconView icon={ic} size={20} />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}

@@ -2510,6 +2510,114 @@ export const S = {
     minHeight: 52,
     fontSize: 17
   },
+  // Stats: two short sections under the balanced weeks
+  statsSection: {
+    marginBottom: 28
+  },
+  statsSubtitle: {
+    margin: "0 0 10px",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 700,
+    fontSize: 20
+  },
+  barHours: {
+    minWidth: 52,
+    textAlign: "right",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 13
+  },
+  // rows share columns, so the numbers sit right by the names and line up (JP: "really far away")
+  areaRows: {
+    listStyle: "none",
+    margin: 0,
+    padding: 0,
+    display: "grid",
+    gridTemplateColumns: "10px max-content max-content max-content 14px",
+    justifyContent: "start",
+    columnGap: 12,
+    rowGap: 7
+  },
+  areaRow: {
+    display: "grid",
+    gridColumn: "1 / -1",
+    gridTemplateColumns: "subgrid",
+    alignItems: "center",
+    fontSize: 15
+  },
+  // Stats bars: the hours right after the bar's end, no long empty track
+  barTrackTight: {
+    flex: 1,
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    minWidth: 0
+  },
+  // Settings: four groups, jump buttons at the top
+  settingsNav: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 8
+  },
+  settingsNavBtn: {
+    minHeight: 40,
+    padding: "0 14px",
+    border: `1px solid ${ink}`,
+    borderRadius: 999,
+    background: "transparent",
+    color: ink,
+    cursor: "pointer",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 12
+  },
+  settingsGroup: {
+    marginTop: 36,
+    paddingTop: 20,
+    borderTop: `2px solid ${ink}`,
+    scrollMarginTop: 16
+  },
+  settingsSubtitle: {
+    margin: "0 0 6px",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 700,
+    fontSize: 18
+  },
+  // the Areas page: an icon button by the name, and the grid to pick from (JP, 2026-11-08)
+  iconBtn: {
+    flexShrink: 0,
+    width: 44,
+    height: 44,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    border: `1.5px dashed ${line}`,
+    borderRadius: 8,
+    background: "transparent",
+    cursor: "pointer"
+  },
+  iconGrid: {
+    flexBasis: "100%",
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, 44px)",
+    gap: 6,
+    paddingTop: 8
+  },
+  iconPick: {
+    width: 44,
+    height: 44,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    border: `1px solid ${line}`,
+    borderRadius: 8,
+    background: "var(--c-card)",
+    color: ink,
+    cursor: "pointer",
+    fontFamily: "'Spline Sans Mono', monospace"
+  },
+  iconPickOn: {
+    border: `2px solid ${ink}`
+  },
   // the week review: one short row per area
   reviewTicked: {
     margin: 0,
@@ -2518,20 +2626,19 @@ export const S = {
     color: "var(--c-muted)"
   },
   reviewName: {
-    flex: 1,
     minWidth: 0,
+    maxWidth: 180,
     fontWeight: 600,
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap"
   },
   reviewHours: {
+    textAlign: "right",
     fontFamily: "'Spline Sans Mono', monospace",
     fontWeight: 500
   },
   reviewLimit: {
-    minWidth: 92,
-    textAlign: "right",
     fontFamily: "'Spline Sans Mono', monospace",
     fontSize: 11,
     color: "var(--c-muted)"

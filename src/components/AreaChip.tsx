@@ -1,5 +1,6 @@
 import type React from "react";
 import type { Interaction } from "../interaction/useInteraction";
+import { AreaIconView } from "./AreaIconView";
 import { withAlpha } from "../lib/gesture";
 import type { PanelArea } from "../lib/panel";
 import { fmtDur } from "../lib/time";
@@ -49,7 +50,10 @@ export default function AreaChip({ area: a, interaction, armed, onArm }: Props) 
       }}
     >
       <span className="cadence-hold-fill" aria-hidden="true" />
-      <span style={S.trayName}>{a.name}</span>
+      <span style={{ ...S.trayName, display: "inline-flex", alignItems: "center", gap: 6 }}>
+        <AreaIconView icon={a.icon} size={15} />
+        {a.name}
+      </span>
       <span style={{ ...S.trayMins, color: armed ? "#fff" : a.color }}>{fmtDur(a.mins, lang)}</span>
     </div>
   );

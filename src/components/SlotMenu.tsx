@@ -1,5 +1,6 @@
 import type React from "react";
 import type { Bounds } from "../lib/placement";
+import { AreaMark } from "./AreaIconView";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { Block, Category } from "../lib/model";
 import { menuPosition, pickPlacement, slotOptions, type SlotTap } from "../lib/slotMenu";
@@ -104,7 +105,7 @@ export default function SlotMenu({ tap, blocks, cats, phone, bounds, onPick, onC
                 } as React.CSSProperties
               }
             >
-              <span style={{ ...S.dot, background: color, flexShrink: 0 }} aria-hidden="true" />
+              <AreaMark icon={o.icon} color={color} />
               <span style={S.slotOptionName}>{o.name}</span>
             </button>
           );

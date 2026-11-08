@@ -95,7 +95,7 @@ export default function AccountSync(p: AccountSyncProps) {
 
   return (
     <>
-      <h2 style={{ ...S.statsTitle, marginTop: 36 }}>{m.account.title}</h2>
+      <h3 style={{ ...S.settingsSubtitle, marginTop: 22 }}>{m.account.title}</h3>
 
       {p.conflict && (
         <div style={{ ...S.streakCard, textAlign: "left", padding: 14, marginTop: 16 }}>

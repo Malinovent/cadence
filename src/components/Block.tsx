@@ -1,5 +1,6 @@
 import type React from "react";
 import type { InteractionEngine } from "../interaction/engine";
+import { AreaIconView } from "./AreaIconView";
 import { blockText, tallerThan } from "../lib/dayview";
 import { blockBox, GRIP_MIN_WIDTH, GRIP_SPAN, gripZones, withAlpha } from "../lib/gesture";
 import type { Block as BlockT, Category, Task } from "../lib/model";
@@ -236,7 +237,12 @@ export default function Block({
             {buffer ? (
               <span style={{ ...S.placedName, ...S.bufferName }}>{m.lib.panel.buffer}</span>
             ) : (
-              <span style={S.placedName}>{cats.map((c) => c.name).join(" + ") || "?"}</span>
+              <span style={S.placedName}>
+                {!multi && cats[0]?.icon && (
+                  <AreaIconView icon={cats[0].icon} size={12} style={{ marginRight: 4, verticalAlign: "-2px" }} />
+                )}
+                {cats.map((c) => c.name).join(" + ") || "?"}
+              </span>
             )}
           </span>
           <div style={S.placedTopRight}>

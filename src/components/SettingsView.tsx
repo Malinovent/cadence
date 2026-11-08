@@ -1,3 +1,4 @@
+import type React from "react";
 import { useRef, useState, type ChangeEvent } from "react";
 import AccountSync, { type AccountSyncProps } from "./AccountSync";
 import { downloadText } from "../lib/download";
@@ -116,74 +117,109 @@ export default function SettingsView({
     ),
   );
 
+  // Settings in four groups with jump buttons at the top (JP, 2026-11-08)
+  const jump = (id: string) => document.getElementById(`settings-${id}`)?.scrollIntoView({ block: "start" });
   return (
     <div style={S.catBody}>
-      <h2 style={S.statsTitle}>{m.settings.dataTitle}</h2>
-      <div style={S.catIntro}>{m.settings.dataIntro}</div>
-      <div style={{ ...row, marginTop: 16 }}>
-        <button style={{ ...S.catAdd, marginTop: 0 }} onClick={onExport}>
-          {m.settings.export}
-        </button>
-        <button style={{ ...S.catAdd, marginTop: 0 }} onClick={onPickClick}>
-          {m.settings.import}
-        </button>
-        <input
-          ref={fileRef}
-          type="file"
-          accept=".json,application/json"
-          style={{ display: "none" }}
-          onChange={onFile}
-        />
-      </div>
-      {copies.map((c) => (
-        <div key={c.key} style={{ ...note, color: "var(--c-muted)", marginTop: 12 }}>
-          {m.settings[c.line]}{" "}
-          <button
-            style={{ ...S.catDel, fontStyle: "normal", textDecoration: "underline", padding: 0 }}
-            onClick={() => downloadText(c.text, c.file)}
-          >
-            {m.settings.download}
+      <nav aria-label={m.settings.groupsNav} style={S.settingsNav}>
+        {GROUPS.map((g) => (
+          <button key={g} type="button" onClick={() => jump(g)} style={S.settingsNavBtn}>
+            {m.settings.groups[g]}
           </button>
-        </div>
-      ))}
+        ))}
+      </nav>
 
-      {status.kind === "pending" && (
-        <div style={{ ...S.streakCard, textAlign: "left", padding: 14, marginTop: 16 }}>
-          <div style={S.catIntro}>{importSummaryLine(status.result.summary, m.lib)}</div>
-          {dropped && <div style={{ ...note, color: "var(--c-faint)", marginTop: 4 }}>{dropped}</div>}
-          <div style={{ ...S.resetWarn, marginTop: 8 }}>{m.settings.replaceWarn}</div>
-          <div style={{ ...row, marginTop: 10 }}>
-            <button style={{ ...S.resetConfirm, background: "var(--c-done)" }} onClick={onConfirm}>
-              {m.settings.replaceYes}
-            </button>
-            <button style={S.resetCancel} onClick={() => setStatus({ kind: "idle" })}>
-              {m.settings.cancel}
-            </button>
+      <SettingsGroup id="week" title={m.settings.groups.week}>
+        <DayHoursSection hours={dayHours} onHours={onDayHours} />
+        <BalanceRulesSection />
+      </SettingsGroup>
+
+      <SettingsGroup id="look" title={m.settings.groups.look}>
+        <LookSection />
+        <SoundSection />
+        <LanguageSection />
+      </SettingsGroup>
+
+      <SettingsGroup id="data" title={m.settings.groups.data}>
+        {earlyBird && (
+          <div style={S.earlyThanks} role="note">
+            <span style={S.earlyBadge}>{m.header.earlyBird}</span>
+            <span>{m.settings.earlyThanks}</span>
           </div>
-        </div>
-      )}
-      {status.kind === "error" && (
-        <div style={{ ...note, color: "var(--c-danger)", marginTop: 12 }}>{errorText(status.message)}</div>
-      )}
-      {status.kind === "success" && (
-        <div style={{ ...note, color: "var(--c-done)", marginTop: 12 }}>{m.settings.imported}</div>
-      )}
+        )}
+        {sync && <AccountSync {...sync} />}
+        <div style={{ marginTop: 24 }}>
+          <h3 style={S.settingsSubtitle}>{m.settings.dataTitle}</h3>
+          <div style={S.catIntro}>{m.settings.dataIntro}</div>
+          <div style={{ ...row, marginTop: 16 }}>
+            <button style={{ ...S.catAdd, marginTop: 0 }} onClick={onExport}>
+              {m.settings.export}
+            </button>
+            <button style={{ ...S.catAdd, marginTop: 0 }} onClick={onPickClick}>
+              {m.settings.import}
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".json,application/json"
+              style={{ display: "none" }}
+              onChange={onFile}
+            />
+          </div>
+          {copies.map((c) => (
+            <div key={c.key} style={{ ...note, color: "var(--c-muted)", marginTop: 12 }}>
+              {m.settings[c.line]}{" "}
+              <button
+                style={{ ...S.catDel, fontStyle: "normal", textDecoration: "underline", padding: 0 }}
+                onClick={() => downloadText(c.text, c.file)}
+              >
+                {m.settings.download}
+              </button>
+            </div>
+          ))}
 
-      <BalanceRulesSection />
-      <DayHoursSection hours={dayHours} onHours={onDayHours} />
-      <LookSection />
-      <SoundSection />
-      <LanguageSection />
-
-      {earlyBird && (
-        <div style={S.earlyThanks} role="note">
-          <span style={S.earlyBadge}>{m.header.earlyBird}</span>
-          <span>{m.settings.earlyThanks}</span>
+          {status.kind === "pending" && (
+            <div style={{ ...S.streakCard, textAlign: "left", padding: 14, marginTop: 16 }}>
+              <div style={S.catIntro}>{importSummaryLine(status.result.summary, m.lib)}</div>
+              {dropped && <div style={{ ...note, color: "var(--c-faint)", marginTop: 4 }}>{dropped}</div>}
+              <div style={{ ...S.resetWarn, marginTop: 8 }}>{m.settings.replaceWarn}</div>
+              <div style={{ ...row, marginTop: 10 }}>
+                <button style={{ ...S.resetConfirm, background: "var(--c-done)" }} onClick={onConfirm}>
+                  {m.settings.replaceYes}
+                </button>
+                <button style={S.resetCancel} onClick={() => setStatus({ kind: "idle" })}>
+                  {m.settings.cancel}
+                </button>
+              </div>
+            </div>
+          )}
+          {status.kind === "error" && (
+            <div style={{ ...note, color: "var(--c-danger)", marginTop: 12 }}>{errorText(status.message)}</div>
+          )}
+          {status.kind === "success" && (
+            <div style={{ ...note, color: "var(--c-done)", marginTop: 12 }}>{m.settings.imported}</div>
+          )}
         </div>
-      )}
-      {sync && <AccountSync {...sync} />}
-      <AboutSection onReplayIntro={onReplayIntro} />
+      </SettingsGroup>
+
+      <SettingsGroup id="help" title={m.settings.groups.help}>
+        <AboutSection onReplayIntro={onReplayIntro} />
+      </SettingsGroup>
     </div>
+  );
+}
+
+const GROUPS = ["week", "look", "data", "help"] as const;
+
+/** One group of Settings: a big title, its sections under it. */
+function SettingsGroup({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
+  return (
+    <section id={`settings-${id}`} aria-labelledby={`settings-${id}-title`} style={S.settingsGroup}>
+      <h2 id={`settings-${id}-title`} style={S.statsTitle}>
+        {title}
+      </h2>
+      {children}
+    </section>
   );
 }
 
@@ -198,8 +234,8 @@ function BalanceRulesSection() {
   };
   const changed = rules.floorPct !== DEFAULT_RULES.floorPct || rules.ceilingOverPct !== DEFAULT_RULES.ceilingOverPct;
   return (
-    <div style={{ marginTop: 32 }}>
-      <h2 style={S.statsTitle}>{m.settings.rulesTitle}</h2>
+    <div style={{ marginTop: 22 }}>
+      <h3 style={S.settingsSubtitle}>{m.settings.rulesTitle}</h3>
       <div style={S.catIntro}>{m.settings.rulesIntro}</div>
       <div style={{ ...row, marginTop: 12, alignItems: "flex-end" }}>
         <label style={S.catField}>
@@ -244,8 +280,8 @@ function DayHoursSection({ hours, onHours }: { hours: Bounds; onHours: (h: Bound
   const { m, lang } = useI18n();
   const label = (t: number) => (t === 0 || t === 24 * 60 ? m.settings.midnight : fmtTime(t, lang));
   return (
-    <div style={{ marginTop: 32 }}>
-      <h2 style={S.statsTitle}>{m.settings.dayTitle}</h2>
+    <div style={{ marginTop: 22 }}>
+      <h3 style={S.settingsSubtitle}>{m.settings.dayTitle}</h3>
       <div style={S.catIntro}>{m.settings.dayIntro}</div>
       <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginTop: 12 }}>
         <label style={S.dayField}>
@@ -291,8 +327,8 @@ function LookSection() {
     applyTheme(c);
   };
   return (
-    <div style={{ marginTop: 32 }}>
-      <h2 style={S.statsTitle}>{m.settings.lookTitle}</h2>
+    <div style={{ marginTop: 22 }}>
+      <h3 style={S.settingsSubtitle}>{m.settings.lookTitle}</h3>
       <div style={S.catIntro}>{m.settings.lookIntro}</div>
       <div
         style={{ ...S.kindGroup, marginTop: 12, display: "inline-flex", flexWrap: "wrap" }}
@@ -320,8 +356,8 @@ function SoundSection() {
   const { m } = useI18n();
   const [vol, setVol] = useState(soundVolume);
   return (
-    <div style={{ marginTop: 32 }}>
-      <h2 style={S.statsTitle}>{m.settings.soundTitle}</h2>
+    <div style={{ marginTop: 22 }}>
+      <h3 style={S.settingsSubtitle}>{m.settings.soundTitle}</h3>
       <div style={S.catIntro}>{m.settings.soundIntro}</div>
       <label style={S.volumeRow}>
         <span style={S.dayFieldLabel}>{m.settings.soundVolume}</span>
@@ -356,8 +392,8 @@ function LanguageSection() {
     { value: "en", label: m.settings.langNames.en },
   ];
   return (
-    <div style={{ marginTop: 32 }}>
-      <h2 style={S.statsTitle}>{m.settings.langTitle}</h2>
+    <div style={{ marginTop: 22 }}>
+      <h3 style={S.settingsSubtitle}>{m.settings.langTitle}</h3>
       <div style={S.catIntro}>{m.settings.langIntro}</div>
       <div
         style={{ ...S.kindGroup, marginTop: 12, display: "inline-flex" }}
@@ -392,8 +428,8 @@ function AboutSection({ onReplayIntro }: { onReplayIntro: () => void }) {
     m.settings.helpSubject(APP_NAME),
   );
   return (
-    <div style={{ marginTop: 32 }}>
-      <h2 style={S.statsTitle}>{m.settings.aboutTitle}</h2>
+    <div style={{ marginTop: 22 }}>
+      <h3 style={S.settingsSubtitle}>{m.settings.aboutTitle}</h3>
       <div style={S.catIntro}>{m.settings.aboutText}</div>
       <div style={{ ...row, marginTop: 12, alignItems: "center" }}>
         <button type="button" style={{ ...S.catAdd, marginTop: 0 }} onClick={onReplayIntro}>

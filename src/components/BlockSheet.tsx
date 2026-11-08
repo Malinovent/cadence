@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { BUFFER_COLOR } from "../lib/constants";
+import { AreaMark } from "./AreaIconView";
 import { withAlpha } from "../lib/gesture";
 import type { Block, Category, Task } from "../lib/model";
 import { blockWhen } from "../lib/sheet";
@@ -129,7 +130,7 @@ export default function BlockSheet({ block: p, cats, tasks, weeks, onClose, onDe
                       background: on ? withAlpha(c.color, "2e") : "transparent",
                     }}
                   >
-                    <span aria-hidden="true" style={{ ...S.dot, background: c.color }} />
+                    <AreaMark icon={c.icon} color={c.color} />
                     {c.name}
                     {on && <span aria-hidden="true">✓</span>}
                   </button>

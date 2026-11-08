@@ -111,7 +111,7 @@ export const fr: Messages = {
     ranges: { month: "mois", quarter: "trimestre", year: "année" },
     lastWeek: "La semaine dernière",
     sessions: (n) => `${n} ${n <= 1 ? "séance" : "séances"}`,
-    note: "Les stats et les semaines équilibrées comptent les blocs que vous cochez. Chaque semaine repart à zéro.",
+    note: "Compte les blocs que vous cochez.",
     resetWarn: "Effacer toutes les heures suivies et les semaines équilibrées? C'est irréversible.",
     resetYes: "Oui, effacer",
     cancel: "Annuler",
@@ -136,6 +136,8 @@ export const fr: Messages = {
     add: "＋ Ajouter un domaine",
     newName: "Nouveau",
     remove: (name) => `Supprimer ${name}`,
+    icon: (name) => `Icône de ${name}`,
+    noIcon: "Aucune",
   },
   settings: {
     dataTitle: "Vos données",
@@ -160,6 +162,8 @@ export const fr: Messages = {
     rulesBack: "Revenir à 80 % et 10 %",
     earlyThanks:
       `Merci d'avoir cru en ${APP_NAME} dès le début. Votre achat lève-tôt est lié à ce compte, et Pro est à vous pour la vie dès son arrivée.`,
+    groupsNav: "Sections des réglages",
+    groups: { week: "Votre semaine", look: "Apparence et son", data: "Données et compte", help: "Aide" },
     lookTitle: "Apparence",
     lookIntro: "L'apparence de l'app sur cet appareil. Vos domaines gardent leurs couleurs.",
     looks: { paper: "Papier", night: "Nuit", contrast: "Contraste élevé", device: "Comme l'appareil" },

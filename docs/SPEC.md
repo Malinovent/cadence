@@ -344,6 +344,16 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 ### Rolling the week forward: its review (JP, 2026-11-08)
 - Roll forward plays a soft turn-of-the-page sound and, when Week 1 had blocks, opens a card on how it went (`weekReview`, `src/lib/review.ts`; `WeekReview`): judged on ticked blocks with the balanced-week rules (Settings → Balanced weeks), a block for several areas counting fully to each. "A balanced week." when every area kept its time, with a fanfare and squares rising in the area colours; otherwise "That week is done.", no fanfare. Then "3/4 ticked" and one short row per area (JP: the sentences were verbose): colour dot, name, hours ticked, its target ("At least 4 h"), and a green ✓ when it kept its time; the neutral S1.10 sentence is the row's label for screen readers. "Start the new week", Escape or a tap outside closes it; the Undo bar stays underneath. An empty week rolls without a card.
 
+### Stats, shorter (JP, 2026-11-08: "less verbose")
+- Stats reads top to bottom: the balanced-weeks card; "Last week", one short row per area like the week review (name, hours ticked, target, ✓ when kept; `lastWeekLines`, the S1.10 sentence kept as each row's screen-reader label; shared `AreaRows`); "Time invested" with its month / quarter / year switch beside it, bars with hours only ("14 h"; sessions in the row's tooltip); "Counts the blocks you tick."; Reset stats.
+- Rows and bars sit close to their names (JP: "numbers are really far away"): the rows are columns sized to their content, bars stop at 82% with the hours just after them.
+
+### Area icons (JP, 2026-11-08)
+- An area may carry one icon from a set of 24 line icons (lucide, ISC licence, bundled so it works offline; `src/lib/icons.ts` the names, `AreaIconView` the drawings). Areas page: the square button before the name opens the grid, "None" takes it away. Drawn in the area's colour before its name on its chip, its blocks (one area only), the add window, the phone sheet, the week review and Stats; without one, the colour dot as before. Stored as `icon` on the area in `cadence:cats`; `normalizeData` keeps only a known name, so older data loads unchanged. An older copy of the app drops the icon when it saves: update every device.
+
+### Settings in four groups (JP, 2026-11-08)
+- Settings opens with four jump buttons, then the groups in this order, each under a big title with a rule above: Your week (Your day, Balanced weeks); Look and sound (Look, Sounds, Language); Data and account (early-bird thanks, Account & sync with Delete my account last, Your data: export and import); Help (About, help links, the introduction again, privacy and terms). Groups are `<section>`s labelled by their `<h2>`; sections are `<h3>`.
+
 ### Looks (JP, 2026-11-08)
 - Settings → Look: Paper (the app as it has always been, the default), Night, High contrast, or Match device (Night when the device is dark). Per device (`cadence:ui:theme`), applied before the first paint as `<html data-theme>`. Every colour of the app's own look is a CSS variable by role (`--c-ink`, `--c-paper`, `--c-card`, `--c-muted`…; palettes in `src/lib/theme.ts`, tested for text contrast: 4.5:1, 7:1 for ink in high contrast); area colours never change. Text on an ink fill uses paper, so filled buttons invert with the theme.
 

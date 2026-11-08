@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { useI18n } from "../i18n/I18nProvider";
 import type { WeekReview as Review } from "../lib/review";
 import { doneGreen, S } from "../styles";
+import AreaRows from "./AreaRows";
 
 const BITS = 16;
 
@@ -73,23 +74,11 @@ export default function WeekReview({
           {review.balanced ? m.review.balanced : m.review.done}
         </h2>
         <p style={S.reviewTicked}>{m.review.ticked(review.ticked, review.total)}</p>
-        <ul style={big(S.finaleList, S.finaleListPhone)}>
-          {review.lines.map((l, k) => (
-            <li
-              key={l.catId}
-              aria-label={l.text}
-              style={{ ...big(S.finaleItem, S.finaleItemPhone), animationDelay: `${120 + k * 90}ms` }}
-            >
-              <span aria-hidden="true" style={{ ...S.dot, background: l.color, flexShrink: 0 }} />
-              <span style={S.reviewName}>{l.name}</span>
-              <span style={S.reviewHours}>{l.hours} h</span>
-              <span style={S.reviewLimit}>{l.limit}</span>
-              <span aria-hidden="true" style={{ ...S.reviewKept, visibility: l.kept ? "visible" : "hidden" }}>
-                ✓
-              </span>
-            </li>
-          ))}
-        </ul>
+        <AreaRows
+          lines={review.lines}
+          itemStyle={big(S.finaleItem, S.finaleItemPhone)}
+          delay={(k) => `${120 + k * 90}ms`}
+        />
         <button ref={start} type="button" style={big(S.onboardPrimary, S.finaleStartPhone)} onClick={onClose}>
           {m.review.start}
         </button>

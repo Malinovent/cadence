@@ -120,6 +120,9 @@
 - `src/components/CategoriesView.tsx` — areas editor: name, At least / At most / Between and its hours, block length, colour
 - `src/components/SettingsView.tsx` — "Your data": export / import with summary + confirm, download of the pre-guardrails copy, balanced-week rules, Your day (calendar hours), sounds, language; hosts "Account & sync" when sync is configured; About (what it is, show the introduction again, privacy and terms, help and feedback)
 - `src/components/AccountSync.tsx` — Settings "Account & sync": conflict card, signed-out email form → code entry, signed-in email + status + sign out, "Delete my account" (asked first)
+- `src/lib/icons.ts` — the area icon names (`AREA_ICONS`, `isAreaIcon`)
+- `src/components/AreaIconView.tsx` — an area's icon (lucide) in its colour, or its colour dot (`AreaMark`)
+- `src/components/AreaRows.tsx` — one short row per area (name, hours, target, ✓), for the week review and Stats → Last week
 - `src/components/WeekReview.tsx` — the card after roll forward: the week's lines, a fanfare and rising squares when balanced
 - `src/components/ErrorBoundary.tsx` — around the app (main.tsx): a crash shows the crash screen
 - `src/components/CrashScreen.tsx` — "Something went wrong": Reload, Download my data, Write to us, what happened
