@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stats trends</title>
+<style>
+  :root { --paper:#f4ede1; --card:#fbf6ec; --ink:#2b2622; --muted:#7a6e5e; --faint:#9a8d7d; --line:#d8cbb8; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font-family:Georgia, 'Fraunces', serif; }
+  .intro { max-width:1120px; margin:0 auto; padding:20px 16px 0; font-size:14.5px; line-height:1.5; }
+  .wrap { display:flex; flex-wrap:wrap; gap:24px; justify-content:center; padding:16px 16px 40px; align-items:flex-start; }
+  .col { width:350px; }
+  .cap { font:600 11px ui-monospace, monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 4px; }
+  .why { font-size:13px; color:var(--muted); margin:0 0 10px; min-height:54px; line-height:1.4; }
+  .phone { background:var(--paper); border:1.5px solid var(--ink); border-radius:18px; padding:16px 14px 20px; }
+  h2 { margin:0 0 4px; font-size:20px; font-weight:900; }
+  .sub { font:11px ui-monospace, monospace; color:var(--muted); margin-bottom:10px; }
+  .seg { display:inline-flex; border:1.5px solid var(--ink); border-radius:4px; overflow:hidden; font:11px ui-monospace, monospace; text-transform:uppercase; margin-bottom:10px; }
+  .seg span { padding:6px 10px; }
+  .seg .on { background:var(--ink); color:var(--paper); }
+  .row { display:grid; grid-template-columns:78px 1fr 72px; gap:8px; align-items:center; padding:8px 0; border-top:1px solid var(--line); }
+  .row:first-of-type { border-top:none; }
+  .nm { font-weight:700; font-size:14px; display:flex; align-items:center; gap:5px; }
+  .dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+  .v { font:12px ui-monospace, monospace; text-align:right; line-height:1.35; }
+  .v b { font-size:13px; }
+  .v small { color:var(--muted); display:block; }
+  svg { display:block; overflow:visible; }
+  .arrow { font-weight:700; }
+  .lately { display:grid; grid-template-columns:22px 1fr auto; gap:8px; align-items:center; padding:9px 0; border-top:1px solid var(--line); font-size:14px; }
+  .lately:first-of-type { border-top:none; }
+  .big { font-size:18px; font-weight:800; text-align:center; }
+  .lately .v small { display:inline; }
+  .month { display:grid; grid-template-columns:42px 1fr 36px; gap:8px; align-items:center; padding:6px 0; font:12px ui-monospace, monospace; }
+  .sq { display:flex; gap:3px; }
+  .sq i { width:14px; height:14px; border-radius:3px; display:block; border:1.5px solid var(--ink); }
+  .sq .b { background:var(--ink); }
+  .kept { display:grid; grid-template-columns:78px repeat(6, 1fr); gap:4px; align-items:center; font:10px ui-monospace, monospace; color:var(--muted); padding:4px 0; }
+  .kept .cell { height:16px; border-radius:3px; }
+  .note { max-width:1120px; margin:0 auto; padding:0 16px 30px; font-size:14px; line-height:1.5; }
+  .note li { margin-bottom:6px; }
+</style>
+</head>
+<body>
+<p class="intro">Stats already shows the last 12 weeks per area. A trends feature could go further in three ways. Each is built only from what the app already keeps (every ticked block's area, time and date), and each describes, never judges: arrows and words, no red for having less.</p>
+<div class="wrap">
+
+  <!-- A -->
+  <div class="col">
+    <p class="cap">A · Lines over time (my pick)</p>
+    <p class="why">Each area's hours a week as a line, with its target dashed, over 12 weeks, 6 months or a year. Shows the shape: steady, rising, slipping.</p>
+    <div class="phone">
+      <h2>Trends</h2>
+      <span class="seg"><span>12 wks</span><span class="on">6 mo</span><span>Year</span></span>
+      <div class="row"><span class="nm"><span class="dot" style="background:#E8643C"></span>Exercise</span>
+        <svg width="150" height="36" viewBox="0 0 150 36"><line x1="0" x2="150" y1="12" y2="12" stroke="#2b2622" stroke-dasharray="3 3" opacity=".6"/><polyline fill="none" stroke="#E8643C" stroke-width="2" points="0,28 25,24 50,26 75,18 100,14 125,12 150,8"/></svg>
+        <span class="v"><b>4.5h</b><small>a week</small><span class="arrow">↗</span> 1.5h</span></div>
+      <div class="row"><span class="nm"><span class="dot" style="background:#3C6FE8"></span>Work</span>
+        <svg width="150" height="36" viewBox="0 0 150 36"><line x1="0" x2="150" y1="8" y2="8" stroke="#2b2622" stroke-dasharray="3 3" opacity=".6"/><polyline fill="none" stroke="#3C6FE8" stroke-width="2" points="0,10 25,12 50,9 75,11 100,10 125,12 150,11"/></svg>
+        <span class="v"><b>38h</b><small>a week</small><span class="arrow">→</span> steady</span></div>
+      <div class="row"><span class="nm"><span class="dot" style="background:#0CA678"></span>People</span>
+        <svg width="150" height="36" viewBox="0 0 150 36"><line x1="0" x2="150" y1="10" y2="10" stroke="#2b2622" stroke-dasharray="3 3" opacity=".6"/><polyline fill="none" stroke="#0CA678" stroke-width="2" points="0,8 25,12 50,10 75,18 100,22 125,24 150,26"/></svg>
+        <span class="v"><b>2h</b><small>a week</small><span class="arrow">↘</span> 2h</span></div>
+      <p class="sub" style="margin:10px 0 0">Arrow: the last 4 weeks against the 4 before. Dashed: the target.</p>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div class="col">
+    <p class="cap">B · Lately, in words</p>
+    <p class="why">No chart: the last 4 weeks against the 4 before, one calm line per area, the biggest changes first. Quickest to read.</p>
+    <div class="phone">
+      <h2>Lately</h2>
+      <p class="sub">The last 4 weeks, against the 4 before</p>
+      <div class="lately"><span class="big">↗</span><span><b>Exercise</b> 4.5h a week</span><span class="v"><small>was 3h</small></span></div>
+      <div class="lately"><span class="big">↘</span><span><b>People</b> 2h a week</span><span class="v"><small>was 4h</small></span></div>
+      <div class="lately"><span class="big">↗</span><span><b>Learn</b> 3.5h a week</span><span class="v"><small>was 2.5h</small></span></div>
+      <div class="lately"><span class="big">→</span><span><b>Work</b> 38h a week</span><span class="v"><small>about the same</small></span></div>
+      <div class="lately"><span class="big">→</span><span><b>Rest</b> 8h a week</span><span class="v"><small>about the same</small></span></div>
+    </div>
+  </div>
+
+  <!-- C -->
+  <div class="col">
+    <p class="cap">C · Month by month</p>
+    <p class="why">Zoomed out: balanced weeks per month, and how often each area kept its target, a month per column. Good for "how is this season going?".</p>
+    <div class="phone">
+      <h2>Month by month</h2>
+      <p class="sub">Balanced weeks</p>
+      <div class="month"><span>Jun</span><span class="sq"><i class="b"></i><i class="b"></i><i></i><i></i></span><span>2/4</span></div>
+      <div class="month"><span>Jul</span><span class="sq"><i class="b"></i><i></i><i></i><i></i><i></i></span><span>1/5</span></div>
+      <div class="month"><span>Aug</span><span class="sq"><i class="b"></i><i class="b"></i><i class="b"></i><i></i></span><span>3/4</span></div>
+      <div class="month"><span>Sep</span><span class="sq"><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i></span><span>4/4</span></div>
+      <p class="sub" style="margin-top:12px">Weeks each area kept its target</p>
+      <div class="kept"><span></span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span></div>
+      <div class="kept"><span class="nm" style="font-size:12px">Exercise</span><span class="cell" style="background:#E8643C;opacity:.35"></span><span class="cell" style="background:#E8643C;opacity:.5"></span><span class="cell" style="background:#E8643C;opacity:.75"></span><span class="cell" style="background:#E8643C"></span><span class="cell" style="background:#E8643C"></span><span class="cell" style="background:#E8643C;opacity:.75"></span></div>
+      <div class="kept"><span class="nm" style="font-size:12px">People</span><span class="cell" style="background:#0CA678"></span><span class="cell" style="background:#0CA678;opacity:.75"></span><span class="cell" style="background:#0CA678;opacity:.5"></span><span class="cell" style="background:#0CA678;opacity:.5"></span><span class="cell" style="background:#0CA678;opacity:.35"></span><span class="cell" style="background:#0CA678;opacity:.25"></span></div>
+    </div>
+  </div>
+</div>
+<div class="note">
+  <ul>
+    <li><b>Where it goes:</b> under "Last 12 weeks". A, or B, could also replace "Last 12 weeks" if two charts feel like too much.</li>
+    <li><b>Mixing:</b> B's sentences fit well as one line under A's chart ("Exercise: up 1.5h a week lately").</li>
+    <li><b>Early on:</b> with fewer than 8 weeks of ticks there is nothing to compare yet, so the section says so instead of showing empty lines.</li>
+  </ul>
+</div>
+</body>
+</html>

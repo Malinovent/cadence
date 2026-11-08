@@ -20,8 +20,9 @@ const placed = (color: string) => `repeating-linear-gradient(45deg, ${color} 0 1
  * Visual B (JP, 2026-11-07): under an area, a square per block of its goal, filled as you plan,
  * and what's left in time ("3h to go"; JP, 2026-11-08: the goal is time, the squares the picture).
  * Under: an outlined ink tag with "!" (never red). Past the goal (option B): a short line at the
- * goal, then solid squares: red past an "at most" or "between", with a solid "! 2h over" tag;
- * green past an "at least", with "✓ 2h above".
+ * goal, then more squares, striped while only placed and solid once ticked, like the others: red
+ * past an "at most" or "between", with a solid "! 2h over" tag; the area's colour past an "at
+ * least" (the line green), with "✓ 2h above".
  */
 export default function BlockCount({ area: a }: { area: PanelArea }) {
   const { m } = useI18n();
@@ -31,18 +32,30 @@ export default function BlockCount({ area: a }: { area: PanelArea }) {
   const kind = a.balance.limit.kind;
   const total = c.squares + c.extra + c.above;
 
-  // past the goal (JP, 2026-11-08, option B): a short line at the goal, then solid squares. Past an
-  // "at most" or "between": both red (too much). Past an "at least": a green line, then squares in the
-  // area's own colour (JP: "should match the color if it's at least")
+  // past the goal (JP, 2026-11-08, option B): a short line at the goal, then squares striped while
+  // only placed and solid once ticked (JP: "if I go over in blocks assigned, but not blocks complete,
+  // the red blocks should be hashed. Same for the at least"). Past an "at most" or "between": red.
+  // Past an "at least": a green line, then the area's own colour.
   const over = c.extra > 0;
   const lineColor = over ? warn : "var(--c-done)";
   const pastColor = over ? warn : a.color;
   const squares = Array.from({ length: total }, (_, i) => i).flatMap((i): React.ReactNode => {
     if (i >= c.squares) {
       const fill = Math.max(0, Math.min(1, c.filled - i));
+      const done = Math.max(0, Math.min(fill, c.done - i));
       const square = (
         <span key={i} style={{ ...S.square, border: `1.5px solid ${pastColor}` }}>
-          <span style={{ ...S.squareFill, width: `${fill * 100}%`, background: pastColor }} />
+          {done > 0 && <span style={{ ...S.squareFill, width: `${done * 100}%`, background: pastColor }} />}
+          {fill > done && (
+            <span
+              style={{
+                ...S.squareFill,
+                left: `${done * 100}%`,
+                width: `${(fill - done) * 100}%`,
+                background: placed(pastColor),
+              }}
+            />
+          )}
         </span>
       );
       return i === c.squares ? [<span key="goal" style={{ ...S.goalLine, background: lineColor }} />, square] : square;
@@ -89,23 +102,26 @@ export default function BlockCount({ area: a }: { area: PanelArea }) {
           }}
         />
       )}
-      {kind !== "floor" && c.filled > c.squares && (
-        <span
-          style={{
-            ...S.countBarExtra,
-            left: `${(c.squares / scale) * 100}%`,
-            width: `${((c.filled - c.squares) / scale) * 100}%`,
-          }}
-        />
-      )}
-      {kind === "floor" && c.filled > c.squares && (
+      {/* past the goal: striped while placed, solid once ticked, red past a limit */}
+      {c.filled > c.squares && (
         <span
           style={{
             ...S.countBarFill,
             borderRadius: 0,
             left: `${(c.squares / scale) * 100}%`,
             width: `${((c.filled - c.squares) / scale) * 100}%`,
-            background: a.color,
+            background: placed(pastColor),
+          }}
+        />
+      )}
+      {c.done > c.squares && (
+        <span
+          style={{
+            ...S.countBarFill,
+            borderRadius: 0,
+            left: `${(c.squares / scale) * 100}%`,
+            width: `${((c.done - c.squares) / scale) * 100}%`,
+            background: pastColor,
           }}
         />
       )}
