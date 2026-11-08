@@ -118,6 +118,7 @@
 - `src/components/BlockTasks.tsx` — a block's tasks and the open tasks to add or move into it, shared by the popup and the sheet
 - `src/components/BalancedWeeksCard.tsx` — "N balanced weeks this season" card with a square per week
 - `src/components/StatsView.tsx` — balanced weeks card, hours chart, reset
+- `src/components/GoalText.tsx` — an area's target, number first with its sign ("≥ 4 h at least"); the Areas list and Stats rows
 - `src/components/CategoriesView.tsx` — the Areas tab: a list (icon on colour, name, weekly goal); tap one to change its name, At least / At most / Between, hours and block length (− / ＋ in half hours), colour (palette or any), icon; delete asks first
 - `src/components/SettingsView.tsx` — "Your data": export / import with summary + confirm, download of the pre-guardrails copy, balanced-week rules, Your day (calendar hours), sounds, language; hosts "Account & sync" when sync is configured; About (what it is, show the introduction again, privacy and terms, help and feedback)
 - `src/components/AccountSync.tsx` — Settings "Account & sync": conflict card, signed-out email form → code entry, signed-in email + status + sign out, "Delete my account" (asked first)

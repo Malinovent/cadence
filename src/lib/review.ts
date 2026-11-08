@@ -3,7 +3,7 @@
 // Neutral words (S1.10's describeArea); a balanced week gets a fanfare. Pure rules only.
 import { addDays, limitKept, mondayOf, tickedMins, weekBalanced, type BalanceRules } from "./balancedWeeks";
 import { describeArea } from "./describe";
-import { fmtH, limitLabel } from "./guardrail";
+import { fmtH, limitLabel, type Limit } from "./guardrail";
 import { LIB_EN, type LibWords } from "./words";
 import type { CadenceData, Category, HistoryEntry } from "./model";
 
@@ -15,6 +15,7 @@ export type ReviewLine = {
   kept: boolean;
   hours: string; // "4" (decimal comma in French)
   limit: string; // "At least 4 h"
+  goal: Limit; // drawn as "≥ 4 h at least", like the Areas list (JP, 2026-11-08)
   text: string; // "Rest reached at least 4 h (4 h)."
   icon?: string;
 };
@@ -34,6 +35,7 @@ export function areaLine(c: Category, mins: number, rules: BalanceRules, w: LibW
     kept: limitKept(c.limit, mins, rules),
     hours: hoursText(mins, w),
     limit: limitLabel(c.limit, w),
+    goal: c.limit,
     text: describeArea(c, mins, w.describe),
     ...(c.icon ? { icon: c.icon } : {}),
   };

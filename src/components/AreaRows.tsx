@@ -1,6 +1,7 @@
 import type React from "react";
 import type { ReviewLine } from "../lib/review";
 import { AreaMark } from "./AreaIconView";
+import GoalText from "./GoalText";
 import { S } from "../styles";
 
 /**
@@ -28,7 +29,9 @@ export default function AreaRows({
           <AreaMark icon={l.icon} color={l.color} size={15} />
           <span style={S.reviewName}>{l.name}</span>
           <span style={S.reviewHours}>{l.hours} h</span>
-          <span style={S.reviewLimit}>{l.limit}</span>
+          <span style={S.reviewLimit}>
+            <GoalText limit={l.goal} />
+          </span>
           <span aria-hidden="true" style={{ ...S.reviewKept, visibility: l.kept ? "visible" : "hidden" }}>
             ✓
           </span>

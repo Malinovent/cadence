@@ -4,6 +4,7 @@ import { changeKind, fmtH, type Limit, type LimitKind } from "../lib/guardrail";
 import type { Category } from "../lib/model";
 import { PALETTE } from "../lib/constants";
 import { AreaIconView } from "./AreaIconView";
+import GoalText, { SIGN } from "./GoalText";
 import { AREA_ICONS } from "../lib/icons";
 import type { CadenceActions } from "../state/useCadence";
 import { S } from "../styles";
@@ -16,8 +17,6 @@ type Props = {
 
 const KINDS: LimitKind[] = ["floor", "ceiling", "range"];
 const STEP = 30; // half an hour
-// the kinds' signs (JP, 2026-11-08, option A): beside the words, never instead of them
-const SIGN: Record<LimitKind, string> = { floor: "≥", ceiling: "≤", range: "↔" };
 
 /** − 4 h ＋, in half hours: no keyboard on the phone (JP, 2026-11-08) */
 function Stepper({
@@ -81,23 +80,6 @@ function LimitHours({ limit: l, onChange }: { limit: Limit; onChange: (limit: Li
         mins={l.max}
         onChange={(max) => onChange({ ...l, max, min: Math.min(max, l.min) })}
       />
-    </>
-  );
-}
-
-/** "≥ 4 h at least": the sign, the number first, then the key word in bold (JP, 2026-11-08) */
-function GoalText({ limit: l }: { limit: Limit }) {
-  const { m } = useI18n();
-  const amount =
-    l.kind === "range"
-      ? m.categories.span(fmtH(l.min), fmtH(l.max))
-      : m.categories.hours(fmtH(l.kind === "floor" ? l.min : l.max));
-  return (
-    <>
-      <span aria-hidden="true" style={S.areaSign}>
-        {SIGN[l.kind]}
-      </span>
-      <strong style={S.areaGoalAmount}>{amount}</strong> {m.categories.kinds[l.kind].word}
     </>
   );
 }
