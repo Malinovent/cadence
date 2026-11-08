@@ -9,7 +9,7 @@ import { fmtLeft } from "../lib/now";
 import { fmtDur, fmtTime } from "../lib/time";
 import type { CadenceActions } from "../state/useCadence";
 import { BUFFER_COLOR } from "../lib/constants";
-import { SOLID_TEXT, SOLID_TEXT_SOFT, SOLID_TICK } from "../lib/doneStyle";
+import { SOFT_TINT, SOLID_TEXT, SOLID_TEXT_SOFT, SOLID_TICK } from "../lib/doneStyle";
 import { readDoneStyle } from "../state/doneStylePrefs";
 import { ink, nowRing, paper, S } from "../styles";
 import BlockEditor from "./BlockEditor";
@@ -106,8 +106,7 @@ export default function Block({
   const done = p.done;
   const onColor = solidText ?? (done ? ink : baseColor);
   const gradient = multi ? blendGradient(colors) : null;
-  const TINT = "2e"; // ~18% of the area colour over the grid background
-  const tint = (c: string) => withAlpha(c, TINT);
+  const tint = (c: string) => withAlpha(c, SOFT_TINT); // ~18% of the area colour over the grid background
   const isNow = minsLeft !== null;
 
   // Single-type keeps plain CSS borders. Multi-type paints the gradient into

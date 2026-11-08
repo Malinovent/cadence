@@ -74,8 +74,9 @@ export const ink = "var(--c-ink)";
 export const paper = "var(--c-paper)";
 export const paper2 = "var(--c-paper2)";
 export const line = "var(--c-line)";
-// past an "at most" or "between" limit (JP, 2026-11-08: "make it red when it goes over"); never for shortfalls
-export const danger = "var(--c-danger)";
+// past an "at most" or "between" limit (JP, 2026-11-08: "make it red when it goes over", "more like a
+// warning red"): saturated, its own role per look; never for shortfalls
+export const warn = "var(--c-warn)";
 // "done" in a step's feedback: the roll-forward green, never alone (a check and words go with it)
 export const doneGreen = "var(--c-done)";
 // the block happening now: heavier ink outline drawn as a box-shadow (keeps its layout)
@@ -1244,8 +1245,8 @@ export const S = {
   },
   // past what "at most" / "between" allows: striped ink, never red
   squareExtra: {
-    border: `1.5px dashed ${danger}`,
-    background: `repeating-linear-gradient(45deg, ${danger} 0 1.5px, transparent 1.5px 4px)`
+    border: `1.5px dashed ${warn}`,
+    background: `repeating-linear-gradient(45deg, ${warn} 0 1.5px, transparent 1.5px 4px)`
   },
   countBarWrap: {
     flex: "1 1 120px",
@@ -1270,7 +1271,7 @@ export const S = {
     position: "absolute",
     top: 0,
     bottom: 0,
-    background: `repeating-linear-gradient(45deg, ${danger} 0 1.5px, transparent 1.5px 4px)`
+    background: `repeating-linear-gradient(45deg, ${warn} 0 1.5px, transparent 1.5px 4px)`
   },
   countBarMark: {
     position: "absolute",
@@ -1304,7 +1305,7 @@ export const S = {
   // "over": past what it allows. A solid ink tag, the stronger warning
   countOver: {
     color: "#fff",
-    background: danger,
+    background: warn,
     padding: "0 6px"
   },
   countBang: {
@@ -2586,6 +2587,20 @@ export const S = {
   // Stats: two short sections under the balanced weeks
   statsSection: {
     marginBottom: 28
+  },
+  // Settings → Done blocks: a ticked block as it would look (JP, 2026-11-08)
+  donePreview: {
+    flex: "1 1 120px",
+    maxWidth: 180,
+    minWidth: 0,
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    height: 44,
+    boxSizing: "border-box",
+    padding: "5px 7px",
+    borderRadius: 4,
+    boxShadow: "1px 1px 0 rgba(0,0,0,0.12)"
   },
   // Stats week by week (JP, 2026-11-08): the season's squares as buttons, with months under them
   seasonPick: {

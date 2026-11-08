@@ -20,7 +20,11 @@ import { helpLinks, legalLinks } from "../lib/legal";
 import { playSound, setSoundVolume, soundVolume } from "../state/sound";
 import { applyTheme, readTheme, writeTheme } from "../state/themePrefs";
 import { readDoneStyle, writeDoneStyle } from "../state/doneStylePrefs";
-import { DONE_STYLES, type DoneStyle } from "../lib/doneStyle";
+import { DONE_STYLES, SOFT_TINT, SOLID_TEXT, SOLID_TEXT_SOFT, SOLID_TICK, type DoneStyle } from "../lib/doneStyle";
+import { withAlpha } from "../lib/gesture";
+import type { Category } from "../lib/model";
+import { fmtDur } from "../lib/time";
+import { AreaIconView } from "./AreaIconView";
 import { THEME_CHOICES, type ThemeChoice } from "../lib/theme";
 import { endChoices, startChoices, withEnd, withStart } from "../lib/dayHours";
 import type { Bounds } from "../lib/placement";
@@ -195,7 +199,7 @@ export default function SettingsView({
       <SettingsGroup id="look" title={m.settings.groups.look}>
         <div style={S.setCard}>
           <LookRow />
-          <DoneStyleRow />
+          <DoneStyleRow cats={data.cats} />
           <SoundRow />
           <LanguageRow />
         </div>
@@ -426,22 +430,69 @@ function LookRow() {
 }
 
 /** Sounds: one volume slider, 0 for none (JP, 2026-11-08). Half by default; saved on this device. */
-/** Done blocks: the soft tint, or filled solid in the area's colour (JP, 2026-11-08). */
-function DoneStyleRow() {
-  const { m } = useI18n();
+/**
+ * Done blocks: the soft tint, or filled solid in the area's colour (JP, 2026-11-08), with a preview
+ * of a few ticked blocks in the person's own areas, so the choice shows before the calendar does.
+ */
+function DoneStyleRow({ cats }: { cats: Category[] }) {
+  const { m, lang } = useI18n();
   const [style, setStyle] = useState<DoneStyle>(readDoneStyle);
+  const sample = cats.slice(0, 3);
   return (
-    <SetRow label={m.settings.doneTitle}>
-      <Choice
-        label={m.settings.doneTitle}
-        value={style}
-        options={DONE_STYLES.map((s) => ({ value: s, label: m.settings.doneStyles[s] }))}
-        onChoose={(s) => {
-          setStyle(s);
-          writeDoneStyle(s);
-        }}
-      />
-    </SetRow>
+    <>
+      <SetRow label={m.settings.doneTitle}>
+        <Choice
+          label={m.settings.doneTitle}
+          value={style}
+          options={DONE_STYLES.map((s) => ({ value: s, label: m.settings.doneStyles[s] }))}
+          onChoose={(s) => {
+            setStyle(s);
+            writeDoneStyle(s);
+          }}
+        />
+      </SetRow>
+      {sample.length > 0 && (
+        <div style={{ ...S.setPanel, display: "flex", gap: 8, flexWrap: "wrap" }} aria-hidden="true">
+          {sample.map((c, i) => {
+            const solid = style === "solid";
+            return (
+              <div
+                key={c.id}
+                style={{
+                  ...S.donePreview,
+                  border: `1.5px solid ${c.color}`,
+                  background: solid
+                    ? c.color
+                    : `linear-gradient(${withAlpha(c.color, SOFT_TINT)}, ${withAlpha(c.color, SOFT_TINT)}), var(--c-card)`,
+                  color: solid ? SOLID_TEXT : "var(--c-ink)",
+                }}
+              >
+                <span style={{ ...S.placedName, display: "flex", alignItems: "center", gap: 4, minWidth: 0 }}>
+                  {c.icon && <AreaIconView icon={c.icon} size={12} />}
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</span>
+                </span>
+                <span style={{ ...S.placedDur, color: solid ? SOLID_TEXT_SOFT : c.color, marginLeft: "auto" }}>
+                  {fmtDur([60, 90, 120][i], lang)}
+                </span>
+                <span
+                  style={{
+                    ...S.doneToggle,
+                    display: "grid",
+                    placeItems: "center",
+                    cursor: "default",
+                    background: solid ? SOLID_TICK : "var(--c-ink)",
+                    color: solid ? SOLID_TEXT : "var(--c-paper)",
+                    ...(solid ? { borderColor: "transparent" } : {}),
+                  }}
+                >
+                  ✓
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </>
   );
 }
 

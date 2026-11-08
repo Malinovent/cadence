@@ -25,6 +25,7 @@ export type Palette = {
   muted: string; // labels, notes
   faint: string; // done, disabled
   danger: string; // delete marks
+  warn: string; // past an "at most" limit: a saturated warning red (JP, 2026-11-08)
   done: string; // "done" green
   dots: string; // the page's dot pattern
   scroll: string; // scrollbars
@@ -42,6 +43,7 @@ export const PALETTES: Record<Theme, Palette> = {
     muted: "#7a6e5e",
     faint: "#9a8d7d",
     danger: "#bb5544",
+    warn: "#dc2626",
     done: "#1FA98A",
     dots: "#e6dcc9",
     scroll: "#cabfb2",
@@ -57,6 +59,7 @@ export const PALETTES: Record<Theme, Palette> = {
     muted: "#a99d8c",
     faint: "#857a6c",
     danger: "#e08a78",
+    warn: "#f05252",
     done: "#3fcca8",
     dots: "#28231f",
     scroll: "#4a433b",
@@ -72,6 +75,7 @@ export const PALETTES: Record<Theme, Palette> = {
     muted: "#333333",
     faint: "#4d4d4d",
     danger: "#9b2c1f",
+    warn: "#c81e1e",
     done: "#00745a",
     dots: "#ffffff",
     scroll: "#6b6b6b",

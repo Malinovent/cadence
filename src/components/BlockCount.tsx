@@ -2,7 +2,7 @@ import type React from "react";
 import { blockCount, countStatus, type CountTone } from "../lib/blockCount";
 import { withAlpha } from "../lib/gesture";
 import type { PanelArea } from "../lib/panel";
-import { danger, S } from "../styles";
+import { warn, S } from "../styles";
 import { useI18n } from "../i18n/I18nProvider";
 
 const TONE: Record<CountTone, React.CSSProperties> = {
@@ -38,7 +38,7 @@ export default function BlockCount({ area: a }: { area: PanelArea }) {
       const doneOver = Math.max(0, Math.min(1, c.done - i));
       return (
         <span key={i} style={{ ...S.square, ...S.squareExtra }}>
-          {doneOver > 0 && <span style={{ ...S.squareFill, width: `${doneOver * 100}%`, background: danger }} />}
+          {doneOver > 0 && <span style={{ ...S.squareFill, width: `${doneOver * 100}%`, background: warn }} />}
         </span>
       );
     }
@@ -101,7 +101,7 @@ export default function BlockCount({ area: a }: { area: PanelArea }) {
             borderRadius: 0,
             left: `${(c.squares / scale) * 100}%`,
             width: `${((c.done - c.squares) / scale) * 100}%`,
-            background: danger,
+            background: warn,
           }}
         />
       )}

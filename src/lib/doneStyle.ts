@@ -12,3 +12,5 @@ export const parseDoneStyle = (v: unknown): DoneStyle => (v === "solid" ? "solid
 export const SOLID_TEXT = "#fff";
 export const SOLID_TEXT_SOFT = "rgba(255,255,255,0.85)";
 export const SOLID_TICK = "rgba(255,255,255,0.25)";
+/** Soft: the area's colour at ~18% over the card, as an 8-digit hex alpha */
+export const SOFT_TINT = "2e";
