@@ -39,6 +39,10 @@ export default function BlockCount({ area: a }: { area: PanelArea }) {
   const over = c.extra > 0;
   const lineColor = over ? warn : "var(--c-done)";
   const pastColor = over ? warn : a.color;
+  // "between" reads as "at least" its low end plus "at most" its top (JP, 2026-11-08: "consistent
+  // with our choices for in between"): once past the low end, the same green line as an "at least"
+  const limit = a.balance.limit;
+  const pastLow = limit.kind === "range" && c.needed > 0 && c.needed < c.squares && a.balance.plannedMins > limit.min;
   const squares = Array.from({ length: total }, (_, i) => i).flatMap((i): React.ReactNode => {
     if (i >= c.squares) {
       const fill = Math.max(0, Math.min(1, c.filled - i));
@@ -62,10 +66,10 @@ export default function BlockCount({ area: a }: { area: PanelArea }) {
     }
     const fill = Math.max(0, Math.min(1, c.filled - i));
     const done = Math.max(0, Math.min(fill, c.done - i)); // the solid part, then the striped rest
-    const optional = kind === "range" && i >= c.needed; // "between": past the low end is room, not need
-    const allowance = kind === "ceiling"; // "at most": allowed, not needed
-    const border = `1.5px ${optional ? "dashed" : "solid"} ${allowance ? withAlpha(a.color, "99") : a.color}`;
-    return (
+    // room, not need, looks the same everywhere: all of an "at most", and a "between" past its low end
+    const room = kind === "ceiling" || (kind === "range" && i >= c.needed);
+    const border = `1.5px solid ${room ? withAlpha(a.color, "99") : a.color}`;
+    const square = (
       <span key={i} style={{ ...S.square, border }}>
         {done > 0 && <span style={{ ...S.squareFill, width: `${done * 100}%`, background: a.color }} />}
         {fill > done && (
@@ -80,6 +84,9 @@ export default function BlockCount({ area: a }: { area: PanelArea }) {
         )}
       </span>
     );
+    return pastLow && i === c.needed
+      ? [<span key="low" style={{ ...S.goalLine, background: "var(--c-done)" }} />, square]
+      : square;
   });
 
   // too many squares to draw: one thin bar, same words
