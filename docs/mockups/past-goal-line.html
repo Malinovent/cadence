@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Past-the-goal line</title>
+<style>
+  body { margin:0; background:#1c1916; color:#ece4d6; font-family:Georgia, serif; padding:20px 16px 40px; }
+  h2 { font-size:15px; margin:22px 0 8px; }
+  .chip { width:330px; border:1px dashed #1FA98A; border-radius:4px; padding:8px 10px; margin-bottom:6px; }
+  .chip .t { display:flex; justify-content:space-between; color:#1FA98A; font-weight:700; font-size:14px; }
+  .row { display:flex; align-items:center; gap:2px; margin-top:6px; width:330px; }
+  .sq { width:11px; height:11px; border-radius:3px; box-sizing:border-box; border:1.5px solid var(--c); background:var(--c); flex:none; }
+  .sq.empty { background:transparent; }
+  .lab { margin-left:auto; font:10px ui-monospace, monospace; white-space:nowrap; padding:0 6px; border-radius:10px; }
+  .ok { color:#ece4d6; }
+  .bad { background:#f05252; color:#fff; }
+  .line { height:3px; border-radius:2px; flex:none; margin-left:4px; }
+  .tick { width:2px; height:15px; background:#ece4d6; flex:none; margin:0 3px; }
+  .under { position:relative; }
+  .note { font-size:13px; color:#a99d8c; max-width:560px; line-height:1.45; }
+  .grid { display:flex; gap:36px; flex-wrap:wrap; }
+</style>
+</head>
+<body>
+<p class="note">Today, time past an area's goal is drawn as extra squares. Two ways to make it a line instead: green when you went past an "at least" (good), red when you went past an "at most" (too much). The words stay, the "!" stays on red, so it never relies on colour alone.</p>
+<div class="grid">
+<div>
+  <h2>A · A line after the squares, as long as the extra time</h2>
+  <div class="chip" style="--c:#1FA98A"><div class="t"><span>Learn · at least 4 h</span><span>1h</span></div>
+    <div class="row"><span class="sq"></span><span class="sq"></span><span class="sq"></span><span class="sq"></span>
+      <span class="line" style="width:52px;background:#3fcca8"></span><span class="lab ok">✓ 3h30 above</span></div></div>
+  <div class="chip" style="--c:#3C6FE8;border-color:#3C6FE8"><div class="t" style="color:#3C6FE8"><span>Work · at most 4 h</span><span>2h</span></div>
+    <div class="row"><span class="sq"></span><span class="sq"></span>
+      <span class="line" style="width:30px;background:#f05252"></span><span class="lab bad">! 2h over</span></div></div>
+</div>
+<div>
+  <h2>B · A marker at the goal, then the line</h2>
+  <div class="chip" style="--c:#1FA98A"><div class="t"><span>Learn · at least 4 h</span><span>1h</span></div>
+    <div class="row"><span class="sq"></span><span class="sq"></span><span class="sq"></span><span class="sq"></span><span class="tick"></span>
+      <span class="line" style="width:52px;background:#3fcca8;margin-left:0"></span><span class="lab ok">✓ 3h30 above</span></div></div>
+  <div class="chip" style="--c:#3C6FE8;border-color:#3C6FE8"><div class="t" style="color:#3C6FE8"><span>Work · at most 4 h</span><span>2h</span></div>
+    <div class="row"><span class="sq"></span><span class="sq"></span><span class="tick"></span>
+      <span class="line" style="width:30px;background:#f05252;margin-left:0"></span><span class="lab bad">! 2h over</span></div></div>
+</div>
+</div>
+<p class="note" style="margin-top:20px">In both, the line's length is the extra time on the same scale as the squares, capped so it never pushes the words off the chip. The good line could be white (the text colour) instead of green if you prefer it quieter.</p>
+</body>
+</html>

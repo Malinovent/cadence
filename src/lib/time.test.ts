@@ -20,7 +20,8 @@ describe("fmtDur", () => {
     expect(fmtDur(120)).toBe("2h");
     expect(fmtDur(45)).toBe("45m");
     expect(fmtDur(30)).toBe("30m");
-    expect(fmtDur(0)).toBe("0m");
+    expect(fmtDur(0)).toBe("0h");
+    expect(fmtDur(0, "fr")).toBe("0 h");
     expect(fmtDur(1200)).toBe("20h");
   });
 });

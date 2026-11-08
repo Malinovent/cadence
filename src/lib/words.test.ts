@@ -27,7 +27,7 @@ describe("French (Canada) wording of the lib", () => {
   });
   it("labels the weekly time", () => {
     expect(limitLabel({ kind: "floor", min: h(10) }, LIB_FR)).toBe("Au moins 10 h");
-    expect(limitLabel({ kind: "range", min: h(4), max: h(8) }, LIB_FR)).toBe("Entre 4 et 8 h");
+    expect(limitLabel({ kind: "range", min: h(4), max: h(8) }, LIB_FR)).toBe("Entre 4 h et 8 h");
     expect(limitLabel({ kind: "ceiling", max: h(40) }, LIB_FR)).toBe("Au plus 40 h");
   });
   it("describes without judging, in French too", () => {
@@ -68,11 +68,9 @@ describe("default areas in the person's language", () => {
   });
 });
 
-describe("French decimals", () => {
-  it("writes hours with a decimal comma", async () => {
-    const { fmtHours } = await import("./time");
-    expect(limitLabel({ kind: "floor", min: 150 }, LIB_FR)).toBe("Au moins 2,5 h");
-    expect(fmtHours("3.0", "fr")).toBe("3,0 h");
-    expect(fmtHours("3.0")).toBe("3.0h");
+describe("one way to write time", () => {
+  it("half hours read 2 h 30, never 2,5 h (JP, 2026-11-08)", () => {
+    expect(limitLabel({ kind: "floor", min: 150 }, LIB_FR)).toBe("Au moins 2 h 30");
+    expect(limitLabel({ kind: "floor", min: 150 })).toBe("At least 2h30");
   });
 });

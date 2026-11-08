@@ -1,6 +1,5 @@
 import { describeArea } from "../lib/describe";
 import { fmtDur } from "../lib/time";
-import { hoursText } from "../lib/review";
 import { gapText, rowBar, type WeekRow } from "../lib/statsWeeks";
 import { S } from "../styles";
 import { useI18n } from "../i18n/I18nProvider";
@@ -35,7 +34,7 @@ export default function WeekRows({ rows }: { rows: WeekRow[] }) {
             <span style={S.weekRowValue}>
               <span style={S.srOnly}>{describeArea(cat, mins, m.lib.describe)}</span>
               <span aria-hidden="true" style={S.reviewHours}>
-                {hoursText(mins, m.lib)} h
+                {fmtDur(mins, m.lib.lang)}
               </span>
               {kept ? (
                 <span aria-hidden="true" style={S.reviewKept}>

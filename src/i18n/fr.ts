@@ -147,8 +147,6 @@ export const fr: Messages = {
     from: "De",
     to: "À",
     block: "Durée de bloc par défaut",
-    hours: (h) => `${h.replace(".", ",")} h`,
-    span: (lo, hi) => `${lo.replace(".", ",")}–${hi.replace(".", ",")} h`,
     less: (label) => `${label} : une demi-heure de moins`,
     more: (label) => `${label} : une demi-heure de plus`,
     colour: "Couleur",
@@ -230,7 +228,7 @@ export const fr: Messages = {
     },
     placedTitle: (area) => `${area} a son premier bloc`,
     placedBody:
-      "Ses carrés se remplissent à mesure que vous planifiez. L'étiquette dit combien de blocs il lui faut encore cette semaine.",
+      "Ses carrés se remplissent à mesure que vous planifiez. L'étiquette dit combien de temps il lui faut encore cette semaine.",
     tickTitle: "Cochez le cercle quand c'est fait",
     tickBody: "Les blocs cochés comptent pour les semaines équilibrées.",
     areaTitle: "Adaptez vos domaines",

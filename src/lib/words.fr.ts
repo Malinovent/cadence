@@ -2,18 +2,18 @@
 import type { DescribeWords, LibWords } from "./words";
 
 const plural = (n: number, one: string, many: string) => `${n} ${n <= 1 ? one : many}`;
-// hours arrive as "2.5" (fmtH); French writes a decimal comma: "2,5"
-const c = (h: string) => h.replace(".", ",");
+// durations arrive already written the French way: « 2 h 30 » (fmtDur)
 
 const DESCRIBE_FR: DescribeWords = {
+  lang: "fr",
   noTicks: (n) => `Aucun bloc ${n} coché.`,
-  floorMet: (n, d, min) => `${n} : au moins ${c(min)} h atteintes (${c(d)} h).`,
-  floorShort: (n, d, min) => `${n} : sous les ${c(min)} h visées (${c(d)} h).`,
-  ceilingWithin: (n, d, max) => `${n} : dans la limite de ${c(max)} h (${c(d)} h).`,
-  ceilingOver: (n, o, d, max) => `${n} : ${c(o)} h au-delà de ${c(max)} h (${c(d)} h).`,
-  rangeIn: (n, d, min, max) => `${n} : entre ${c(min)} et ${c(max)} h (${c(d)} h).`,
-  rangeShort: (n, d, min, max) => `${n} : sous les ${c(min)} à ${c(max)} h visées (${c(d)} h).`,
-  rangeOver: (n, o, d, max) => `${n} : ${c(o)} h au-delà de ${c(max)} h (${c(d)} h).`,
+  floorMet: (n, d, min) => `${n} : au moins ${min} atteintes (${d}).`,
+  floorShort: (n, d, min) => `${n} : sous les ${min} visées (${d}).`,
+  ceilingWithin: (n, d, max) => `${n} : dans la limite de ${max} (${d}).`,
+  ceilingOver: (n, o, d, max) => `${n} : ${o} au-delà de ${max} (${d}).`,
+  rangeIn: (n, d, min, max) => `${n} : entre ${min} et ${max} (${d}).`,
+  rangeShort: (n, d, min, max) => `${n} : sous les ${min} à ${max} visées (${d}).`,
+  rangeOver: (n, o, d, max) => `${n} : ${o} au-delà de ${max} (${d}).`,
 };
 
 /** « 0,5 bloc », « 1 bloc », « 1,5 bloc », « 2 blocs » (decimal comma, like the hours) */
@@ -22,9 +22,9 @@ export const LIB_FR: LibWords = {
   lang: "fr",
   days: ["lun.", "mar.", "mer.", "jeu.", "ven.", "sam.", "dim."],
   limit: {
-    floor: (h) => `Au moins ${c(h)} h`,
-    ceiling: (h) => `Au plus ${c(h)} h`,
-    range: (lo, hi) => `Entre ${c(lo)} et ${c(hi)} h`,
+    floor: (h) => `Au moins ${h}`,
+    ceiling: (h) => `Au plus ${h}`,
+    range: (lo, hi) => `Entre ${lo} et ${hi}`,
   },
   describe: DESCRIBE_FR,
   summary: {

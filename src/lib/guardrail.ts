@@ -1,3 +1,4 @@
+import { fmtDur } from "./time";
 import { LIB_EN, type LibWords } from "./words";
 // Guardrail quotas (sprint 1, S1.2): each area has a floor, a ceiling or a range of weekly time.
 // The balance counts PLANNED minutes in the week (a block tagged with several areas counts fully
@@ -116,7 +117,8 @@ export const fmtH = (m: number): string => String(Math.round((m / 60) * 100) / 1
 
 /** "At least 10 h", "At most 40 h", "Between 4 and 8 h" */
 export function limitLabel(l: Limit, w: LibWords = LIB_EN): string {
-  if (l.kind === "floor") return w.limit.floor(fmtH(l.min));
-  if (l.kind === "ceiling") return w.limit.ceiling(fmtH(l.max));
-  return w.limit.range(fmtH(l.min), fmtH(l.max));
+  const d = (mins: number) => fmtDur(mins, w.lang);
+  if (l.kind === "floor") return w.limit.floor(d(l.min));
+  if (l.kind === "ceiling") return w.limit.ceiling(d(l.max));
+  return w.limit.range(d(l.min), d(l.max));
 }

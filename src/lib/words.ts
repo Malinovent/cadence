@@ -6,6 +6,8 @@ export type Lang = "en" | "fr";
 
 // S1.10 neutral week descriptions (describe.ts)
 export type DescribeWords = {
+  /** the durations in the sentences are written the app's one way ("2h30" / « 2 h 30 ») */
+  lang: Lang;
   noTicks: (name: string) => string;
   floorMet: (name: string, done: string, min: string) => string;
   floorShort: (name: string, done: string, min: string) => string;
@@ -17,14 +19,15 @@ export type DescribeWords = {
 };
 
 export const DESCRIBE_EN: DescribeWords = {
+  lang: "en",
   noTicks: (n) => `No ${n} blocks were ticked.`,
-  floorMet: (n, d, min) => `${n} reached at least ${min} h (${d} h).`,
-  floorShort: (n, d, min) => `${n} was under its ${min} h (${d} h).`,
-  ceilingWithin: (n, d, max) => `${n} stayed within its ${max} h (${d} h).`,
-  ceilingOver: (n, o, d, max) => `${n} went ${o} h over its ${max} h (${d} h).`,
-  rangeIn: (n, d, min, max) => `${n} landed between ${min} and ${max} h (${d} h).`,
-  rangeShort: (n, d, min, max) => `${n} was under its ${min} to ${max} h (${d} h).`,
-  rangeOver: (n, o, d, max) => `${n} went ${o} h over its ${max} h (${d} h).`,
+  floorMet: (n, d, min) => `${n} reached at least ${min} (${d}).`,
+  floorShort: (n, d, min) => `${n} was under its ${min} (${d}).`,
+  ceilingWithin: (n, d, max) => `${n} stayed within its ${max} (${d}).`,
+  ceilingOver: (n, o, d, max) => `${n} went ${o} over its ${max} (${d}).`,
+  rangeIn: (n, d, min, max) => `${n} landed between ${min} and ${max} (${d}).`,
+  rangeShort: (n, d, min, max) => `${n} was under its ${min} to ${max} (${d}).`,
+  rangeOver: (n, o, d, max) => `${n} went ${o} over its ${max} (${d}).`,
 };
 
 export type LibWords = {
@@ -85,9 +88,9 @@ export const LIB_EN: LibWords = {
   lang: "en",
   days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
   limit: {
-    floor: (h) => `At least ${h} h`,
-    ceiling: (h) => `At most ${h} h`,
-    range: (lo, hi) => `Between ${lo} and ${hi} h`,
+    floor: (h) => `At least ${h}`,
+    ceiling: (h) => `At most ${h}`,
+    range: (lo, hi) => `Between ${lo} and ${hi}`,
   },
   describe: DESCRIBE_EN,
   summary: {
@@ -125,7 +128,7 @@ export const LIB_EN: LibWords = {
     inRange: "in range",
   },
   now: {
-    left: (h, m) => (!h ? `${m} min left` : m ? `${h} h ${String(m).padStart(2, "0")} left` : `${h} h left`),
+    left: (h, m) => (!h ? `${m}m left` : m ? `${h}h${String(m).padStart(2, "0")} left` : `${h}h left`),
   },
   panel: { untitled: "Untitled", buffer: "Buffer", nextWeek: "next week", backFrom: (d) => `back from ${d}` },
   welcome: {

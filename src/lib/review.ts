@@ -3,7 +3,8 @@
 // Neutral words (S1.10's describeArea); a balanced week gets a fanfare. Pure rules only.
 import { limitKept, weekBalanced, type BalanceRules } from "./balancedWeeks";
 import { describeArea } from "./describe";
-import { fmtH, limitLabel, type Limit } from "./guardrail";
+import { limitLabel, type Limit } from "./guardrail";
+import { fmtDur } from "./time";
 import { LIB_EN, type LibWords } from "./words";
 import type { CadenceData, Category } from "./model";
 
@@ -13,7 +14,7 @@ export type ReviewLine = {
   name: string;
   color: string;
   kept: boolean;
-  hours: string; // "4" (decimal comma in French)
+  hours: string; // "4h", "1h30" (French « 1 h 30 »): the app's one way to write time
   limit: string; // "At least 4 h"
   goal: Limit; // drawn as "≥ 4 h at least", like the Areas list (JP, 2026-11-08)
   text: string; // "Rest reached at least 4 h (4 h)."
@@ -33,17 +34,13 @@ export function areaLine(c: Category, mins: number, rules: BalanceRules, w: LibW
     name: c.name,
     color: c.color,
     kept: limitKept(c.limit, mins, rules),
-    hours: hoursText(mins, w),
+    hours: fmtDur(mins, w.lang),
     limit: limitLabel(c.limit, w),
     goal: c.limit,
     text: describeArea(c, mins, w.describe),
     ...(c.icon ? { icon: c.icon } : {}),
   };
 }
-
-/** "14", "1.5" / "1,5": hours without a trailing zero. */
-export const hoursText = (mins: number, w: LibWords = LIB_EN): string =>
-  w.lang === "fr" ? fmtH(mins).replace(".", ",") : fmtH(mins);
 
 /** How Week 1 went, from its ticked blocks (a block for several areas counts fully to each). */
 export function weekReview(data: CadenceData, rules: BalanceRules, w: LibWords = LIB_EN): WeekReview {

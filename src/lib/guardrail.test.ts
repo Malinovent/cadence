@@ -85,8 +85,8 @@ describe("wording", () => {
     expect(fmtH(0)).toBe("0");
   });
   it("labels limits like the wireframe", () => {
-    expect(limitLabel(floor10)).toBe("At least 10 h");
-    expect(limitLabel(ceil40)).toBe("At most 40 h");
-    expect(limitLabel(range48)).toBe("Between 4 and 8 h");
+    expect(limitLabel(floor10)).toBe("At least 10h");
+    expect(limitLabel(ceil40)).toBe("At most 40h");
+    expect(limitLabel(range48)).toBe("Between 4h and 8h");
   });
 });

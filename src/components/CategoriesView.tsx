@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { changeKind, fmtH, type Limit, type LimitKind } from "../lib/guardrail";
+import { changeKind, type Limit, type LimitKind } from "../lib/guardrail";
+import { fmtDur } from "../lib/time";
 import type { Category } from "../lib/model";
 import { PALETTE } from "../lib/constants";
 import { AreaIconView } from "./AreaIconView";
@@ -30,7 +31,7 @@ function Stepper({
   min?: number;
   onChange: (mins: number) => void;
 }) {
-  const { m } = useI18n();
+  const { m, lang } = useI18n();
   const down = Math.max(min, mins - STEP);
   return (
     <div>
@@ -46,7 +47,7 @@ function Stepper({
           −
         </button>
         <span style={S.stepVal} aria-live="polite">
-          {m.categories.hours(fmtH(mins))}
+          {fmtDur(mins, lang)}
         </span>
         <button
           type="button"

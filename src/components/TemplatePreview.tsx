@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useI18n } from "../i18n/I18nProvider";
-import { hoursText } from "../lib/review";
+import { fmtDur } from "../lib/time";
 import type { Preview } from "../lib/templatePreview";
 import type { Bounds } from "../lib/placement";
 import { S } from "../styles";
@@ -162,7 +162,7 @@ export default function TemplatePreview({
               <li key={r.catId} style={S.previewRow}>
                 <AreaMark icon={r.icon} color={r.color} />
                 <span style={S.reviewName}>{r.name}</span>
-                <span style={S.reviewHours}>{hoursText(r.mins, m.lib)} h</span>
+                <span style={S.reviewHours}>{fmtDur(r.mins, m.lib.lang)}</span>
               </li>
             ))}
           </ul>
