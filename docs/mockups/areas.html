@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Areas mockup</title>
+<style>
+  :root { --paper:#f4efe4; --card:#fbf8f1; --ink:#2a2420; --muted:#7a7065; --line:#d9d0c1; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font-family:Georgia, 'Fraunces', serif; }
+  .wrap { display:flex; flex-wrap:wrap; gap:28px; justify-content:center; padding:20px 16px 40px; }
+  .phone { width:360px; background:var(--paper); border:1.5px solid var(--ink); border-radius:18px; padding:18px 16px 24px; }
+  .cap { font:600 11px ui-monospace, monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:0 0 10px; }
+  h2 { margin:0; font-size:30px; font-weight:800; }
+  .sub { margin:4px 0 16px; color:var(--muted); font-style:italic; font-size:14px; }
+  .list { border:1.5px solid var(--ink); border-radius:6px; overflow:hidden; background:var(--card); }
+  .row { display:flex; align-items:center; gap:12px; padding:12px; border-top:1px solid var(--line); min-height:56px; }
+  .row:first-child { border-top:none; }
+  .ic { width:34px; height:34px; border-radius:8px; display:grid; place-items:center; color:#fff; font-size:16px; flex:none; }
+  .name { font-weight:700; font-size:16px; flex:1; }
+  .goal { font:12px ui-monospace, monospace; color:var(--muted); text-align:right; }
+  .chev { color:var(--muted); font-size:18px; }
+  .open { background:#fff; }
+  .edit { padding:4px 12px 14px; background:#fff; border-top:1px dashed var(--line); display:flex; flex-direction:column; gap:12px; }
+  .lbl { font:600 10px ui-monospace, monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:5px; }
+  .seg { display:grid; grid-template-columns:repeat(3,1fr); border:1.5px solid var(--ink); border-radius:4px; overflow:hidden; }
+  .seg span { text-align:center; padding:9px 0; font-size:13px; font-weight:600; }
+  .seg .on { background:var(--ink); color:var(--paper); }
+  .hint { font-size:12px; color:var(--muted); font-style:italic; margin-top:4px; }
+  .step { display:flex; align-items:center; border:1.5px solid var(--ink); border-radius:4px; width:max-content; }
+  .step b { width:40px; height:40px; display:grid; place-items:center; font-size:18px; }
+  .step span { min-width:64px; text-align:center; font:600 15px ui-monospace, monospace; border-left:1px solid var(--line); border-right:1px solid var(--line); line-height:40px; }
+  .pair { display:flex; gap:16px; flex-wrap:wrap; }
+  .sw { display:flex; gap:8px; flex-wrap:wrap; }
+  .sw i { width:28px; height:28px; border-radius:50%; display:block; }
+  .sw .on { outline:2px solid var(--ink); outline-offset:2px; }
+  .icons { display:flex; gap:6px; flex-wrap:wrap; }
+  .icons span { width:36px; height:36px; border:1px solid var(--line); border-radius:6px; display:grid; place-items:center; font-size:16px; }
+  .icons .on { border:2px solid var(--ink); }
+  .del { font-size:13px; color:var(--muted); text-decoration:underline; text-underline-offset:3px; align-self:flex-start; }
+  .add { margin-top:12px; border:1.5px dashed var(--ink); border-radius:6px; padding:12px; text-align:center; font-weight:600; }
+  .nameIn { border:1.5px solid var(--ink); border-radius:4px; padding:9px 10px; font:inherit; font-size:16px; width:100%; background:var(--card); }
+  .note { max-width:760px; margin:0 auto; padding:0 16px 30px; font-size:14px; line-height:1.5; }
+  .note li { margin-bottom:4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <p class="cap">1 · At a glance</p>
+    <div class="phone">
+      <h2>Your areas</h2>
+      <p class="sub">How much time each one gets, every week.</p>
+      <div class="list">
+        <div class="row"><span class="ic" style="background:#E8643C">🏋</span><span class="name">Exercise</span><span class="goal">at least 4 h<br>2 h blocks</span><span class="chev">›</span></div>
+        <div class="row"><span class="ic" style="background:#3C6FE8">💼</span><span class="name">Work</span><span class="goal">at most 40 h<br>4 h blocks</span><span class="chev">›</span></div>
+        <div class="row"><span class="ic" style="background:#1FA98A">L</span><span class="name">Learn</span><span class="goal">at least 3 h<br>1 h blocks</span><span class="chev">›</span></div>
+        <div class="row"><span class="ic" style="background:#C9A227">P</span><span class="name">Play</span><span class="goal">2–5 h<br>1 h blocks</span><span class="chev">›</span></div>
+        <div class="row"><span class="ic" style="background:#9B4DCA">R</span><span class="name">Rest</span><span class="goal">at least 8 h<br>1 h blocks</span><span class="chev">›</span></div>
+      </div>
+      <div class="add">＋ New area</div>
+    </div>
+  </div>
+
+  <div>
+    <p class="cap">2 · Tap one to change it</p>
+    <div class="phone">
+      <h2>Your areas</h2>
+      <p class="sub">How much time each one gets, every week.</p>
+      <div class="list">
+        <div class="row open"><span class="ic" style="background:#E8643C">🏋</span><span class="name">Exercise</span><span class="goal">at least 4 h<br>2 h blocks</span><span class="chev">⌄</span></div>
+        <div class="edit">
+          <div><div class="lbl">Name</div><input class="nameIn" value="Exercise"></div>
+          <div>
+            <div class="lbl">Each week</div>
+            <div class="seg"><span class="on">At least</span><span>At most</span><span>Between</span></div>
+            <div class="hint">Time you want to protect, like rest.</div>
+          </div>
+          <div class="pair">
+            <div><div class="lbl">Hours</div><div class="step"><b>−</b><span>4 h</span><b>＋</b></div></div>
+            <div><div class="lbl">One block</div><div class="step"><b>−</b><span>2 h</span><b>＋</b></div></div>
+          </div>
+          <div><div class="lbl">Colour</div>
+            <div class="sw"><i class="on" style="background:#E8643C"></i><i style="background:#3C6FE8"></i><i style="background:#1FA98A"></i><i style="background:#C9A227"></i><i style="background:#9B4DCA"></i><i style="background:#D6336C"></i><i style="background:#0CA678"></i><i style="background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red)"></i></div>
+          </div>
+          <div><div class="lbl">Icon</div>
+            <div class="icons"><span style="font-size:11px">none</span><span class="on">🏋</span><span>🚲</span><span>📖</span><span>🧠</span><span>🎵</span><span>☕</span><span>💤</span><span>…</span></div>
+          </div>
+          <span class="del">Delete this area</span>
+        </div>
+        <div class="row"><span class="ic" style="background:#3C6FE8">💼</span><span class="name">Work</span><span class="goal">at most 40 h<br>4 h blocks</span><span class="chev">›</span></div>
+        <div class="row"><span class="ic" style="background:#1FA98A">L</span><span class="name">Learn</span><span class="goal">at least 3 h<br>1 h blocks</span><span class="chev">›</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="note">
+  <ul>
+    <li><b>The list reads in a few seconds:</b> each area's icon (or initial) in its colour, its name, its weekly goal and its block length. The three-sentence intro becomes one line.</li>
+    <li><b>Tap an area to edit it.</b> Only one is open at a time, and the rest of the list stays short.</li>
+    <li><b>− / ＋ buttons</b> replace the number boxes, in half-hour steps, so no keyboard opens on the phone. "Between" shows two of them, from and to.</li>
+    <li><b>Colour swatches</b> from the app's palette, plus one for any colour. They replace the small colour box.</li>
+    <li><b>The icon grid</b> sits in the same panel, with no extra button to open it.</li>
+    <li><b>"Delete this area"</b> becomes a quiet link inside the panel instead of a ✕ beside every area, so it's harder to tap by accident.</li>
+  </ul>
+</div>
+</body>
+</html>

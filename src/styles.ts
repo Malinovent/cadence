@@ -1701,32 +1701,6 @@ export const S = {
     fontSize: 14,
     marginTop: 4
   },
-  catList: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 10,
-    marginTop: 16
-  },
-  catRow: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    background: "var(--c-card)",
-    padding: "12px 14px",
-    borderRadius: 4,
-    flexWrap: "wrap"
-  },
-  catNameInput: {
-    flex: "1 1 140px",
-    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
-    fontSize: 16,
-    fontWeight: 600,
-    border: "none",
-    borderBottom: `1.5px solid ${line}`,
-    background: "transparent",
-    color: ink,
-    padding: "4px 2px"
-  },
   catField: {
     display: "flex",
     flexDirection: "column",
@@ -1745,12 +1719,6 @@ export const S = {
     padding: "5px",
     background: "var(--c-field)",
     color: ink
-  },
-  // S1.2 guardrail picker in the category row: Floor | Ceiling | Range, then the hours
-  catGuard: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 4
   },
   kindGroup: {
     display: "inline-flex",
@@ -1778,20 +1746,139 @@ export const S = {
     fontStyle: "italic",
     color: "var(--c-muted)"
   },
-  catColor: {
-    width: 38,
-    height: 38,
-    border: "none",
-    background: "none",
-    cursor: "pointer",
-    padding: 0
-  },
   catDel: {
     border: "none",
     background: "transparent",
     cursor: "pointer",
     color: "var(--c-danger)",
     fontSize: 16
+  },
+  // the Areas tab: a list, one area open to change (JP, 2026-11-08)
+  areaBadge: {
+    width: 34,
+    height: 34,
+    flexShrink: 0,
+    borderRadius: 8,
+    display: "grid",
+    placeItems: "center",
+    color: "#fff",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 700,
+    fontSize: 16
+  },
+  areaGoal: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 11.5,
+    lineHeight: 1.5,
+    color: "var(--c-muted)",
+    textAlign: "right",
+    whiteSpace: "nowrap",
+    flexShrink: 0
+  },
+  areaEdit: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 16,
+    padding: "6px 14px 16px",
+    background: "var(--c-field)",
+    borderTop: `1px dashed ${line}`
+  },
+  areaLabel: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 10,
+    letterSpacing: "0.08em",
+    textTransform: "uppercase",
+    color: "var(--c-muted)",
+    marginBottom: 5
+  },
+  areaNameInput: {
+    boxSizing: "border-box",
+    width: "100%",
+    padding: "9px 10px",
+    border: `1.5px solid ${ink}`,
+    borderRadius: 4,
+    background: "var(--c-card)",
+    color: ink,
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontSize: 16,
+    fontWeight: 600
+  },
+  areaSteppers: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "12px 20px"
+  },
+  stepper: {
+    display: "inline-flex",
+    alignItems: "stretch",
+    border: `1.5px solid ${ink}`,
+    borderRadius: 4,
+    overflow: "hidden",
+    background: "var(--c-card)"
+  },
+  stepBtn: {
+    width: 44,
+    minHeight: 44,
+    border: "none",
+    background: "transparent",
+    color: ink,
+    fontSize: 18,
+    cursor: "pointer"
+  },
+  stepVal: {
+    minWidth: 64,
+    display: "grid",
+    placeItems: "center",
+    borderLeft: `1px solid ${line}`,
+    borderRight: `1px solid ${line}`,
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 14,
+    fontWeight: 600
+  },
+  swatches: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 10
+  },
+  swatch: {
+    position: "relative",
+    width: 32,
+    height: 32,
+    borderRadius: "50%",
+    border: "none",
+    padding: 0,
+    cursor: "pointer",
+    display: "block"
+  },
+  swatchOn: {
+    outline: `2px solid ${ink}`,
+    outlineOffset: 3
+  },
+  swatchInput: {
+    position: "absolute",
+    inset: 0,
+    width: "100%",
+    height: "100%",
+    opacity: 0,
+    cursor: "pointer"
+  },
+  areaConfirm: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: 10,
+    fontSize: 14
+  },
+  areaConfirmYes: {
+    minHeight: 40,
+    padding: "0 14px",
+    border: "none",
+    borderRadius: 4,
+    background: ink,
+    color: paper,
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 600,
+    cursor: "pointer"
   },
   catAdd: {
     marginTop: 16,
@@ -2804,18 +2891,6 @@ export const S = {
     color: "var(--c-muted)"
   },
   // the Areas page: an icon button by the name, and the grid to pick from (JP, 2026-11-08)
-  iconBtn: {
-    flexShrink: 0,
-    width: 44,
-    height: 44,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    border: `1.5px dashed ${line}`,
-    borderRadius: 8,
-    background: "transparent",
-    cursor: "pointer"
-  },
   iconGrid: {
     flexBasis: "100%",
     display: "grid",
