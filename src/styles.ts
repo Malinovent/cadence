@@ -2552,35 +2552,106 @@ export const S = {
     gap: 8,
     minWidth: 0
   },
-  // Settings: four groups, jump buttons at the top
-  settingsNav: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: 8,
-    marginBottom: 8
+  // Settings as short rows: name on the left, its control on the right (JP, 2026-11-08)
+  setGroup: {
+    marginTop: 28
   },
-  settingsNavBtn: {
+  setGroupTitle: {
+    margin: "0 0 8px",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 900,
+    fontSize: 20
+  },
+  setCard: {
+    border: `1px solid ${line}`,
+    borderRadius: 8,
+    background: "var(--c-card)",
+    overflow: "hidden" // clips the first row's top rule
+  },
+  setRow: {
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: "8px 12px",
+    boxSizing: "border-box",
+    width: "100%",
+    minHeight: 56,
+    padding: "10px 14px",
+    marginTop: -1,
+    borderTop: `1px solid ${line}`
+  },
+  setRowBtn: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    boxSizing: "border-box",
+    width: "100%",
+    minHeight: 52,
+    padding: "10px 14px",
+    margin: "-1px 0 0",
+    border: "none",
+    borderTop: `1px solid ${line}`,
+    background: "transparent",
+    color: ink,
+    textAlign: "left",
+    textDecoration: "none",
+    cursor: "pointer",
+    fontFamily: "inherit"
+  },
+  setLabel: {
+    flex: "1 1 150px",
+    minWidth: 0,
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontSize: 15,
+    fontWeight: 600
+  },
+  setHint: {
+    display: "block",
+    marginTop: 2,
+    fontSize: 12.5,
+    fontWeight: 400,
+    color: "var(--c-muted)"
+  },
+  setValue: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 13,
+    color: "var(--c-muted)"
+  },
+  setSelect: {
     minHeight: 40,
-    padding: "0 14px",
-    border: `1px solid ${ink}`,
-    borderRadius: 999,
+    minWidth: 110,
+    padding: "6px 8px",
+    border: `1.5px solid ${ink}`,
+    borderRadius: 6,
+    background: "var(--c-field)",
+    color: ink,
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 14
+  },
+  setSeg: {
+    fontSize: 13,
+    minHeight: 36,
+    padding: "4px 10px"
+  },
+  setLink: {
+    minHeight: 36,
+    padding: "0 4px",
+    border: "none",
     background: "transparent",
     color: ink,
     cursor: "pointer",
-    fontFamily: "'Spline Sans Mono', monospace",
-    fontSize: 12
-  },
-  settingsGroup: {
-    marginTop: 36,
-    paddingTop: 20,
-    borderTop: `2px solid ${ink}`,
-    scrollMarginTop: 16
-  },
-  settingsSubtitle: {
-    margin: "0 0 6px",
     fontFamily: "'Fraunces Variable', 'Fraunces', serif",
-    fontWeight: 700,
-    fontSize: 18
+    fontSize: 14,
+    fontWeight: 600,
+    textDecoration: "underline"
+  },
+  setPanel: {
+    padding: "2px 14px 14px"
+  },
+  setFoot: {
+    margin: "6px 2px 0",
+    fontSize: 12.5,
+    color: "var(--c-muted)"
   },
   // the Areas page: an icon button by the name, and the grid to pick from (JP, 2026-11-08)
   iconBtn: {

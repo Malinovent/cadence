@@ -351,8 +351,12 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 ### Area icons (JP, 2026-11-08)
 - An area may carry one icon from a set of 24 line icons (lucide, ISC licence, bundled so it works offline; `src/lib/icons.ts` the names, `AreaIconView` the drawings). Areas page: the square button before the name opens the grid, "None" takes it away. Drawn in the area's colour before its name on its chip, its blocks (one area only), the add window, the phone sheet, the week review and Stats; without one, the colour dot as before. Stored as `icon` on the area in `cadence:cats`; `normalizeData` keeps only a known name, so older data loads unchanged. An older copy of the app drops the icon when it saves: update every device.
 
-### Settings in four groups (JP, 2026-11-08)
-- Settings opens with four jump buttons, then the groups in this order, each under a big title with a rule above: Your week (Your day, Balanced weeks); Look and sound (Look, Sounds, Language); Data and account (early-bird thanks, Account & sync with Delete my account last, Your data: export and import); Help (About, help links, the introduction again, privacy and terms). Groups are `<section>`s labelled by their `<h2>`; sections are `<h3>`.
+### Settings in four groups, as short rows (JP, 2026-11-08: "more readable")
+- Four groups, each a title and one card of rows (`SetRow`): the setting's name on the left, at most one short grey hint under it, its control on the right (under it on a phone). No paragraphs; "Saved on this device." once, under Look and sound.
+- Your week: Day starts, Day ends (selects); Balanced week, summed up ("Targets met to 80%, limits passed by 10% at most") with Edit opening the two numbers.
+- Look and sound: Look (Paper / Night / Contrast / Auto), Sounds (volume slider), Language (Auto / Français / English).
+- Data and account: early-bird thanks above the card; Sync ("The same weeks on your phone and computer", Sign in opens the email form under the row; signed in: the email, the sync status, Sign out); Export my data; Import from file; Delete my account last, small and grey, asked in place.
+- Help: Questions and answers, Write to us (once the site or support address is set), Show the introduction, Privacy and Terms; one line under the card on what the app keeps where.
 
 ### Looks (JP, 2026-11-08)
 - Settings → Look: Paper (the app as it has always been, the default), Night, High contrast, or Match device (Night when the device is dark). Per device (`cadence:ui:theme`), applied before the first paint as `<html data-theme>`. Every colour of the app's own look is a CSS variable by role (`--c-ink`, `--c-paper`, `--c-card`, `--c-muted`…; palettes in `src/lib/theme.ts`, tested for text contrast: 4.5:1, 7:1 for ink in high contrast); area colours never change. Text on an ink fill uses paper, so filled buttons invert with the theme.

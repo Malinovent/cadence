@@ -29,6 +29,8 @@ describe("French and English catalogues", () => {
       "header.nav.stats",
       "editor.description",
       "lib.lang",
+      "settings.langAuto",
+      "settings.looks.device",
     ];
     expect(same.filter((k) => !ALLOWED.includes(k))).toEqual([]);
   });

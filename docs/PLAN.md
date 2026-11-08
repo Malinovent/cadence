@@ -163,7 +163,7 @@ On branch `count-halves`: plain decimals, "0.5 more blocks", "1.5 more blocks" (
 ### [x] Consumer basics (2026-11-07)
 On branch `consumer-ready` (JP): crash screen with download and reload; help and feedback (VITE_SUPPORT_EMAIL, the site's FAQ); delete my account (`delete_my_account()` in schema.sql); sounds with a volume slider; a week review (and fanfare when balanced) after roll forward; looks (paper, night, high contrast, device); Settings → Your day (calendar hours, blocks anywhere in the day). Shipped to main 2026-11-08. Left: JP re-runs `supabase/schema.sql`, sets `VITE_SUPPORT_EMAIL`; test the deletion with a real account; open the app on every device before planning outside 7:00–23:00.
 
-On branch `stats-clear` (JP, 2026-11-08): Stats shorter (last week as rows, bars with hours); rows and bars closer to their names; area icons (24, picked on the Areas page); Settings in four groups with jump buttons. Not shipped yet. Left: update every device before picking icons.
+On branch `stats-clear` (JP, 2026-11-08): Stats shorter (last week as rows, bars with hours); rows and bars closer to their names; area icons (24, picked on the Areas page); Settings in four groups. Shipped to main 2026-11-08 (1a53c97). Then Settings as short rows, no paragraphs (JP: "more readable"), on branch main, not shipped yet. Left: update every device before picking icons.
 ### [~] S1.9 French and English
 Done on branch `s1-finish`: catalogues for every string (en/fr), lib wording passed in, detection + Settings switch (device-local), Quebec formats, default areas named in the person's language. Shipped to main 2026-11-04. Left: JP reviews the French.
 ### [x] S1.10 Neutral stats

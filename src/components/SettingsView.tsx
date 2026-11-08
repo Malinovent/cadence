@@ -1,6 +1,7 @@
 import type React from "react";
 import { useRef, useState, type ChangeEvent } from "react";
 import AccountSync, { type AccountSyncProps } from "./AccountSync";
+import SetRow from "./SetRow";
 import { downloadText } from "../lib/download";
 import { droppedLine, importSummaryLine } from "../lib/format";
 import type { CadenceData } from "../lib/model";
@@ -60,7 +61,7 @@ export default function SettingsView({
 }: {
   data: CadenceData;
   onReplace: (next: CadenceData) => void;
-  /** null when sync is not configured: the "Account & sync" section is hidden */
+  /** null when sync is not configured: the Sync row is hidden */
   sync: AccountSyncProps | null;
   /** S1.11: show the early-bird thank-you */
   earlyBird?: boolean;
@@ -117,57 +118,26 @@ export default function SettingsView({
     ),
   );
 
-  // Settings in four groups with jump buttons at the top (JP, 2026-11-08)
-  const jump = (id: string) => document.getElementById(`settings-${id}`)?.scrollIntoView({ block: "start" });
-  return (
-    <div style={S.catBody}>
-      <nav aria-label={m.settings.groupsNav} style={S.settingsNav}>
-        {GROUPS.map((g) => (
-          <button key={g} type="button" onClick={() => jump(g)} style={S.settingsNavBtn}>
-            {m.settings.groups[g]}
-          </button>
-        ))}
-      </nav>
-
-      <SettingsGroup id="week" title={m.settings.groups.week}>
-        <DayHoursSection hours={dayHours} onHours={onDayHours} />
-        <BalanceRulesSection />
-      </SettingsGroup>
-
-      <SettingsGroup id="look" title={m.settings.groups.look}>
-        <LookSection />
-        <SoundSection />
-        <LanguageSection />
-      </SettingsGroup>
-
-      <SettingsGroup id="data" title={m.settings.groups.data}>
-        {earlyBird && (
-          <div style={S.earlyThanks} role="note">
-            <span style={S.earlyBadge}>{m.header.earlyBird}</span>
-            <span>{m.settings.earlyThanks}</span>
-          </div>
-        )}
-        {sync && <AccountSync {...sync} />}
-        <div style={{ marginTop: 24 }}>
-          <h3 style={S.settingsSubtitle}>{m.settings.dataTitle}</h3>
-          <div style={S.catIntro}>{m.settings.dataIntro}</div>
-          <div style={{ ...row, marginTop: 16 }}>
-            <button style={{ ...S.catAdd, marginTop: 0 }} onClick={onExport}>
-              {m.settings.export}
-            </button>
-            <button style={{ ...S.catAdd, marginTop: 0 }} onClick={onPickClick}>
-              {m.settings.import}
-            </button>
-            <input
-              ref={fileRef}
-              type="file"
-              accept=".json,application/json"
-              style={{ display: "none" }}
-              onChange={onFile}
-            />
-          </div>
+  // Settings as short rows, in four groups (JP, 2026-11-08: "more readable")
+  const dataRows = (
+    <>
+      <button type="button" style={S.setRowBtn} onClick={onExport}>
+        <span style={S.setLabel}>{m.settings.export}</span>
+        <span aria-hidden="true" style={S.setValue}>
+          ↓
+        </span>
+      </button>
+      <button type="button" style={S.setRowBtn} onClick={onPickClick}>
+        <span style={S.setLabel}>{m.settings.import}</span>
+        <span aria-hidden="true" style={S.setValue}>
+          ↑
+        </span>
+      </button>
+      <input ref={fileRef} type="file" accept=".json,application/json" style={{ display: "none" }} onChange={onFile} />
+      {(copies.length > 0 || status.kind !== "idle") && (
+        <div style={S.setPanel}>
           {copies.map((c) => (
-            <div key={c.key} style={{ ...note, color: "var(--c-muted)", marginTop: 12 }}>
+            <div key={c.key} style={{ ...note, color: "var(--c-muted)", marginTop: 8 }}>
               {m.settings[c.line]}{" "}
               <button
                 style={{ ...S.catDel, fontStyle: "normal", textDecoration: "underline", padding: 0 }}
@@ -177,9 +147,8 @@ export default function SettingsView({
               </button>
             </div>
           ))}
-
           {status.kind === "pending" && (
-            <div style={{ ...S.streakCard, textAlign: "left", padding: 14, marginTop: 16 }}>
+            <div style={{ ...S.streakCard, textAlign: "left", padding: 14, marginTop: 8 }}>
               <div style={S.catIntro}>{importSummaryLine(status.result.summary, m.lib)}</div>
               {dropped && <div style={{ ...note, color: "var(--c-faint)", marginTop: 4 }}>{dropped}</div>}
               <div style={{ ...S.resetWarn, marginTop: 8 }}>{m.settings.replaceWarn}</div>
@@ -194,28 +163,61 @@ export default function SettingsView({
             </div>
           )}
           {status.kind === "error" && (
-            <div style={{ ...note, color: "var(--c-danger)", marginTop: 12 }}>{errorText(status.message)}</div>
+            <div role="alert" style={{ ...note, color: "var(--c-danger)", marginTop: 8 }}>
+              {errorText(status.message)}
+            </div>
           )}
           {status.kind === "success" && (
-            <div style={{ ...note, color: "var(--c-done)", marginTop: 12 }}>{m.settings.imported}</div>
+            <div role="status" style={{ ...note, color: "var(--c-done)", marginTop: 8 }}>
+              {m.settings.imported}
+            </div>
           )}
+        </div>
+      )}
+    </>
+  );
+
+  return (
+    <div style={S.catBody}>
+      <SettingsGroup id="week" title={m.settings.groups.week}>
+        <div style={S.setCard}>
+          <DayHoursRows hours={dayHours} onHours={onDayHours} />
+          <BalanceRulesRow />
         </div>
       </SettingsGroup>
 
+      <SettingsGroup id="look" title={m.settings.groups.look}>
+        <div style={S.setCard}>
+          <LookRow />
+          <SoundRow />
+          <LanguageRow />
+        </div>
+        <p style={S.setFoot}>{m.settings.savedHere}</p>
+      </SettingsGroup>
+
+      <SettingsGroup id="data" title={m.settings.groups.data}>
+        {earlyBird && (
+          <div style={{ ...S.earlyThanks, marginTop: 0 }} role="note">
+            <span style={S.earlyBadge}>{m.header.earlyBird}</span>
+            <span>{m.settings.earlyThanks}</span>
+          </div>
+        )}
+        <div style={S.setCard}>{sync ? <AccountSync {...sync}>{dataRows}</AccountSync> : dataRows}</div>
+      </SettingsGroup>
+
       <SettingsGroup id="help" title={m.settings.groups.help}>
-        <AboutSection onReplayIntro={onReplayIntro} />
+        <HelpRows onReplayIntro={onReplayIntro} />
+        <p style={S.setFoot}>{m.settings.aboutText}</p>
       </SettingsGroup>
     </div>
   );
 }
 
-const GROUPS = ["week", "look", "data", "help"] as const;
-
-/** One group of Settings: a big title, its sections under it. */
+/** One group of Settings: its title, then its card of rows. */
 function SettingsGroup({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
-    <section id={`settings-${id}`} aria-labelledby={`settings-${id}-title`} style={S.settingsGroup}>
-      <h2 id={`settings-${id}-title`} style={S.statsTitle}>
+    <section aria-labelledby={`settings-${id}-title`} style={S.setGroup}>
+      <h2 id={`settings-${id}-title`} style={S.setGroupTitle}>
         {title}
       </h2>
       {children}
@@ -223,10 +225,11 @@ function SettingsGroup({ id, title, children }: { id: string; title: string; chi
   );
 }
 
-/** S1.3: when a week counts as balanced. Saved on this device only. */
-function BalanceRulesSection() {
+/** S1.3: when a week counts as balanced, summed up in one line; Edit opens the two numbers. */
+function BalanceRulesRow() {
   const { m } = useI18n();
   const [rules, setRules] = useState(readBalanceRules);
+  const [open, setOpen] = useState(false);
   const set = (patch: Partial<BalanceRules>) => {
     const next = clampRules({ ...rules, ...patch });
     setRules(next);
@@ -234,41 +237,49 @@ function BalanceRulesSection() {
   };
   const changed = rules.floorPct !== DEFAULT_RULES.floorPct || rules.ceilingOverPct !== DEFAULT_RULES.ceilingOverPct;
   return (
-    <div style={{ marginTop: 22 }}>
-      <h3 style={S.settingsSubtitle}>{m.settings.rulesTitle}</h3>
-      <div style={S.catIntro}>{m.settings.rulesIntro}</div>
-      <div style={{ ...row, marginTop: 12, alignItems: "flex-end" }}>
-        <label style={S.catField}>
-          <span>{m.settings.floorsMet}</span>
-          <input
-            type="number"
-            min="0"
-            max="100"
-            step="5"
-            value={rules.floorPct}
-            onChange={(e) => set({ floorPct: +e.target.value })}
-            style={S.catNum}
-          />
-        </label>
-        <label style={S.catField}>
-          <span>{m.settings.ceilingsPassed}</span>
-          <input
-            type="number"
-            min="0"
-            max="100"
-            step="5"
-            value={rules.ceilingOverPct}
-            onChange={(e) => set({ ceilingOverPct: +e.target.value })}
-            style={S.catNum}
-          />
-        </label>
-        {changed && (
-          <button style={{ ...S.catDel, fontSize: 13, textDecoration: "underline" }} onClick={() => set(DEFAULT_RULES)}>
-            {m.settings.rulesBack}
-          </button>
-        )}
-      </div>
-    </div>
+    <>
+      <SetRow label={m.settings.rulesTitle} hint={m.settings.rulesSummary(rules.floorPct, rules.ceilingOverPct)}>
+        <button type="button" aria-expanded={open} style={S.setLink} onClick={() => setOpen(!open)}>
+          {open ? m.settings.close : m.settings.edit}
+        </button>
+      </SetRow>
+      {open && (
+        <div style={{ ...S.setPanel, ...row, alignItems: "flex-end" }}>
+          <label style={S.catField}>
+            <span>{m.settings.floorsMet}</span>
+            <input
+              type="number"
+              min="0"
+              max="100"
+              step="5"
+              value={rules.floorPct}
+              onChange={(e) => set({ floorPct: +e.target.value })}
+              style={S.catNum}
+            />
+          </label>
+          <label style={S.catField}>
+            <span>{m.settings.ceilingsPassed}</span>
+            <input
+              type="number"
+              min="0"
+              max="100"
+              step="5"
+              value={rules.ceilingOverPct}
+              onChange={(e) => set({ ceilingOverPct: +e.target.value })}
+              style={S.catNum}
+            />
+          </label>
+          {changed && (
+            <button
+              style={{ ...S.catDel, fontSize: 13, textDecoration: "underline" }}
+              onClick={() => set(DEFAULT_RULES)}
+            >
+              {m.settings.rulesBack}
+            </button>
+          )}
+        </div>
+      )}
+    </>
   );
 }
 
@@ -276,98 +287,102 @@ function BalanceRulesSection() {
  * The hours the calendar shows (JP, 2026-11-07): 7:00 to 23:00 unless chosen, at least four hours.
  * Blocks outside them still show (the calendar grows to hold them). Saved on this device.
  */
-function DayHoursSection({ hours, onHours }: { hours: Bounds; onHours: (h: Bounds) => void }) {
+function DayHoursRows({ hours, onHours }: { hours: Bounds; onHours: (h: Bounds) => void }) {
   const { m, lang } = useI18n();
   const label = (t: number) => (t === 0 || t === 24 * 60 ? m.settings.midnight : fmtTime(t, lang));
   return (
-    <div style={{ marginTop: 22 }}>
-      <h3 style={S.settingsSubtitle}>{m.settings.dayTitle}</h3>
-      <div style={S.catIntro}>{m.settings.dayIntro}</div>
-      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginTop: 12 }}>
-        <label style={S.dayField}>
-          <span style={S.dayFieldLabel}>{m.settings.dayStart}</span>
-          <select
-            value={hours[0]}
-            onChange={(e) => onHours(withStart(hours, Number(e.target.value)))}
-            style={S.daySelect}
-          >
-            {startChoices().map((t) => (
-              <option key={t} value={t}>
-                {label(t)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label style={S.dayField}>
-          <span style={S.dayFieldLabel}>{m.settings.dayEnd}</span>
-          <select
-            value={hours[1]}
-            onChange={(e) => onHours(withEnd(hours, Number(e.target.value)))}
-            style={S.daySelect}
-          >
-            {endChoices(hours[0]).map((t) => (
-              <option key={t} value={t}>
-                {label(t)}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+    <>
+      <SetRow label={m.settings.dayStart} field>
+        <select
+          value={hours[0]}
+          onChange={(e) => onHours(withStart(hours, Number(e.target.value)))}
+          style={S.setSelect}
+        >
+          {startChoices().map((t) => (
+            <option key={t} value={t}>
+              {label(t)}
+            </option>
+          ))}
+        </select>
+      </SetRow>
+      <SetRow label={m.settings.dayEnd} field>
+        <select value={hours[1]} onChange={(e) => onHours(withEnd(hours, Number(e.target.value)))} style={S.setSelect}>
+          {endChoices(hours[0]).map((t) => (
+            <option key={t} value={t}>
+              {label(t)}
+            </option>
+          ))}
+        </select>
+      </SetRow>
+    </>
+  );
+}
+
+/** Buttons where one is chosen (look, language). */
+function Choice<T extends string>({
+  label,
+  value,
+  options,
+  onChoose,
+}: {
+  label: string;
+  value: T;
+  options: { value: T; label: string; lang?: string }[];
+  onChoose: (v: T) => void;
+}) {
+  return (
+    <div style={{ ...S.kindGroup, flexWrap: "wrap" }} role="group" aria-label={label}>
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          lang={o.lang}
+          aria-pressed={value === o.value}
+          onClick={() => onChoose(o.value)}
+          style={{ ...S.kindBtn, ...S.setSeg, ...(value === o.value ? S.kindBtnActive : {}) }}
+        >
+          {o.label}
+        </button>
+      ))}
     </div>
   );
 }
 
 /** The app's look (JP, 2026-11-08): paper, night, high contrast or the device's. Saved on this device. */
-function LookSection() {
+function LookRow() {
   const { m } = useI18n();
   const [choice, setChoice] = useState<ThemeChoice>(readTheme);
-  const choose = (c: ThemeChoice) => {
-    setChoice(c);
-    writeTheme(c);
-    applyTheme(c);
-  };
   return (
-    <div style={{ marginTop: 22 }}>
-      <h3 style={S.settingsSubtitle}>{m.settings.lookTitle}</h3>
-      <div style={S.catIntro}>{m.settings.lookIntro}</div>
-      <div
-        style={{ ...S.kindGroup, marginTop: 12, display: "inline-flex", flexWrap: "wrap" }}
-        role="group"
-        aria-label={m.settings.lookTitle}
-      >
-        {THEME_CHOICES.map((c) => (
-          <button
-            key={c}
-            type="button"
-            aria-pressed={choice === c}
-            onClick={() => choose(c)}
-            style={{ ...S.kindBtn, ...(choice === c ? S.kindBtnActive : {}) }}
-          >
-            {m.settings.looks[c]}
-          </button>
-        ))}
-      </div>
-    </div>
+    <SetRow label={m.settings.lookTitle}>
+      <Choice
+        label={m.settings.lookTitle}
+        value={choice}
+        options={THEME_CHOICES.map((c) => ({ value: c, label: m.settings.looks[c] }))}
+        onChoose={(c) => {
+          setChoice(c);
+          writeTheme(c);
+          applyTheme(c);
+        }}
+      />
+    </SetRow>
   );
 }
 
 /** Sounds: one volume slider, 0 for none (JP, 2026-11-08). Half by default; saved on this device. */
-function SoundSection() {
+function SoundRow() {
   const { m } = useI18n();
   const [vol, setVol] = useState(soundVolume);
+  const text = vol === 0 ? m.settings.soundOff : `${vol}%`;
   return (
-    <div style={{ marginTop: 22 }}>
-      <h3 style={S.settingsSubtitle}>{m.settings.soundTitle}</h3>
-      <div style={S.catIntro}>{m.settings.soundIntro}</div>
-      <label style={S.volumeRow}>
-        <span style={S.dayFieldLabel}>{m.settings.soundVolume}</span>
+    <SetRow label={m.settings.soundTitle} field>
+      <span style={{ display: "flex", alignItems: "center", gap: 10, flex: "1 1 180px", maxWidth: 260 }}>
         <input
           type="range"
           min={0}
           max={100}
           step={5}
           value={vol}
-          aria-valuetext={vol === 0 ? m.settings.soundOff : `${vol}%`}
+          aria-valuetext={text}
           onChange={(e) => {
             const v = Number(e.target.value);
             setVol(v);
@@ -377,48 +392,39 @@ function SoundSection() {
           onKeyUp={() => playSound("tick")}
           style={S.volumeSlider}
         />
-        <span style={S.volumeValue}>{vol === 0 ? m.settings.soundOff : `${vol}%`}</span>
-      </label>
-    </div>
+        <span style={S.volumeValue}>{text}</span>
+      </span>
+    </SetRow>
   );
 }
 
 /** S1.9: the language, following the device unless one is chosen. Saved on this device. */
-function LanguageSection() {
+function LanguageRow() {
   const { m, choice, setChoice } = useI18n();
-  const options: { value: LangChoice; label: string }[] = [
-    { value: "auto", label: m.settings.langAuto },
-    { value: "fr", label: m.settings.langNames.fr },
-    { value: "en", label: m.settings.langNames.en },
-  ];
   return (
-    <div style={{ marginTop: 22 }}>
-      <h3 style={S.settingsSubtitle}>{m.settings.langTitle}</h3>
-      <div style={S.catIntro}>{m.settings.langIntro}</div>
-      <div
-        style={{ ...S.kindGroup, marginTop: 12, display: "inline-flex" }}
-        role="group"
-        aria-label={m.settings.langTitle}
-      >
-        {options.map((o) => (
-          <button
-            key={o.value}
-            type="button"
-            lang={o.value === "auto" ? undefined : o.value}
-            aria-pressed={choice === o.value}
-            onClick={() => setChoice(o.value)}
-            style={{ ...S.kindBtn, ...(choice === o.value ? S.kindBtnActive : {}) }}
-          >
-            {o.label}
-          </button>
-        ))}
-      </div>
-    </div>
+    <SetRow label={m.settings.langTitle}>
+      <Choice<LangChoice>
+        label={m.settings.langTitle}
+        value={choice}
+        options={[
+          { value: "auto", label: m.settings.langAuto },
+          { value: "fr", label: m.settings.langNames.fr, lang: "fr" },
+          { value: "en", label: m.settings.langNames.en, lang: "en" },
+        ]}
+        onChoose={setChoice}
+      />
+    </SetRow>
   );
 }
 
-/** What the app is, the introduction again, and the legal pages (once the site has its address). */
-function AboutSection({ onReplayIntro }: { onReplayIntro: () => void }) {
+const Chevron = () => (
+  <span aria-hidden="true" style={S.setValue}>
+    ›
+  </span>
+);
+
+/** Help: questions, writing to us, the introduction again, and the legal pages (once the site has its address). */
+function HelpRows({ onReplayIntro }: { onReplayIntro: () => void }) {
   const { m, lang } = useI18n();
   const links = legalLinks(import.meta.env.VITE_SITE_URL, lang);
   const help = helpLinks(
@@ -428,40 +434,31 @@ function AboutSection({ onReplayIntro }: { onReplayIntro: () => void }) {
     m.settings.helpSubject(APP_NAME),
   );
   return (
-    <div style={{ marginTop: 22 }}>
-      <h3 style={S.settingsSubtitle}>{m.settings.aboutTitle}</h3>
-      <div style={S.catIntro}>{m.settings.aboutText}</div>
-      <div style={{ ...row, marginTop: 12, alignItems: "center" }}>
-        <button type="button" style={{ ...S.catAdd, marginTop: 0 }} onClick={onReplayIntro}>
-          {m.settings.replayIntro}
-        </button>
-        {links && (
-          <>
-            <a href={links.privacy} target="_blank" rel="noreferrer" style={S.aboutLink}>
-              {m.settings.privacy}
-            </a>
-            <a href={links.terms} target="_blank" rel="noreferrer" style={S.aboutLink}>
-              {m.settings.terms}
-            </a>
-          </>
-        )}
-      </div>
-      {(help.faq || help.mail) && (
-        <div style={{ marginTop: 20 }}>
-          <h3 style={S.helpTitle}>{m.settings.helpTitle}</h3>
-          <div style={S.catIntro}>{m.settings.helpText}</div>
-          <div style={{ ...row, marginTop: 10, alignItems: "center" }}>
-            {help.mail && (
-              <a href={help.mail} style={{ ...S.catAdd, marginTop: 0, textDecoration: "none", color: "inherit" }}>
-                {m.settings.helpMail}
-              </a>
-            )}
-            {help.faq && (
-              <a href={help.faq} target="_blank" rel="noreferrer" style={S.aboutLink}>
-                {m.settings.helpFaq}
-              </a>
-            )}
-          </div>
+    <div style={S.setCard}>
+      {help.faq && (
+        <a href={help.faq} target="_blank" rel="noreferrer" style={S.setRowBtn}>
+          <span style={S.setLabel}>{m.settings.helpFaq}</span>
+          <Chevron />
+        </a>
+      )}
+      {help.mail && (
+        <a href={help.mail} style={S.setRowBtn}>
+          <span style={S.setLabel}>{m.settings.helpMail}</span>
+          <Chevron />
+        </a>
+      )}
+      <button type="button" style={S.setRowBtn} onClick={onReplayIntro}>
+        <span style={S.setLabel}>{m.settings.replayIntro}</span>
+        <Chevron />
+      </button>
+      {links && (
+        <div style={S.setRow}>
+          <a href={links.privacy} target="_blank" rel="noreferrer" style={S.aboutLink}>
+            {m.settings.privacy}
+          </a>
+          <a href={links.terms} target="_blank" rel="noreferrer" style={S.aboutLink}>
+            {m.settings.terms}
+          </a>
         </div>
       )}
     </div>
