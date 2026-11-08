@@ -284,8 +284,6 @@ export default function CategoriesView({ cats, actions }: Props) {
                 </span>
                 <span style={S.areaGoal}>
                   <GoalText limit={c.limit} />
-                  <br />
-                  {m.categories.blocks(fmtH(c.blockMins))}
                 </span>
                 <Chevron size={18} aria-hidden="true" style={{ color: "var(--c-muted)", flexShrink: 0 }} />
               </button>
