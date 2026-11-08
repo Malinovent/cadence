@@ -57,6 +57,7 @@
 - `src/lib/legal.ts` — links to the site's privacy policy and terms, by language; help and feedback (`helpLinks`: the site's FAQ, a mail to VITE_SUPPORT_EMAIL)
 - `src/lib/crash.ts` — the crash screen's backup: the stored keys exactly as they are (`crashBackup`), importable
 - `src/lib/sounds.ts` — the sounds as tones (place, tick, untick, remove, step, finale), quiet and short
+- `src/lib/statsWeeks.ts` — Stats week by week: `weekSpan`, `shiftWeek`, `weekRows`, `weekGap` / `gapText`, `rowBar`, `areaTrends`, `monthStarts`
 - `src/lib/review.ts` — roll forward: how Week 1 went (`weekReview`: balanced, ticked of total, a line per area)
 - `src/lib/theme.ts` — the looks: paper, night, high contrast, device; each palette's colours by role, as CSS variables
 - `src/lib/dayHours.ts` — the hours the calendar shows: choices, the saved setting, and `gridBounds` (widened to hold every block)
@@ -117,7 +118,9 @@
 - `src/components/BlockSheet.tsx` — phone: a block in a floating sheet (day and time, Delete, Done on top; 44 px controls; rides above the keyboard)
 - `src/components/BlockTasks.tsx` — a block's tasks and the open tasks to add or move into it, shared by the popup and the sheet
 - `src/components/BalancedWeeksCard.tsx` — "N balanced weeks this season" card with a square per week
-- `src/components/StatsView.tsx` — balanced weeks card, hours chart, reset
+- `src/components/StatsView.tsx` — Stats: season card (tap a week), any week with ‹ ›, last 12 weeks, hours chart, empty state
+- `src/components/WeekRows.tsx` — Stats, one week: per area a bar with its target, ✓ or "1h short" / "1h over"
+- `src/components/AreaTrends.tsx` — Stats, last 12 weeks: a column per week per area, the target dashed, "kept 5 of 7"
 - `src/components/GoalText.tsx` — an area's target, number first with its sign ("≥ 4 h at least"); the Areas list and Stats rows
 - `src/components/CategoriesView.tsx` — the Areas tab: a list (icon on colour, name, weekly goal); tap one to change its name, At least / At most / Between, hours and block length (− / ＋ in half hours), colour (palette or any), icon; delete asks first
 - `src/components/SettingsView.tsx` — "Your data": export / import with summary + confirm, download of the pre-guardrails copy, balanced-week rules, Your day (calendar hours), sounds, language; hosts "Account & sync" when sync is configured; About (what it is, show the introduction again, privacy and terms, help and feedback)

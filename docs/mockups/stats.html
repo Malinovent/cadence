@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stats mockup</title>
+<style>
+  :root { --paper:#f4efe4; --card:#fbf8f1; --ink:#2a2420; --muted:#7a7065; --line:#d9d0c1; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font-family:Georgia, 'Fraunces', serif; }
+  .wrap { display:flex; flex-wrap:wrap; gap:28px; justify-content:center; padding:20px 16px 40px; align-items:flex-start; }
+  .phone { width:360px; background:var(--paper); border:1.5px solid var(--ink); border-radius:18px; padding:18px 16px 24px; }
+  .mono { font-family:ui-monospace, 'Spline Sans Mono', monospace; }
+  .num { display:inline-grid; place-items:center; width:20px; height:20px; border-radius:50%; background:#3C6FE8; color:#fff; font:700 11px ui-monospace, monospace; margin-right:6px; vertical-align:2px; }
+  h2 { margin:0; font-size:19px; font-weight:800; }
+  .season { background:var(--ink); color:var(--paper); border-radius:6px; padding:14px 14px 12px; display:flex; gap:14px; }
+  .season .big { font-size:46px; font-weight:900; line-height:1; }
+  .season .lbl { font-weight:700; font-size:15px; }
+  .sq { display:flex; gap:5px; margin-top:8px; }
+  .sq span { width:18px; height:18px; border-radius:3px; display:block; }
+  .sq .b { background:var(--paper); }
+  .sq .g { border:1.5px dashed var(--paper); }
+  .sq .u { border:1.5px solid rgba(244,239,228,.3); }
+  .sq .c { border:1.5px solid var(--paper); }
+  .sq .sel { outline:2px solid #f4efe4; outline-offset:2px; }
+  .mo { display:flex; gap:5px; margin-top:4px; font:9px ui-monospace, monospace; color:rgba(244,239,228,.7); }
+  .mo span { width:18px; }
+  .sec { margin-top:22px; }
+  .wk { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .wk .arr { width:36px; height:36px; border:1.5px solid var(--ink); border-radius:4px; display:grid; place-items:center; font-weight:700; }
+  .wk .arr.off { opacity:.3; }
+  .wk .t { text-align:center; }
+  .wk .t small { display:block; font:11px ui-monospace, monospace; color:var(--muted); }
+  .row { display:grid; grid-template-columns:76px 1fr 64px; gap:8px; align-items:center; padding:7px 0; border-top:1px solid var(--line); font-size:14px; }
+  .row:first-of-type { border-top:none; }
+  .nm { font-weight:700; }
+  .bar { position:relative; height:8px; background:#e9e2d4; border-radius:4px; }
+  .bar i { position:absolute; left:0; top:0; bottom:0; border-radius:4px; }
+  .bar b { position:absolute; top:-4px; bottom:-4px; width:2px; background:var(--ink); }
+  .bar .over { background:repeating-linear-gradient(45deg, var(--ink) 0 1.5px, transparent 1.5px 4px); }
+  .val { font:12px ui-monospace, monospace; text-align:right; }
+  .val .ok { color:#1f7a5c; font-weight:700; }
+  .tag { display:inline-block; margin-top:2px; font:10px ui-monospace, monospace; border:1px dashed var(--ink); border-radius:8px; padding:0 5px; }
+  .goal { font:10.5px ui-monospace, monospace; color:var(--muted); grid-column:2 / 3; margin-top:-4px; }
+  .goal b { color:var(--ink); }
+  .trend { display:grid; grid-template-columns:76px 1fr 54px; gap:8px; align-items:end; padding:8px 0; border-top:1px solid var(--line); }
+  .trend:first-of-type { border-top:none; }
+  .cols { position:relative; height:34px; display:flex; align-items:flex-end; gap:3px; }
+  .cols span { flex:1; border-radius:2px 2px 0 0; }
+  .cols .line { position:absolute; left:0; right:0; border-top:1.5px dashed var(--ink); }
+  .kept { font:11px ui-monospace, monospace; text-align:right; line-height:1.3; }
+  .seg { display:inline-flex; border:1.5px solid var(--ink); border-radius:4px; overflow:hidden; font:11px ui-monospace, monospace; text-transform:uppercase; }
+  .seg span { padding:6px 9px; }
+  .seg .on { background:var(--ink); color:var(--paper); }
+  .avg { display:grid; grid-template-columns:76px 1fr auto; gap:8px; padding:6px 0; border-top:1px solid var(--line); font-size:14px; align-items:center; }
+  .avg:first-of-type { border-top:none; }
+  .avg .mono { font-size:12px; text-align:right; }
+  .avg .mono small { color:var(--muted); }
+  .foot { margin-top:18px; font-size:12px; color:var(--muted); font-style:italic; }
+  .notes { width:380px; font-size:14.5px; line-height:1.5; }
+  .notes h3 { margin:0 0 8px; font-size:20px; }
+  .notes li { margin-bottom:10px; }
+  .notes .pick { background:#fff7d6; padding:1px 4px; border-radius:3px; font-size:12px; font-family:ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="phone">
+    <!-- 1 -->
+    <div><span class="num">1</span></div>
+    <div class="season" style="margin-top:6px">
+      <div class="big">3</div>
+      <div>
+        <div class="lbl">balanced weeks this season</div>
+        <div class="sq"><span class="b"></span><span class="g"></span><span class="b"></span><span class="u"></span><span class="u"></span><span class="b sel"></span><span class="g"></span><span class="u"></span><span class="c"></span></div>
+        <div class="mo"><span>Sep</span><span></span><span></span><span></span><span>Oct</span><span></span><span></span><span></span><span>Nov</span></div>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="sec">
+      <div><span class="num">2</span></div>
+      <div class="wk" style="margin-top:6px">
+        <span class="arr">‹</span>
+        <div class="t"><h2>Week of Nov 2</h2><small>last week</small></div>
+        <span class="arr off">›</span>
+      </div>
+      <div class="row"><span class="nm">Exercise</span><div class="bar"><i style="width:56%;background:#E8643C"></i><b style="left:75%"></b></div><span class="val">3 h<br><span class="tag">! 1 h short</span></span></div>
+      <div class="goal"><b>≥ 4 h</b> at least</div>
+      <div class="row"><span class="nm">Work</span><div class="bar"><i style="width:76%;background:#3C6FE8"></i><b style="left:80%"></b></div><span class="val">38 h <span class="ok">✓</span></span></div>
+      <div class="goal"><b>≤ 40 h</b> at most</div>
+      <div class="row"><span class="nm">Learn</span><div class="bar"><i style="width:75%;background:#1FA98A"></i><b style="left:75%"></b></div><span class="val">4 h <span class="ok">✓</span></span></div>
+      <div class="goal"><b>≥ 4 h</b> at least</div>
+      <div class="row"><span class="nm">Play</span><div class="bar"><i style="width:62%;background:#C9A227"></i><b style="left:25%"></b><b style="left:62%"></b></div><span class="val">5 h <span class="ok">✓</span></span></div>
+      <div class="goal"><b>↔ 2–5 h</b> between</div>
+      <div class="row"><span class="nm">People</span><div class="bar"><i style="width:47%;background:#0CA678"></i><b style="left:75%"></b></div><span class="val">2.5 h<br><span class="tag">! 1.5 h short</span></span></div>
+      <div class="goal"><b>≥ 4 h</b> at least</div>
+    </div>
+
+    <!-- 3 -->
+    <div class="sec">
+      <div><span class="num">3</span></div>
+      <h2 style="margin-top:6px">Last 12 weeks</h2>
+      <div style="margin-top:8px">
+        <div class="trend"><span class="nm" style="font-size:14px">Exercise</span>
+          <div class="cols"><span style="height:60%;background:#E8643C"></span><span style="height:85%;background:#E8643C"></span><span style="height:40%;background:#E8643C"></span><span style="height:90%;background:#E8643C"></span><span style="height:55%;background:#E8643C"></span><span style="height:70%;background:#E8643C"></span><span style="height:95%;background:#E8643C"></span><span style="height:50%;background:#E8643C"></span><span style="height:80%;background:#E8643C"></span><span style="height:45%;background:#E8643C"></span><span style="height:85%;background:#E8643C"></span><span style="height:56%;background:#E8643C"></span><div class="line" style="bottom:75%"></div></div>
+          <span class="kept">kept<br><b>5 of 12</b></span></div>
+        <div class="trend"><span class="nm" style="font-size:14px">Work</span>
+          <div class="cols"><span style="height:80%;background:#3C6FE8"></span><span style="height:95%;background:#3C6FE8"></span><span style="height:78%;background:#3C6FE8"></span><span style="height:76%;background:#3C6FE8"></span><span style="height:82%;background:#3C6FE8"></span><span style="height:74%;background:#3C6FE8"></span><span style="height:79%;background:#3C6FE8"></span><span style="height:77%;background:#3C6FE8"></span><span style="height:73%;background:#3C6FE8"></span><span style="height:80%;background:#3C6FE8"></span><span style="height:75%;background:#3C6FE8"></span><span style="height:76%;background:#3C6FE8"></span><div class="line" style="bottom:80%"></div></div>
+          <span class="kept">kept<br><b>11 of 12</b></span></div>
+        <div class="trend"><span class="nm" style="font-size:14px">People</span>
+          <div class="cols"><span style="height:50%;background:#0CA678"></span><span style="height:40%;background:#0CA678"></span><span style="height:80%;background:#0CA678"></span><span style="height:45%;background:#0CA678"></span><span style="height:30%;background:#0CA678"></span><span style="height:60%;background:#0CA678"></span><span style="height:35%;background:#0CA678"></span><span style="height:85%;background:#0CA678"></span><span style="height:40%;background:#0CA678"></span><span style="height:55%;background:#0CA678"></span><span style="height:38%;background:#0CA678"></span><span style="height:47%;background:#0CA678"></span><div class="line" style="bottom:75%"></div></div>
+          <span class="kept">kept<br><b>2 of 12</b></span></div>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="sec">
+      <div><span class="num">4</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px"><h2>Time invested</h2><span class="seg"><span class="on">4 wks</span><span>12 wks</span><span>Year</span></span></div>
+      <div style="margin-top:8px">
+        <div class="avg"><span class="nm">Exercise</span><span></span><span class="mono"><b>3.5 h</b> <small>a week · 14 h</small></span></div>
+        <div class="avg"><span class="nm">Work</span><span></span><span class="mono"><b>38 h</b> <small>a week · 152 h</small></span></div>
+        <div class="avg"><span class="nm">People</span><span></span><span class="mono"><b>2.4 h</b> <small>a week · 9.5 h</small></span></div>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <p class="foot"><span class="num">5</span>Counts the blocks you tick. Reset is in Settings → Your data.</p>
+  </div>
+
+  <div class="notes">
+    <h3>Suggestions for Stats</h3>
+    <ol>
+      <li><b>Bigger season squares with months under them, and tap one to see that week.</b> Today they're tiny and dateless, so you can't tell which week a grace square was. <span class="pick">my pick</span></li>
+      <li><b>"Last week" becomes any week, with ‹ ›.</b> Each area gets a bar with its target marked, and a calm "1 h short" tag in ink, like the area chips. Today a missed target is only a missing ✓, which is easy to overlook. <span class="pick">my pick</span></li>
+      <li><b>A "Last 12 weeks" trend per area:</b> one small column per week with the target as a dashed line, and "kept 5 of 12". This is what a balance app should answer, "which area keeps slipping?", and nothing shows it today. <span class="pick">my pick</span></li>
+      <li><b>Time invested as hours a week, not totals.</b> "Work 76 h" makes every other bar look tiny and can't be compared with a weekly target; "3.5 h a week" can. The ranges also become 4 weeks / 12 weeks / year, since "month" is really the last 30 days.</li>
+      <li><b>Move "Reset stats" to Settings → Your data.</b> It's destructive and rarely used, and a red button at the bottom of your stats is the wrong last thing to see.</li>
+      <li><b>A real empty state:</b> before anything is ticked, show what Stats will look like with a line saying "Tick blocks on the calendar and your weeks show up here", instead of rows of 0 h.</li>
+    </ol>
+    <p style="color:#7a7065">All of these use data the app already keeps: every ticked block is saved with its area, minutes and the moment you ticked it. Nothing new is stored. One catch for 2 and 3: a block counts in the week you <i>tick</i> it, so ticking last Friday's block on Monday puts it in this week. Worth fixing if per-week views become central.</p>
+  </div>
+</div>
+</body>
+</html>

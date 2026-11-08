@@ -2632,6 +2632,149 @@ export const S = {
   statsSection: {
     marginBottom: 28
   },
+  // Stats week by week (JP, 2026-11-08): the season's squares as buttons, with months under them
+  seasonPick: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 3,
+    width: 24,
+    padding: "2px 0",
+    border: "none",
+    background: "transparent",
+    color: paper,
+    cursor: "pointer"
+  },
+  seasonSquareBig: {
+    width: 18,
+    height: 18,
+    borderRadius: 3
+  },
+  seasonPicked: {
+    outline: `2px solid ${paper}`,
+    outlineOffset: 2
+  },
+  seasonMonth: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 9,
+    lineHeight: "10px",
+    height: 10,
+    opacity: 0.75,
+    whiteSpace: "nowrap"
+  },
+  // ‹ Week of Nov 2 ›
+  weekPicker: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+    marginBottom: 6
+  },
+  weekArrow: {
+    width: 40,
+    height: 40,
+    flexShrink: 0,
+    border: `1.5px solid ${ink}`,
+    borderRadius: 4,
+    background: "transparent",
+    color: ink,
+    fontSize: 18,
+    fontWeight: 700,
+    cursor: "pointer"
+  },
+  weekWhen: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 11,
+    color: "var(--c-muted)",
+    textAlign: "center"
+  },
+  weekRows: {
+    listStyle: "none",
+    margin: 0,
+    padding: 0
+  },
+  weekRow: {
+    display: "grid",
+    gridTemplateColumns: "minmax(84px, 120px) 1fr auto",
+    columnGap: 10,
+    rowGap: 2,
+    alignItems: "center",
+    padding: "8px 0",
+    borderTop: `1px solid ${line}`
+  },
+  weekRowName: {
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    minWidth: 0,
+    fontWeight: 600,
+    fontSize: 15
+  },
+  weekRowNameText: {
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap"
+  },
+  weekRowValue: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: 6,
+    fontSize: 14
+  },
+  weekRowGoal: {
+    gridColumn: "1 / 3",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 10.5,
+    color: "var(--c-muted)"
+  },
+  // the last 12 weeks per area
+  trendRow: {
+    display: "grid",
+    gridTemplateColumns: "minmax(84px, 120px) 1fr 58px",
+    columnGap: 10,
+    alignItems: "end",
+    padding: "8px 0",
+    borderTop: `1px solid ${line}`
+  },
+  trendCols: {
+    position: "relative",
+    height: 36,
+    display: "flex",
+    alignItems: "flex-end",
+    gap: 2
+  },
+  trendCol: {
+    flex: 1,
+    borderRadius: "2px 2px 0 0"
+  },
+  trendLine: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    borderTop: `1.5px dashed ${ink}`,
+    opacity: 0.7
+  },
+  trendKept: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 10.5,
+    lineHeight: 1.3,
+    textAlign: "right",
+    color: "var(--c-muted)"
+  },
+  // before anything is ticked
+  statsEmpty: {
+    border: `1px dashed ${line}`,
+    borderRadius: 6,
+    padding: "16px 16px 18px",
+    marginBottom: 28
+  },
+  statsEmptyText: {
+    margin: "0 0 14px",
+    fontSize: 14,
+    color: "var(--c-muted)"
+  },
   statsSubtitle: {
     margin: "0 0 10px",
     fontFamily: "'Fraunces Variable', 'Fraunces', serif",

@@ -56,6 +56,7 @@ export const LIB_FR: LibWords = {
     toGo: (d) => `encore ${d}`,
     room: (d) => `reste ${d}`,
     over: (d) => `${d} de trop`,
+    short: (d) => `il manque ${d}`,
     atLimit: "à la limite",
     reached: "atteint",
     inRange: "entre les deux",

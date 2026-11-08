@@ -600,7 +600,7 @@ export default function App() {
         />
       )}
       {view === "stats" && (
-        <StatsView data={data} range={statsRange} setRange={setStatsRange} resetStats={actions.resetStats} />
+        <StatsView data={data} range={statsRange} setRange={setStatsRange} />
       )}
       {view === "categories" && <CategoriesView cats={data.cats} actions={actions} />}
       {view === "settings" && (
@@ -612,6 +612,7 @@ export default function App() {
           onReplayIntro={onb.replay}
           dayHours={dayHours}
           onDayHours={setDayHours}
+          onResetStats={actions.resetStats}
         />
       )}
       {onb.guide && !onb.intro && (

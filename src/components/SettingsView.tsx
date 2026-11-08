@@ -58,6 +58,7 @@ export default function SettingsView({
   onReplayIntro,
   dayHours,
   onDayHours,
+  onResetStats,
 }: {
   data: CadenceData;
   onReplace: (next: CadenceData) => void;
@@ -70,6 +71,8 @@ export default function SettingsView({
   /** the hours the calendar shows (Settings → Your day) */
   dayHours: Bounds;
   onDayHours: (h: Bounds) => void;
+  /** Settings → Data: clear the ticked history and balanced weeks (moved from Stats, JP 2026-11-08) */
+  onResetStats: () => void;
 }) {
   const { m } = useI18n();
   const [status, setStatus] = useState<Status>({ kind: "idle" });
@@ -134,6 +137,7 @@ export default function SettingsView({
         </span>
       </button>
       <input ref={fileRef} type="file" accept=".json,application/json" style={{ display: "none" }} onChange={onFile} />
+      <ResetStatsRow onReset={onResetStats} />
       {(copies.length > 0 || status.kind !== "idle") && (
         <div style={S.setPanel}>
           {copies.map((c) => (
@@ -210,6 +214,56 @@ export default function SettingsView({
         <p style={S.setFoot}>{m.settings.aboutText}</p>
       </SettingsGroup>
     </div>
+  );
+}
+
+/** "Reset stats": asks first, since it can't be undone. */
+function ResetStatsRow({ onReset }: { onReset: () => void }) {
+  const { m } = useI18n();
+  const [confirming, setConfirming] = useState(false);
+  const [done, setDone] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        style={S.setRowBtn}
+        aria-expanded={confirming}
+        onClick={() => {
+          setDone(false);
+          setConfirming(!confirming);
+        }}
+      >
+        <span style={S.setLabel}>{m.stats.reset}</span>
+      </button>
+      {(confirming || done) && (
+        <div style={S.setPanel}>
+          {done ? (
+            <div role="status" style={{ ...note, color: "var(--c-muted)" }}>
+              {m.stats.resetDone}
+            </div>
+          ) : (
+            <>
+              <div style={S.resetWarn}>{m.stats.resetWarn}</div>
+              <div style={{ ...row, marginTop: 10 }}>
+                <button
+                  style={S.resetConfirm}
+                  onClick={() => {
+                    onReset();
+                    setConfirming(false);
+                    setDone(true);
+                  }}
+                >
+                  {m.stats.resetYes}
+                </button>
+                <button style={S.resetCancel} onClick={() => setConfirming(false)}>
+                  {m.stats.cancel}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </>
   );
 }
 

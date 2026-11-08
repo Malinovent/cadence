@@ -1,11 +1,11 @@
 // The week in review (JP, 2026-11-08): when Week 1 rolls forward, a short summary of how it went,
 // from its ticked blocks, judged by the same rules as balanced weeks (Settings → Balanced weeks).
 // Neutral words (S1.10's describeArea); a balanced week gets a fanfare. Pure rules only.
-import { addDays, limitKept, mondayOf, tickedMins, weekBalanced, type BalanceRules } from "./balancedWeeks";
+import { limitKept, weekBalanced, type BalanceRules } from "./balancedWeeks";
 import { describeArea } from "./describe";
 import { fmtH, limitLabel, type Limit } from "./guardrail";
 import { LIB_EN, type LibWords } from "./words";
-import type { CadenceData, Category, HistoryEntry } from "./model";
+import type { CadenceData, Category } from "./model";
 
 // a short row for the eye (JP: "it's verbose"): name, hours ticked, the target; the sentence is for screen readers
 export type ReviewLine = {
@@ -44,18 +44,6 @@ export function areaLine(c: Category, mins: number, rules: BalanceRules, w: LibW
 /** "14", "1.5" / "1,5": hours without a trailing zero. */
 export const hoursText = (mins: number, w: LibWords = LIB_EN): string =>
   w.lang === "fr" ? fmtH(mins).replace(".", ",") : fmtH(mins);
-
-/** Stats → Last week (the calendar week before this one), one row per area (JP: "less verbose"). */
-export function lastWeekLines(
-  cats: readonly Category[],
-  history: readonly HistoryEntry[],
-  now: Date,
-  rules: BalanceRules,
-  w: LibWords = LIB_EN,
-): ReviewLine[] {
-  const ticked = tickedMins(history, addDays(mondayOf(now), -7));
-  return cats.map((c) => areaLine(c, ticked.get(c.id) ?? 0, rules, w));
-}
 
 /** How Week 1 went, from its ticked blocks (a block for several areas counts fully to each). */
 export function weekReview(data: CadenceData, rules: BalanceRules, w: LibWords = LIB_EN): WeekReview {
