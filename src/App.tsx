@@ -18,7 +18,6 @@ import QuestFinale from "./components/QuestFinale";
 import BlockSheet from "./components/BlockSheet";
 import WeekReview from "./components/WeekReview";
 import TemplatePreview from "./components/TemplatePreview";
-import MiniCal from "./components/MiniCal";
 import { previewChange } from "./lib/templatePreview";
 import { readPhoneView, writePhoneView, type PhoneView } from "./state/phoneViewPrefs";
 import { hasReview, weekReview, type WeekReview as Review } from "./lib/review";
@@ -456,42 +455,25 @@ export default function App() {
                   ))}
                 </div>
               )}
-              {isPhone && phoneView === "week" ? (
-                <div style={S.phoneWeek}>
-                  <MiniCal
-                    blocks={data.weeks[activeWeek]}
-                    cats={data.cats}
-                    days={[0, 1, 2, 3, 4, 5, 6]}
-                    height={460}
-                    hours={bounds}
-                    heads={m.lib.days}
-                    today={activeWeek === 0 ? (now.getDay() + 6) % 7 : null}
-                    onBlock={(b) => setEditingId(b.id)}
-                    onDay={(d) => {
-                      setPhoneDay(d);
-                      setPhoneView("day");
-                    }}
-                    dayLabel={(d) => m.phoneView.openDay(m.preview.days[d])}
-                  />
-                </div>
-              ) : (
-                <WeekGrid
-                  week={activeWeek}
-                  blocks={data.weeks[activeWeek]}
-                  cats={data.cats}
-                  tasks={data.tasks}
-                  weeks={data.weeks}
-                  editingId={editingId}
-                  setEditingId={setEditingId}
-                  interaction={interaction}
-                  armedCatId={armedCatId}
-                  onPlaced={() => setArmedCatId(null)}
-                  actions={live}
-                  onMoveToDay={onMoveToDay}
-                  onEmptyTap={setSlotTap}
-                  slotMark={slotTap}
-                  bounds={bounds}
-                  {...(isPhone
+              <WeekGrid
+                week={activeWeek}
+                blocks={data.weeks[activeWeek]}
+                cats={data.cats}
+                tasks={data.tasks}
+                weeks={data.weeks}
+                editingId={editingId}
+                setEditingId={setEditingId}
+                interaction={interaction}
+                armedCatId={armedCatId}
+                onPlaced={() => setArmedCatId(null)}
+                actions={live}
+                onMoveToDay={onMoveToDay}
+                onEmptyTap={setSlotTap}
+                slotMark={slotTap}
+                bounds={bounds}
+                {...(isPhone && phoneView === "week"
+                  ? { rowH: 24, narrow: true }
+                  : isPhone
                     ? {
                         rowH: ROW_H_PHONE,
                         days: [phoneDay],
@@ -504,8 +486,7 @@ export default function App() {
                         },
                       }
                     : {})}
-                />
-              )}
+              />
               <WeekFooter
                 data={data}
                 week={activeWeek}
@@ -514,7 +495,6 @@ export default function App() {
                 onApplyStarter={(id) => setPending({ kind: "starter", id, week: activeWeek })}
                 onApplyDay={(id) => setPending({ kind: "day", id, week: activeWeek, day: shownDay })}
                 day={shownDay}
-                phone={isPhone}
                 onAdvance={onAdvance}
               />
             </main>

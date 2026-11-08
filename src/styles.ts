@@ -448,6 +448,15 @@ export const S = {
     fontWeight: 500,
     color: ink
   },
+  // a day template's tag in the list (JP, 2026-11-08)
+  tplTag: {
+    marginLeft: 8,
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 10,
+    letterSpacing: "0.06em",
+    textTransform: "uppercase",
+    color: "var(--c-muted)"
+  },
   tplNameRow: {
     display: "flex",
     alignItems: "center",
@@ -2666,6 +2675,29 @@ export const S = {
     gap: 10,
     marginTop: 4
   },
+  // the phone's week: slim blocks (JP, 2026-11-08)
+  narrowBody: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 4,
+    height: "100%"
+  },
+  narrowInitial: {
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 700,
+    fontSize: 12,
+    lineHeight: 1
+  },
+  narrowTick: {
+    width: 18,
+    height: 18,
+    fontSize: 11
+  },
+  narrowHead: {
+    padding: "8px 0",
+    fontSize: 12
+  },
   // the phone: Day / Week above the calendar
   phoneViewToggle: {
     display: "grid",
@@ -2674,12 +2706,6 @@ export const S = {
     borderRadius: 4,
     overflow: "hidden",
     marginBottom: 8
-  },
-  phoneWeek: {
-    padding: "6px 6px 8px",
-    border: `1.5px solid ${ink}`,
-    borderRadius: 4,
-    background: "var(--c-card)"
   },
   // Settings as short rows: name on the left, its control on the right (JP, 2026-11-08)
   setGroup: {

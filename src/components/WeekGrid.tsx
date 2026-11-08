@@ -55,6 +55,8 @@ type Props = {
   days?: readonly number[]; // day indexes shown as columns, Mon = 0 (desktop: all seven)
   // phone one-day view: the day strip replaces the head row, swipes change day
   phone?: { day: number; setDay: (day: number) => void };
+  /** the phone's week (JP, 2026-11-08): seven slim columns that do everything the day does */
+  narrow?: boolean;
   onMoveToDay?: (p: BlockT, day: number) => void; // editor day chips (default: moveBlock)
   onEmptyTap?: (tap: SlotTap) => void; // S1.6: tap on empty time with nothing armed
   slotMark?: { day: number; start: number } | null; // S1.6: the slot the add window is for
@@ -79,6 +81,7 @@ export default function WeekGrid({
   rowH = ROW_H,
   days = ALL_DAYS,
   phone,
+  narrow = false,
   onMoveToDay: onMoveToDayProp,
   onEmptyTap,
   slotMark,
@@ -86,7 +89,7 @@ export default function WeekGrid({
 }: Props) {
   const { engine, state } = interaction;
   const { m, lang } = useI18n();
-  const cols = phone ? "52px 1fr" : `64px repeat(${days.length}, 1fr)`;
+  const cols = phone ? "52px 1fr" : narrow ? `26px repeat(${days.length}, minmax(0, 1fr))` : `64px repeat(${days.length}, 1fr)`;
   const slots = slotsOf(bounds);
   const colHeight = slots.length * rowH;
 
@@ -177,28 +180,42 @@ export default function WeekGrid({
       {phone ? (
         <DayStrip day={phone.day} setDay={phone.setDay} hasBlocks={daysWithBlocks(blocks)} />
       ) : (
-        <div style={{ ...S.headRow, gridTemplateColumns: cols }}>
+        <div style={{ ...S.headRow, gridTemplateColumns: cols, ...(narrow ? { minWidth: 0 } : {}) }}>
           <div style={S.corner} />
           {days.map((d) => (
-            <div key={d} style={S.dayHead}>
+            <div
+              key={d}
+              style={{
+                ...S.dayHead,
+                ...(narrow ? S.narrowHead : {}),
+                ...(narrow && d === today ? { textDecoration: "underline", textUnderlineOffset: 3 } : {}),
+              }}
+            >
               {m.lib.days[d]}
             </div>
           ))}
         </div>
       )}
       <div
-        style={phone ? { display: "grid", gridTemplateColumns: cols } : { ...S.bodyRow, gridTemplateColumns: cols }}
+        style={
+          phone
+            ? { display: "grid", gridTemplateColumns: cols }
+            : { ...S.bodyRow, gridTemplateColumns: cols, ...(narrow ? { minWidth: 0 } : {}) }
+        }
         onTouchStart={phone ? onTouchStart : undefined}
         onTouchEnd={phone ? onTouchEnd : undefined}
         onTouchCancel={phone ? onTouchCancel : undefined}
       >
         <div style={S.timeColWrap}>
           {slots.map((t) => (
-            <div key={t} style={{ ...S.timeLabel, height: rowH, opacity: t % 60 === 0 ? 1 : 0 }}>
-              {t % 60 === 0 ? fmtTime(t, lang) : ""}
+            <div
+              key={t}
+              style={{ ...S.timeLabel, height: rowH, opacity: t % 60 === 0 ? 1 : 0, ...(narrow ? { padding: "1px 3px" } : {}) }}
+            >
+              {t % 60 === 0 ? (narrow ? String(t / 60) : fmtTime(t, lang)) : ""}
             </div>
           ))}
-          {lineTop !== null && today !== null && (
+          {lineTop !== null && today !== null && !narrow && (
             <div style={{ ...S.nowClock, top: lineTop }} aria-hidden="true">
               {fmtClock(point, lang)}
             </div>
@@ -225,7 +242,8 @@ export default function WeekGrid({
                   block={p}
                   cats={cats}
                   isEditing={editingId === p.id}
-                  sheet={!!phone}
+                  sheet={!!phone || narrow}
+                  narrow={narrow}
                   dayStart={bounds[0]}
                   setEditingId={setEditingId}
                   engine={engine}

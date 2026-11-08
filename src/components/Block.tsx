@@ -19,6 +19,7 @@ type Props = {
   cats: Category[];
   isEditing: boolean;
   sheet?: boolean; // phone: the block opens in the sheet (App), so it isn't edited inline
+  narrow?: boolean; // the phone's week: a slim column, so the area's icon (or initial) and the tick only
   dayStart?: number; // minutes: the grid's first hour (Settings → Your day)
   setEditingId: (id: string | null) => void;
   engine: InteractionEngine;
@@ -60,6 +61,7 @@ export default function Block({
   cats: allCats,
   isEditing,
   sheet = false,
+  narrow = false,
   dayStart,
   setEditingId,
   engine,
@@ -204,7 +206,7 @@ export default function Block({
           height,
           ...blockStyle,
           // keep text inset identical whether the ring is a real border or the masked overlay
-          padding: multi ? "6.5px 8.5px" : "5px 7px",
+          padding: narrow ? "2px 1px" : multi ? "6.5px 8.5px" : "5px 7px",
           color: onColor,
           cursor: inline ? "default" : "grab",
           zIndex: inline ? 20 : isNow ? 3 : 2,
@@ -219,12 +221,44 @@ export default function Block({
       >
         {ringOverlay}
         {!inline && edgeHandle("top")}
-        {minsLeft !== null && nowRoom && (
+        {narrow && !inline && (
+          <div style={S.narrowBody}>
+            {buffer ? null : !multi && cats[0]?.icon ? (
+              <AreaIconView icon={cats[0].icon} size={13} />
+            ) : multi ? (
+              <span style={{ ...S.pipRow, flexDirection: "column", gap: 2 }}>
+                {colors.map((col, i) => (
+                  <span key={i} style={{ ...S.pip, background: col }} />
+                ))}
+              </span>
+            ) : (
+              <span style={S.narrowInitial}>{(cats[0]?.name ?? "?").slice(0, 1)}</span>
+            )}
+            {!buffer && tallerThan(height, rowH, 40) && (
+              <button
+                type="button"
+                className="cadence-tick"
+                aria-pressed={done}
+                aria-label={done ? m.block.markOpen : m.block.markDone}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleDone(p.id);
+                }}
+                style={{ ...S.doneToggle, ...S.narrowTick, background: done ? ink : "transparent", color: done ? paper : ink }}
+              >
+                {done ? "✓" : ""}
+              </button>
+            )}
+          </div>
+        )}
+        {!narrow && minsLeft !== null && nowRoom && (
           <div style={S.nowBadge}>
             <span style={S.nowTag}>{m.block.now}</span>
             {fmtLeft(minsLeft, m.lib)}
           </div>
         )}
+        {!narrow && (
         <div style={S.placedTop}>
           <span style={S.placedNameWrap}>
             {multi && (
@@ -274,7 +308,8 @@ export default function Block({
             )}
           </div>
         </div>
-        {inline ? (
+        )}
+        {narrow && !inline ? null : inline ? (
           <BlockEditor
             block={p}
             cats={allCats}

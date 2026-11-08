@@ -123,7 +123,7 @@
 - `src/lib/icons.ts` — the area icon names (`AREA_ICONS`, `isAreaIcon`)
 - `src/components/AreaIconView.tsx` — an area's icon (lucide) in its colour, or its colour dot (`AreaMark`)
 - `src/lib/templatePreview.ts` — what a template, starter or day template would do (`previewChange`), and the miniature's hours
-- `src/components/MiniCal.tsx` — a week or a day in miniature (template preview, the phone's week view)
+- `src/components/MiniCal.tsx` — a week or a day in miniature (the template preview)
 - `src/components/TemplatePreview.tsx` — the card shown before a template is used
 - `src/state/phoneViewPrefs.ts` — the phone shows Day or Week (`cadence:ui:phoneView`)
 - `src/components/SetRow.tsx` — one Settings row: name and short hint on the left, the control on the right
