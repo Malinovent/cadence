@@ -1766,21 +1766,19 @@ export const S = {
     fontWeight: 700,
     fontSize: 16
   },
-  // the target reads at a glance (JP, 2026-11-08: "aren't easy to read"): ink, the number large
   areaGoal: {
-    display: "flex",
-    alignItems: "baseline",
-    gap: 5,
-    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
-    fontSize: 13.5,
-    lineHeight: 1.2,
-    color: ink,
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 11.5,
+    lineHeight: 1.5,
+    color: "var(--c-muted)",
+    textAlign: "right",
     whiteSpace: "nowrap",
     flexShrink: 0
   },
   areaSign: {
     display: "inline-block",
     width: 16,
+    marginRight: 5,
     textAlign: "center",
     // a system face: the mono one draws "↔" tiny
     fontFamily: "system-ui, -apple-system, 'Segoe UI', sans-serif",
@@ -1803,12 +1801,8 @@ export const S = {
     gap: 3,
     minHeight: 52
   },
+  // the number bold in ink with its sign; the key word plain (JP, 2026-11-08)
   areaGoalAmount: {
-    fontSize: 18,
-    fontWeight: 800,
-    fontVariantNumeric: "tabular-nums"
-  },
-  areaGoalWord: {
     fontWeight: 700,
     color: ink
   },
