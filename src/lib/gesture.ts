@@ -38,7 +38,12 @@ export const slotStartAt = (y: number, rowH: number, bounds: Bounds = DEFAULT_BO
 
 // y in px from the top of a day column -> start of the NEAREST slot row boundary (round, not
 // floor), clamped to the day. Used for a moved block's top edge, so it snaps symmetrically.
-export const slotStartNear = (y: number, rowH: number, bounds: Bounds = DEFAULT_BOUNDS, step: number = STEP): number => {
+export const slotStartNear = (
+  y: number,
+  rowH: number,
+  bounds: Bounds = DEFAULT_BOUNDS,
+  step: number = STEP,
+): number => {
   const last = slotCount(bounds, step) - 1;
   const idx = Math.max(0, Math.min(last, Math.round(y / rowH)));
   return bounds[0] + idx * step;
@@ -149,7 +154,8 @@ export const hitTest = (
 };
 
 // ---- what a drop means ----
-export type DragSource = { kind: "tray"; catId: string } | { kind: "move"; id: string } | { kind: "task"; taskId: string };
+export type DragSource =
+  { kind: "tray"; catId: string } | { kind: "move"; id: string } | { kind: "task"; taskId: string };
 export type DropIntent =
   | { kind: "attach"; blockId: string; taskId: string } // S1.5: task dropped onto a block: joins its to-do list
   | { kind: "tag"; blockId: string; catId: string } // tray category dropped onto a block
@@ -159,14 +165,20 @@ export type DropIntent =
 // Where the pointer sits inside the drag ghost (px from the ghost's top-left). A moved block
 // keeps the point where it was grabbed (pointer down at startX/startY on `rect`); a tray item
 // is not block-shaped, so its ghost hangs just below-right of the pointer.
-export const ghostOffset = (source: DragSource, startX: number, startY: number, rect: Rect): { x: number; y: number } =>
+export const ghostOffset = (
+  source: DragSource,
+  startX: number,
+  startY: number,
+  rect: Rect,
+): { x: number; y: number } =>
   source.kind === "move"
     ? { x: startX - rect.left, y: startY - rect.top }
     : { x: TRAY_GHOST_OFFSET, y: TRAY_GHOST_OFFSET };
 
 // null: the drop does nothing (a task over empty time: tasks only go into blocks)
 export const resolveDrop = (source: DragSource, hit: GridHit): DropIntent | null => {
-  if (source.kind === "task") return hit.blockId ? { kind: "attach", blockId: hit.blockId, taskId: source.taskId } : null;
+  if (source.kind === "task")
+    return hit.blockId ? { kind: "attach", blockId: hit.blockId, taskId: source.taskId } : null;
   if (source.kind === "tray") {
     // a buffer is never a tag: dropped over a block it goes in the nearest free spot instead
     if (hit.blockId && source.catId !== BUFFER_ID) return { kind: "tag", blockId: hit.blockId, catId: source.catId };
@@ -182,17 +194,18 @@ export const dropPreview = (
   blocks: readonly Block[],
   cats: readonly Category[],
   intent: DropIntent,
+  bounds: Bounds = DEFAULT_BOUNDS,
 ): { day: number; start: number; mins: number } | null => {
   if (intent.kind === "tag" || intent.kind === "attach") return null;
   if (intent.kind === "place") {
     const dur = intent.catId === BUFFER_ID ? BUFFER_MINS : cats.find((c) => c.id === intent.catId)?.blockMins;
     if (!dur) return null;
-    const r = resolvePlacement(blocks, intent.day, intent.start, dur, null);
+    const r = resolvePlacement(blocks, intent.day, intent.start, dur, null, bounds);
     return r && { day: intent.day, ...r };
   }
   const p = blocks.find((b) => b.id === intent.id);
   if (!p) return null;
-  const r = resolvePlacement(blocks, intent.day, intent.start, p.mins, intent.id);
+  const r = resolvePlacement(blocks, intent.day, intent.start, p.mins, intent.id, bounds);
   return r && { day: intent.day, ...r };
 };
 

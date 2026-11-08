@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CadenceStore } from "../state/store";
-import { createSyncEngine, type AuthResult, type ConflictChoice, type SyncClient, type SyncEngine, type SyncState } from "./engine";
+import {
+  createSyncEngine,
+  type AuthResult,
+  type ConflictChoice,
+  type SyncClient,
+  type SyncEngine,
+  type SyncState,
+} from "./engine";
 import { syncClient } from "./supabaseClient";
 
 export type SyncActions = {
@@ -10,6 +17,8 @@ export type SyncActions = {
   verifyCode(email: string, code: string): Promise<AuthResult>;
   /** Signs this device out; local data stays. */
   signOut(): Promise<void>;
+  /** Deletes the account and its server copy; local data stays, signed out. */
+  deleteAccount(): Promise<AuthResult>;
   /** Settles a first-sign-in conflict: keep this device's schedule or use the account's. */
   resolveConflict(choice: ConflictChoice): void;
 };
@@ -58,6 +67,7 @@ export function useSync(store: CadenceStore, client: SyncClient | null = syncCli
       sendCode: (email) => engineRef.current?.sendCode(email) ?? Promise.resolve(NOT_CONFIGURED),
       verifyCode: (email, code) => engineRef.current?.verifyCode(email, code) ?? Promise.resolve(NOT_CONFIGURED),
       signOut: () => engineRef.current?.signOut() ?? Promise.resolve(),
+      deleteAccount: () => engineRef.current?.deleteAccount() ?? Promise.resolve(NOT_CONFIGURED),
       resolveConflict: (choice) => engineRef.current?.resolveConflict(choice),
     }),
     [],

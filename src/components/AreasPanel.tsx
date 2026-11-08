@@ -18,18 +18,8 @@ export type PanelProps = {
   actions: TaskActions;
 };
 
-
 /** S1.4 desktop: the left panel. Each area: its drag handle and this week's balance; one task list below. */
-export default function AreasPanel({
-  areas,
-  data,
-  now,
-  interaction,
-  armedCatId,
-  onArm,
-  onHide,
-  actions,
-}: PanelProps) {
+export default function AreasPanel({ areas, data, now, interaction, armedCatId, onArm, onHide, actions }: PanelProps) {
   const { m } = useI18n();
   return (
     <aside style={S.sidebar} aria-label={m.panel.region}>

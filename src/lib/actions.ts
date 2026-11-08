@@ -4,13 +4,14 @@ import { legacyTarget } from "./guardrail";
 import { BUFFER_ID, BUFFER_MINS, DAY_END, DAY_START, PALETTE, STEP } from "./constants";
 import type { Block, CadenceData, Category, HistoryEntry, Streaks, Template, Weeks } from "./model";
 import { afterBlockTick, releaseRemoved, unsortArea } from "./tasks";
-import { resizeBlock, resolvePlacement } from "./placement";
+import { resizeBlock, resolvePlacement, type Bounds } from "./placement";
 import { uid as defaultUid } from "./uid";
 
 export type WeekIndex = 0 | 1;
-export type Deps = { uid?: () => string; now?: () => number };
+// bounds: the hours the calendar shows (Settings → Your day, JP 2026-11-07); 7:00–23:00 when not given
+export type Deps = { uid?: () => string; now?: () => number; bounds?: Bounds };
 
-const BOUNDS = [DAY_START, DAY_END] as const;
+const BOUNDS: Bounds = [DAY_START, DAY_END];
 
 /** Default length when placing from the tray: the area's usual block, or BUFFER_MINS for a buffer. */
 export const placeMins = (cats: readonly Category[], catId: string): number | undefined =>
@@ -49,7 +50,7 @@ export const placeBlock = (
   const dur = mins || placeMins(data.cats, catId);
   if (!dur) return data;
   const blocks = data.weeks[week];
-  const r = resolvePlacement(blocks, day, start, dur, null, BOUNDS, STEP);
+  const r = resolvePlacement(blocks, day, start, dur, null, deps.bounds ?? BOUNDS, STEP);
   if (!r) return data; // day full — nothing to do
   const id = (deps.uid ?? defaultUid)();
   const base = { id, day, start: r.start, mins: r.mins, label: "", desc: "", done: false };
@@ -59,15 +60,26 @@ export const placeBlock = (
   ]);
 };
 
-export const moveBlock = (data: CadenceData, week: WeekIndex, id: string, day: number, start: number): CadenceData => {
+export const moveBlock = (
+  data: CadenceData,
+  week: WeekIndex,
+  id: string,
+  day: number,
+  start: number,
+  deps: Deps = {},
+): CadenceData => {
   const blocks = data.weeks[week];
   const p = blocks.find((x) => x.id === id);
   if (!p) return data;
-  const r = resolvePlacement(blocks, day, start, p.mins, id, BOUNDS, STEP);
+  const r = resolvePlacement(blocks, day, start, p.mins, id, deps.bounds ?? BOUNDS, STEP);
   if (!r) return data; // no room — leave where it was
   if (p.day === day && p.start === r.start && p.mins === r.mins) return data;
   // may shrink to fit the target gap
-  return withWeek(data, week, blocks.map((x) => (x === p ? { ...p, day, start: r.start, mins: r.mins } : x)));
+  return withWeek(
+    data,
+    week,
+    blocks.map((x) => (x === p ? { ...p, day, start: r.start, mins: r.mins } : x)),
+  );
 };
 
 export const resize = (
@@ -78,9 +90,10 @@ export const resize = (
   origStart: number,
   origMins: number,
   deltaSlots: number,
+  deps: Deps = {},
 ): CadenceData => {
   const blocks = data.weeks[week];
-  const next = resizeBlock(blocks, id, edge, origStart, origMins, deltaSlots, BOUNDS, STEP);
+  const next = resizeBlock(blocks, id, edge, origStart, origMins, deltaSlots, deps.bounds ?? BOUNDS, STEP);
   if (next === blocks) return data;
   const i = blocks.findIndex((x) => x.id === id);
   if (blocks[i].start === next[i].start && blocks[i].mins === next[i].mins) return data;
@@ -139,7 +152,18 @@ export const toggleDone = (data: CadenceData, week: WeekIndex, id: string, deps:
     history = data.history.filter((e) => e.id !== q.id);
   }
   // S1.5: a single-task block finishes its task; otherwise unticked tasks go back to their list
-  return afterBlockTick({ ...withWeek(data, week, blocks.map((x) => (x === p ? q : x))), history }, q, deps);
+  return afterBlockTick(
+    {
+      ...withWeek(
+        data,
+        week,
+        blocks.map((x) => (x === p ? q : x)),
+      ),
+      history,
+    },
+    q,
+    deps,
+  );
 };
 
 export const saveTemplate = (data: CadenceData, week: WeekIndex, name?: string, deps: Deps = {}): CadenceData => {
@@ -186,9 +210,7 @@ export const deleteTemplate = (data: CadenceData, id: string): CadenceData =>
 export const advanceWeek = (data: CadenceData): CadenceData => {
   const streaks: Streaks = { ...data.streaks };
   data.cats.forEach((c) => {
-    const doneMins = data.weeks[0]
-      .filter((p) => p.catIds.includes(c.id) && p.done)
-      .reduce((s, p) => s + p.mins, 0);
+    const doneMins = data.weeks[0].filter((p) => p.catIds.includes(c.id) && p.done).reduce((s, p) => s + p.mins, 0);
     const met = doneMins >= c.targetMins;
     const cur = streaks[c.id] || { count: 0 };
     streaks[c.id] = { count: met ? cur.count + 1 : 0 }; // legacy drops lastWeek
@@ -206,7 +228,11 @@ export const resetStats = (data: CadenceData): CadenceData => ({
 });
 
 // A new limit also rewrites the legacy targetMins beside it; targetMins alone can't be set any more.
-export const updateCat = (data: CadenceData, id: string, patch: Partial<Omit<Category, "id" | "targetMins">>): CadenceData =>
+export const updateCat = (
+  data: CadenceData,
+  id: string,
+  patch: Partial<Omit<Category, "id" | "targetMins">>,
+): CadenceData =>
   data.cats.some((c) => c.id === id)
     ? {
         ...data,

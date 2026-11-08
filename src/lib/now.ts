@@ -3,6 +3,7 @@
 import type { WeekIndex } from "./actions";
 import { DAY_END, DAY_START, STEP } from "./constants";
 import type { Block } from "./model";
+import type { Bounds } from "./placement";
 import { fmtTime } from "./time";
 import { LIB_EN, type Lang, type LibWords } from "./words";
 
@@ -25,9 +26,14 @@ export const minutesLeft = (b: Pick<Block, "start" | "mins">, p: NowPoint): numb
 export const fmtLeft = (mins: number, w: LibWords = LIB_EN): string => w.now.left(Math.floor(mins / 60), mins % 60);
 
 /** px from the top of the day column for the current-time line, or null outside the grid's hours or on week 2. */
-export const nowLineTop = (week: WeekIndex, p: NowPoint, rowH: number): number | null => {
-  if (week !== 0 || p.mins < DAY_START || p.mins >= DAY_END) return null;
-  return ((p.mins - DAY_START) / STEP) * rowH;
+export const nowLineTop = (
+  week: WeekIndex,
+  p: NowPoint,
+  rowH: number,
+  bounds: Bounds = [DAY_START, DAY_END],
+): number | null => {
+  if (week !== 0 || p.mins < bounds[0] || p.mins >= bounds[1]) return null;
+  return ((p.mins - bounds[0]) / STEP) * rowH;
 };
 
 /** "10:22am" for the label beside the current-time line, in the grid's own time format (S1.9 makes it local). */

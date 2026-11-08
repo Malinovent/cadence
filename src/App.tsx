@@ -16,6 +16,8 @@ import Checklist from "./components/Checklist";
 import QuestToast from "./components/QuestToast";
 import QuestFinale from "./components/QuestFinale";
 import BlockSheet from "./components/BlockSheet";
+import WeekReview from "./components/WeekReview";
+import { hasReview, weekReview, type WeekReview as Review } from "./lib/review";
 import { relabelDefaults } from "./lib/onboarding";
 import type { Guide } from "./lib/guide";
 import { useOnboarding } from "./state/useOnboarding";
@@ -26,7 +28,7 @@ import { readWelcomeAnswered, writeWelcomeAnswered } from "./state/welcomePrefs"
 import SlotMenu from "./components/SlotMenu";
 import type { SlotTap } from "./lib/slotMenu";
 import { useInteraction } from "./interaction/useInteraction";
-import { moveBlock, type WeekIndex } from "./lib/actions";
+import { moveBlock as moveBlockTo, type WeekIndex } from "./lib/actions";
 import { ROW_H_PHONE } from "./lib/constants";
 import { defaultDay } from "./lib/dayview";
 import { resolveDrop } from "./lib/gesture";
@@ -42,6 +44,10 @@ import { useCadence } from "./state/useCadence";
 import { useIsPhone } from "./state/useIsPhone";
 import { useNow } from "./state/useNow";
 import { useSync } from "./sync/useSync";
+import { playSound, unlockSoundOnFirstGesture } from "./state/sound";
+import { readDayHours, writeDayHours } from "./state/dayHoursPrefs";
+import { gridBounds } from "./lib/dayHours";
+import type { Bounds } from "./lib/placement";
 import { useEarlyBird } from "./sync/useEarlyBird";
 import { FONT_IMPORT, S } from "./styles";
 import { useI18n } from "./i18n/I18nProvider";
@@ -62,8 +68,16 @@ export default function App() {
   // automatic changes made after opening; and the absence the prompt was last answered for
   const [lastEdit, setLastEdit] = useState(() => store.getSnapshot().meta.updatedAt);
   const [welcomeAnswered, setWelcomeAnswered] = useState(readWelcomeAnswered);
-  const [undo, setUndo] = useState<UndoOffer | null>(null); // a week just replaced or rolled forward
+  const [undo, setUndo] = useState<UndoOffer | null>(null);
+  const [review, setReview] = useState<Review | null>(null); // roll forward: how that week went // a week just replaced or rolled forward
   const [phoneDay, setPhoneDay] = useState(() => defaultDay(0, new Date())); // phone: the one day shown, Mon = 0
+  // the hours the calendar shows (Settings → Your day, per device), widened to hold every block
+  const [dayHours, setDayHoursState] = useState<Bounds>(readDayHours);
+  const setDayHours = (h: Bounds) => {
+    setDayHoursState(h);
+    writeDayHours(h);
+  };
+  const bounds = gridBounds(dayHours, data.weeks);
   const isPhone = useIsPhone();
   // S1.4: the areas-and-tasks panel hidden (desktop) or folded (phone); remembered on this device
   const [panelHidden, setPanelHidden] = useState(readPanelHidden);
@@ -79,12 +93,12 @@ export default function App() {
       const d = resolveDrop(source, hit);
       if (!d) return;
       if (d.kind === "tag") actions.addTag(d.blockId, d.catId);
-      else if (d.kind === "place") actions.placeBlock(activeWeek, d.catId, d.day, d.start);
+      else if (d.kind === "place") live.placeBlock(activeWeek, d.catId, d.day, d.start);
       else if (d.kind === "attach") actions.attachTask(d.taskId, d.blockId);
-      else actions.moveBlock(activeWeek, d.id, d.day, d.start);
+      else live.moveBlock(activeWeek, d.id, d.day, d.start);
     },
     onResize: (id, edge, origStart, origMins, deltaSlots) =>
-      actions.resize(activeWeek, id, edge, origStart, origMins, deltaSlots),
+      live.resize(activeWeek, id, edge, origStart, origMins, deltaSlots),
   });
 
   // a server copy replaced the data: the open editor and an armed tray item may point at stale ids
@@ -132,7 +146,43 @@ export default function App() {
     if (after !== before) setUndo({ before, after, text });
   };
   // a block deleted (phone sheet, desktop right-click, touch popup) can be undone (JP, 2026-11-07)
-  const deleteBlock = (id: string) => withUndo(m.undo.deleted, () => actions.removeBlock(id));
+  const deleteBlock = (id: string) => {
+    const before = store.getSnapshot().data;
+    withUndo(m.undo.deleted, () => actions.removeBlock(id));
+    if (store.getSnapshot().data !== before) playSound("remove");
+  };
+  // what the person does makes a small sound (JP, 2026-11-07; Settings → Sounds turns them off):
+  // a block placed, a block or task ticked or unticked, a block deleted
+  useEffect(() => unlockSoundOnFirstGesture(), []);
+  // ...and blocks land, move and resize within the hours the calendar shows (Settings → Your day)
+  const live: typeof actions = {
+    ...actions,
+    placeBlock: (...a: Parameters<typeof actions.placeBlock>) => {
+      const [w, catId, day, start, mins, deps] = a;
+      const before = store.getSnapshot().data;
+      actions.placeBlock(w, catId, day, start, mins, { bounds, ...deps });
+      if (store.getSnapshot().data !== before) playSound("place");
+    },
+    moveBlock: (...a: Parameters<typeof actions.moveBlock>) => {
+      const [w, id, day, start, deps] = a;
+      actions.moveBlock(w, id, day, start, { bounds, ...deps });
+    },
+    resize: (...a: Parameters<typeof actions.resize>) => {
+      const [w, id, edge, origStart, origMins, deltaSlots, deps] = a;
+      actions.resize(w, id, edge, origStart, origMins, deltaSlots, { bounds, ...deps });
+    },
+    toggleDone: (week: WeekIndex, id: string) => {
+      actions.toggleDone(week, id);
+      const b = store.getSnapshot().data.weeks[week].find((x) => x.id === id);
+      if (b && !b.buffer) playSound(b.done ? "tick" : "untick");
+    },
+    toggleTask: (id: string) => {
+      actions.toggleTask(id);
+      const t = store.getSnapshot().data.tasks.find((x) => x.id === id);
+      if (t) playSound(t.done ? "tick" : "untick");
+    },
+    removeBlock: deleteBlock,
+  };
   const replaceWeek = (week: WeekIndex, run: () => void) => {
     withUndo(m.undo.replaced(m.week.names[week]), run);
     onb.markTried(); // the checklist's "Try a starter week"
@@ -153,6 +203,7 @@ export default function App() {
     data,
     week: activeWeek,
     isPhone,
+    onEarned: (how) => playSound(how === "finale" ? "finale" : "step", 180),
     go: {
       calendar: () => changeView("calendar"),
       areas: () => changeView("categories"),
@@ -192,15 +243,22 @@ export default function App() {
   };
 
   // week 2 becomes week 1, and the view jumps back to it
+  // ...with a turn-of-the-page sound and how that week went; a balanced one gets its fanfare
   const onAdvance = () => {
+    const r = weekReview(data, readBalanceRules(), m.lib);
     withUndo(m.undo.rolled, () => actions.advanceWeek());
     changeWeek(0);
+    playSound("roll");
+    if (hasReview(r)) {
+      setReview(r);
+      if (r.balanced) playSound("fanfare", 320);
+    }
   };
 
   // editor day chips: move the block; on phone the view follows it, if it actually moved
   const onMoveToDay = (p: Block, day: number) => {
-    const moved = moveBlock(data, activeWeek, p.id, day, p.start) !== data;
-    actions.moveBlock(activeWeek, p.id, day, p.start);
+    const moved = moveBlockTo(data, activeWeek, p.id, day, p.start, { bounds }) !== data;
+    live.moveBlock(activeWeek, p.id, day, p.start);
     if (isPhone && moved && p.day !== day) setPhoneDay(day);
   };
 
@@ -228,7 +286,7 @@ export default function App() {
     armedCatId,
     onArm: setArmedCatId,
     onHide: () => setHidden(true),
-    actions,
+    actions: live,
   };
   const showSide = !isPhone && !panelHidden;
   const editingBlock = editingId ? (data.weeks[activeWeek].find((b) => b.id === editingId) ?? null) : null;
@@ -313,10 +371,11 @@ export default function App() {
                 interaction={interaction}
                 armedCatId={armedCatId}
                 onPlaced={() => setArmedCatId(null)}
-                actions={{ ...actions, removeBlock: deleteBlock }}
+                actions={live}
                 onMoveToDay={onMoveToDay}
                 onEmptyTap={setSlotTap}
                 slotMark={slotTap}
+                bounds={bounds}
                 {...(isPhone
                   ? {
                       rowH: ROW_H_PHONE,
@@ -349,8 +408,9 @@ export default function App() {
               blocks={data.weeks[activeWeek]}
               cats={data.cats}
               phone={isPhone}
+              bounds={bounds}
               onPick={(catId) => {
-                actions.placeBlock(activeWeek, catId, slotTap.day, slotTap.start);
+                live.placeBlock(activeWeek, catId, slotTap.day, slotTap.start);
                 setSlotTap(null);
               }}
               onClose={closeSlotMenu}
@@ -372,7 +432,7 @@ export default function App() {
             deleteBlock(editingBlock.id);
           }}
           onMoveToDay={(day) => onMoveToDay(editingBlock, day)}
-          actions={actions}
+          actions={live}
         />
       )}
       {undoAvailable(undo, data) && (
@@ -396,6 +456,8 @@ export default function App() {
           sync={sync.configured ? sync : null}
           earlyBird={earlyBird}
           onReplayIntro={onb.replay}
+          dayHours={dayHours}
+          onDayHours={setDayHours}
         />
       )}
       {onb.guide && !onb.intro && (
@@ -413,6 +475,7 @@ export default function App() {
           phone={isPhone}
         />
       )}
+      {review && <WeekReview review={review} onClose={() => setReview(null)} phone={isPhone} />}
       {onb.finale && !onb.guide && !onb.intro && (
         <QuestFinale colors={data.cats.map((c) => c.color)} onClose={onb.endFinale} phone={isPhone} />
       )}

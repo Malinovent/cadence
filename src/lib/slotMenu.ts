@@ -5,7 +5,7 @@
 // as before), and it offers areas and the buffer, not tasks (tasks go into blocks only).
 import { BUFFER_ID } from "./constants";
 import type { Block, Category } from "./model";
-import { resolvePlacement } from "./placement";
+import { resolvePlacement, type Bounds } from "./placement";
 import { placeMins } from "./actions";
 import { LIB_EN, type LibWords } from "./words";
 
@@ -22,15 +22,16 @@ export const pickPlacement = (
   cats: readonly Category[],
   tap: Pick<SlotTap, "day" | "start">,
   catId: string,
+  bounds?: Bounds, // the calendar's hours; 7:00–23:00 when not given
 ): { start: number; mins: number } | null => {
   const mins = placeMins(cats, catId);
   if (!mins) return null;
-  return resolvePlacement(blocks, tap.day, tap.start, mins, null);
+  return resolvePlacement(blocks, tap.day, tap.start, mins, null, bounds);
 };
 
 /** The window opens only where a block could go (a full day stays quiet). */
-export const canAddAt = (blocks: readonly Block[], day: number, start: number): boolean =>
-  resolvePlacement(blocks, day, start, 30, null) !== null;
+export const canAddAt = (blocks: readonly Block[], day: number, start: number, bounds?: Bounds): boolean =>
+  resolvePlacement(blocks, day, start, 30, null, bounds) !== null;
 
 /** The menu's rows: the areas in their order, then the buffer. */
 export const slotOptions = (

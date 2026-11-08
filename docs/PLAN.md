@@ -160,6 +160,8 @@ On branch `quest-feedback`: a toast at the top when a step is done away from the
 On branch `task-add-top`: "＋ Add a task" first in the list as a full-width 44 px button, a 44 px field and "Add task" button, new tasks on top, the phone tray above the keyboard while typing (JP). Shipped to main 2026-11-07. Left: check the keyboard on a real iPhone.
 ### [x] Readable halves in the block counts (2026-11-07)
 On branch `count-halves`: plain decimals, "0.5 more blocks", "1.5 more blocks" (FR « encore 0,5 bloc », « encore 1,5 bloc »), instead of the "½" sign, unreadable in the small mono type (JP: "Just use 1 or 1.5 or 0.5"). Shipped to main 2026-11-07.
+### [x] Consumer basics (2026-11-07)
+On branch `consumer-ready` (JP): crash screen with download and reload; help and feedback (VITE_SUPPORT_EMAIL, the site's FAQ); delete my account (`delete_my_account()` in schema.sql); sounds with a volume slider; a week review (and fanfare when balanced) after roll forward; looks (paper, night, high contrast, device); Settings → Your day (calendar hours, blocks anywhere in the day). Shipped to main 2026-11-08. Left: JP re-runs `supabase/schema.sql`, sets `VITE_SUPPORT_EMAIL`; test the deletion with a real account; open the app on every device before planning outside 7:00–23:00.
 ### [~] S1.9 French and English
 Done on branch `s1-finish`: catalogues for every string (en/fr), lib wording passed in, detection + Settings switch (device-local), Quebec formats, default areas named in the person's language. Shipped to main 2026-11-04. Left: JP reviews the French.
 ### [x] S1.10 Neutral stats

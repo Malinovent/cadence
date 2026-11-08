@@ -4,7 +4,8 @@ import type { CadenceData } from "../lib/model";
 import { supabase } from "./client";
 import { SyncError, type RawRow, type SyncClient, type SyncSession } from "./engine";
 
-const toSession = (s: Session | null): SyncSession | null => (s ? { userId: s.user.id, email: s.user.email ?? null } : null);
+const toSession = (s: Session | null): SyncSession | null =>
+  s ? { userId: s.user.id, email: s.user.email ?? null } : null;
 
 // `invalid` is what a 4xx means for this call (a bad code when verifying, a bad email when sending)
 const authError = (e: unknown, invalid: "invalid_code" | "failed"): SyncError => {
@@ -60,6 +61,10 @@ export function createSupabaseSyncClient(sb: SupabaseClient): SyncClient {
       // local scope: works offline, only this device signs out
       const { error } = await sb.auth.signOut({ scope: "local" });
       if (error) throw authError(error, "failed");
+    },
+    async deleteAccount() {
+      const { error, status } = await sb.rpc("delete_my_account");
+      if (error) throw dbError(error, status);
     },
     async pull(userId) {
       const { data, error, status } = await sb

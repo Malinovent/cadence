@@ -44,12 +44,14 @@ export function useOnboarding({
   week,
   isPhone,
   go,
+  onEarned,
 }: {
   store: CadenceStore;
   data: CadenceData;
   week: WeekIndex;
   isPhone: boolean;
   go: Go;
+  onEarned?: (how: "finale" | "board" | "toast") => void; // a step was done: its sound
 }) {
   // judged once on opening: never edited here, nothing saved, not seen on this device
   const [intro, setIntro] = useState(() =>
@@ -77,9 +79,11 @@ export function useOnboarding({
   const doneRef = useRef(check.done);
   const guideRef = useRef(guide);
   const boardInView = useRef(false); // reported by the board
+  const onEarnedRef = useRef(onEarned);
   useEffect(() => {
     doneRef.current = check.done;
     guideRef.current = guide;
+    onEarnedRef.current = onEarned;
   });
 
   /** Steps just done: kept for good, then shown the one way that fits. */
@@ -91,6 +95,7 @@ export function useOnboarding({
     setCheck((c) => ({ ...c, done: { ...c.done, ...got } }));
     setFresh((f) => [...f, ...items.filter((i) => !f.includes(i))]);
     const how = feedbackFor(now, boardInView.current, guideRef.current);
+    onEarnedRef.current?.(how);
     if (how === "finale") {
       setNews(null);
       setFinale(true);

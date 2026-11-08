@@ -30,7 +30,11 @@ export default function StatsView({ data, range, setRange, resetStats }: Props) 
         <h2 style={S.statsTitle}>{m.stats.title}</h2>
         <div style={S.rangeToggle}>
           {RANGES.map((r) => (
-            <button key={r} onClick={() => setRange(r)} style={{ ...S.rangeBtn, ...(range === r ? S.rangeBtnActive : {}) }}>
+            <button
+              key={r}
+              onClick={() => setRange(r)}
+              style={{ ...S.rangeBtn, ...(range === r ? S.rangeBtnActive : {}) }}
+            >
               {m.stats.ranges[r]}
             </button>
           ))}

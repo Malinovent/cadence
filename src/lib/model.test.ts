@@ -98,8 +98,8 @@ describe("normalizeData", () => {
           block({ start: "540" }),
           block({ start: NaN }),
           block({ mins: 15 }),
-          block({ start: 400 }),
-          block({ start: 1350, mins: 60 }),
+          block({ start: -30 }), // before midnight (any hour of the day is fine since the hours setting)
+          block({ start: 1410, mins: 60 }), // past midnight
           block({ catIds: ["ghost"] }),
           block({ catIds: [] }),
           "not a block",

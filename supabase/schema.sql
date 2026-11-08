@@ -78,3 +78,29 @@ $$;
 
 revoke execute on function public.push_state(jsonb, timestamptz) from public, anon;
 grant execute on function public.push_state(jsonb, timestamptz) to authenticated;
+
+-- Delete my account (Quebec Law 25; JP, 2026-11-07). Deletes the caller's synced copy and their
+-- sign-in (the auth user; its sessions go with it). The device keeps its own copy. Purchase and
+-- early-bird rows, kept by email for tax records, aren't touched here.
+-- security definer: only the database owner may delete from auth.users. It acts on auth.uid()
+-- alone, so nobody can delete anyone else.
+create or replace function public.delete_my_account()
+returns void
+language plpgsql
+volatile
+security definer
+set search_path = ''
+as $$
+declare
+  v_uid uuid := auth.uid();
+begin
+  if v_uid is null then
+    raise exception 'delete_my_account: not signed in' using errcode = '42501';
+  end if;
+  delete from public.cadence_state where user_id = v_uid;
+  delete from auth.users where id = v_uid;
+end;
+$$;
+
+revoke execute on function public.delete_my_account() from public, anon;
+grant execute on function public.delete_my_account() to authenticated;

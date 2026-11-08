@@ -110,7 +110,11 @@ export default function BlockEditor({
       {/* the block's tasks, and the open tasks to add to it */}
       <BlockTasks block={p} cats={cats} tasks={tasks} weeks={weeks} actions={actions} />
       <div style={S.editActions}>
-        <button className="cadence-coarse-only" onClick={onDelete} style={{ ...S.editDone, background: "#b54" }}>
+        <button
+          className="cadence-coarse-only"
+          onClick={onDelete}
+          style={{ ...S.editDone, background: "var(--c-danger)" }}
+        >
           {m.editor.delete}
         </button>
         <button onClick={onClose} style={S.editDone}>

@@ -1,12 +1,17 @@
 import type React from "react";
+import { PALETTES, paletteVars } from "./lib/theme";
 
 // ============================================================
 //  STYLES — warm paper / editorial aesthetic (ported verbatim from legacy)
 // ============================================================
 export const FONT_IMPORT = `
+:root { ${paletteVars(PALETTES.paper)} color-scheme: light; }
+[data-theme="night"] { ${paletteVars(PALETTES.night)} color-scheme: dark; }
+[data-theme="contrast"] { ${paletteVars(PALETTES.contrast)} color-scheme: light; }
+html, body { background: var(--c-paper) !important; color: var(--c-ink); }
 * { box-sizing: border-box; }
 ::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-thumb { background: #cabfb2; border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: var(--c-scroll); border-radius: 4px; }
 /* the panel hide/show text button: hover underline + 44px touch target on coarse pointers */
 .cadence-tray-toggle { padding: 9px 0 9px 12px; margin: -9px 0; }
 .cadence-tray-toggle:hover { text-decoration: underline; }
@@ -63,12 +68,14 @@ html, body { touch-action: manipulation; }
   .cadence-hit44::after { content: ""; position: absolute; left: 50%; top: 50%; width: 44px; height: 44px; transform: translate(-50%, -50%); }
 }
 `;
-export const ink = "#2b2622";
-export const paper = "#f4ede1";
-export const paper2 = "#ece2d2";
-export const line = "#d8cbb8";
+// the app's look comes from CSS variables (Settings → Look, JP 2026-11-08): src/lib/theme.ts holds
+// the palettes; paper is the default and unchanged
+export const ink = "var(--c-ink)";
+export const paper = "var(--c-paper)";
+export const paper2 = "var(--c-paper2)";
+export const line = "var(--c-line)";
 // "done" in a step's feedback: the roll-forward green, never alone (a check and words go with it)
-export const doneGreen = "#1FA98A";
+export const doneGreen = "var(--c-done)";
 // the block happening now: heavier ink outline drawn as a box-shadow (keeps its layout)
 export const nowRing = `0 0 0 2px ${ink}`;
 export const S = {
@@ -78,7 +85,7 @@ export const S = {
     color: ink,
     minHeight: "100%",
     padding: "max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left))",
-    backgroundImage: "radial-gradient(#e6dcc9 0.5px, transparent 0.5px)",
+    backgroundImage: "radial-gradient(var(--c-dots) 0.5px, transparent 0.5px)",
     backgroundSize: "14px 14px"
   },
   header: {
@@ -101,7 +108,7 @@ export const S = {
   tagline: {
     margin: "4px 0 0",
     fontStyle: "italic",
-    color: "#7a6e5e",
+    color: "var(--c-muted)",
     fontSize: 14
   },
   nav: {
@@ -142,7 +149,7 @@ export const S = {
     cursor: "pointer",
     fontFamily: "'Spline Sans Mono', monospace",
     fontSize: 10,
-    color: "#9a8d7d",
+    color: "var(--c-faint)",
     textTransform: "uppercase",
     letterSpacing: "0.08em"
   },
@@ -180,13 +187,13 @@ export const S = {
   },
   starterBlurb: {
     fontSize: 12,
-    color: "#7a6e5e",
+    color: "var(--c-muted)",
     lineHeight: 1.35
   },
   starterNote: {
     fontFamily: "'Spline Sans Mono', monospace",
     fontSize: 10,
-    color: "#7a6e5e"
+    color: "var(--c-muted)"
   },
   // S1.7 welcome back: a calm card above the calendar
   welcomeCard: {
@@ -214,7 +221,7 @@ export const S = {
   welcomeNote: {
     fontFamily: "'Spline Sans Mono', monospace",
     fontSize: 11,
-    color: "#7a6e5e"
+    color: "var(--c-muted)"
   },
   welcomeActions: {
     display: "flex",
@@ -228,7 +235,7 @@ export const S = {
     flexWrap: "wrap",
     gap: 6,
     fontSize: 13,
-    color: "#7a6e5e"
+    color: "var(--c-muted)"
   },
   welcomeStarter: {
     minHeight: 36,
@@ -303,7 +310,7 @@ export const S = {
     fontSize: 11,
     textTransform: "uppercase",
     letterSpacing: "0.1em",
-    color: "#9a8d7d",
+    color: "var(--c-faint)",
     marginTop: 4
   },
   tray: {
@@ -453,14 +460,14 @@ export const S = {
     borderRadius: 3,
     fontFamily: "'Fraunces Variable', 'Fraunces', serif",
     fontSize: 13,
-    background: "#fff",
+    background: "var(--c-field)",
     color: ink,
     minWidth: 0
   },
   tplSaveConfirm: {
     padding: "7px 12px",
     border: "none",
-    background: "#1FA98A",
+    background: "var(--c-done)",
     color: "#fff",
     borderRadius: 3,
     cursor: "pointer",
@@ -470,7 +477,7 @@ export const S = {
   },
   tplEmpty: {
     fontSize: 12,
-    color: "#9a8d7d",
+    color: "var(--c-faint)",
     fontStyle: "italic"
   },
   tplRow: {
@@ -499,14 +506,14 @@ export const S = {
     border: "none",
     background: "transparent",
     cursor: "pointer",
-    color: "#b54",
+    color: "var(--c-danger)",
     fontSize: 13
   },
   advanceBtn: {
     marginTop: 6,
     padding: "11px",
     border: "none",
-    background: "#1FA98A",
+    background: "var(--c-done)",
     color: "#fff",
     borderRadius: 4,
     cursor: "pointer",
@@ -519,7 +526,7 @@ export const S = {
     overflowX: "auto",
     border: `1.5px solid ${ink}`,
     borderRadius: 4,
-    background: "#fbf6ec"
+    background: "var(--c-card)"
   },
   headRow: {
     display: "grid",
@@ -574,7 +581,7 @@ export const S = {
   timeLabel: {
     fontFamily: "'Spline Sans Mono', monospace",
     fontSize: 10,
-    color: "#9a8d7d",
+    color: "var(--c-faint)",
     padding: "2px 4px",
     textAlign: "right",
     borderBottom: `1px solid ${paper2}`,
@@ -685,7 +692,7 @@ export const S = {
     fontSize: 10,
     letterSpacing: "0.1em",
     textTransform: "uppercase",
-    color: "#7a6e5e"
+    color: "var(--c-muted)"
   },
   placedName: {
     fontWeight: 600,
@@ -745,7 +752,7 @@ export const S = {
   },
   inlineArea: {
     width: "100%",
-    background: "#fff",
+    background: "var(--c-field)",
     border: "1px solid",
     borderRadius: 3,
     outline: "none",
@@ -783,7 +790,7 @@ export const S = {
     fontSize: 9,
     letterSpacing: "0.08em",
     textTransform: "uppercase",
-    color: "#7a6e5e"
+    color: "var(--c-muted)"
   },
   editTaskList: {
     display: "flex",
@@ -801,7 +808,7 @@ export const S = {
     padding: "3px 6px",
     border: `1px solid ${line}`,
     borderRadius: 4,
-    background: "#fbf6ec",
+    background: "var(--c-card)",
     color: ink,
     cursor: "pointer",
     textAlign: "left",
@@ -816,13 +823,13 @@ export const S = {
   editTaskElsewhere: {
     borderStyle: "dashed",
     background: "transparent",
-    color: "#7a6e5e"
+    color: "var(--c-muted)"
   },
   editTaskWhere: {
     flexShrink: 0,
     fontFamily: "'Spline Sans Mono', monospace",
     fontSize: 9,
-    color: "#7a6e5e",
+    color: "var(--c-muted)",
     whiteSpace: "nowrap"
   },
   editTaskName: {
@@ -954,7 +961,7 @@ export const S = {
   },
   streakCard: {
     flex: "1 1 120px",
-    background: "#fbf6ec",
+    background: "var(--c-card)",
     border: `1.5px solid ${line}`,
     borderRadius: 4,
     padding: "14px",
@@ -971,7 +978,7 @@ export const S = {
   streakName: {
     fontSize: 11,
     fontFamily: "'Spline Sans Mono', monospace",
-    color: "#9a8d7d",
+    color: "var(--c-faint)",
     marginTop: 2
   },
   barChart: {
@@ -1016,7 +1023,7 @@ export const S = {
   barSessions: {
     width: 90,
     fontSize: 12,
-    color: "#9a8d7d",
+    color: "var(--c-faint)",
     fontFamily: "'Spline Sans Mono', monospace",
     flexShrink: 0
   },
@@ -1061,6 +1068,89 @@ export const S = {
   aboutLink: {
     color: ink,
     fontSize: 14
+  },
+  // Settings → Account: "Delete your account?", asked in place
+  deleteCard: {
+    marginTop: 16,
+    padding: 14,
+    border: `1.5px solid ${ink}`,
+    borderRadius: 6,
+    background: "var(--c-card)",
+    maxWidth: 520
+  },
+  // Settings → Sounds: the volume, a 44px-tall slider
+  volumeRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    marginTop: 14,
+    maxWidth: 420
+  },
+  volumeSlider: {
+    flex: 1,
+    minHeight: 44,
+    accentColor: ink,
+    cursor: "pointer"
+  },
+  volumeValue: {
+    minWidth: 40,
+    textAlign: "right",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 13
+  },
+  // Settings → Your day: two big, plain selects
+  dayField: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 4
+  },
+  dayFieldLabel: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 10,
+    letterSpacing: "0.08em",
+    textTransform: "uppercase",
+    color: "var(--c-muted)"
+  },
+  daySelect: {
+    minHeight: 44,
+    minWidth: 130,
+    padding: "8px 10px",
+    border: `1.5px solid ${ink}`,
+    borderRadius: 6,
+    background: "var(--c-field)",
+    color: ink,
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 14
+  },
+  helpTitle: {
+    margin: "0 0 4px",
+    fontFamily: "'Fraunces Variable', 'Fraunces', serif",
+    fontWeight: 700,
+    fontSize: 17
+  },
+  // ---- the crash screen: instead of a blank page (JP, 2026-11-07) ----
+  crashPage: {
+    minHeight: "100vh",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16
+  },
+  crashActions: {
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: 12
+  },
+  crashDetails: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 12,
+    color: "var(--c-muted)"
+  },
+  crashError: {
+    margin: "8px 0 0",
+    whiteSpace: "pre-wrap",
+    overflowWrap: "anywhere"
   },
   // ---- onboarding (2026-11-07): three short screens for new people ----
   onboardBackdrop: {
@@ -1162,7 +1252,7 @@ export const S = {
     padding: "6px 0",
     border: "none",
     background: "transparent",
-    color: "#5c5247",
+    color: "var(--c-soft)",
     cursor: "pointer",
     fontFamily: "'Fraunces Variable', 'Fraunces', serif",
     fontSize: 14,
@@ -1244,7 +1334,7 @@ export const S = {
     borderRadius: 10
   },
   countCalm: {
-    color: "#7a6e5e"
+    color: "var(--c-muted)"
   },
   countDone: {
     color: ink,
@@ -1302,7 +1392,7 @@ export const S = {
   introDayName: {
     fontFamily: "'Spline Sans Mono', monospace",
     fontSize: 9,
-    color: "#7a6e5e",
+    color: "var(--c-muted)",
     textAlign: "center"
   },
   introBlock: {
@@ -1323,7 +1413,7 @@ export const S = {
     padding: "3px 8px",
     border: `1px solid ${ink}`,
     borderRadius: 999,
-    background: "#fbf6ec",
+    background: "var(--c-card)",
     fontFamily: "'Spline Sans Mono', monospace",
     fontSize: 11
   },
@@ -1331,7 +1421,7 @@ export const S = {
     margin: 0,
     fontSize: 13,
     lineHeight: 1.45,
-    color: "#5c5247"
+    color: "var(--c-soft)"
   },
   // a guided step: an outline that lets clicks through, and a small bubble beside it
   coachRing: {
@@ -1367,7 +1457,7 @@ export const S = {
   coachBody: {
     fontSize: 13,
     lineHeight: 1.45,
-    color: "#5c5247"
+    color: "var(--c-soft)"
   },
   coachActions: {
     display: "flex",
@@ -1392,7 +1482,7 @@ export const S = {
     padding: "6px 2px",
     border: "none",
     background: "transparent",
-    color: "#5c5247",
+    color: "var(--c-soft)",
     cursor: "pointer",
     fontFamily: "'Fraunces Variable', 'Fraunces', serif",
     fontSize: 14,
@@ -1406,7 +1496,7 @@ export const S = {
     padding: "10px 14px",
     border: `1.5px solid ${ink}`,
     borderRadius: 6,
-    background: "#fbf6ec"
+    background: "var(--c-card)"
   },
   checkHead: {
     display: "flex",
@@ -1431,7 +1521,7 @@ export const S = {
   checkProgress: {
     fontFamily: "'Spline Sans Mono', monospace",
     fontSize: 11,
-    color: "#7a6e5e",
+    color: "var(--c-muted)",
     whiteSpace: "nowrap"
   },
   checkItems: {
@@ -1481,7 +1571,7 @@ export const S = {
     right: 0,
     top: "55%",
     height: 1.5,
-    background: "#9a8d7d",
+    background: "var(--c-faint)",
     transformOrigin: "left center",
     animation: "cadence-strike 380ms 180ms ease-out both"
   },
@@ -1520,7 +1610,7 @@ export const S = {
     letterSpacing: "0.08em",
     textTransform: "uppercase",
     color: ink,
-    background: "#fbf6ec"
+    background: "var(--c-card)"
   },
   earlyThanks: {
     display: "flex",
@@ -1553,7 +1643,7 @@ export const S = {
   statsNote: {
     marginTop: 24,
     fontStyle: "italic",
-    color: "#9a8d7d",
+    color: "var(--c-faint)",
     fontSize: 13
   },
   resetRow: {
@@ -1567,9 +1657,9 @@ export const S = {
   },
   resetBtn: {
     padding: "8px 14px",
-    border: `1.5px solid #b54`,
+    border: "1.5px solid var(--c-danger)",
     background: "transparent",
-    color: "#b54",
+    color: "var(--c-danger)",
     borderRadius: 3,
     cursor: "pointer",
     fontFamily: "'Spline Sans Mono', monospace",
@@ -1579,13 +1669,13 @@ export const S = {
   },
   resetWarn: {
     fontSize: 13,
-    color: "#b54",
+    color: "var(--c-danger)",
     fontStyle: "italic"
   },
   resetConfirm: {
     padding: "8px 16px",
     border: "none",
-    background: "#b54",
+    background: "var(--c-danger)",
     color: "#fff",
     borderRadius: 3,
     cursor: "pointer",
@@ -1607,7 +1697,7 @@ export const S = {
     maxWidth: 720
   },
   catIntro: {
-    color: "#7a6e5e",
+    color: "var(--c-muted)",
     fontSize: 14,
     marginTop: 4
   },
@@ -1621,7 +1711,7 @@ export const S = {
     display: "flex",
     alignItems: "center",
     gap: 12,
-    background: "#fbf6ec",
+    background: "var(--c-card)",
     padding: "12px 14px",
     borderRadius: 4,
     flexWrap: "wrap"
@@ -1642,7 +1732,7 @@ export const S = {
     flexDirection: "column",
     fontSize: 10,
     fontFamily: "'Spline Sans Mono', monospace",
-    color: "#9a8d7d",
+    color: "var(--c-faint)",
     textTransform: "uppercase",
     gap: 2
   },
@@ -1653,7 +1743,7 @@ export const S = {
     border: `1.5px solid ${line}`,
     borderRadius: 3,
     padding: "5px",
-    background: "#fff",
+    background: "var(--c-field)",
     color: ink
   },
   // S1.2 guardrail picker in the category row: Floor | Ceiling | Range, then the hours
@@ -1686,7 +1776,7 @@ export const S = {
   catGuardHint: {
     fontSize: 11,
     fontStyle: "italic",
-    color: "#7a6e5e"
+    color: "var(--c-muted)"
   },
   catColor: {
     width: 38,
@@ -1700,7 +1790,7 @@ export const S = {
     border: "none",
     background: "transparent",
     cursor: "pointer",
-    color: "#b54",
+    color: "var(--c-danger)",
     fontSize: 16
   },
   catAdd: {
@@ -1733,7 +1823,7 @@ export const S = {
     fontSize: 11,
     textTransform: "uppercase",
     letterSpacing: "0.1em",
-    color: "#9a8d7d",
+    color: "var(--c-faint)",
     marginTop: 4,
     display: "flex",
     alignItems: "center",
@@ -1798,7 +1888,7 @@ export const S = {
     padding: "8px 10px",
     border: `1.5px solid ${ink}`,
     borderRadius: 8,
-    background: "#fff",
+    background: "var(--c-field)",
     color: ink,
     fontFamily: "'Fraunces Variable', 'Fraunces', serif",
     fontSize: 15
@@ -1826,7 +1916,7 @@ export const S = {
     display: "flex",
     alignItems: "center",
     gap: 8,
-    background: "#fbf6ec",
+    background: "var(--c-card)",
     padding: "6px 8px",
     borderRadius: 3
   },
@@ -1865,7 +1955,7 @@ export const S = {
     fontSize: 11,
     textTransform: "uppercase",
     letterSpacing: "0.1em",
-    color: "#9a8d7d"
+    color: "var(--c-faint)"
   },
   seasonCardCompact: {
     padding: "10px 14px",
@@ -1954,7 +2044,7 @@ export const S = {
     fontSize: 11,
     textTransform: "uppercase",
     letterSpacing: "0.1em",
-    color: "#9a8d7d"
+    color: "var(--c-faint)"
   },
   dockBody: {
     maxHeight: "30vh",
@@ -2015,7 +2105,7 @@ export const S = {
     minWidth: 0,
     padding: "8px 10px",
     borderRadius: 6,
-    background: "#fbf6ec",
+    background: "var(--c-card)",
     color: ink,
     textAlign: "left",
     fontFamily: "'Fraunces Variable', 'Fraunces', serif",
@@ -2041,7 +2131,7 @@ export const S = {
     fontSize: 11,
     textTransform: "uppercase",
     letterSpacing: "0.1em",
-    color: "#7a6e5e"
+    color: "var(--c-muted)"
   },
   // the tapped slot, outlined while the window is open
   slotMark: {
@@ -2078,7 +2168,7 @@ export const S = {
   panelTaskNote: {
     fontFamily: "'Spline Sans Mono', monospace",
     fontSize: 10,
-    color: "#7a6e5e"
+    color: "var(--c-muted)"
   },
   taskDoneToggle: {
     alignSelf: "flex-start",
@@ -2089,7 +2179,7 @@ export const S = {
     fontFamily: "'Fraunces Variable', 'Fraunces', serif",
     fontSize: 12,
     fontStyle: "italic",
-    color: "#7a6e5e",
+    color: "var(--c-muted)",
     textDecoration: "underline"
   },
   blockTodos: {
@@ -2113,7 +2203,7 @@ export const S = {
     padding: 0,
     border: "1.5px solid",
     borderRadius: 2,
-    color: "#fff",
+    color: paper,
     fontSize: 8,
     lineHeight: 1,
     cursor: "pointer",
@@ -2145,7 +2235,7 @@ export const S = {
     display: "flex",
     alignItems: "center",
     gap: 12,
-    background: "#fbf6ec",
+    background: "var(--c-card)",
     padding: "10px 14px",
     borderRadius: 4
   },
@@ -2166,8 +2256,8 @@ export const S = {
     lineHeight: 1
   },
   taskCheckDone: {
-    border: "1.5px solid #1FA98A",
-    background: "#1FA98A"
+    border: "1.5px solid var(--c-done)",
+    background: "var(--c-done)"
   },
   taskName: {
     flex: 1,
@@ -2179,7 +2269,7 @@ export const S = {
   },
   taskNameDone: {
     textDecoration: "line-through",
-    color: "#9a8d7d"
+    color: "var(--c-faint)"
   },
   // ---- a step just done, away from the board: a toast at the top (JP, 2026-11-07) ----
   questToast: {
@@ -2216,7 +2306,7 @@ export const S = {
   questLabel: {
     fontFamily: "'Spline Sans Mono', monospace",
     fontSize: 11,
-    color: "#7a6e5e"
+    color: "var(--c-muted)"
   },
   questItem: {
     position: "relative",
@@ -2261,7 +2351,7 @@ export const S = {
     gap: "0 6px",
     marginTop: 2,
     fontSize: 13,
-    color: "#5c5247"
+    color: "var(--c-soft)"
   },
   questShow: {
     minHeight: 32,
@@ -2280,7 +2370,7 @@ export const S = {
     height: 36,
     border: "none",
     background: "transparent",
-    color: "#7a6e5e",
+    color: "var(--c-muted)",
     cursor: "pointer",
     fontSize: 15
   },
@@ -2366,7 +2456,7 @@ export const S = {
     margin: 0,
     fontSize: 14,
     lineHeight: 1.45,
-    color: "#5c5247"
+    color: "var(--c-soft)"
   },
   finaleList: {
     listStyle: "none",
@@ -2420,6 +2510,38 @@ export const S = {
     minHeight: 52,
     fontSize: 17
   },
+  // the week review: one short row per area
+  reviewTicked: {
+    margin: 0,
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 12,
+    color: "var(--c-muted)"
+  },
+  reviewName: {
+    flex: 1,
+    minWidth: 0,
+    fontWeight: 600,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap"
+  },
+  reviewHours: {
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontWeight: 500
+  },
+  reviewLimit: {
+    minWidth: 92,
+    textAlign: "right",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 11,
+    color: "var(--c-muted)"
+  },
+  reviewKept: {
+    width: 14,
+    textAlign: "center",
+    color: doneGreen,
+    fontWeight: 700
+  },
   finaleTick: {
     flexShrink: 0,
     width: 20,
@@ -2471,7 +2593,7 @@ export const S = {
     gap: 6,
     fontFamily: "'Spline Sans Mono', monospace",
     fontSize: 12,
-    color: "#5c5247",
+    color: "var(--c-soft)",
     whiteSpace: "nowrap",
     overflow: "hidden",
     textOverflow: "ellipsis"
@@ -2529,7 +2651,7 @@ export const S = {
     padding: "8px 10px",
     border: "1px solid",
     borderRadius: 8,
-    background: "#fff",
+    background: "var(--c-field)",
     outline: "none",
     color: ink,
     fontFamily: "'Fraunces Variable', 'Fraunces', serif",
@@ -2542,7 +2664,7 @@ export const S = {
     fontSize: 10,
     letterSpacing: "0.08em",
     textTransform: "uppercase",
-    color: "#7a6e5e"
+    color: "var(--c-muted)"
   },
   sheetChips: {
     display: "flex",

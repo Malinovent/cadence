@@ -19,7 +19,7 @@ const memStorage = (init: Record<string, string> = {}): StorageLike => {
 const withBlock = (d: CadenceData = defaultData(), id = "b1", day = 1): CadenceData =>
   A.placeBlock(d, 0, "work", day, 9 * 60, undefined, { uid: () => id });
 
-const clone = <T,>(v: T): T => JSON.parse(JSON.stringify(v));
+const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v));
 
 // In-memory backend with the same last-write-wins rule as push_state in supabase/schema.sql.
 class FakeBackend implements SyncClient {
@@ -70,6 +70,13 @@ class FakeBackend implements SyncClient {
   }
   async signOut() {
     this.emitAuth(null);
+  }
+  deleted: string[] = [];
+  async deleteAccount() {
+    this.check();
+    const uid = this.session!.userId;
+    this.rows.delete(uid);
+    this.deleted.push(uid);
   }
   async pull(userId: string) {
     this.pulls++;
@@ -253,7 +260,9 @@ describe("sync engine: pushing edits", () => {
     await vi.advanceTimersByTimeAsync(1500);
     await flush();
     expect(backend.pushes).toHaveLength(1);
-    expect(backend.pushes[0].data.tasks).toEqual([{ id: "t1", name: "Buy milk", catId: null, done: false, order: 0, createdAt: clock }]);
+    expect(backend.pushes[0].data.tasks).toEqual([
+      { id: "t1", name: "Buy milk", catId: null, done: false, order: 0, createdAt: clock },
+    ]);
     expect(engine.getState().status).toBe("synced");
     store.edit((d) => T.toggleTask(d, "missing"));
     await vi.advanceTimersByTimeAsync(3000);
@@ -304,7 +313,9 @@ describe("sync engine: pushing edits", () => {
     edit((d) => withBlock(d, "after", 5));
     await vi.advanceTimersByTimeAsync(1500);
     await flush();
-    expect(backend.rows.get(U1.userId)!.data).toMatchObject({ weeks: [expect.arrayContaining([expect.objectContaining({ id: "after" })]), []] });
+    expect(backend.rows.get(U1.userId)!.data).toMatchObject({
+      weeks: [expect.arrayContaining([expect.objectContaining({ id: "after" })]), []],
+    });
   });
 
   it("offline: keeps edits local, shows offline, then syncs on online", async () => {
@@ -464,6 +475,33 @@ describe("sync engine: auth", () => {
     await flush();
     expect(backend.pulls).toBe(1);
     expect(engine.getState().session).toEqual(U1);
+  });
+
+  it("delete my account: the server copy goes, this device keeps its weeks, signed out", async () => {
+    setup({ local: withBlock() });
+    await flush();
+    expect(backend.rows.has(U1.userId)).toBe(true);
+    const r = await engine.deleteAccount();
+    await flush();
+    expect(r).toEqual({ ok: true });
+    expect(backend.rows.has(U1.userId)).toBe(false);
+    expect(backend.deleted).toEqual([U1.userId]);
+    expect(engine.getState()).toMatchObject({ session: null, status: "local" });
+    expect(store.getSnapshot().data.weeks[0]).toHaveLength(1);
+    expect(store.getSnapshot().meta).toMatchObject({ userId: null, syncedAt: null });
+    edit((d) => withBlock(d, "x", 3));
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(backend.rows.has(U1.userId)).toBe(false); // nothing re-creates it
+  });
+
+  it("delete my account offline: nothing changes, still signed in", async () => {
+    setup({ local: withBlock() });
+    await flush();
+    backend.online = false;
+    const r = await engine.deleteAccount();
+    expect(r).toEqual({ ok: false, reason: "offline" });
+    expect(engine.getState().session).toEqual(U1);
+    expect(backend.rows.has(U1.userId)).toBe(true);
   });
 
   it("sign out keeps local data, forgets the account, and stops syncing", async () => {

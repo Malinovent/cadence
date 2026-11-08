@@ -160,11 +160,32 @@ export const en = {
     rulesBack: "Back to 80% and 10%",
     earlyThanks:
       `Thank you for believing in ${APP_NAME} early. Your early-bird purchase is linked to this account, and Pro is yours for life when it arrives.`,
+    // the app's look (JP, 2026-11-08)
+    lookTitle: "Look",
+    lookIntro: "How the app looks on this device. Your areas keep their colours.",
+    looks: { paper: "Paper", night: "Night", contrast: "High contrast", device: "Match device" },
+    // the hours the calendar shows (JP, 2026-11-07)
+    dayTitle: "Your day",
+    dayIntro: "The hours the calendar shows. Blocks outside them still show. Saved on this device.",
+    dayStart: "Starts at",
+    dayEnd: "Ends at",
+    midnight: "midnight",
+    // sounds (JP, 2026-11-07)
+    soundTitle: "Sounds",
+    soundIntro: "Small sounds when you place or tick a block, finish a step or roll the week forward. Saved on this device.",
+    soundOff: "Off",
+    soundVolume: "Volume",
     langTitle: "Language",
     langIntro: `${APP_NAME} follows your device's language. Choose one to keep it. Saved on this device.`,
     langAuto: "Device language",
     langNames: { fr: "Français", en: "English" },
     aboutTitle: "About",
+    // help and feedback (JP, 2026-11-07): shown once the site or the support address is set
+    helpTitle: "Help and feedback",
+    helpText: "A question, an idea, or something that doesn't work? Every message is read.",
+    helpFaq: "Questions and answers",
+    helpMail: "Write to us",
+    helpSubject: (app: string) => `${app}: help and feedback`,
     aboutText: `${APP_NAME} plans two weeks at a time and keeps them in balance across the parts of your life, from work to rest. Your weeks stay on this device unless you sign in to sync them.`,
     replayIntro: "Show the introduction again",
     privacy: "Privacy policy",
@@ -225,6 +246,23 @@ export const en = {
     finaleBody: "That's the basics. The rest of the week is yours to plan.",
     finaleStart: "Start planning",
   },
+  // the crash screen: shown instead of a blank page when something breaks
+  crash: {
+    title: "Something went wrong.",
+    body: "Your weeks are still saved on this device. Reload to try again, or download a copy of your data first.",
+    reload: "Reload",
+    download: "Download my data",
+    details: "What happened",
+    help: "Write to us",
+  },
+  // roll forward: how the week went (JP, 2026-11-08)
+  review: {
+    balanced: "A balanced week.",
+    done: "That week is done.",
+    ticked: (n: number, total: number) => `${n}/${total} ticked`,
+    kept: "kept",
+    start: "Start the new week",
+  },
   undo: {
     replaced: (week: string) => `${week} replaced.`,
     rolled: "Rolled forward.",
@@ -252,6 +290,16 @@ export const en = {
     signingIn: "Signing in…",
     signIn: "Sign in",
     differentEmail: "Use a different email",
+    // delete my account (JP, 2026-11-07)
+    delete: "Delete my account",
+    deleteTitle: "Delete your account?",
+    deleteText:
+      "This deletes your sign-in and the copy of your weeks on our server, for good. Your weeks stay on this device; download a copy first if you want one. Purchase records are kept as the law requires.",
+    deleteConfirm: "Delete my account",
+    deleteCancel: "Keep my account",
+    deleting: "Deleting…",
+    deleteFailed: "Couldn't delete your account. Check your connection and try again.",
+    deletedNote: "Your account is deleted. Your weeks are still on this device.",
   },
 };
 

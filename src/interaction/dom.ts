@@ -3,10 +3,12 @@
 //
 // DOM contract with the grid (WeekGrid today, the phone day view in task 9):
 //   grid root (the scroll container)  ref={engine.setGrid}  data-row-h={rowH}
+//                                     data-day-start / data-day-end (minutes: the hours it shows)
 //   each day column                   data-day={dayIndex}   (Mon = 0)
 //   each placed block                 data-block-id={id}
-import { ROW_H } from "../lib/constants";
+import { DAY_END, DAY_START, ROW_H } from "../lib/constants";
 import { hitTest, type GridHit, type Rect } from "../lib/gesture";
+import type { Bounds } from "../lib/placement";
 
 export type Ghost = { moveTo(x: number, y: number): void; remove(): void };
 
@@ -18,8 +20,21 @@ const rowHOf = (el: Element | null): number => {
   return v > 0 ? v : ROW_H;
 };
 
+// the hours the grid shows (Settings → Your day); 7:00–23:00 when the grid doesn't say
+const boundsOf = (el: Element | null): Bounds => {
+  const root = el?.closest<HTMLElement>("[data-row-h]");
+  const a = Number(root?.dataset.dayStart);
+  const b = Number(root?.dataset.dayEnd);
+  return Number.isFinite(a) && Number.isFinite(b) && b > a ? [a, b] : [DAY_START, DAY_END];
+};
+
 // what is under viewport point (x, y) inside the grid root (grabOffsetY: see hitTest)
-export const gridHitAt = (root: HTMLElement, x: number, y: number, grabOffsetY: number | null = null): GridHit | null => {
+export const gridHitAt = (
+  root: HTMLElement,
+  x: number,
+  y: number,
+  grabOffsetY: number | null = null,
+): GridHit | null => {
   const cols = Array.from(root.querySelectorAll<HTMLElement>("[data-day]"), (el) => ({
     day: Number(el.dataset.day),
     rect: toRect(el.getBoundingClientRect()),
@@ -28,7 +43,7 @@ export const gridHitAt = (root: HTMLElement, x: number, y: number, grabOffsetY: 
     id: el.dataset.blockId ?? "",
     rect: toRect(el.getBoundingClientRect()),
   }));
-  return hitTest(x, y, toRect(root.getBoundingClientRect()), cols, blocks, rowHOf(root), grabOffsetY);
+  return hitTest(x, y, toRect(root.getBoundingClientRect()), cols, blocks, rowHOf(root), grabOffsetY, boundsOf(root));
 };
 
 // the day column an element sits in: its current viewport top and the grid's row height

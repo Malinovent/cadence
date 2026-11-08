@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { legalLinks } from "./legal";
+import { helpLinks, legalLinks } from "./legal";
 
 describe("legal links", () => {
   it("point at the site's pages in the person's language", () => {
@@ -13,5 +13,19 @@ describe("legal links", () => {
     expect(legalLinks(undefined, "fr")).toBeNull();
     expect(legalLinks("  ", "fr")).toBeNull();
     expect(legalLinks("javascript:alert(1)", "en")).toBeNull();
+  });
+});
+
+describe("help and feedback", () => {
+  it("links the site's questions and a message to the support address", () => {
+    expect(helpLinks("https://example.ca/", "aide@example.ca", "fr", "Cadence : aide")).toEqual({
+      faq: "https://example.ca/fr/#faq",
+      mail: "mailto:aide@example.ca?subject=Cadence%20%3A%20aide",
+    });
+  });
+  it("leaves out whatever isn't set, or isn't safe", () => {
+    expect(helpLinks(undefined, undefined, "en", "x")).toEqual({ faq: null, mail: null });
+    expect(helpLinks("https://example.ca", "not an address", "en", "x").mail).toBeNull();
+    expect(helpLinks("https://example.ca", "a@b.ca?cc=evil@x.com", "en", "x").mail).toBeNull();
   });
 });

@@ -1,4 +1,5 @@
 import type React from "react";
+import type { Bounds } from "../lib/placement";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { Block, Category } from "../lib/model";
 import { menuPosition, pickPlacement, slotOptions, type SlotTap } from "../lib/slotMenu";
@@ -13,6 +14,7 @@ type Props = {
   blocks: Block[];
   cats: Category[];
   phone: boolean;
+  bounds?: Bounds; // the hours the calendar shows (Settings → Your day)
   onPick: (catId: string) => void;
   onClose: () => void;
 };
@@ -23,7 +25,7 @@ type Props = {
  * fit, like a drop) and closes; the person resizes it in the calendar. Escape, ✕ or a tap outside
  * closes with nothing changed.
  */
-export default function SlotMenu({ tap, blocks, cats, phone, onPick, onClose }: Props) {
+export default function SlotMenu({ tap, blocks, cats, phone, bounds, onPick, onClose }: Props) {
   const { m, lang } = useI18n();
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
@@ -80,7 +82,7 @@ export default function SlotMenu({ tap, blocks, cats, phone, onPick, onClose }: 
       </div>
       <div style={S.slotOptions}>
         {slotOptions(cats, m.lib).map((o) => {
-          const fit = pickPlacement(blocks, cats, tap, o.id);
+          const fit = pickPlacement(blocks, cats, tap, o.id, bounds);
           const buffer = o.color === null;
           const color = o.color ?? BUFFER_COLOR;
           return (

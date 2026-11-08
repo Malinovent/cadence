@@ -37,6 +37,8 @@ export interface SyncClient {
   sendCode(email: string, redirectTo: string): Promise<void>;
   verifyCode(email: string, code: string): Promise<SyncSession>;
   signOut(): Promise<void>;
+  /** Deletes the signed-in account and its synced copy on the server (delete_my_account). */
+  deleteAccount(): Promise<void>;
   pull(userId: string): Promise<RawRow | null>;
   push(data: CadenceData, updatedAt: number): Promise<RawRow>;
 }
@@ -64,6 +66,8 @@ export interface SyncEngine {
   sendCode(email: string): Promise<AuthResult>;
   verifyCode(email: string, code: string): Promise<AuthResult>;
   signOut(): Promise<void>;
+  /** Deletes the account and its server copy; this device keeps its weeks, signed out. */
+  deleteAccount(): Promise<AuthResult>;
   resolveConflict(choice: ConflictChoice): void;
 }
 
@@ -228,7 +232,8 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
         break;
       case "push":
         uncommittedUser = first ? userId : null;
-        if (d.updatedAt > meta.updatedAt) store.setMeta((m) => ({ ...m, updatedAt: Math.max(m.updatedAt, d.updatedAt) }));
+        if (d.updatedAt > meta.updatedAt)
+          store.setMeta((m) => ({ ...m, updatedAt: Math.max(m.updatedAt, d.updatedAt) }));
         await pushOp(g);
         return;
     }
@@ -373,6 +378,23 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
       } catch (e) {
         console.warn("sign out failed", e);
       }
+    },
+    async deleteAccount() {
+      if (!session) return { ok: false, reason: "failed" };
+      try {
+        await client.deleteAccount();
+      } catch (e) {
+        return { ok: false, reason: authReason(e) }; // nothing changed: still signed in
+      }
+      // the account and its server copy are gone; the weeks stay here, local only
+      setSession(null);
+      store.setMeta((m) => ({ ...m, userId: null, syncedAt: null }));
+      try {
+        await client.signOut();
+      } catch {
+        // the session went with the account
+      }
+      return { ok: true };
     },
     resolveConflict(choice) {
       if (!conflictRow || !session) return;

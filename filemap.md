@@ -53,7 +53,12 @@
 - `src/lib/guide.ts` — onboarding path 1 + checklist: the guided steps and what ends each, what each change to the data did for the checklist (`progress`), what's newly earned, the next open step and how to show it (toast, board or finale: `earned`, `nextItem`, `feedbackFor`), where a hint bubble sits, when its target needs scrolling
 - `src/lib/sheet.ts` — the phone block sheet: how far the keyboard covers the screen (`keyboardInset`), the header's day and time (`blockWhen`)
 - `src/lib/blockCount.ts` — visual B: an area's week as squares (one per block of its goal), blocks to go / left / over, rounded to halves, the status words
-- `src/lib/legal.ts` — links to the site's privacy policy and terms, by language
+- `src/lib/legal.ts` — links to the site's privacy policy and terms, by language; help and feedback (`helpLinks`: the site's FAQ, a mail to VITE_SUPPORT_EMAIL)
+- `src/lib/crash.ts` — the crash screen's backup: the stored keys exactly as they are (`crashBackup`), importable
+- `src/lib/sounds.ts` — the sounds as tones (place, tick, untick, remove, step, finale), quiet and short
+- `src/lib/review.ts` — roll forward: how Week 1 went (`weekReview`: balanced, ticked of total, a line per area)
+- `src/lib/theme.ts` — the looks: paper, night, high contrast, device; each palette's colours by role, as CSS variables
+- `src/lib/dayHours.ts` — the hours the calendar shows: choices, the saved setting, and `gridBounds` (widened to hold every block)
 - `src/lib/starters.ts` — S1.8 the three starter weeks, matching areas by name, adding missing ones, applying to a week
 - `src/lib/welcome.ts` — S1.7 when to welcome back (7+ days without an edit) and what a tap replaces
 - `src/lib/tasks.ts` — S1.5 task rules: add / tick / remove, attach to a block, single-task tick, return on tick, end or removal, done this week
@@ -73,6 +78,9 @@
 - `src/state/balanceRules.ts` — read/write the per-device balanced-week rules (`cadence:ui:balanceRules`)
 - `src/state/useNow.ts` — `useNow()`: current time, refreshed each whole minute and when the page becomes visible
 - `src/state/useKeyboard.ts` — `useKeyboard()`: how far the on-screen keyboard covers the bottom (visual viewport), so the block sheet and the phone tray rise above it
+- `src/state/sound.ts` — plays the sounds with Web Audio (unlocked on the first tap), the per-device volume (`cadence:ui:soundVolume`, 0 = off)
+- `src/state/themePrefs.ts` — the look per device (`cadence:ui:theme`), applied as `<html data-theme>`, following the device when asked
+- `src/state/dayHoursPrefs.ts` — the calendar's hours per device (`cadence:ui:dayHours`)
 - `src/state/useIsPhone.ts` — `useIsPhone()`: matchMedia `(max-width: 899px)`, live, SSR default false
 - `src/sync/client.ts` — Supabase client from env, or `null` (local-only)
 - `src/sync/supabaseClient.ts` — `SyncClient` adapter over supabase-js (OTP auth, row select, `push_state` RPC, error mapping); `syncClient` (null when unconfigured)
@@ -110,7 +118,10 @@
 - `src/components/BalancedWeeksCard.tsx` — "N balanced weeks this season" card with a square per week
 - `src/components/StatsView.tsx` — balanced weeks card, hours chart, reset
 - `src/components/CategoriesView.tsx` — areas editor: name, At least / At most / Between and its hours, block length, colour
-- `src/components/SettingsView.tsx` — "Your data": export / import with summary + confirm, download of the pre-guardrails copy, balanced-week rules, language; hosts "Account & sync" when sync is configured; About (what it is, show the introduction again, privacy and terms)
-- `src/components/AccountSync.tsx` — Settings "Account & sync": conflict card, signed-out email form → code entry, signed-in email + status + sign out
+- `src/components/SettingsView.tsx` — "Your data": export / import with summary + confirm, download of the pre-guardrails copy, balanced-week rules, Your day (calendar hours), sounds, language; hosts "Account & sync" when sync is configured; About (what it is, show the introduction again, privacy and terms, help and feedback)
+- `src/components/AccountSync.tsx` — Settings "Account & sync": conflict card, signed-out email form → code entry, signed-in email + status + sign out, "Delete my account" (asked first)
+- `src/components/WeekReview.tsx` — the card after roll forward: the week's lines, a fanfare and rising squares when balanced
+- `src/components/ErrorBoundary.tsx` — around the app (main.tsx): a crash shows the crash screen
+- `src/components/CrashScreen.tsx` — "Something went wrong": Reload, Download my data, Write to us, what happened
 - `.github/workflows/deploy.yml` — CI: test, lint, build, deploy to GitHub Pages
 - `handoff/INSTALL-IPHONE.md` — one-page install + sign-in note for the end user

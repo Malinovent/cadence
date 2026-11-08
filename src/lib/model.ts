@@ -1,4 +1,4 @@
-import { DAY_END, DAY_START, defaultCategories, STEP } from "./constants";
+import { defaultCategories, STEP } from "./constants";
 import { floorFromTarget, legacyTarget, parseLimit, type Limit } from "./guardrail";
 import { uid } from "./uid";
 
@@ -108,7 +108,14 @@ export const normalizeData = (partial: unknown, lang: "en" | "fr" = "en"): { dat
     cats = [];
     const seen = new Set<string>();
     for (const c of raw.cats as unknown[]) {
-      if (!isRec(c) || typeof c.id !== "string" || !c.id || seen.has(c.id) || typeof c.name !== "string" || typeof c.color !== "string") {
+      if (
+        !isRec(c) ||
+        typeof c.id !== "string" ||
+        !c.id ||
+        seen.has(c.id) ||
+        typeof c.name !== "string" ||
+        typeof c.color !== "string"
+      ) {
         dropped++;
         continue;
       }
@@ -134,10 +141,20 @@ export const normalizeData = (partial: unknown, lang: "en" | "fr" = "en"): { dat
   const cleanBlock = (p: Migrated): TemplateBlock | null => {
     const { day, start, mins } = p;
     if (typeof day !== "number" || !Number.isInteger(day) || day < 0 || day > 6) return null;
-    if (!isNum(start) || !isNum(mins) || mins < STEP || start < DAY_START || start + mins > DAY_END) return null;
+    // anywhere midnight to midnight (JP, 2026-11-07: the calendar's hours are a setting). An older
+    // copy of the app still drops blocks outside 7:00–23:00: open the app on every device once.
+    if (!isNum(start) || !isNum(mins) || mins < STEP || start < 0 || start + mins > 24 * 60) return null;
     // S1.2: a buffer belongs to no area (any stray tags are ignored)
     if (p.buffer === true)
-      return { catIds: [], day, start, mins, label: typeof p.label === "string" ? p.label : "", desc: typeof p.desc === "string" ? p.desc : "", buffer: true };
+      return {
+        catIds: [],
+        day,
+        start,
+        mins,
+        label: typeof p.label === "string" ? p.label : "",
+        desc: typeof p.desc === "string" ? p.desc : "",
+        buffer: true,
+      };
     const catIds: string[] = [];
     for (const c of p.catIds) if (typeof c === "string" && catSet.has(c) && !catIds.includes(c)) catIds.push(c);
     if (catIds.length === 0) return null;
@@ -263,7 +280,8 @@ export const normalizeData = (partial: unknown, lang: "en" | "fr" = "en"): { dat
   }
   // a block made from a task keeps the link only while that task exists
   const taskIds = new Set(tasks.map((t) => t.id));
-  for (const b of blockIds.values()) if (b.sourceTaskId !== undefined && !taskIds.has(b.sourceTaskId)) delete b.sourceTaskId;
+  for (const b of blockIds.values())
+    if (b.sourceTaskId !== undefined && !taskIds.has(b.sourceTaskId)) delete b.sourceTaskId;
 
   return { data: { schemaVersion: 2, cats, weeks, templates, history, streaks, tasks }, dropped };
 };

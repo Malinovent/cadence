@@ -19,9 +19,9 @@ type Props = {
 
 // press / hold-progress colours for the shared tray-item CSS (styles.ts FONT_IMPORT), in ink
 const HOLD_VARS = {
-  "--cadence-hover": "rgba(43, 38, 34, 0.05)",
-  "--cadence-press": "rgba(43, 38, 34, 0.1)",
-  "--cadence-hold": "rgba(43, 38, 34, 0.16)",
+  "--cadence-hover": "color-mix(in srgb, var(--c-ink) 5%, transparent)",
+  "--cadence-press": "color-mix(in srgb, var(--c-ink) 10%, transparent)",
+  "--cadence-hold": "color-mix(in srgb, var(--c-ink) 16%, transparent)",
 } as React.CSSProperties;
 
 /**

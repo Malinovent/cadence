@@ -37,6 +37,7 @@ You need two values: the **Project URL** and the **public key**. Both are safe t
     - Supabase may warn that the query contains "destructive operations" (it replaces its own access rules). That's expected. Confirm and run it.
     - You should see **Success. No rows returned**.
     - Running it again later is safe and changes nothing.
+    - **Already set up before Nov 7, 2026?** Run the whole file once more: it adds `delete_my_account()`, which Settings → Account & sync → "Delete my account" needs. Until then that button answers that it couldn't delete the account.
 
 ## Part 4 — Email sign-in
 

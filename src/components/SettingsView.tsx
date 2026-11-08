@@ -14,7 +14,14 @@ import {
 } from "../lib/transfer";
 import { clampRules, DEFAULT_RULES, type BalanceRules } from "../lib/balancedWeeks";
 import { readBalanceRules, writeBalanceRules } from "../state/balanceRules";
-import { legalLinks } from "../lib/legal";
+import { helpLinks, legalLinks } from "../lib/legal";
+import { playSound, setSoundVolume, soundVolume } from "../state/sound";
+import { applyTheme, readTheme, writeTheme } from "../state/themePrefs";
+import { THEME_CHOICES, type ThemeChoice } from "../lib/theme";
+import { endChoices, startChoices, withEnd, withStart } from "../lib/dayHours";
+import type { Bounds } from "../lib/placement";
+import { fmtTime } from "../lib/time";
+import { APP_NAME } from "../appName";
 import { S } from "../styles";
 import { useI18n } from "../i18n/I18nProvider";
 import type { LangChoice } from "../i18n/lang";
@@ -47,6 +54,8 @@ export default function SettingsView({
   sync,
   earlyBird = false,
   onReplayIntro,
+  dayHours,
+  onDayHours,
 }: {
   data: CadenceData;
   onReplace: (next: CadenceData) => void;
@@ -56,6 +65,9 @@ export default function SettingsView({
   earlyBird?: boolean;
   /** Settings → About: show the onboarding again */
   onReplayIntro: () => void;
+  /** the hours the calendar shows (Settings → Your day) */
+  dayHours: Bounds;
+  onDayHours: (h: Bounds) => void;
 }) {
   const { m } = useI18n();
   const [status, setStatus] = useState<Status>({ kind: "idle" });
@@ -124,7 +136,7 @@ export default function SettingsView({
         />
       </div>
       {copies.map((c) => (
-        <div key={c.key} style={{ ...note, color: "#7a6e5e", marginTop: 12 }}>
+        <div key={c.key} style={{ ...note, color: "var(--c-muted)", marginTop: 12 }}>
           {m.settings[c.line]}{" "}
           <button
             style={{ ...S.catDel, fontStyle: "normal", textDecoration: "underline", padding: 0 }}
@@ -138,10 +150,10 @@ export default function SettingsView({
       {status.kind === "pending" && (
         <div style={{ ...S.streakCard, textAlign: "left", padding: 14, marginTop: 16 }}>
           <div style={S.catIntro}>{importSummaryLine(status.result.summary, m.lib)}</div>
-          {dropped && <div style={{ ...note, color: "#9a8d7d", marginTop: 4 }}>{dropped}</div>}
+          {dropped && <div style={{ ...note, color: "var(--c-faint)", marginTop: 4 }}>{dropped}</div>}
           <div style={{ ...S.resetWarn, marginTop: 8 }}>{m.settings.replaceWarn}</div>
           <div style={{ ...row, marginTop: 10 }}>
-            <button style={{ ...S.resetConfirm, background: "#1FA98A" }} onClick={onConfirm}>
+            <button style={{ ...S.resetConfirm, background: "var(--c-done)" }} onClick={onConfirm}>
               {m.settings.replaceYes}
             </button>
             <button style={S.resetCancel} onClick={() => setStatus({ kind: "idle" })}>
@@ -151,13 +163,16 @@ export default function SettingsView({
         </div>
       )}
       {status.kind === "error" && (
-        <div style={{ ...note, color: "#b54", marginTop: 12 }}>{errorText(status.message)}</div>
+        <div style={{ ...note, color: "var(--c-danger)", marginTop: 12 }}>{errorText(status.message)}</div>
       )}
       {status.kind === "success" && (
-        <div style={{ ...note, color: "#1FA98A", marginTop: 12 }}>{m.settings.imported}</div>
+        <div style={{ ...note, color: "var(--c-done)", marginTop: 12 }}>{m.settings.imported}</div>
       )}
 
       <BalanceRulesSection />
+      <DayHoursSection hours={dayHours} onHours={onDayHours} />
+      <LookSection />
+      <SoundSection />
       <LanguageSection />
 
       {earlyBird && (
@@ -221,6 +236,117 @@ function BalanceRulesSection() {
   );
 }
 
+/**
+ * The hours the calendar shows (JP, 2026-11-07): 7:00 to 23:00 unless chosen, at least four hours.
+ * Blocks outside them still show (the calendar grows to hold them). Saved on this device.
+ */
+function DayHoursSection({ hours, onHours }: { hours: Bounds; onHours: (h: Bounds) => void }) {
+  const { m, lang } = useI18n();
+  const label = (t: number) => (t === 0 || t === 24 * 60 ? m.settings.midnight : fmtTime(t, lang));
+  return (
+    <div style={{ marginTop: 32 }}>
+      <h2 style={S.statsTitle}>{m.settings.dayTitle}</h2>
+      <div style={S.catIntro}>{m.settings.dayIntro}</div>
+      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginTop: 12 }}>
+        <label style={S.dayField}>
+          <span style={S.dayFieldLabel}>{m.settings.dayStart}</span>
+          <select
+            value={hours[0]}
+            onChange={(e) => onHours(withStart(hours, Number(e.target.value)))}
+            style={S.daySelect}
+          >
+            {startChoices().map((t) => (
+              <option key={t} value={t}>
+                {label(t)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label style={S.dayField}>
+          <span style={S.dayFieldLabel}>{m.settings.dayEnd}</span>
+          <select
+            value={hours[1]}
+            onChange={(e) => onHours(withEnd(hours, Number(e.target.value)))}
+            style={S.daySelect}
+          >
+            {endChoices(hours[0]).map((t) => (
+              <option key={t} value={t}>
+                {label(t)}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+    </div>
+  );
+}
+
+/** The app's look (JP, 2026-11-08): paper, night, high contrast or the device's. Saved on this device. */
+function LookSection() {
+  const { m } = useI18n();
+  const [choice, setChoice] = useState<ThemeChoice>(readTheme);
+  const choose = (c: ThemeChoice) => {
+    setChoice(c);
+    writeTheme(c);
+    applyTheme(c);
+  };
+  return (
+    <div style={{ marginTop: 32 }}>
+      <h2 style={S.statsTitle}>{m.settings.lookTitle}</h2>
+      <div style={S.catIntro}>{m.settings.lookIntro}</div>
+      <div
+        style={{ ...S.kindGroup, marginTop: 12, display: "inline-flex", flexWrap: "wrap" }}
+        role="group"
+        aria-label={m.settings.lookTitle}
+      >
+        {THEME_CHOICES.map((c) => (
+          <button
+            key={c}
+            type="button"
+            aria-pressed={choice === c}
+            onClick={() => choose(c)}
+            style={{ ...S.kindBtn, ...(choice === c ? S.kindBtnActive : {}) }}
+          >
+            {m.settings.looks[c]}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Sounds: one volume slider, 0 for none (JP, 2026-11-08). Half by default; saved on this device. */
+function SoundSection() {
+  const { m } = useI18n();
+  const [vol, setVol] = useState(soundVolume);
+  return (
+    <div style={{ marginTop: 32 }}>
+      <h2 style={S.statsTitle}>{m.settings.soundTitle}</h2>
+      <div style={S.catIntro}>{m.settings.soundIntro}</div>
+      <label style={S.volumeRow}>
+        <span style={S.dayFieldLabel}>{m.settings.soundVolume}</span>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          step={5}
+          value={vol}
+          aria-valuetext={vol === 0 ? m.settings.soundOff : `${vol}%`}
+          onChange={(e) => {
+            const v = Number(e.target.value);
+            setVol(v);
+            setSoundVolume(v);
+          }}
+          onPointerUp={() => playSound("tick")} // hear the new level on release
+          onKeyUp={() => playSound("tick")}
+          style={S.volumeSlider}
+        />
+        <span style={S.volumeValue}>{vol === 0 ? m.settings.soundOff : `${vol}%`}</span>
+      </label>
+    </div>
+  );
+}
+
 /** S1.9: the language, following the device unless one is chosen. Saved on this device. */
 function LanguageSection() {
   const { m, choice, setChoice } = useI18n();
@@ -259,6 +385,12 @@ function LanguageSection() {
 function AboutSection({ onReplayIntro }: { onReplayIntro: () => void }) {
   const { m, lang } = useI18n();
   const links = legalLinks(import.meta.env.VITE_SITE_URL, lang);
+  const help = helpLinks(
+    import.meta.env.VITE_SITE_URL,
+    import.meta.env.VITE_SUPPORT_EMAIL,
+    lang,
+    m.settings.helpSubject(APP_NAME),
+  );
   return (
     <div style={{ marginTop: 32 }}>
       <h2 style={S.statsTitle}>{m.settings.aboutTitle}</h2>
@@ -278,6 +410,24 @@ function AboutSection({ onReplayIntro }: { onReplayIntro: () => void }) {
           </>
         )}
       </div>
+      {(help.faq || help.mail) && (
+        <div style={{ marginTop: 20 }}>
+          <h3 style={S.helpTitle}>{m.settings.helpTitle}</h3>
+          <div style={S.catIntro}>{m.settings.helpText}</div>
+          <div style={{ ...row, marginTop: 10, alignItems: "center" }}>
+            {help.mail && (
+              <a href={help.mail} style={{ ...S.catAdd, marginTop: 0, textDecoration: "none", color: "inherit" }}>
+                {m.settings.helpMail}
+              </a>
+            )}
+            {help.faq && (
+              <a href={help.faq} target="_blank" rel="noreferrer" style={S.aboutLink}>
+                {m.settings.helpFaq}
+              </a>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

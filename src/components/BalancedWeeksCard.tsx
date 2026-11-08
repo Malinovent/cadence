@@ -8,14 +8,22 @@ import { useI18n } from "../i18n/I18nProvider";
 const SQUARE: Record<WeekMark, React.CSSProperties> = {
   balanced: { background: paper },
   grace: { border: `1.5px dashed ${paper}` },
-  unbalanced: { border: "1.5px solid rgba(244, 237, 225, 0.3)" },
+  unbalanced: { border: "1.5px solid color-mix(in srgb, var(--c-paper) 30%, transparent)" },
   current: { border: `1.5px solid ${paper}` },
 };
 const fmtMonday = (key: string, locale: string) =>
   new Date(`${key}T12:00:00`).toLocaleDateString(locale, { month: "short", day: "numeric" });
 
 /** S1.3: "5 balanced weeks this season", with a square per week. Compact above the grid (S1.4). */
-export default function BalancedWeeksCard({ season, footnote, compact }: { season: Season; footnote?: string; compact?: boolean }) {
+export default function BalancedWeeksCard({
+  season,
+  footnote,
+  compact,
+}: {
+  season: Season;
+  footnote?: string;
+  compact?: boolean;
+}) {
   const { m, locale } = useI18n();
   const n = season.balancedCount;
   const hasGrace = season.weeks.some((w) => w.mark === "grace");
@@ -27,7 +35,15 @@ export default function BalancedWeeksCard({ season, footnote, compact }: { seaso
         <div style={S.seasonSquares} role="list" aria-label={m.season.squares}>
           {season.weeks.map((w) => {
             const label = m.season.week(fmtMonday(w.monday, locale), m.season.marks[w.mark]);
-            return <span key={w.monday} role="listitem" aria-label={label} title={label} style={{ ...S.seasonSquare, ...SQUARE[w.mark] }} />;
+            return (
+              <span
+                key={w.monday}
+                role="listitem"
+                aria-label={label}
+                title={label}
+                style={{ ...S.seasonSquare, ...SQUARE[w.mark] }}
+              />
+            );
           })}
         </div>
         {hasGrace && <div style={S.seasonLegend}>{m.season.graceLegend}</div>}

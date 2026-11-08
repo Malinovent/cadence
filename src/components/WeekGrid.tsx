@@ -2,7 +2,9 @@ import type React from "react";
 import { useEffect, useRef } from "react";
 import type { Interaction } from "../interaction/useInteraction";
 import type { WeekIndex } from "../lib/actions";
-import { BUFFER_ID, DAY_END, DAY_START, DAYS, ROW_H, STEP } from "../lib/constants";
+import { BUFFER_ID, DAYS, ROW_H, STEP } from "../lib/constants";
+import { DEFAULT_HOURS as DEFAULT_BOUNDS } from "../lib/dayHours";
+import type { Bounds } from "../lib/placement";
 import { daysWithBlocks, swipeDay } from "../lib/dayview";
 import { blockBox, dropPreview, resolveDrop, slotStartAt } from "../lib/gesture";
 import type { Block as BlockT, Category, Task } from "../lib/model";
@@ -16,8 +18,12 @@ import { useNow } from "../state/useNow";
 import { useI18n } from "../i18n/I18nProvider";
 import Block from "./Block";
 
-const SLOTS: number[] = [];
-for (let t = DAY_START; t < DAY_END; t += STEP) SLOTS.push(t);
+// the rows: one per half hour of the hours shown (Settings → Your day)
+const slotsOf = ([from, to]: Bounds): number[] => {
+  const out: number[] = [];
+  for (let t = from; t < to; t += STEP) out.push(t);
+  return out;
+};
 
 const ALL_DAYS = DAYS.map((_, i) => i);
 
@@ -52,6 +58,7 @@ type Props = {
   onMoveToDay?: (p: BlockT, day: number) => void; // editor day chips (default: moveBlock)
   onEmptyTap?: (tap: SlotTap) => void; // S1.6: tap on empty time with nothing armed
   slotMark?: { day: number; start: number } | null; // S1.6: the slot the add window is for
+  bounds?: Bounds; // the hours shown (Settings → Your day, widened to hold every block); 7:00–23:00
 };
 
 // x/y where a touch went down on the grid body, and whether the engine dragged/resized since
@@ -75,16 +82,18 @@ export default function WeekGrid({
   onMoveToDay: onMoveToDayProp,
   onEmptyTap,
   slotMark,
+  bounds = DEFAULT_BOUNDS,
 }: Props) {
   const { engine, state } = interaction;
   const { m, lang } = useI18n();
   const cols = phone ? "52px 1fr" : `64px repeat(${days.length}, 1fr)`;
-  const colHeight = SLOTS.length * rowH;
+  const slots = slotsOf(bounds);
+  const colHeight = slots.length * rowH;
 
   // what the current drag would do: outline the landing spot, or highlight the block to tag
   const drag = state.drag;
   const intent = drag?.hit ? resolveDrop(drag.source, drag.hit) : null;
-  const preview = intent ? dropPreview(blocks, cats, intent) : null;
+  const preview = intent ? dropPreview(blocks, cats, intent, bounds) : null;
   const tagTargetId = intent?.kind === "tag" || intent?.kind === "attach" ? intent.blockId : null;
   // the outline on the block a drop would add to: the dragged area's colour, ink for a task
   const dragCatId = drag?.source.kind === "tray" ? drag.source.catId : null;
@@ -96,7 +105,7 @@ export default function WeekGrid({
 
   // now: the block under way gets an outline and "minutes left"; a line marks the time today
   const point = nowPoint(useNow());
-  const lineTop = nowLineTop(week, point, rowH);
+  const lineTop = nowLineTop(week, point, rowH, bounds);
   const today = days.includes(point.day) ? point.day : null;
 
   // a tap that closes the block editor (outside it) must not also open the add window
@@ -110,14 +119,14 @@ export default function WeekGrid({
   // a tap on an empty spot: places the armed category there, or (nothing armed) opens the add window
   const onColumnClick = (e: React.MouseEvent<HTMLDivElement>, day: number) => {
     if ((e.target as Element).closest("[data-block-id]")) return; // the block handles its own tap
-    const start = slotStartAt(e.clientY - e.currentTarget.getBoundingClientRect().top, rowH);
+    const start = slotStartAt(e.clientY - e.currentTarget.getBoundingClientRect().top, rowH, bounds);
     if (!armedCatId) {
       if (!onEmptyTap || editingId || Date.now() - editorClosedAt.current < 400) return;
-      if (canAddAt(blocks, day, start)) onEmptyTap({ day, start, x: e.clientX, y: e.clientY });
+      if (canAddAt(blocks, day, start, bounds)) onEmptyTap({ day, start, x: e.clientX, y: e.clientY });
       return;
     }
     // a full day places nothing; stay armed so another slot can be tried
-    if (!dropPreview(blocks, cats, { kind: "place", catId: armedCatId, day, start })) return;
+    if (!dropPreview(blocks, cats, { kind: "place", catId: armedCatId, day, start }, bounds)) return;
     actions.placeBlock(week, armedCatId, day, start);
     onPlaced();
   };
@@ -164,7 +173,7 @@ export default function WeekGrid({
   };
 
   return (
-    <div ref={engine.setGrid} data-row-h={rowH} style={S.gridWrap}>
+    <div ref={engine.setGrid} data-row-h={rowH} data-day-start={bounds[0]} data-day-end={bounds[1]} style={S.gridWrap}>
       {phone ? (
         <DayStrip day={phone.day} setDay={phone.setDay} hasBlocks={daysWithBlocks(blocks)} />
       ) : (
@@ -184,7 +193,7 @@ export default function WeekGrid({
         onTouchCancel={phone ? onTouchCancel : undefined}
       >
         <div style={S.timeColWrap}>
-          {SLOTS.map((t) => (
+          {slots.map((t) => (
             <div key={t} style={{ ...S.timeLabel, height: rowH, opacity: t % 60 === 0 ? 1 : 0 }}>
               {t % 60 === 0 ? fmtTime(t, lang) : ""}
             </div>
@@ -197,7 +206,7 @@ export default function WeekGrid({
         </div>
         {days.map((di) => (
           <div key={di} data-day={di} style={{ ...S.dayCol, height: colHeight }} onClick={(e) => onColumnClick(e, di)}>
-            {SLOTS.map((t, si) => (
+            {slots.map((t, si) => (
               <div
                 key={t}
                 style={{
@@ -217,6 +226,7 @@ export default function WeekGrid({
                   cats={cats}
                   isEditing={editingId === p.id}
                   sheet={!!phone}
+                  dayStart={bounds[0]}
                   setEditingId={setEditingId}
                   engine={engine}
                   rowH={rowH}
@@ -237,10 +247,10 @@ export default function WeekGrid({
                 />
               ))}
             {preview && preview.day === di && (
-              <div style={{ ...S.dropPreview, ...blockBox(preview.start, preview.mins, rowH) }} />
+              <div style={{ ...S.dropPreview, ...blockBox(preview.start, preview.mins, rowH, bounds[0]) }} />
             )}
             {slotMark && slotMark.day === di && (
-              <div style={{ ...S.slotMark, ...blockBox(slotMark.start, STEP, rowH) }} aria-hidden="true" />
+              <div style={{ ...S.slotMark, ...blockBox(slotMark.start, STEP, rowH, bounds[0]) }} aria-hidden="true" />
             )}
             {lineTop !== null && di === today && <div style={{ ...S.nowLine, top: lineTop - 1 }} aria-hidden="true" />}
           </div>
@@ -265,7 +275,7 @@ function DayStrip({ day, setDay, hasBlocks }: { day: number; setDay: (d: number)
             style={{ ...S.dayStripBtn, background: on ? ink : "transparent", color: on ? paper : ink }}
           >
             {name}
-            <span style={{ ...S.dayDot, background: hasBlocks[i] ? (on ? paper : "#9a8d7d") : "transparent" }} />
+            <span style={{ ...S.dayDot, background: hasBlocks[i] ? (on ? paper : "var(--c-faint)") : "transparent" }} />
           </button>
         );
       })}

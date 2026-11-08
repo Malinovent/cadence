@@ -18,6 +18,7 @@ type Props = {
   cats: Category[];
   isEditing: boolean;
   sheet?: boolean; // phone: the block opens in the sheet (App), so it isn't edited inline
+  dayStart?: number; // minutes: the grid's first hour (Settings → Your day)
   setEditingId: (id: string | null) => void;
   engine: InteractionEngine;
   rowH: number; // px per 30-min row
@@ -58,6 +59,7 @@ export default function Block({
   cats: allCats,
   isEditing,
   sheet = false,
+  dayStart,
   setEditingId,
   engine,
   rowH,
@@ -80,7 +82,7 @@ export default function Block({
   const cats = p.catIds.map((id) => allCats.find((c) => c.id === id)).filter((c): c is Category => !!c);
   const buffer = p.buffer === true; // S1.2: unassigned time, grey dashed, no tick
   const colors = buffer ? [BUFFER_COLOR] : cats.length ? cats.map((c) => c.color) : ["#999"];
-  const { top, height } = blockBox(p.start, p.mins, rowH);
+  const { top, height } = blockBox(p.start, p.mins, rowH, dayStart);
   const named = !!p.label;
   const baseColor = colors[0];
   const multi = colors.length > 1;
@@ -100,13 +102,13 @@ export default function Block({
   if (!multi) {
     blockStyle = {
       // tint over the grid colour, so slot lines never show through
-      background: done ? `linear-gradient(${tint(baseColor)}, ${tint(baseColor)}), #fbf6ec` : "#fbf6ec",
+      background: done ? `linear-gradient(${tint(baseColor)}, ${tint(baseColor)}), var(--c-card)` : "var(--c-card)",
       border: (done || named) && !buffer ? `1.5px solid ${baseColor}` : `1.5px dashed ${baseColor}`,
     };
   } else {
     // multi-type: gradient ring drawn by an overlay; done adds the blended tint inside
     blockStyle = {
-      background: done ? `${blendGradient(colors.map(tint))}, #fbf6ec` : "#fbf6ec",
+      background: done ? `${blendGradient(colors.map(tint))}, var(--c-card)` : "var(--c-card)",
       border: "none",
     };
     // gaps punched along the ring to mimic a dashed border
@@ -258,7 +260,7 @@ export default function Block({
                 style={{
                   ...S.doneToggle,
                   background: done ? ink : "transparent",
-                  color: done ? "#fff" : ink,
+                  color: done ? paper : ink,
                 }}
               >
                 {done ? "✓" : ""}

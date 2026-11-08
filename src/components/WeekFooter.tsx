@@ -97,7 +97,10 @@ function StarterWeeks({ data, week, onApply }: { data: CadenceData; week: WeekIn
     <div data-coach="starters" style={{ ...S.tplSection, ...S.weekFooterTpl }}>
       <div style={S.panelLabel}>{m.footer.starters}</div>
       {STARTERS.map((st) => {
-        const note = addedNote(missingAreas(data.cats, st).map((a) => areaName(a, m.lib)), m.lib);
+        const note = addedNote(
+          missingAreas(data.cats, st).map((a) => areaName(a, m.lib)),
+          m.lib,
+        );
         const text = starterText(st, m.lib);
         return (
           <div key={st.id} style={{ ...S.tplRow, ...S.starterRow }}>
