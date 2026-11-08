@@ -116,7 +116,16 @@ export default function StatsView({ data }: Props) {
             </section>
           )}
 
-          {lines.some((l) => l.points.length > 0) && (
+          {/* Trends always has its heading once anything is ticked; before a week has finished, it says
+              when the lines will start instead of hiding (JP, 2026-11-08: "I don't see the trend line") */}
+          {!lines.some((l) => l.points.length > 0) ? (
+            <section style={S.statsSection} aria-labelledby="stats-lines">
+              <h2 id="stats-lines" style={S.statsSubtitle}>
+                {m.stats.trendsTitle}
+              </h2>
+              <p style={S.statsEmptyText}>{m.stats.trendsSoon}</p>
+            </section>
+          ) : (
             <section style={S.statsSection} aria-labelledby="stats-lines">
               <div style={{ ...S.statsHead, marginBottom: 6 }}>
                 <h2 id="stats-lines" style={{ ...S.statsSubtitle, margin: 0 }}>
@@ -137,9 +146,9 @@ export default function StatsView({ data }: Props) {
                 </div>
               </div>
               <TrendLines lines={lines} />
-              {lines.some((l) => l.direction) && (
-                <p style={{ ...S.weekWhen, textAlign: "left" }}>{m.stats.trendsNote}</p>
-              )}
+              <p style={{ ...S.weekWhen, textAlign: "left" }}>
+                {lines.some((l) => l.direction) ? m.stats.trendsNote : m.stats.trendsEarly}
+              </p>
             </section>
           )}
 

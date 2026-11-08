@@ -124,6 +124,9 @@ export const fr: Messages = {
     aWeek: "par semaine",
     steady: "stable",
     trendsNote: "Flèche : les 4 dernières semaines contre les 4 d'avant. Pointillé : la cible.",
+    trendsSoon:
+      "Les tendances commencent une fois cette semaine terminée : chaque semaine finie ajoute un point aux lignes.",
+    trendsEarly: "Chaque semaine finie ajoute un point. Les flèches viennent quand il y a 8 semaines à comparer.",
     lineLabel: (name, avg, direction, change) =>
       direction === null
         ? `${name} : ${avg} par semaine ces derniers temps`

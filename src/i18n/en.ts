@@ -127,6 +127,8 @@ export const en = {
     aWeek: "a week",
     steady: "steady",
     trendsNote: "Arrow: the last 4 weeks against the 4 before. Dashed: the target.",
+    trendsSoon: "Trends start once this week is over: each finished week adds a point to the lines.",
+    trendsEarly: "Each finished week adds a point. Arrows start once there are 8 weeks to compare.",
     lineLabel: (name: string, avg: string, direction: "up" | "down" | "steady" | null, change: string) =>
       direction === null
         ? `${name}: ${avg} a week lately`
