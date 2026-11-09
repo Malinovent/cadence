@@ -1,5 +1,7 @@
 # Plan
 
+**Name and domain (2026-11-09):** the product is **Rebalance** (same name in French), site at **https://rebalanceweek.com** (registered at Namecheap). The app keeps its address https://malinovent.github.io/cadence/, its `/cadence/` base path and its `cadence:*` storage keys, so saved weeks survive; "Cadence" in the tasks below is the working name.
+
 Status legend: [ ] todo · [~] in progress · [x] accepted. Each phase stops for the user's OK.
 
 ## Phase 1 — Port
@@ -87,12 +89,12 @@ Depends: none (runs alongside 14; does not touch Sidebar.tsx or Block.tsx).
 
 ## Sprint 0 — Pre-sale page, due 2026-11-15 (see `docs/BRIEF-sprints-0-1.md`)
 
-Plan approved 2026-11-04. Site repo: `D:\Custom Apps\cadence-site` (local git, no remote yet; renamed `{{APP_NAME}}-site` once the name is picked).
+Plan approved 2026-11-04. Site repo: `D:\Custom Apps\rebalance-site` (renamed from `cadence-site` 2026-11-09; GitHub repo `Malinovent/rebalance-site` to create).
 
 ### [~] S0.1 Site repo scaffold + i18n — Medium
-`{{APP_NAME}}-site` repo: static Vite site (no React runtime needed), FR/EN pages with French default for Quebec, translation files, self-hosted fonts and clip placeholder, Pages workflow, custom domain once DNS exists.
+`rebalance-site` repo: static Vite site (no React runtime needed), FR/EN pages with French default for Quebec, translation files, self-hosted fonts and clip placeholder, Pages workflow, custom domain once DNS exists.
 Done: Vite + TS site, build-time FR/EN render, root language redirect, self-hosted fonts, Pages workflow, tests for language/headline/source/waitlist/translations. Left: GitHub repo + custom domain.
-Depends: JP's OK. Blocked for the domain on: name + DNS (Nov 8).
+Depends: JP's OK. 2026-11-09: name Rebalance filled in, `public/CNAME` = rebalanceweek.com; waitlist removed from the page (the app is ready). Left: JP signs in `gh`, repo created and pushed, Pages + custom domain + HTTPS, DNS at Namecheap.
 
 ### [~] S0.2 Landing page — Medium
 Hero (A/B headline in session storage), how it works, offer, waitlist form, FAQ, footer, per `docs/wireframes/landing-*.png`. Reduced motion, Lighthouse a11y 90+, no third-party requests except checkout.
@@ -180,3 +182,7 @@ Done on branch `s1-finish`: catalogues for every string (en/fr), lib wording pas
 Done on branch `s1-finish`: "Last week" in Stats, one describing sentence per area, tested for judging words. Shipped to main 2026-11-04. copy
 ### [x] S1.11 Early-bird badge
 Done on branch `s1-finish`: reads `entitlements.early_bird` for the signed-in email; badge by the logo, thank-you in Settings; remembered per device. Not checked against a live early-bird account yet (needs a real purchase row). Shipped to main 2026-11-04.
+
+### [~] R1. Rename to Rebalance + Paddle domain review — Medium
+App: `APP_NAME` = "Rebalance" (header, page title, manifest name and short name, onboarding, legal text); address, base path and `cadence:*` keys unchanged. Site: seller Jean-Philippe Provost (sole proprietor), Paddle as merchant of record with its standard reseller wording, $39 USD early-bird lifetime, 30-day full refund with no conditions (paddle.net or email), privacy names Paddle as recipient of payment data, Contact page in FR/EN, "How you get it" card (pay, receipt, sign in to the web app with the same email).
+Left: GitHub repo + Pages + rebalanceweek.com over HTTPS; repo variables (site `VITE_SITE_URL`; app `VITE_SITE_URL`, `VITE_SUPPORT_EMAIL`); check the Paddle list on the live site. Later: wire the Buy button to Paddle checkout after domain approval, and a Paddle webhook so a purchase gives access on sign-in.
