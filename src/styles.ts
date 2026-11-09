@@ -2951,13 +2951,13 @@ export const S = {
     gap: 4,
     height: "100%"
   },
-  // a block in several areas: their icons side by side, two across on every phone (room for two
-  // 11px icons and the gap, a pixel spare each side), so three or four take two lines (narrowTick)
+  // a block in several areas: their icons side by side, up to four across (JP, 2026-11-09: "can fit
+  // 4 in a row"): 11px for two, 8px for three or four (4 x 8 + 3 = 35px, inside a 360px phone's
+  // slim block); five or six take a second line (narrowTick)
   narrowMarks: {
     flexWrap: "wrap",
     justifyContent: "center",
-    maxWidth: 26,
-    gap: 2
+    gap: 1
   },
   narrowInitial: {
     fontFamily: "'Fraunces Variable', 'Fraunces', serif",

@@ -23,14 +23,14 @@ export const minutesLeft = (b: Pick<Block, "start" | "mins">, p: NowPoint): numb
   Math.max(1, Math.ceil(b.start + b.mins - p.mins));
 
 /**
- * The block under way: "38m left" under an hour (minutes keep their unit, or "38 left" would read
- * as hours), then hours with no unit like the rest of the app, to one decimal since it counts down
- * by the minute: "1.4 left", "2 left" (FR « encore 38 min », « encore 1,4 »).
+ * The block under way: "38m left" under an hour, then decimal hours like the rest of the app,
+ * to one decimal since it counts down by the minute: "1.4h left", "2h left" (FR « encore 38 min »,
+ * « encore 1,4 h »).
  */
 export const fmtLeft = (mins: number, w: LibWords = LIB_EN): string => {
   if (mins < 60) return w.now.left(w.lang === "fr" ? `${mins} min` : `${mins}m`);
   const h = String(Math.round((mins / 60) * 10) / 10);
-  return w.now.left(w.lang === "fr" ? h.replace(".", ",") : h);
+  return w.now.left(w.lang === "fr" ? `${h.replace(".", ",")} h` : `${h}h`);
 };
 
 /** px from the top of the day column for the current-time line, or null outside the grid's hours or on week 2. */

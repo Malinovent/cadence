@@ -1,5 +1,5 @@
 import { describeArea } from "../lib/describe";
-import { fmtDur } from "../lib/time";
+import { fmtDur, fmtNum } from "../lib/time";
 import { gapText, rowBar, type WeekRow } from "../lib/statsWeeks";
 import { S } from "../styles";
 import { useI18n } from "../i18n/I18nProvider";
@@ -65,7 +65,7 @@ export default function WeekRows({ rows }: { rows: WeekRow[] }) {
             {/* past an "at least": how far above, on the second line so it never runs off a phone */}
             {kept && cat.limit.kind === "floor" && mins > cat.limit.min && (
               <span aria-hidden="true" style={S.weekRowNote}>
-                {m.lib.count.above(fmtDur(mins - cat.limit.min, m.lib.lang))}
+                {m.lib.count.above(fmtNum(mins - cat.limit.min, m.lib.lang))}
               </span>
             )}
           </li>

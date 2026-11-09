@@ -66,27 +66,27 @@ describe("tallerThan / blockText", () => {
 });
 
 describe("narrowTick", () => {
-  // the phone's week: 24px rows, slim blocks with their icons two across
+  // the phone's week: 24px rows, slim blocks with their icons up to four across
   const at = (mins: number, areas: number) => narrowTick(blockBox(540, mins, 24).height, 24, areas);
-  it("shows the tick from an hour under one icon, or two side by side", () => {
+  it("shows the tick from an hour under one line of up to four icons", () => {
     expect(at(30, 1)).toBe(false);
-    expect(at(30, 2)).toBe(false);
+    expect(at(30, 4)).toBe(false);
     expect(at(60, 1)).toBe(true);
     expect(at(60, 2)).toBe(true);
+    expect(at(60, 4)).toBe(true);
   });
-  it("needs an hour and a half once the icons take a second line", () => {
-    expect(at(60, 3)).toBe(false);
-    expect(at(60, 4)).toBe(false);
-    expect(at(90, 3)).toBe(true);
-    expect(at(90, 4)).toBe(true);
+  it("needs more room once five or six icons take a second line", () => {
+    expect(at(60, 5)).toBe(false);
+    expect(at(90, 5)).toBe(true);
+    expect(at(90, 6)).toBe(true);
   });
   it("only when the icons, the gap and the 18px tick fit inside the block", () => {
     for (const rowH of [24, ROW_H]) {
       for (let mins = 30; mins <= 240; mins += 30) {
         for (let areas = 1; areas <= 6; areas++) {
           const { height } = blockBox(540, mins, rowH);
-          const lines = Math.ceil(areas / 2);
-          const icons = areas === 1 ? 13 : lines * 11 + (lines - 1) * 2;
+          const lines = Math.ceil(areas / 4);
+          const icons = areas === 1 ? 13 : areas === 2 ? 11 : lines * 8 + (lines - 1);
           if (narrowTick(height, rowH, areas)) expect(2 + icons + 4 + 18 + 2).toBeLessThanOrEqual(height);
         }
       }

@@ -220,11 +220,13 @@ export default function Block({
         title={buffer ? m.block.bufferTitle : m.block.title}
         style={{
           ...S.placedBlock,
+          // the phone's week: a pixel each side instead of three, room for four icons across
+          ...(narrow ? { left: 1, right: 1 } : {}),
           top,
           height,
           ...blockStyle,
           // keep text inset identical whether the ring is a real border or the masked overlay
-          padding: narrow ? "2px 1px" : multi ? "6.5px 8.5px" : "5px 7px",
+          padding: narrow ? "2px 0" : multi ? "6.5px 8.5px" : "5px 7px",
           color: onColor,
           cursor: inline ? "default" : "grab",
           zIndex: inline ? 20 : isNow ? 3 : 2,
@@ -244,7 +246,7 @@ export default function Block({
             {buffer ? null : !multi && cats[0]?.icon ? (
               <AreaIconView icon={cats[0].icon} size={13} />
             ) : multi ? (
-              marks(11, true)
+              marks(cats.length > 2 ? 8 : 11, true) // up to four across (JP, 2026-11-09)
             ) : (
               <span style={S.narrowInitial}>{(cats[0]?.name ?? "?").slice(0, 1)}</span>
             )}

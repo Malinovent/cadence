@@ -4,7 +4,7 @@
 import { addDays, dayKey, limitKept, mondayOf, tickedMins, type BalanceRules } from "./balancedWeeks";
 import type { Limit } from "./guardrail";
 import type { Category, HistoryEntry } from "./model";
-import { fmtDur } from "./time";
+import { fmtNum } from "./time";
 import { LIB_EN, type LibWords } from "./words";
 
 /** Local noon of a "2026-11-02" key: safe from daylight-saving edges. */
@@ -33,7 +33,7 @@ export function weekGap(l: Limit, mins: number, rules: BalanceRules, open: boole
 
 /** "1h short", "0.5h over", "2h to go" (FR « il manque 1 h », « 0,5 h de trop », « encore 2 h »). */
 export function gapText(g: Gap, w: LibWords = LIB_EN): string {
-  const d = fmtDur(g.mins, w.lang);
+  const d = fmtNum(g.mins, w.lang);
   return g.kind === "over" ? w.count.over(d) : g.kind === "toGo" ? w.count.toGo(d) : w.count.short(d);
 }
 

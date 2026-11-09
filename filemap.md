@@ -28,7 +28,7 @@
 - `src/lib/` — pure business logic and its unit tests (`*.test.ts` next to each module)
 - `src/lib/constants.ts` — grid constants (`ROW_H` desktop, `ROW_H_PHONE`), `DEFAULT_CATEGORIES`, `PALETTE`, buffer constants (`BUFFER_ID`, `BUFFER_MINS`, `BUFFER_COLOR`)
 - `src/lib/uid.ts` — `uid()`
-- `src/lib/time.ts` — `fmtTime` (clock times), `fmtDur` (an amount of time on screen: bare hours, "1.5"), `fmtHours` (the same with its unit, for screen readers and tooltips)
+- `src/lib/time.ts` — `fmtTime` (clock times), `fmtDur` (an amount of time on screen: "1.5h"), `fmtNum` (bare hours, "1.5", only in the tags "9.5 to go" / "4.5 left"), `fmtHours` (same as fmtDur, for sentences read aloud)
 - `src/lib/blend.ts` — `blendGradient`: the colour blend of a block in several areas (calendar and previews)
 - `src/lib/placement.ts` — `freeGaps`, `resolvePlacement`, `resizeBlock`
 - `src/lib/model.ts` — data types (incl. `Task`), `defaultData`, migrations, `normalizeData`

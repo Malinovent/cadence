@@ -19,10 +19,10 @@ describe("French (Canada) wording of the lib", () => {
     expect(fmtTime(540, "fr")).toBe("9 h");
     expect(fmtTime(810, "fr")).toBe("13 h 30");
     expect(fmtTime(810)).toBe("1:30pm");
-    expect(fmtDur(120, "fr")).toBe("2");
-    expect(fmtDur(90, "fr")).toBe("1,5");
-    expect(fmtDur(30, "fr")).toBe("0,5");
-    expect(fmtLeft(65, LIB_FR)).toBe("encore 1,1");
+    expect(fmtDur(120, "fr")).toBe("2 h");
+    expect(fmtDur(90, "fr")).toBe("1,5 h");
+    expect(fmtDur(30, "fr")).toBe("0,5 h");
+    expect(fmtLeft(65, LIB_FR)).toBe("encore 1,1 h");
     expect(fmtLeft(38, LIB_FR)).toBe("encore 38 min");
   });
   it("labels the weekly time", () => {

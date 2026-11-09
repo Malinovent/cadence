@@ -38,7 +38,7 @@ describe("the week in review", () => {
       ["Rest", true],
       ["Work", true],
     ]);
-    expect(r.lines[0]).toMatchObject({ hours: "2", limit: "At least 2h", text: "Rest reached at least 2h (2h)." });
+    expect(r.lines[0]).toMatchObject({ hours: "2h", limit: "At least 2h", text: "Rest reached at least 2h (2h)." });
   });
   it("isn't when an area fell short or went over; planned but unticked doesn't count", () => {
     const short = weekReview(data([blk("a", ["rest"], 120, false), blk("b", ["work"], 60, true)]), DEFAULT_RULES);

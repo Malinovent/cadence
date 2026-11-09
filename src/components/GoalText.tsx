@@ -1,5 +1,5 @@
 import type { Limit, LimitKind } from "../lib/guardrail";
-import { fmtDur } from "../lib/time";
+import { fmtDur, fmtNum } from "../lib/time";
 import { S } from "../styles";
 import { useI18n } from "../i18n/I18nProvider";
 
@@ -12,8 +12,11 @@ export const SIGN: Record<LimitKind, string> = { floor: "≥", ceiling: "≤", r
  */
 export default function GoalText({ limit: l }: { limit: Limit }) {
   const { m, lang } = useI18n();
-  const d = (mins: number) => fmtDur(mins, lang); // "4", "1.5": hours, the app's one way to show time
-  const amount = l.kind === "range" ? `${d(l.min)}–${d(l.max)}` : d(l.kind === "floor" ? l.min : l.max);
+  // "4h", "1.5h"; a range carries its unit once, "2–5h"
+  const amount =
+    l.kind === "range"
+      ? `${fmtNum(l.min, lang)}–${fmtDur(l.max, lang)}`
+      : fmtDur(l.kind === "floor" ? l.min : l.max, lang);
   return (
     <>
       <span aria-hidden="true" style={S.areaSign}>

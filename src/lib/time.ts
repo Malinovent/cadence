@@ -10,16 +10,18 @@ export const fmtTime = (mins: number, lang: Lang = "en"): string => {
   return `${hh}${m ? ":" + String(m).padStart(2, "0") : ""}${ap}`;
 };
 
-// minutes -> "2", "1.5", "0.5" (French "2", "1,5", "0,5"): the one way the app shows an amount of
-// time, in hours with no unit (JP, 2026-11-08: "I prefer 1.5 instead of 1h30", then "get rid of the
-// h in the numbers … just write 9.5 to go"). Blocks snap to half hours, so it is nearly always a
-// whole or a half; anything finer keeps two decimals at most.
-export const fmtDur = (mins: number, lang: Lang = "en"): string => {
+// minutes -> "2", "1.5", "0.5" (French "2", "1,5", "0,5"): hours with no unit, only in the tags
+// under an area, "9.5 to go", "4.5 left" (JP, 2026-11-09: "the only place I didn't want them").
+// Blocks snap to half hours, so it is nearly always a whole or a half; finer keeps two decimals.
+export const fmtNum = (mins: number, lang: Lang = "en"): string => {
   const h = String(Math.round((mins / 60) * 100) / 100);
   return lang === "fr" ? h.replace(".", ",") : h;
 };
 
-// the same with its unit, "9.5h" / « 9,5 h », for sentences heard or read away from the screen
-// around them: screen readers and hover tooltips, where a bare "9.5" would say nothing
-export const fmtHours = (mins: number, lang: Lang = "en"): string =>
-  lang === "fr" ? `${fmtDur(mins, "fr")} h` : `${fmtDur(mins)}h`;
+// minutes -> "2h", "1.5h", "0.5h" (French « 2 h », « 1,5 h »): the way the app shows an amount of
+// time everywhere else (JP, 2026-11-08: "I prefer 1.5 instead of 1h30"; 2026-11-09: keep the h)
+export const fmtDur = (mins: number, lang: Lang = "en"): string =>
+  lang === "fr" ? `${fmtNum(mins, "fr")} h` : `${fmtNum(mins)}h`;
+
+/** The same as fmtDur, named for sentences read aloud and tooltips. */
+export const fmtHours = fmtDur;

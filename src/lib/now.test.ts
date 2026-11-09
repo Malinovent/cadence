@@ -34,9 +34,9 @@ describe("minutesLeft / fmtLeft", () => {
   });
   it("formats like the brief", () => {
     expect(fmtLeft(38)).toBe("38m left");
-    expect(fmtLeft(60)).toBe("1 left");
-    expect(fmtLeft(85)).toBe("1.4 left");
-    expect(fmtLeft(65)).toBe("1.1 left");
+    expect(fmtLeft(60)).toBe("1h left");
+    expect(fmtLeft(85)).toBe("1.4h left");
+    expect(fmtLeft(65)).toBe("1.1h left");
   });
 });
 

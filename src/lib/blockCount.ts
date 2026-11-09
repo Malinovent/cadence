@@ -6,7 +6,7 @@
 // target"): the squares stay as the picture, the words say the time, "3h to go". Three states
 // (JP, 2026-11-08, option C): an empty square is not placed, a striped one placed, a solid one done.
 import type { Limit } from "./guardrail";
-import { fmtDur } from "./time";
+import { fmtNum } from "./time";
 import { LIB_EN, type LibWords } from "./words";
 
 export type CountState = "toGo" | "reached" | "above" | "room" | "atLimit" | "inRange" | "over";
@@ -96,13 +96,13 @@ export function blockCount(limit: Limit, plannedMins: number, blockMins: number,
 export function countStatus(c: BlockCount, w: LibWords = LIB_EN): string {
   switch (c.state) {
     case "toGo":
-      return w.count.toGo(fmtDur(c.mins, w.lang));
+      return w.count.toGo(fmtNum(c.mins, w.lang));
     case "room":
-      return w.count.room(fmtDur(c.mins, w.lang));
+      return w.count.room(fmtNum(c.mins, w.lang));
     case "over":
-      return w.count.over(fmtDur(c.mins, w.lang));
+      return w.count.over(fmtNum(c.mins, w.lang));
     case "above":
-      return w.count.above(fmtDur(c.mins, w.lang));
+      return w.count.above(fmtNum(c.mins, w.lang));
     case "atLimit":
       return w.count.atLimit;
     case "reached":
