@@ -2,7 +2,7 @@ import { blendGradient } from "../lib/blend";
 import type React from "react";
 import type { InteractionEngine } from "../interaction/engine";
 import { AreaIconView } from "./AreaIconView";
-import { blockText, tallerThan } from "../lib/dayview";
+import { blockText, narrowTick, tallerThan } from "../lib/dayview";
 import { blockBox, GRIP_MIN_WIDTH, GRIP_SPAN, gripZones, withAlpha } from "../lib/gesture";
 import type { Block as BlockT, Category, Task } from "../lib/model";
 import { fmtLeft } from "../lib/now";
@@ -84,11 +84,10 @@ export default function Block({
   // Settings → Done blocks (JP, 2026-11-08): "solid" fills a ticked block with its colour and white
   // text, as the first version did; "soft" (the default) keeps the light tint and ink text
   const solidText = p.done && !buffer && readDoneStyle() === "solid" ? SOLID_TEXT : null;
-  // several areas: each area's icon in its colour, a dot for one without an icon (JP, 2026-11-08)
-  const marks = (size: number, column = false) => (
-    <span
-      style={{ ...S.pipRow, gap: column ? 1 : 3, alignItems: "center", ...(column ? { flexDirection: "column" } : {}) }}
-    >
+  // several areas: each area's icon in its colour, a dot for one without an icon (JP, 2026-11-08),
+  // side by side, in the phone's slim week column too, where they used to stack (JP, 2026-11-08)
+  const marks = (size: number, slim = false) => (
+    <span style={{ ...S.pipRow, alignItems: "center", ...(slim ? S.narrowMarks : { gap: 3 }) }}>
       {cats.map((c) =>
         c.icon ? (
           <AreaIconView key={c.id} icon={c.icon} size={size} style={{ color: solidText ?? c.color }} />
@@ -249,7 +248,7 @@ export default function Block({
             ) : (
               <span style={S.narrowInitial}>{(cats[0]?.name ?? "?").slice(0, 1)}</span>
             )}
-            {!buffer && tallerThan(height, rowH, 40) && (
+            {!buffer && narrowTick(height, rowH, cats.length) && (
               <button
                 type="button"
                 className="cadence-tick"

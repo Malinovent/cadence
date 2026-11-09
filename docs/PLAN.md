@@ -172,6 +172,8 @@ JP: "the blocks on the left need 3 states: not placed, placed, and complete". Op
 JP: Time invested removed from Stats; Settings → Done blocks: Soft (the tint) or Solid (the area's colour, readable text); done squares past an at-most limit turn solid ink instead of staying striped. Committed to main; push when JP says.
 ### [x] Stats trends, decimal hours, consistency pass (2026-11-08)
 JP: durations as decimal hours everywhere (1.5h); a consistency pass (headings, close vs delete, one confirm pattern, hide toggles, wording); squares past a goal striped while placed; Stats → Trends, option A (a line per area over 12 weeks / 6 months / a year, with an arrow against the 4 weeks before). Committed to main; push when JP says.
+### [x] Phone week: a block's icons side by side (2026-11-08)
+JP: "On mobile, in the weekly view, if there are multiple icons the align vertically". A block in several areas shows its icons in a row in the slim week column, as in the day view, two across on every phone, so three or four areas take two lines. The tick shows when there's room under the icons (`narrowTick`): from an hour, from an hour and a half for three or more areas. Committed to main; push when JP says.
 ### [~] S1.9 French and English
 Done on branch `s1-finish`: catalogues for every string (en/fr), lib wording passed in, detection + Settings switch (device-local), Quebec formats, default areas named in the person's language. Shipped to main 2026-11-04. Left: JP reviews the French.
 ### [x] S1.10 Neutral stats

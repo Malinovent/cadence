@@ -68,7 +68,7 @@
 - `src/lib/panel.ts` — S1.4/S1.5: the panel's area rows (area + this week's balance, buffer last), open task count, where a task is, its block's colour dots
 - `src/lib/balancedWeeks.ts` — S1.3: calendar weeks and weather seasons, ticked minutes per week from history, `limitKept` / `weekBalanced` with `BalanceRules`, `season` (marks + count)
 - `src/lib/now.ts` — "now" on the grid: `nowPoint`, `isNowBlock`, `minutesLeft`, `fmtLeft`, `nowLineTop`, `fmtClock`, `msToNextMinute`
-- `src/lib/dayview.ts` — phone day view maths: `defaultDay`, `swipeDay`, `daysWithBlocks`; row-height-scaled block text thresholds (`tallerThan`, `blockText`)
+- `src/lib/dayview.ts` — phone day view maths: `defaultDay`, `swipeDay`, `daysWithBlocks`; row-height-scaled block text thresholds (`tallerThan`, `blockText`); the phone week's room for a block's tick under its icons (`narrowTick`)
 - `src/lib/__fixtures__/legacy.ts` — legacy-app data fixture for tests
 - `src/state/store.ts` — `createCadenceStore`: framework-free holder of data + meta; per-key persistence; `edit` (user edit, bumps `updatedAt`), `applyRemote` (no bump), `setMeta`
 - `src/state/useCadence.ts` — `useCadence` hook: renders from the store (`useSyncExternalStore`); data, meta, bound user actions, `store`

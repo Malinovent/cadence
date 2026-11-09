@@ -40,6 +40,13 @@ export const blockText = (
   descLines: tallerThan(height, rowH, 78) ? 2 : 1,
 });
 
+// The phone's week: a slim block shows its areas' icons side by side, two across, so three or
+// four areas take two lines and five or six three (JP, 2026-11-08). Its tick shows only
+// when there's room under them: under one line from an hour, as before (40px on 26px rows); each
+// extra line of icons adds 13px, so from an hour and a half under two or three lines.
+export const narrowTick = (height: number, rowH: number, areas: number): boolean =>
+  tallerThan(height, rowH, 40 + (Math.max(1, Math.ceil(areas / 2)) - 1) * 13);
+
 // per day (Mon = 0): does the week have any block on it (day strip dots)
 export const daysWithBlocks = (blocks: readonly { day: number }[]): boolean[] =>
   DAYS.map((_, i) => blocks.some((b) => b.day === i));

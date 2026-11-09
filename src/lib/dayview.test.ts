@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ROW_H, ROW_H_PHONE } from "./constants";
 import { blockBox } from "./gesture";
-import { blockText, daysWithBlocks, defaultDay, swipeDay, tallerThan } from "./dayview";
+import { blockText, daysWithBlocks, defaultDay, narrowTick, swipeDay, tallerThan } from "./dayview";
 
 describe("defaultDay", () => {
   it("is today's weekday (Mon = 0) on week 1", () => {
@@ -62,6 +62,35 @@ describe("tallerThan / blockText", () => {
     expect(at(120, true)).toEqual({ desc: true, time: true, descLines: 2 });
     expect(at(60, false).time).toBe(true);
     expect(at(30, false).time).toBe(false);
+  });
+});
+
+describe("narrowTick", () => {
+  // the phone's week: 24px rows, slim blocks with their icons two across
+  const at = (mins: number, areas: number) => narrowTick(blockBox(540, mins, 24).height, 24, areas);
+  it("shows the tick from an hour under one icon, or two side by side", () => {
+    expect(at(30, 1)).toBe(false);
+    expect(at(30, 2)).toBe(false);
+    expect(at(60, 1)).toBe(true);
+    expect(at(60, 2)).toBe(true);
+  });
+  it("needs an hour and a half once the icons take a second line", () => {
+    expect(at(60, 3)).toBe(false);
+    expect(at(60, 4)).toBe(false);
+    expect(at(90, 3)).toBe(true);
+    expect(at(90, 4)).toBe(true);
+  });
+  it("only when the icons, the gap and the 18px tick fit inside the block", () => {
+    for (const rowH of [24, ROW_H]) {
+      for (let mins = 30; mins <= 240; mins += 30) {
+        for (let areas = 1; areas <= 6; areas++) {
+          const { height } = blockBox(540, mins, rowH);
+          const lines = Math.ceil(areas / 2);
+          const icons = areas === 1 ? 13 : lines * 11 + (lines - 1) * 2;
+          if (narrowTick(height, rowH, areas)) expect(2 + icons + 4 + 18 + 2).toBeLessThanOrEqual(height);
+        }
+      }
+    }
   });
 });
 
