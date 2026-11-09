@@ -1,5 +1,6 @@
 import { Component, type ReactNode } from "react";
 import CrashScreen from "./CrashScreen";
+import { APP_NAME } from "../appName";
 
 /** Catches anything that breaks drawing the app and shows the crash screen instead of a blank page. */
 export default class ErrorBoundary extends Component<{ children: ReactNode }, { error: unknown }> {
@@ -10,7 +11,7 @@ export default class ErrorBoundary extends Component<{ children: ReactNode }, { 
   }
 
   componentDidCatch(error: unknown) {
-    console.error("Cadence crashed", error);
+    console.error(`${APP_NAME} crashed`, error);
   }
 
   render() {

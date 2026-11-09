@@ -1,4 +1,4 @@
-// Audit item 6: links from the app to the site's legal pages (cadence-site), in the person's
+// Audit item 6: links from the app to the site's legal pages (rebalance-site), in the person's
 // language. The site's address is VITE_SITE_URL; until the domain exists there are no links.
 import type { Lang } from "./words";
 
