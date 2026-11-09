@@ -1,5 +1,5 @@
 import type { AreaLine, Direction } from "../lib/statsWeeks";
-import { fmtDur } from "../lib/time";
+import { fmtDur, fmtHours } from "../lib/time";
 import { S } from "../styles";
 import { useI18n } from "../i18n/I18nProvider";
 import { AreaMark } from "./AreaIconView";
@@ -32,7 +32,7 @@ export default function TrendLines({ lines }: { lines: AreaLine[] }) {
             </span>
             <svg
               role="img"
-              aria-label={m.stats.lineLabel(cat.name, avg, direction, fmtDur(change, lang))}
+              aria-label={m.stats.lineLabel(cat.name, fmtHours(recent, lang), direction, fmtHours(change, lang))}
               viewBox={`0 0 ${W} ${H}`}
               preserveAspectRatio="none"
               style={S.lineSvg}

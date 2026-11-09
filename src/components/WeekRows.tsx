@@ -38,12 +38,7 @@ export default function WeekRows({ rows }: { rows: WeekRow[] }) {
               </span>
               {kept ? (
                 <span aria-hidden="true" style={S.reviewKept}>
-                  ✓{/* past an "at least": how far above (JP, 2026-11-08) */}
-                  {cat.limit.kind === "floor" && mins > cat.limit.min && (
-                    <span style={{ ...S.countStatus, ...S.countCalm, marginLeft: 6, fontWeight: 400 }}>
-                      {m.lib.count.above(fmtDur(mins - cat.limit.min, m.lib.lang))}
-                    </span>
-                  )}
+                  ✓
                 </span>
               ) : (
                 gap && (
@@ -67,6 +62,12 @@ export default function WeekRows({ rows }: { rows: WeekRow[] }) {
             <span style={S.weekRowGoal}>
               <GoalText limit={cat.limit} />
             </span>
+            {/* past an "at least": how far above, on the second line so it never runs off a phone */}
+            {kept && cat.limit.kind === "floor" && mins > cat.limit.min && (
+              <span aria-hidden="true" style={S.weekRowNote}>
+                {m.lib.count.above(fmtDur(mins - cat.limit.min, m.lib.lang))}
+              </span>
+            )}
           </li>
         );
       })}

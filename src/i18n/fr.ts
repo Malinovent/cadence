@@ -225,7 +225,7 @@ export const fr: Messages = {
     title: "Équilibrez les parts de votre vie.",
     lead: "Travail, repos, proches, projets : donnez à chacun son temps chaque semaine, puis voyez d'un coup d'œil l'équilibre de la semaine.",
     exampleLabel: "Un exemple de semaine équilibrée",
-    example: ["Repos · ≥ 10 h au moins", "Proches · ≥ 4 h au moins", "Travail · ≤ 40 h au plus"],
+    example: ["Repos · ≥ 10 au moins", "Proches · ≥ 4 au moins", "Travail · ≤ 40 au plus"],
     promise:
       "Rien ne bouge à moins que vous ne le déplaciez. Vos semaines restent sur cet appareil, sauf si vous vous connectez pour les synchroniser.",
     signIn: "Vous l'utilisez déjà sur un autre appareil? Connectez-vous plutôt",

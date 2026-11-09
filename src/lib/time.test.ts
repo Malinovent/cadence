@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fmtDur, fmtTime } from "./time";
+import { fmtDur, fmtHours, fmtTime } from "./time";
 
 describe("fmtTime", () => {
   it("formats like the legacy app", () => {
@@ -16,14 +16,18 @@ describe("fmtTime", () => {
 
 describe("fmtDur", () => {
   it("formats like the legacy app", () => {
-    // decimal hours (JP, 2026-11-08: "I prefer 1.5 instead of 1h30")
-    expect(fmtDur(150)).toBe("2.5h");
-    expect(fmtDur(120)).toBe("2h");
-    expect(fmtDur(45)).toBe("0.75h");
-    expect(fmtDur(30)).toBe("0.5h");
-    expect(fmtDur(0)).toBe("0h");
-    expect(fmtDur(0, "fr")).toBe("0 h");
-    expect(fmtDur(90, "fr")).toBe("1,5 h");
-    expect(fmtDur(1200)).toBe("20h");
+    // hours, no unit (JP, 2026-11-08: "I prefer 1.5 instead of 1h30", "get rid of the h")
+    expect(fmtDur(150)).toBe("2.5");
+    expect(fmtDur(120)).toBe("2");
+    expect(fmtDur(45)).toBe("0.75");
+    expect(fmtDur(30)).toBe("0.5");
+    expect(fmtDur(0)).toBe("0");
+    expect(fmtDur(0, "fr")).toBe("0");
+    expect(fmtDur(90, "fr")).toBe("1,5");
+    expect(fmtDur(1200)).toBe("20");
+  });
+  it("keeps the unit for sentences read away from the screen", () => {
+    expect(fmtHours(150)).toBe("2.5h");
+    expect(fmtHours(90, "fr")).toBe("1,5 h");
   });
 });

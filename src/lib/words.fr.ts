@@ -2,7 +2,7 @@
 import type { DescribeWords, LibWords } from "./words";
 
 const plural = (n: number, one: string, many: string) => `${n} ${n <= 1 ? one : many}`;
-// durations arrive already written the French way: « 1,5 h » (fmtDur)
+// durations arrive already written the French way: « 1,5 » on screen, « 1,5 h » in sentences
 
 const DESCRIBE_FR: DescribeWords = {
   lang: "fr",

@@ -235,7 +235,7 @@ export const en = {
     title: "Balance the parts of your life.",
     lead: "Work, rest, people, projects: give each its time every week, then see at a glance how the week balances.",
     exampleLabel: "An example of a balanced week",
-    example: ["Rest · ≥ 10h at least", "People · ≥ 4h at least", "Work · ≤ 40h at most"],
+    example: ["Rest · ≥ 10 at least", "People · ≥ 4 at least", "Work · ≤ 40 at most"],
     promise: "Nothing moves unless you move it. Your weeks stay on this device unless you sign in to sync them.",
     signIn: "Already use it on another device? Sign in instead",
     skip: "Skip",

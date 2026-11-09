@@ -2716,6 +2716,14 @@ export const S = {
     gap: 6,
     fontSize: 14
   },
+  weekRowNote: {
+    gridColumn: 3,
+    justifySelf: "end",
+    fontFamily: "'Spline Sans Mono', monospace",
+    fontSize: 10.5,
+    color: "var(--c-muted)",
+    whiteSpace: "nowrap"
+  },
   weekRowGoal: {
     gridColumn: "1 / 3",
     fontFamily: "'Spline Sans Mono', monospace",
