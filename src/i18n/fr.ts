@@ -272,6 +272,7 @@ export const fr: Messages = {
     showMe: "Me montrer",
     hide: "masquer",
     show: "afficher",
+    allSteps: "toutes les étapes",
     close: "Fermer",
     allDone: "Tout est prêt.",
     next: "Ensuite :",

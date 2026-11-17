@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DAY_END, DAY_START, DEFAULT_CATEGORIES, STEP } from "./constants";
+import { DAY_END, DAY_START, DEFAULT_CATEGORIES, legacyDefaultCategories, STEP } from "./constants";
 import { balance } from "./guardrail";
 import { defaultData, normalizeData, type CadenceData, type Task } from "./model";
 import { addedNote, applyStarter, matchArea, missingAreas, STARTERS } from "./starters";
@@ -58,11 +58,15 @@ describe("starter weeks", () => {
 describe("applying a starter", () => {
   const starter = STARTERS[0];
 
-  it("adds only the missing areas, with the starter's guardrail, and keeps the person's own", () => {
-    const d = defaultData();
+  it("adds the missing areas and gives the ones the person has the starter's guardrail", () => {
+    // the old defaults (Work at least 20 h): the work-heavy week must not show Work "10h above"
+    const d = { ...defaultData(), cats: legacyDefaultCategories("en") };
     expect(missingAreas(d.cats, starter).map((a) => a.name)).toEqual(["Rest", "People"]);
     const out = applyStarter(d, 0, starter.id, ids());
-    expect(out.cats.slice(0, 4)).toEqual(d.cats); // Work keeps its 20 h floor
+    const byName = (n: string) => out.cats.find((c) => c.name === n)!;
+    expect(byName("Work")).toEqual({ ...d.cats[1], limit: { kind: "ceiling", max: 2400 }, targetMins: 0 });
+    expect(byName("Exercise").limit).toEqual({ kind: "floor", min: 150 });
+    expect(out.cats.slice(2, 4)).toEqual(d.cats.slice(2, 4)); // Learn and Play: not in the starter, untouched
     const added = out.cats.slice(4);
     expect(added.map((c) => [c.name, c.limit])).toEqual([
       ["Rest", { kind: "floor", min: 480 }],
@@ -72,8 +76,16 @@ describe("applying a starter", () => {
     expect(added.map((c) => c.color)).toEqual(["#9B4DCA", "#0CA678"]); // calm, never the raspberry
   });
 
+  it("the default areas already hold every starter area", () => {
+    for (const st of STARTERS) expect(missingAreas(defaultData().cats, st)).toEqual([]);
+    const out = applyStarter(defaultData(), 0, STARTERS[1].id, ids());
+    expect(out.cats.map((c) => c.id)).toEqual(DEFAULT_CATEGORIES.map((c) => c.id));
+    expect(out.cats.find((c) => c.id === "people")!.limit).toEqual({ kind: "floor", min: 840 });
+  });
+
   it("matches areas by name, ignoring case and spaces", () => {
-    const cats = [...DEFAULT_CATEGORIES, { ...DEFAULT_CATEGORIES[3], id: "r", name: "  rest " }];
+    const old = legacyDefaultCategories();
+    const cats = [...old, { ...old[3], id: "r", name: "  rest " }];
     expect(matchArea(cats, starter.areas[1])?.id).toBe("r");
     const out = applyStarter({ ...defaultData(), cats }, 0, starter.id, ids());
     expect(out.cats.filter((c) => c.name.trim().toLowerCase() === "rest")).toHaveLength(1);
@@ -105,9 +117,10 @@ describe("applying a starter", () => {
   });
 
   it("a second starter reuses the areas the first added", () => {
-    const once = applyStarter(defaultData(), 0, STARTERS[0].id, ids());
+    const once = applyStarter({ ...defaultData(), cats: legacyDefaultCategories() }, 0, STARTERS[0].id, ids());
     const twice = applyStarter(once, 1, STARTERS[2].id, { uid: () => `x${Math.random()}` });
-    expect(twice.cats).toEqual(once.cats);
+    expect(twice.cats.map((c) => [c.id, c.name, c.color])).toEqual(once.cats.map((c) => [c.id, c.name, c.color]));
+    expect(twice.cats.find((c) => c.name === "Rest")!.limit).toEqual({ kind: "floor", min: 840 }); // the second one's
     expect(missingAreas(once.cats, STARTERS[2])).toEqual([]);
   });
 
@@ -124,7 +137,7 @@ describe("applying a starter", () => {
   });
 
   it("in French: names the areas it adds and its labels in French, and matches French names", () => {
-    const fr = applyStarter(defaultData("fr"), 0, STARTERS[0].id, { ...ids(), lang: "fr" });
+    const fr = applyStarter({ ...defaultData("fr"), cats: legacyDefaultCategories("fr") }, 0, STARTERS[0].id, { ...ids(), lang: "fr" });
     expect(fr.cats.slice(4).map((c) => c.name)).toEqual(["Repos", "Proches"]);
     expect(fr.cats.filter((c) => c.name === "Travail")).toHaveLength(1); // matched, not added
     expect(fr.weeks[0].some((b) => b.label === "Décompresser")).toBe(true);

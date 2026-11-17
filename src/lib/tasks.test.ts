@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { advanceWeek, applyTemplate, removeBlock, removeCat, saveTemplate, toggleDone } from "./actions";
-import { defaultData, normalizeData, type Block, type CadenceData, type Task } from "./model";
+import { defaultData as freshData, normalizeData, type Block, type CadenceData, type Task } from "./model";
 import { loadData, needsTaskMigration, PREMIGRATION_KEYS, saveData, type StorageLike } from "./storage";
 import {
   addTask,
@@ -16,6 +16,10 @@ import {
   toggleTask,
 } from "./tasks";
 import { buildExport, parseImport } from "./transfer";
+import { legacyDefaultCategories } from "./constants";
+
+// sample data: the default areas before 2026-11-09 (Exercise, Work, Learn, Play), used here by id
+const defaultData = (lang: "en" | "fr" = "en") => ({ ...freshData(lang), cats: legacyDefaultCategories(lang) });
 
 const blk = (id: string, over: Partial<Block> = {}): Block => ({
   id,

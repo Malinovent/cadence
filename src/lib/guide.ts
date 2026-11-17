@@ -2,7 +2,7 @@
 // one thing at a time in the real app (drag one area in, tick it), then a "Getting started"
 // checklist takes over at the person's own pace, ending with templates. Pure rules only.
 // The checklist counts what's done from the moment it starts (JP: a replay showed 5 of 5 at once).
-import { defaultCategories } from "./constants";
+import { allDefaultSets } from "./constants";
 import type { Block, CadenceData, Category } from "./model";
 import { jsonEqual } from "./syncLogic";
 
@@ -36,8 +36,7 @@ export function tickTarget(data: CadenceData, week: WeekIndex, catId?: string): 
 }
 
 const allBlocks = (d: CadenceData): Block[] => [...d.weeks[0], ...d.weeks[1]];
-const untouchedDefaults = (cats: Category[]): boolean =>
-  jsonEqual(cats, defaultCategories("en")) || jsonEqual(cats, defaultCategories("fr"));
+const untouchedDefaults = (cats: Category[]): boolean => allDefaultSets().some((d) => jsonEqual(cats, d));
 
 /**
  * What one change to the data did, for the checklist. Judged change by change (the app keeps what's
@@ -46,7 +45,7 @@ const untouchedDefaults = (cats: Category[]): boolean =>
  * - place: a block of an area that wasn't one before (placed, or a buffer filled);
  * - tick: an open block ticked (not one brought back already ticked by Undo);
  * - area: an area renamed or changed, or one added or deleted on its own; not the areas a starter
- *   week (or its Undo) brings or takes, and never a language switch of the untouched defaults;
+ *   week (or its Undo) brings, takes or sets the limits of, and never a language switch of the untouched defaults;
  * - task: a task put into a block that was already there (not tasks Undo brings back);
  * - template: a template saved. Trying a starter week or applying a template the app reports itself.
  */
@@ -67,7 +66,8 @@ export function progress(prev: CadenceData, next: CadenceData): CheckDone {
     const edited = next.cats.some((c) => old.has(c.id) && !jsonEqual(old.get(c.id), c));
     const sameAreas = next.cats.length === prev.cats.length && next.cats.every((c) => old.has(c.id));
     const noNewBlocks = after.every((b) => before.has(b.id)); // a starter week or Undo brings new ones
-    if (edited || (!sameAreas && noNewBlocks)) got.area = true;
+    // a starter week sets the limits of areas it shares (JP, 2026-11-09): that's not the person's own edit
+    if ((edited || !sameAreas) && noNewBlocks) got.area = true;
   }
 
   const wasIn = new Map(prev.tasks.map((t) => [t.id, t.blockId]));

@@ -8,8 +8,19 @@ export const ROW_H_PHONE = 40; // phone one-day view (< 900px)
 export const STEP = 30; // fixed: 30-minute slots
 export const SNAP_THRESHOLD = 25; // minutes — within this, snap to a neighbor edge
 
-// the default areas a new person starts with; names in their language (S1.9), same ids
+// the default areas a new person starts with; names in their language (S1.9), same ids.
+// JP (2026-11-09): they tell the pitch, protect your rest from your work week: floors for rest and
+// people, a ceiling for work, a little movement. Same numbers as the purpose page's picture.
 export const DEFAULT_CATEGORIES: readonly Category[] = [
+  { id: "rest", name: "Rest", color: "#9B4DCA", targetMins: 600, blockMins: 60, limit: { kind: "floor", min: 600 } },
+  { id: "people", name: "People", color: "#0CA678", targetMins: 240, blockMins: 90, limit: { kind: "floor", min: 240 } },
+  { id: "work", name: "Work", color: "#3C6FE8", targetMins: 0, blockMins: 180, limit: { kind: "ceiling", max: 2400 } },
+  { id: "exercise", name: "Exercise", color: "#E8643C", targetMins: 150, blockMins: 60, limit: { kind: "floor", min: 150 } },
+];
+
+// The defaults before 2026-11-09 (Exercise, Work at least 20h, Learn, Play). Nobody gets them any
+// more; people who still have them untouched count as "untouched defaults" all the same.
+export const LEGACY_DEFAULT_CATEGORIES: readonly Category[] = [
   { id: "exercise", name: "Exercise", color: "#E8643C", targetMins: 240, blockMins: 120, limit: { kind: "floor", min: 240 } },
   { id: "work", name: "Work", color: "#3C6FE8", targetMins: 1200, blockMins: 240, limit: { kind: "floor", min: 1200 } },
   { id: "learn", name: "Learn", color: "#1FA98A", targetMins: 240, blockMins: 60, limit: { kind: "floor", min: 240 } },
@@ -26,6 +37,22 @@ export const BUFFER_COLOR = "#9a8d7d";
 export const PALETTE = ["#E8643C", "#3C6FE8", "#1FA98A", "#C9A227", "#9B4DCA", "#D6336C", "#0CA678"] as const;
 
 // S1.9: French (Canada) names of the default areas, same ids, colours and guardrails
-const DEFAULT_NAMES_FR: Record<string, string> = { exercise: "Exercice", work: "Travail", learn: "Apprentissage", play: "Loisirs" };
-export const defaultCategories = (lang: "en" | "fr" = "en"): Category[] =>
-  DEFAULT_CATEGORIES.map((c) => ({ ...c, ...(lang === "fr" ? { name: DEFAULT_NAMES_FR[c.id] ?? c.name } : {}) }));
+const DEFAULT_NAMES_FR: Record<string, string> = {
+  rest: "Repos",
+  people: "Proches",
+  work: "Travail",
+  exercise: "Exercice",
+  learn: "Apprentissage",
+  play: "Loisirs",
+};
+const named = (cats: readonly Category[], lang: "en" | "fr"): Category[] =>
+  cats.map((c) => ({ ...c, ...(lang === "fr" ? { name: DEFAULT_NAMES_FR[c.id] ?? c.name } : {}) }));
+export const defaultCategories = (lang: "en" | "fr" = "en"): Category[] => named(DEFAULT_CATEGORIES, lang);
+export const legacyDefaultCategories = (lang: "en" | "fr" = "en"): Category[] => named(LEGACY_DEFAULT_CATEGORIES, lang);
+/** Every untouched default set: today's and the old one, in each language. */
+export const allDefaultSets = (): Category[][] => [
+  defaultCategories("en"),
+  defaultCategories("fr"),
+  legacyDefaultCategories("en"),
+  legacyDefaultCategories("fr"),
+];

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { defaultCategories, DEFAULT_CATEGORIES } from "./constants";
+import { defaultCategories, DEFAULT_CATEGORIES, legacyDefaultCategories } from "./constants";
 import { describeArea } from "./describe";
 import { droppedLine, importSummaryLine } from "./format";
 import { limitLabel } from "./guardrail";
@@ -57,13 +57,15 @@ describe("French (Canada) wording of the lib", () => {
 describe("default areas in the person's language", () => {
   it("names the defaults in French for a new French-speaking person, same ids", () => {
     const fr = defaultCategories("fr");
-    expect(fr.map((c) => c.name)).toEqual(["Exercice", "Travail", "Apprentissage", "Loisirs"]);
+    expect(fr.map((c) => c.name)).toEqual(["Repos", "Proches", "Travail", "Exercice"]);
     expect(fr.map((c) => c.id)).toEqual(DEFAULT_CATEGORIES.map((c) => c.id));
     expect(normalizeData({}, "fr").data.cats).toEqual(fr);
     expect(defaultData().cats).toEqual(DEFAULT_CATEGORIES);
   });
   it("counts untouched French defaults as nothing worth keeping (no sign-in conflict)", () => {
     expect(isEmptyData(defaultData("fr"))).toBe(true);
+    // the defaults before 2026-11-09, untouched, still count as nothing worth keeping
+    expect(isEmptyData({ ...defaultData(), cats: legacyDefaultCategories("fr") })).toBe(true);
     expect(isEmptyData(defaultData("en"))).toBe(true);
   });
 });

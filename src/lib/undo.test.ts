@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { advanceWeek, placeBlock } from "./actions";
-import { defaultData } from "./model";
+import { defaultData as freshData } from "./model";
 import { applyStarter, STARTERS } from "./starters";
 import { replaceAll } from "./actions";
 import { undoAvailable } from "./undo";
+import { legacyDefaultCategories } from "./constants";
+
+// sample data: the default areas before 2026-11-09 (Exercise, Work, Learn, Play), used here by id
+const defaultData = (lang: "en" | "fr" = "en") => ({ ...freshData(lang), cats: legacyDefaultCategories(lang) });
 
 describe("undo after a week is replaced", () => {
   const start = placeBlock(defaultData(), 0, "work", 0, 540, undefined, { uid: () => "mine" });

@@ -12,6 +12,8 @@ type Props = {
   fresh: CheckItem[]; // done, not crossed off here yet
   onCrossedOff: (items: CheckItem[]) => void;
   onInView: (inView: boolean) => void; // whether the list can be seen: no toast is needed then
+  /** phone (JP, 2026-11-09): only the next step, the others one tap away, so the calendar shows */
+  short?: boolean;
 };
 
 const CROSS_MS = 1100; // the pop and the strike, then the plain done look
@@ -31,6 +33,7 @@ export default function Checklist({
   fresh,
   onCrossedOff,
   onInView,
+  short = false,
 }: Props) {
   const { m } = useI18n();
   const n = doneCount(done);
@@ -61,6 +64,11 @@ export default function Checklist({
     return () => window.clearTimeout(t);
   }, [playKey, onCrossedOff]);
   const playing = playKey ? (playKey.split(" ") as CheckItem[]) : [];
+
+  // short: the next open step (and one crossing off right now); "all steps" shows the rest
+  const [expanded, setExpanded] = useState(false);
+  const next = CHECK_ITEMS.find((i) => !done[i]);
+  const items = short && !expanded ? CHECK_ITEMS.filter((i) => i === next || playing.includes(i)) : CHECK_ITEMS;
 
   return (
     <section ref={card} style={S.checkCard} aria-labelledby="checklist-title">
@@ -101,7 +109,7 @@ export default function Checklist({
           </div>
         ) : (
           <ol style={S.checkItems}>
-            {CHECK_ITEMS.map((item) => {
+            {items.map((item) => {
               const ok = !!done[item];
               const crossing = playing.includes(item);
               return (
@@ -131,6 +139,13 @@ export default function Checklist({
                 </li>
               );
             })}
+            {items.length < CHECK_ITEMS.length && (
+              <li style={S.checkItem}>
+                <button type="button" style={S.checkShow} onClick={() => setExpanded(true)}>
+                  {m.checklist.allSteps}
+                </button>
+              </li>
+            )}
           </ol>
         ))}
     </section>

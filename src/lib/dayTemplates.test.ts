@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { applyDayTemplate, applyTemplate, saveDayTemplate } from "./actions";
-import { defaultData, normalizeData, type Block, type CadenceData } from "./model";
+import { defaultData as freshData, normalizeData, type Block, type CadenceData } from "./model";
 import { miniBounds, previewChange } from "./templatePreview";
 import { applyStarter, STARTERS } from "./starters";
+import { legacyDefaultCategories } from "./constants";
+
+// sample data: the default areas before 2026-11-09 (Exercise, Work, Learn, Play), used here by id
+const defaultData = (lang: "en" | "fr" = "en") => ({ ...freshData(lang), cats: legacyDefaultCategories(lang) });
 
 const deepFreeze = <T>(o: T): T => {
   if (o && typeof o === "object" && !Object.isFrozen(o)) {

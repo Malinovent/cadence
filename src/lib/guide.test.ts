@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { addCat, addTag, placeBlock, removeCat, saveTemplate, toggleDone, updateCat } from "./actions";
-import { BUFFER_ID } from "./constants";
+import { BUFFER_ID, legacyDefaultCategories } from "./constants";
 import {
   coachPosition,
   countIn,
@@ -13,7 +13,10 @@ import {
   progress,
   tickTarget,
 } from "./guide";
-import { defaultData, type CadenceData } from "./model";
+import { defaultData as freshData, type CadenceData } from "./model";
+
+// sample data: the default areas before 2026-11-09 (Exercise, Work, Learn, Play), used here by id
+const defaultData = (lang: "en" | "fr" = "en") => ({ ...freshData(lang), cats: legacyDefaultCategories(lang) });
 import { relabelDefaults } from "./onboarding";
 import { applyStarter, STARTERS } from "./starters";
 import { addTask, attachTask } from "./tasks";
@@ -28,6 +31,7 @@ const withBlock = (d: CadenceData = defaultData()) =>
 describe("the guided first block", () => {
   it("uses the first area", () => {
     expect(guideArea(defaultData())).toBe("exercise");
+    expect(guideArea(freshData())).toBe("rest");
     expect(guideArea({ ...defaultData(), cats: [] })).toBeNull();
   });
   it("moves on once a block of that area lands in the week", () => {
@@ -92,6 +96,12 @@ describe("the getting-started checklist", () => {
     expect(progress(d, starter).area).toBeUndefined();
     expect(progress(starter, d).area).toBeUndefined();
     expect(progress(defaultData(), relabelDefaults(defaultData(), "fr"))).toEqual({});
+    expect(progress(freshData(), relabelDefaults(freshData(), "fr"))).toEqual({});
+    // a starter setting the limits of areas the person has isn't their own edit either
+    const fresh = withBlock(freshData());
+    const set = applyStarter(fresh, 0, STARTERS[0].id, { uid: () => `f${++n}` });
+    expect(set.cats.length).toBe(fresh.cats.length);
+    expect(progress(fresh, set).area).toBeUndefined();
   });
   it("a task put into a block; not one that comes back with its block", () => {
     const d = addTask(withBlock(), "Stretch", { uid: () => "t" });

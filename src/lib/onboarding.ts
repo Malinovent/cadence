@@ -1,7 +1,7 @@
 // Onboarding (JP, 2026-11-07): three short screens for new people only, each one skippable.
 // 1) what the app is, 2) start from a starter week or an empty one, 3) how it works.
 // Seen once per device; it can be replayed from Settings → About.
-import { defaultCategories } from "./constants";
+import { defaultCategories, legacyDefaultCategories } from "./constants";
 import type { CadenceData } from "./model";
 import { isEmptyData, jsonEqual } from "./syncLogic";
 import type { Lang } from "./words";
@@ -29,5 +29,7 @@ export const shouldOnboard = ({
  */
 export function relabelDefaults(data: CadenceData, lang: Lang): CadenceData {
   const other: Lang = lang === "fr" ? "en" : "fr";
-  return jsonEqual(data.cats, defaultCategories(other)) ? { ...data, cats: defaultCategories(lang) } : data;
+  for (const set of [defaultCategories, legacyDefaultCategories])
+    if (jsonEqual(data.cats, set(other))) return { ...data, cats: set(lang) };
+  return data;
 }

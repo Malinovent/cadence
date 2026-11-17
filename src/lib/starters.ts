@@ -2,8 +2,9 @@
 // each with floors for rest and people and a work ceiling, and a buffer every day.
 //
 // JP (2026-11-04): applying one adds the areas it needs that the person doesn't have (matched
-// by name, case and spaces ignored), with the starter's guardrail; areas the person already has
-// keep their own limits, and the starter's blocks go into them. Built in, never stored or synced:
+// by name, case and spaces ignored), with the starter's guardrail, and the starter's blocks go
+// into the areas they already have. JP (2026-11-09): those areas take the starter's limits too,
+// or an old "Work: at least 20h" turns a work-heavy week into "10h above" (Undo brings them back). Built in, never stored or synced:
 // they're not in `templates`, so nothing changes in the saved shape.
 import { BUFFER_MINS, PALETTE } from "./constants";
 import type { Limit } from "./guardrail";
@@ -152,7 +153,7 @@ export const addedNote = (names: string[], w: LibWords = LIB_EN): string | null 
 
 /**
  * Week `week` becomes the starter: missing areas are added (with the starter's guardrail and a
- * colour the person isn't using yet), existing ones are used as they are, and the week's
+ * colour the person isn't using yet), existing ones take the starter's guardrail, and the week's
  * blocks are replaced (their tasks go back to the list, like applying a template).
  */
 export function applyStarter(data: CadenceData, week: WeekIndex, starterId: string, deps: Deps = {}): CadenceData {
@@ -175,6 +176,8 @@ export function applyStarter(data: CadenceData, week: WeekIndex, starterId: stri
     const have = matchArea(cats, a);
     if (have) {
       idOf.set(a.key, have.id);
+      const i = cats.indexOf(have);
+      cats[i] = { ...have, limit: a.limit, targetMins: legacyTarget(a.limit) };
       continue;
     }
     const cat: Category = {

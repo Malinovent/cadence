@@ -19,7 +19,7 @@ const placed = (color: string) => `repeating-linear-gradient(45deg, ${color} 0 1
 /**
  * Visual B (JP, 2026-11-07): under an area, a square per block of its goal, filled as you plan,
  * and what's left in time ("3h to go"; JP, 2026-11-08: the goal is time, the squares the picture).
- * Under: an outlined ink tag with "!" (never red). Past the goal (option B): a short line at the
+ * Under: a plain outlined ink tag, "4 to go", no "!" (JP, 2026-11-09: it read as a warning). Past the goal (option B): a short line at the
  * goal, then more squares, striped while only placed and solid once ticked, like the others: red
  * past an "at most" or "between", with a solid "! 2h over" tag; the area's colour past an "at
  * least" (the line green), with "✓ 2h above".
@@ -146,7 +146,7 @@ export default function BlockCount({ area: a }: { area: PanelArea }) {
       </span>
       <span style={{ ...S.countStatus, ...TONE[c.tone] }}>
         {c.tone === "done" && <span aria-hidden="true">✓ </span>}
-        {(c.tone === "under" || c.tone === "over") && (
+        {c.tone === "over" && (
           <span aria-hidden="true" style={S.countBang}>
             !
           </span>

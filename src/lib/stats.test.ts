@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { defaultData, type Block, type CadenceData } from "./model";
+import { defaultData as freshData, type Block, type CadenceData } from "./model";
 import * as A from "./actions";
 import { completion, hoursToBlockMins, hoursToTargetMins, quotaStatus, weekBalance } from "./stats";
+import { legacyDefaultCategories } from "./constants";
+
+// sample data: the default areas before 2026-11-09 (Exercise, Work, Learn, Play), used here by id
+const defaultData = (lang: "en" | "fr" = "en") => ({ ...freshData(lang), cats: legacyDefaultCategories(lang) });
 
 const blk = (id: string, over: Partial<Block> = {}): Block => ({
   id,

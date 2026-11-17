@@ -97,7 +97,8 @@ export default function App() {
   const bounds = gridBounds(dayHours, data.weeks);
   const isPhone = useIsPhone();
   // S1.4: the areas-and-tasks panel hidden (desktop) or folded (phone); remembered on this device
-  const [panelHidden, setPanelHidden] = useState(readPanelHidden);
+  const [panelChoice, setPanelHidden] = useState(readPanelHidden);
+  const panelHidden = panelChoice ?? isPhone; // phone: folded until the person opens it
   const setHidden = (hidden: boolean) => {
     setPanelHidden(hidden);
     writePanelHidden(hidden);
@@ -446,6 +447,7 @@ export default function App() {
         setView={changeView}
         syncStatus={sync.configured && sync.session ? sync.status : null}
         earlyBird={earlyBird}
+        phone={isPhone}
       />
       {view === "calendar" && sync.conflict && (
         <div style={S.conflictBanner}>
@@ -479,6 +481,7 @@ export default function App() {
                   fresh={onb.fresh}
                   onCrossedOff={onb.crossedOff}
                   onInView={onb.setBoardInView}
+                  short={isPhone}
                 />
               )}
               <WeekBar
@@ -553,7 +556,7 @@ export default function App() {
               />
             </main>
           </div>
-          {isPhone && <PhoneDock {...panel} folded={panelHidden} onShow={() => setHidden(false)} forceTab={onb.tab} />}
+          {isPhone && <PhoneDock {...panel} folded={panelHidden && !onb.guide} onShow={() => setHidden(false)} forceTab={onb.tab} />}
           {slotTap && (
             <SlotMenu
               key={`${slotTap.day}-${slotTap.start}`}
@@ -618,7 +621,8 @@ export default function App() {
         <Coach key={JSON.stringify(onb.guide)} {...coachFor(onb.guide)} onClose={onb.endGuide} />
       )}
       {/* a step just done away from the board; five of five gets the finale (JP, 2026-11-07) */}
-      {onb.news && !onb.intro && !onb.finale && (
+      {/* one message at a time (JP, 2026-11-09): the toast waits while the Undo bar is up */}
+      {onb.news && !onb.intro && !onb.finale && !undoAvailable(undo, data) && (
         <QuestToast
           key={onb.news.id}
           items={onb.news.items}

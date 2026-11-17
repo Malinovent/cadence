@@ -277,6 +277,7 @@ export const en = {
     showMe: "Show me",
     hide: "hide",
     show: "show",
+    allSteps: "all steps",
     close: "Close",
     allDone: "You're all set.",
     // a step just done (JP, 2026-11-07): the toast, and the card at five of five

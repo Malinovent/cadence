@@ -13,6 +13,7 @@ export default function Header({
   setView,
   syncStatus,
   earlyBird = false,
+  phone = false,
 }: {
   view: View;
   setView: (v: View) => void;
@@ -20,18 +21,44 @@ export default function Header({
   syncStatus: SyncStatus | null;
   /** S1.11: the signed-in email bought the early-bird offer */
   earlyBird?: boolean;
+  /** JP (2026-11-09): a compact header on phones, so the calendar shows when the app opens */
+  phone?: boolean;
 }) {
   const { m } = useI18n();
   const badge = syncStatus ? statusBadge(syncStatus, m.lib) : null;
   const nav = (
-    <nav style={S.nav}>
+    <nav style={{ ...S.nav, ...(phone ? S.navPhone : {}) }}>
       {VIEWS.map((v) => (
-        <button key={v} onClick={() => setView(v)} style={{ ...S.navBtn, ...(view === v ? S.navBtnActive : {}) }}>
+        <button
+          key={v}
+          onClick={() => setView(v)}
+          aria-current={view === v ? "page" : undefined}
+          style={{ ...S.navBtn, ...(phone ? S.navBtnPhone : {}), ...(view === v ? S.navBtnActive : {}) }}
+        >
           {m.header.nav[v]}
         </button>
       ))}
     </nav>
   );
+  const status = badge && (
+    <button style={S.syncStatus} onClick={() => setView("settings")}>
+      <span style={{ ...S.syncDot, background: badge.dot }} />
+      {badge.label}
+    </button>
+  );
+  if (phone)
+    return (
+      <header style={{ ...S.header, ...S.headerPhone }}>
+        <div style={S.headerPhoneTop}>
+          <h1 style={{ ...S.logo, ...S.logoPhone }}>
+            {APP_NAME}
+            {earlyBird && <span style={S.earlyBadge}>{m.header.earlyBird}</span>}
+          </h1>
+          {status}
+        </div>
+        {nav}
+      </header>
+    );
   return (
     <header style={S.header}>
       <div>
@@ -44,10 +71,7 @@ export default function Header({
       {badge ? (
         <div style={S.navStack}>
           {nav}
-          <button style={S.syncStatus} onClick={() => setView("settings")}>
-            <span style={{ ...S.syncDot, background: badge.dot }} />
-            {badge.label}
-          </button>
+          {status}
         </div>
       ) : (
         nav

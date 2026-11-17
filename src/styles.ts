@@ -135,6 +135,41 @@ export const S = {
     background: ink,
     color: paper
   },
+  // phone (JP, 2026-11-09): the header gives the calendar the screen. The name smaller, no tagline,
+  // the four tabs on one line sharing the width
+  headerPhone: {
+    flexDirection: "column",
+    alignItems: "stretch",
+    flexWrap: "nowrap",
+    gap: 8,
+    paddingBottom: 8,
+    marginBottom: 12
+  },
+  headerPhoneTop: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 8
+  },
+  logoPhone: {
+    fontSize: 24
+  },
+  navPhone: {
+    flexWrap: "nowrap",
+    gap: 4
+  },
+  navBtnPhone: {
+    flex: "1 1 0",
+    minWidth: 0,
+    minHeight: 40,
+    padding: "6px 2px",
+    fontSize: 11,
+    letterSpacing: "0.04em",
+    textAlign: "center",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis"
+  },
   // Phase 4: nav with the sync status line under it, right-aligned (SPEC "Phase 4 design: sync" → "UI")
   navStack: {
     display: "flex",

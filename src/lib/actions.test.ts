@@ -19,7 +19,11 @@ import {
   updateCat,
 } from "./actions";
 import { PALETTE } from "./constants";
-import { defaultData, type Block, type CadenceData } from "./model";
+import { defaultData as freshData, type Block, type CadenceData } from "./model";
+import { legacyDefaultCategories } from "./constants";
+
+// sample data: the default areas before 2026-11-09 (Exercise, Work, Learn, Play), used here by id
+const defaultData = (lang: "en" | "fr" = "en") => ({ ...freshData(lang), cats: legacyDefaultCategories(lang) });
 
 // frozen inputs make any mutation throw
 const deepFreeze = <T>(o: T): T => {

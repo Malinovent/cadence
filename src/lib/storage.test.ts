@@ -1,8 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { legacyNormalized, legacyStorage } from "./__fixtures__/legacy";
-import { defaultData, normalizeData } from "./model";
+import { defaultData as freshData, normalizeData } from "./model";
 import { parseImport } from "./transfer";
 import { loadData, needsGuardrailMigration, PREMIGRATION_KEYS, saveData, saveKey, type StorageLike } from "./storage";
+import { legacyDefaultCategories } from "./constants";
+
+// sample data: the default areas before 2026-11-09 (Exercise, Work, Learn, Play), used here by id
+const defaultData = (lang: "en" | "fr" = "en") => ({ ...freshData(lang), cats: legacyDefaultCategories(lang) });
 
 class FakeStorage implements StorageLike {
   map = new Map<string, string>();
@@ -21,7 +25,7 @@ afterEach(() => vi.restoreAllMocks());
 
 describe("storage", () => {
   it("loads defaults when nothing is stored", () => {
-    expect(loadData(new FakeStorage())).toEqual(defaultData());
+    expect(loadData(new FakeStorage())).toEqual(freshData());
   });
 
   it("loads data written by the legacy app", () => {
@@ -83,7 +87,7 @@ describe("storage", () => {
     };
     expect(() => saveKey("cadence:cats", [], broken)).not.toThrow();
     expect(err).toHaveBeenCalledWith("save failed", expect.any(Error));
-    expect(loadData(broken)).toEqual(defaultData());
+    expect(loadData(broken)).toEqual(freshData());
   });
 
   describe("pre-migration copy (S1.2 guardrails)", () => {

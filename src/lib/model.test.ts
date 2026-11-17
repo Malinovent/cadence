@@ -20,7 +20,7 @@ describe("defaultData", () => {
     const d = defaultData();
     expect(d).toEqual({ schemaVersion: 2, cats: DEFAULT_CATEGORIES, weeks: [[], []], templates: [], history: [], streaks: {}, tasks: [] });
     d.cats[0].name = "changed";
-    expect(DEFAULT_CATEGORIES[0].name).toBe("Exercise");
+    expect(DEFAULT_CATEGORIES[0].name).toBe("Rest");
   });
 });
 
