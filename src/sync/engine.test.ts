@@ -33,6 +33,9 @@ class FakeBackend implements SyncClient {
   inFlight = 0;
   maxInFlight = 0;
   sentCodes: { email: string; redirectTo: string }[] = [];
+  pro = true; // the signed-in email has Pro (sync)
+  proChecks = 0;
+  oauth: { provider: string; redirectTo: string }[] = [];
   private authCbs = new Set<(s: SyncSession | null) => void>();
   private held: (() => void)[] = [];
 
@@ -67,6 +70,15 @@ class FakeBackend implements SyncClient {
     const s = email === U2.email ? U2 : U1;
     this.session = s;
     return s;
+  }
+  async signInWith(provider: "google" | "apple", redirectTo: string) {
+    this.check();
+    this.oauth.push({ provider, redirectTo });
+  }
+  async isPro() {
+    this.check();
+    this.proChecks++;
+    return this.pro;
   }
   async signOut() {
     this.emitAuth(null);
@@ -555,5 +567,73 @@ describe("sync engine: auth", () => {
     backend.emitAuth(U1);
     await flush();
     expect(backend.pulls).toBe(0);
+  });
+});
+
+describe("sync engine: Pro is sync (JP, 2026-11-17)", () => {
+  it("an email without Pro: signed in, locked, nothing pulled or pushed; local edits stay", async () => {
+    backend.pro = false;
+    backend.rows.set(U1.userId, { data: clone(withBlock(defaultData(), "srv")), updatedAt: 9_000_000 });
+    setup({ local: withBlock(), meta: { updatedAt: 500, syncedAt: null, userId: null } });
+    await flush();
+    expect(engine.getState()).toMatchObject({ session: U1, pro: false, status: "locked" });
+    edit((d) => withBlock(d, "b2", 2));
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(backend.pulls).toBe(0);
+    expect(backend.pushes).toHaveLength(0);
+    expect(store.getSnapshot().data.weeks[0].map((b) => b.id)).toEqual(["b1", "b2"]);
+  });
+
+  it("buying later: asking again (or coming back to the app) turns sync on", async () => {
+    backend.pro = false;
+    setup({ local: withBlock(), meta: { updatedAt: 500, syncedAt: null, userId: null } });
+    await flush();
+    backend.pro = true;
+    engine.onVisible();
+    await flush();
+    expect(engine.getState()).toMatchObject({ pro: true, status: "synced" });
+    expect(backend.pulls).toBe(1);
+    expect(backend.pushes).toHaveLength(1);
+  });
+
+  it("asks about Pro once per sign-in; later pulls don't ask again", async () => {
+    setup();
+    await flush();
+    engine.onVisible();
+    await flush();
+    expect(backend.proChecks).toBe(1);
+    expect(backend.pulls).toBe(2);
+  });
+
+  it("offline at launch: not known yet, offline; asks when back online", async () => {
+    online = false;
+    backend.online = false;
+    setup();
+    await flush();
+    expect(engine.getState()).toMatchObject({ pro: null, status: "offline" });
+    online = backend.online = true;
+    engine.onOnline();
+    await flush();
+    expect(engine.getState()).toMatchObject({ pro: true, status: "synced" });
+  });
+
+  it("signing out forgets Pro; the next account is asked afresh", async () => {
+    setup();
+    await flush();
+    await engine.signOut();
+    expect(engine.getState()).toMatchObject({ session: null, pro: null, status: "local" });
+    backend.pro = false;
+    backend.emitAuth(U2);
+    await flush();
+    expect(engine.getState()).toMatchObject({ session: U2, pro: false, status: "locked" });
+  });
+
+  it("Google or Apple: hands the provider the app's address to come back to", async () => {
+    setup({ session: null });
+    await flush();
+    expect(await engine.signInWith("google")).toEqual({ ok: true });
+    expect(backend.oauth).toEqual([{ provider: "google", redirectTo: REDIRECT }]);
+    backend.online = false;
+    expect(await engine.signInWith("apple")).toEqual({ ok: false, reason: "offline" });
   });
 });

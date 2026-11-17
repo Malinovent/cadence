@@ -11,7 +11,54 @@ create table if not exists public.cadence_state (
   updated_at timestamptz not null
 );
 
--- Row Level Security: each signed-in user sees and writes only their own row.
+-- Pro is sync (JP, 2026-11-17). Who has Pro lives in `entitlements`, by email: `early_bird` is
+-- the lifetime purchase (set by the Paddle webhook, see the site repo), `pro` is Pro given by hand.
+-- The same table as the site's supabase/presale.sql; created here too so either file can run first.
+create table if not exists public.entitlements (
+  email           text primary key,                 -- lower-cased; matched to the signed-in email
+  early_bird      boolean not null default false,
+  source_order_id text,
+  updated_at      timestamptz not null default now()
+);
+alter table public.entitlements add column if not exists pro boolean not null default false;
+alter table public.entitlements enable row level security;
+
+drop policy if exists "entitlements: read own" on public.entitlements;
+create policy "entitlements: read own"
+  on public.entitlements
+  for select
+  to authenticated
+  using (email = lower((select auth.jwt() ->> 'email')));
+
+-- Does the signed-in email have Pro? security definer: reads only the caller's own row.
+create or replace function public.has_pro()
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1 from public.entitlements e
+    where e.email = lower(auth.jwt() ->> 'email')
+      and (e.pro or e.early_bird)
+  );
+$$;
+
+revoke execute on function public.has_pro() from public, anon;
+grant execute on function public.has_pro() to authenticated;
+
+-- People who already synced before Pro existed keep it: an email with a synced copy and no
+-- entitlements row yet gets pro = true. A row that already exists is never changed here, so
+-- running this file again doesn't give Pro back to someone refunded.
+insert into public.entitlements (email, pro)
+select lower(u.email), true
+from public.cadence_state s
+join auth.users u on u.id = s.user_id
+where u.email is not null
+on conflict (email) do nothing;
+
+-- Row Level Security: each signed-in user sees and writes only their own row, and only with Pro.
 alter table public.cadence_state enable row level security;
 
 drop policy if exists "cadence_state: select own" on public.cadence_state;
@@ -19,22 +66,22 @@ create policy "cadence_state: select own"
   on public.cadence_state
   for select
   to authenticated
-  using (user_id = (select auth.uid()));
+  using (user_id = (select auth.uid()) and (select public.has_pro()));
 
 drop policy if exists "cadence_state: insert own" on public.cadence_state;
 create policy "cadence_state: insert own"
   on public.cadence_state
   for insert
   to authenticated
-  with check (user_id = (select auth.uid()));
+  with check (user_id = (select auth.uid()) and (select public.has_pro()));
 
 drop policy if exists "cadence_state: update own" on public.cadence_state;
 create policy "cadence_state: update own"
   on public.cadence_state
   for update
   to authenticated
-  using (user_id = (select auth.uid()))
-  with check (user_id = (select auth.uid()));
+  using (user_id = (select auth.uid()) and (select public.has_pro()))
+  with check (user_id = (select auth.uid()) and (select public.has_pro()));
 
 -- No delete policy: the app never deletes rows (deleting the auth user cascades).
 

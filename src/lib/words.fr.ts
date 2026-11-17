@@ -37,13 +37,14 @@ export const LIB_FR: LibWords = {
     dropped: (n) => `${plural(n, "entrée ignorée", "entrées ignorées")} : elles ne semblaient pas valides.`,
   },
   sync: {
-    badge: { synced: "synchronisé", syncing: "synchro…", offline: "hors ligne", error: "erreur de synchro" },
+    badge: { synced: "synchronisé", syncing: "synchro…", offline: "hors ligne", error: "erreur de synchro", locked: "cet appareil" },
     sentence: {
       synced: "Tout est synchronisé.",
       syncing: "Enregistrement des changements…",
       offline: "Hors ligne. Les changements sont gardés sur cet appareil et se synchroniseront plus tard.",
       error:
         "Impossible de joindre votre compte. Les changements sont gardés sur cet appareil et se synchroniseront plus tard.",
+      locked: "Pas de synchro : elle fait partie de Pro. Vos semaines restent sur cet appareil.",
     },
     auth: {
       invalid_code: "Ce code n'a pas fonctionné. Réessayez ou demandez-en un nouveau.",

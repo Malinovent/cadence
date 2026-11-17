@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { authErrorMessage, isRemoteApply, isValidCode, isValidEmail, statusBadge, statusSentence } from "./syncUi";
+import { authErrorMessage, authProviders, isRemoteApply, isValidCode, isValidEmail, statusBadge, statusSentence } from "./syncUi";
 
 describe("statusBadge", () => {
   it("maps each signed-in status to a label and dot colour", () => {
@@ -68,5 +68,14 @@ describe("isRemoteApply", () => {
   });
   it("is not an automatic change: the edit time stays, so an open editor is left alone", () => {
     expect(isRemoteApply({ data: a, updatedAt: 5 }, b, { updatedAt: 5, syncedAt: 5 })).toBe(false);
+  });
+});
+
+describe("authProviders", () => {
+  it("only the providers switched on, Google first; none by default", () => {
+    expect(authProviders(undefined)).toEqual([]);
+    expect(authProviders("")).toEqual([]);
+    expect(authProviders("apple, Google")).toEqual(["google", "apple"]);
+    expect(authProviders("google,github")).toEqual(["google"]);
   });
 });

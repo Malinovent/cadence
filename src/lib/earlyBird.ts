@@ -9,6 +9,16 @@
 export const parseEarlyBird = (row: unknown): boolean =>
   typeof row === "object" && row !== null && (row as { early_bird?: unknown }).early_bird === true;
 
+/**
+ * Pro is sync (JP, 2026-11-17). The `entitlements` row gives it with `pro` (granted by hand, or
+ * kept by people who synced before Pro existed) or `early_bird` (the lifetime purchase).
+ */
+export const parsePro = (row: unknown): boolean => {
+  if (typeof row !== "object" || row === null) return false;
+  const r = row as { pro?: unknown; early_bird?: unknown };
+  return r.pro === true || r.early_bird === true;
+};
+
 /** Emails are stored lower-cased in `entitlements`. */
 export const entitlementEmail = (email: string): string => email.trim().toLowerCase();
 

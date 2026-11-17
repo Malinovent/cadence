@@ -1,5 +1,6 @@
 // SyncClient backed by supabase-js: email OTP auth, the cadence_state row, the push_state RPC.
 import { isAuthApiError, isAuthRetryableFetchError, type Session, type SupabaseClient } from "@supabase/supabase-js";
+import { parsePro } from "../lib/earlyBird";
 import type { CadenceData } from "../lib/model";
 import { supabase } from "./client";
 import { SyncError, type RawRow, type SyncClient, type SyncSession } from "./engine";
@@ -56,6 +57,20 @@ export function createSupabaseSyncClient(sb: SupabaseClient): SyncClient {
       const s = toSession(data.session);
       if (!s) throw new SyncError("failed", "sync: no session after verifying the code");
       return s;
+    },
+    async signInWith(provider, redirectTo) {
+      // leaves the page; supabase-js reads the session from the URL when the provider sends us back
+      const { error } = await sb.auth.signInWithOAuth({ provider, options: { redirectTo } });
+      if (error) throw authError(error, "failed");
+    },
+    async isPro() {
+      // read-own RLS: the only row this can see is the signed-in email's
+      const { data, error, status } = await sb.from("entitlements").select("*").maybeSingle();
+      // no entitlements table yet (supabase/schema.sql not run since Pro): the server doesn't ask
+      // for Pro either, so sync carries on as before rather than stopping for everyone
+      if (error && (error.code === "PGRST205" || error.code === "42P01")) return true;
+      if (error) throw dbError(error, status);
+      return parsePro(data);
     },
     async signOut() {
       // local scope: works offline, only this device signs out

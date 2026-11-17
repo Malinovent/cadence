@@ -106,9 +106,10 @@ Depends: S0.1.
 Done (site repo): `supabase/presale.sql`, `hit` + `waitlist` edge functions with tested rules/handlers, page wiring (beacon hit, signup with consent version), `npm run links`, `supabase/SETUP.md`. Checked end to end against a local mock of the functions. Left: JP runs SETUP.md (region check, SQL, deploy, variables); confirmation email waits on an email tool.
 Depends: JP's OK. Flag: Supabase region (Canada).
 
-### [ ] S0.4 Checkout adapter + webhook — Careful
+### [~] S0.4 Checkout adapter + webhook — Careful
 Thin provider adapter (Paddle or Lemon Squeezy), overlay checkout in visitor's language, webhook signature check, purchase + entitlement write, refund handling, thank-you page.
 Depends: S0.2, S0.3. Blocked on: merchant approval + test keys (Nov 5).
+Done 2026-11-17 (site repo, Paddle): `paddle-webhook` function (signature check, transaction.completed → purchase + early_bird, approved full refund or chargeback → refunded + early_bird off; tested), Buy button opens Paddle's overlay in the page's language once `VITE_PADDLE_CLIENT_TOKEN` and `VITE_PADDLE_PRICE_ID` are set, then lands the buyer in the web app. Left: JP works through `docs/PADDLE_SETUP.md` (sandbox first), deploys the function, sends the token and price ID; then the end-to-end check (S0.7).
 
 ### [~] S0.5 Scoreboard — Medium
 Private view for JP: weekly visitors, signups, purchases by headline and source, plus rates. Aggregation as pure tested functions.
@@ -182,6 +183,10 @@ Done on branch `s1-finish`: catalogues for every string (en/fr), lib wording pas
 Done on branch `s1-finish`: "Last week" in Stats, one describing sentence per area, tested for judging words. Shipped to main 2026-11-04. copy
 ### [x] S1.11 Early-bird badge
 Done on branch `s1-finish`: reads `entitlements.early_bird` for the signed-in email; badge by the logo, thank-you in Settings; remembered per device. Not checked against a live early-bird account yet (needs a real purchase row). Shipped to main 2026-11-04.
+
+### [~] P1. Pro is sync; Google and Apple sign-in — Careful
+JP (2026-11-17): Pro = sync between devices. The app asks for Pro after sign-in (`entitlements`: `pro` by hand or `early_bird` from the purchase) and syncs only with it; the database refuses too (`has_pro()` in the `cadence_state` policies). People who synced before keep Pro. Without Pro: "Sync is part of Pro", Get Pro (the site's offer), "I just bought it", and the hint to sign in with the email they paid with. Google and Apple buttons above the email code, shown once `VITE_AUTH_PROVIDERS` lists them. Tested (engine, links, provider switch).
+Left: JP runs `supabase/schema.sql`, follows `docs/SIGNIN_SETUP.md` (Google, optionally Apple), sets the GitHub variables; check sign-in with Google on a phone.
 
 ### [~] R1. Rename to Rebalance + Paddle domain review — Medium
 App: `APP_NAME` = "Rebalance" (header, page title, manifest name and short name, onboarding, legal text); address, base path and `cadence:*` keys unchanged. Site: seller Jean-Philippe Provost (sole proprietor), Paddle as merchant of record with its standard reseller wording, $39 USD early-bird lifetime, 30-day full refund with no conditions (paddle.net or email), privacy names Paddle as recipient of payment data, Contact page in FR/EN, "How you get it" card (pay, receipt, sign in to the web app with the same email).

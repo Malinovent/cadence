@@ -344,7 +344,6 @@ export const en = {
     useAccount: "Use my account's",
     yourAccount: "your account",
     signOut: "Sign out",
-    intro: "We'll email you a code. No password.",
     start: "Sign in",
     emailPlaceholder: "you@example.com",
     email: "Email",
@@ -355,6 +354,18 @@ export const en = {
     signingIn: "Signing in…",
     signIn: "Sign in",
     differentEmail: "Use a different email",
+    // Google and Apple (JP, 2026-11-17); the email code stays
+    withGoogle: "Continue with Google",
+    withApple: "Continue with Apple",
+    orEmail: "Or we'll email you a code. No password.",
+    emailOnly: "We'll email you a code. No password.",
+    // Pro is sync (JP, 2026-11-17)
+    proTitle: "Sync is part of Pro",
+    proBody: "Pro is a one-time purchase: your weeks on all your devices, for life. Until then they stay on this device.",
+    proGet: "Get Pro",
+    proOtherEmail: (email: string) =>
+      `Pro follows the email you bought with. You're signed in as ${email}. Bought with another one? Sign out, then sign in with that one.`,
+    proRecheck: "I just bought it",
     // delete my account (JP, 2026-11-07)
     delete: "Delete my account",
     deleteTitle: "Delete your account?",

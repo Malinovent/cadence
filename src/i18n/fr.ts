@@ -337,7 +337,6 @@ export const fr: Messages = {
     useAccount: "Prendre celui du compte",
     yourAccount: "votre compte",
     signOut: "Se déconnecter",
-    intro: "Nous vous envoyons un code par courriel. Pas de mot de passe.",
     start: "Se connecter",
     emailPlaceholder: "vous@exemple.com",
     email: "Courriel",
@@ -347,6 +346,17 @@ export const fr: Messages = {
     code: "Code de connexion",
     signingIn: "Connexion…",
     signIn: "Se connecter",
+    withGoogle: "Continuer avec Google",
+    withApple: "Continuer avec Apple",
+    orEmail: "Ou recevez un code par courriel. Pas de mot de passe.",
+    emailOnly: "Nous vous envoyons un code par courriel. Pas de mot de passe.",
+    proTitle: "La synchro fait partie de Pro",
+    proBody:
+      "Pro est un achat unique : vos semaines sur tous vos appareils, à vie. D'ici là, elles restent sur cet appareil.",
+    proGet: "Obtenir Pro",
+    proOtherEmail: (email) =>
+      `Pro suit le courriel utilisé pour l'achat. Vous êtes connecté avec ${email}. Acheté avec un autre? Déconnectez-vous, puis connectez-vous avec celui-là.`,
+    proRecheck: "Je viens de l'acheter",
     delete: "Supprimer mon compte",
     deleteTitle: "Supprimer votre compte?",
     deleteText:

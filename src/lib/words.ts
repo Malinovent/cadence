@@ -49,8 +49,8 @@ export type LibWords = {
   };
   // sync
   sync: {
-    badge: { synced: string; syncing: string; offline: string; error: string };
-    sentence: { synced: string; syncing: string; offline: string; error: string };
+    badge: { synced: string; syncing: string; offline: string; error: string; locked: string };
+    sentence: { synced: string; syncing: string; offline: string; error: string; locked: string };
     auth: { invalid_code: string; rate_limited: string; offline: string; failed: string };
   };
   now: { left: (dur: string) => string };
@@ -103,12 +103,13 @@ export const LIB_EN: LibWords = {
     dropped: (n) => `Skipped ${plural(n, "entry", "entries")} that didn't look right.`,
   },
   sync: {
-    badge: { synced: "synced", syncing: "syncing…", offline: "offline", error: "sync error" },
+    badge: { synced: "synced", syncing: "syncing…", offline: "offline", error: "sync error", locked: "this device" },
     sentence: {
       synced: "Everything's synced.",
       syncing: "Saving changes…",
       offline: "Offline. Changes are saved on this device and will sync later.",
       error: "Couldn't reach your account. Changes are saved on this device and will sync later.",
+      locked: "Not syncing: sync is part of Pro. Your weeks stay on this device.",
     },
     auth: {
       invalid_code: "That code didn't work. Try again or ask for a new one.",

@@ -9,6 +9,8 @@ interface ImportMetaEnv {
   readonly VITE_SITE_URL?: string;
   /** Where "Write to us" sends (Settings → About, the crash screen). Missing → no mail link. */
   readonly VITE_SUPPORT_EMAIL?: string;
+  /** Google / Apple sign-in once set up in Supabase: "google,apple" */
+  readonly VITE_AUTH_PROVIDERS?: string;
 }
 
 interface ImportMeta {

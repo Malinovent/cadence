@@ -34,6 +34,12 @@ export function helpLinks(
   };
 }
 
+/** Pro is sync (JP, 2026-11-17): where to buy it, the site's offer in the person's language. */
+export const proLink = (siteUrl: string | undefined, lang: Lang): string | null => {
+  const base = siteBase(siteUrl);
+  return base ? `${base}/${lang}/#offer` : null;
+};
+
 /** Absolute links, or null when the site's address isn't set. Only http(s) addresses count. */
 export function legalLinks(siteUrl: string | undefined, lang: Lang): { privacy: string; terms: string } | null {
   const base = siteBase(siteUrl);

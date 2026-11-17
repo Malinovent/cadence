@@ -1,38 +1,62 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { importSummaryLine } from "../lib/format";
-import { authErrorMessage, isValidCode, isValidEmail, statusSentence } from "../lib/syncUi";
-import type { AuthResult, ConflictChoice, SyncConflict, SyncSession, SyncStatus } from "../sync/engine";
+import { authErrorMessage, authProviders, isValidCode, isValidEmail, statusSentence } from "../lib/syncUi";
+import { proLink } from "../lib/legal";
+import type { AuthResult, ConflictChoice, OAuthProvider, SyncConflict, SyncSession, SyncStatus } from "../sync/engine";
 import { ink, S } from "../styles";
 import SetRow from "./SetRow";
 import { useI18n } from "../i18n/I18nProvider";
 
 export type AccountSyncProps = {
   session: SyncSession | null;
+  /** the email has Pro (sync); null while not known */
+  pro: boolean | null;
   status: SyncStatus;
   conflict: SyncConflict | null;
   sendCode(email: string): Promise<AuthResult>;
   verifyCode(email: string, code: string): Promise<AuthResult>;
+  signInWith(provider: OAuthProvider): Promise<AuthResult>;
+  recheckPro(): void;
   signOut(): Promise<void>;
   deleteAccount(): Promise<AuthResult>;
   resolveConflict(choice: ConflictChoice): void;
 };
 
-const row = { display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" } as const;
-const errorLine = { fontStyle: "italic", fontSize: 13, color: "var(--c-danger)", marginTop: 10 } as const;
-const smallTextBtn = { ...S.textBtn, fontSize: 12, fontWeight: 400, color: "var(--c-muted)" } as const;
+const row = {
+  display: "flex",
+  gap: 10,
+  flexWrap: "wrap",
+  alignItems: "center",
+} as const;
+const errorLine = {
+  fontStyle: "italic",
+  fontSize: 13,
+  color: "var(--c-danger)",
+  marginTop: 10,
+} as const;
+const smallTextBtn = {
+  ...S.textBtn,
+  fontSize: 12,
+  fontWeight: 400,
+  color: "var(--c-muted)",
+} as const;
 const off = (disabled: boolean) => (disabled ? { opacity: 0.5, cursor: "default" } : {});
 const input = { ...S.tplNameInput, flex: "1 1 220px", maxWidth: 320 } as const;
 
 type Step = { kind: "email" } | { kind: "code"; email: string };
 
+// the providers set up in Supabase (docs/SIGNIN_SETUP.md); none: the email code only
+const PROVIDERS = authProviders(import.meta.env.VITE_AUTH_PROVIDERS);
+
 // Settings → Data and account → Sync (SPEC "Phase 4 design: sync" → "UI"). Rendered only when sync is configured.
 /** `children`: the rows that sit between Sync and the quiet Delete my account (export, import). */
 export default function AccountSync({ children, ...p }: AccountSyncProps & { children?: ReactNode }) {
-  const { m } = useI18n();
+  const { m, lang } = useI18n();
+  const buyPro = proLink(import.meta.env.VITE_SITE_URL, lang);
   const [step, setStep] = useState<Step>({ kind: "email" });
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
-  const [busy, setBusy] = useState<"send" | "verify" | "signout" | "delete" | null>(null);
+  const [busy, setBusy] = useState<"send" | "verify" | "signout" | "delete" | OAuthProvider | null>(null);
   const [error, setError] = useState<string | null>(null);
   // delete my account: asked first, then said plainly once it's done (JP, 2026-11-07)
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -68,6 +92,17 @@ export default function AccountSync({ children, ...p }: AccountSyncProps & { chi
     } else setError(authErrorMessage(r.reason, m.lib));
   };
 
+  // Google / Apple: the page leaves for the provider and comes back signed in; busy until it does
+  const onProvider = async (provider: OAuthProvider) => {
+    if (busy) return;
+    setError(null);
+    setBusy(provider);
+    const r = await p.signInWith(provider);
+    if (!r.ok) {
+      setBusy(null);
+      setError(authErrorMessage(r.reason, m.lib));
+    }
+  };
   const onDifferentEmail = () => {
     setStep({ kind: "email" });
     setEmail("");
@@ -140,7 +175,29 @@ export default function AccountSync({ children, ...p }: AccountSyncProps & { chi
             {m.account.signOut}
           </button>
         </SetRow>
-      ) : (
+      ) : null}
+      {p.session && p.pro === false && (
+        <div style={S.setPanel}>
+          <div style={{ ...S.streakCard, textAlign: "left", padding: 14 }}>
+            <div style={{ fontSize: 14, fontWeight: 600 }}>{m.account.proTitle}</div>
+            <div style={S.catIntro}>{m.account.proBody}</div>
+            <div style={{ ...row, marginTop: 10 }}>
+              {buyPro && (
+                <a href={buyPro} target="_blank" rel="noopener" style={{ ...S.resetConfirm, textDecoration: "none" }}>
+                  {m.account.proGet}
+                </a>
+              )}
+              <button type="button" style={S.resetCancel} onClick={p.recheckPro}>
+                {m.account.proRecheck}
+              </button>
+            </div>
+            <div style={{ ...S.catIntro, marginTop: 10 }}>
+              {m.account.proOtherEmail(p.session.email ?? m.account.yourAccount)}
+            </div>
+          </div>
+        </div>
+      )}
+      {p.session ? null : (
         <>
           <SetRow label={m.account.title} hint={deleted ? m.account.deletedNote : m.account.hint}>
             {!signInOpen && (
@@ -153,7 +210,33 @@ export default function AccountSync({ children, ...p }: AccountSyncProps & { chi
             <div style={S.setPanel}>
               {step.kind === "email" ? (
                 <>
-                  <div style={{ ...S.catIntro, marginTop: 0 }}>{m.account.intro}</div>
+                  {PROVIDERS.length > 0 && (
+                    <div style={row}>
+                      {PROVIDERS.map((provider) => (
+                        <button
+                          key={provider}
+                          type="button"
+                          style={{
+                            ...S.resetCancel,
+                            minHeight: 44,
+                            ...off(busy !== null),
+                          }}
+                          onClick={() => onProvider(provider)}
+                          disabled={busy !== null}
+                        >
+                          {provider === "google" ? m.account.withGoogle : m.account.withApple}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div
+                    style={{
+                      ...S.catIntro,
+                      marginTop: PROVIDERS.length > 0 ? 14 : 0,
+                    }}
+                  >
+                    {PROVIDERS.length > 0 ? m.account.orEmail : m.account.emailOnly}
+                  </div>
                   <form style={{ ...row, marginTop: 10 }} onSubmit={onSend} noValidate>
                     <input
                       style={input}
@@ -168,7 +251,11 @@ export default function AccountSync({ children, ...p }: AccountSyncProps & { chi
                     />
                     <button
                       type="submit"
-                      style={{ ...S.catAdd, marginTop: 0, ...off(busy !== null || !isValidEmail(email)) }}
+                      style={{
+                        ...S.catAdd,
+                        marginTop: 0,
+                        ...off(busy !== null || !isValidEmail(email)),
+                      }}
                       disabled={busy !== null || !isValidEmail(email)}
                     >
                       {busy === "send" ? m.account.sending : m.account.sendCode}
@@ -237,7 +324,11 @@ export default function AccountSync({ children, ...p }: AccountSyncProps & { chi
               <div style={{ ...row, marginTop: 12 }}>
                 <button
                   type="button"
-                  style={{ ...S.resetConfirm, background: ink, ...off(busy !== null) }}
+                  style={{
+                    ...S.resetConfirm,
+                    background: ink,
+                    ...off(busy !== null),
+                  }}
                   onClick={onDelete}
                   disabled={busy !== null}
                 >
@@ -260,7 +351,12 @@ export default function AccountSync({ children, ...p }: AccountSyncProps & { chi
         ) : (
           <button
             type="button"
-            style={{ ...S.setRowBtn, minHeight: 44, fontSize: 13, color: "var(--c-muted)" }}
+            style={{
+              ...S.setRowBtn,
+              minHeight: 44,
+              fontSize: 13,
+              color: "var(--c-muted)",
+            }}
             onClick={() => setConfirmDelete(true)}
             disabled={busy !== null}
           >

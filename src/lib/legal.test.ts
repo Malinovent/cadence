@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { helpLinks, legalLinks } from "./legal";
+import { helpLinks, legalLinks, proLink } from "./legal";
 
 describe("legal links", () => {
   it("point at the site's pages in the person's language", () => {
@@ -27,5 +27,14 @@ describe("help and feedback", () => {
     expect(helpLinks(undefined, undefined, "en", "x")).toEqual({ faq: null, mail: null });
     expect(helpLinks("https://example.ca", "not an address", "en", "x").mail).toBeNull();
     expect(helpLinks("https://example.ca", "a@b.ca?cc=evil@x.com", "en", "x").mail).toBeNull();
+  });
+});
+
+describe("proLink", () => {
+  it("points at the site's offer in the person's language, or nowhere without an address", () => {
+    expect(proLink("https://rebalanceweek.com/", "fr")).toBe("https://rebalanceweek.com/fr/#offer");
+    expect(proLink("https://rebalanceweek.com", "en")).toBe("https://rebalanceweek.com/en/#offer");
+    expect(proLink(undefined, "en")).toBeNull();
+    expect(proLink("rebalanceweek.com", "en")).toBeNull();
   });
 });

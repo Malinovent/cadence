@@ -6,7 +6,7 @@ export type AuthFailure = Exclude<AuthResult, { ok: true }>["reason"];
 export type SignedInStatus = Exclude<SyncStatus, "local">;
 
 // header pill: dot colour (the label comes from the words)
-const DOT: Record<SignedInStatus, string> = { synced: "#1FA98A", syncing: "#C9A227", offline: "#cabfb2", error: "#b54" };
+const DOT: Record<SignedInStatus, string> = { synced: "#1FA98A", syncing: "#C9A227", offline: "#cabfb2", error: "#b54", locked: "#cabfb2" };
 
 // null when signed out ("local"): nothing to show
 export const statusBadge = (s: SyncStatus, w: LibWords = LIB_EN): { label: string; dot: string } | null =>
@@ -18,6 +18,15 @@ export const statusSentence = (s: SyncStatus, w: LibWords = LIB_EN): string | nu
 
 export const authErrorMessage = (reason: AuthFailure, w: LibWords = LIB_EN): string =>
   reason === "invalid_code" || reason === "rate_limited" || reason === "offline" ? w.sync.auth[reason] : w.sync.auth.failed;
+
+/**
+ * Google and Apple sign-in (JP, 2026-11-17), shown only once each is set up in Supabase:
+ * VITE_AUTH_PROVIDERS="google,apple" (either one, any order). Unknown names are ignored.
+ */
+export const authProviders = (v: string | undefined): ("google" | "apple")[] => {
+  const on = new Set((v ?? "").split(",").map((s) => s.trim().toLowerCase()));
+  return (["google", "apple"] as const).filter((p) => on.has(p));
+};
 
 // basic shape check only: something@something.tld, no spaces
 export const isValidEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());

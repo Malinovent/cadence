@@ -415,3 +415,11 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 - Phone header: the name at 24px with no tagline, the four tabs on one line sharing the width.
 - Phone checklist: only the next open step (and one crossing off), with "all steps" to see the rest.
 - One message at a time: the checklist toast waits while the Undo bar is up.
+
+## Pro is sync; Google and Apple sign-in (JP, 2026-11-17)
+- Pro = sync between devices. Everything else stays free and local.
+- Who has Pro: the `entitlements` row for the signed-in email (lower-cased) with `pro` (given by hand, or kept by people who synced before Pro) or `early_bird` (the lifetime purchase, set by the site's `paddle-webhook`; a refund clears it).
+- Engine: after a sign-in (or a restored session) it asks `isPro()` once; with Pro it pulls and pushes as before; without, status `locked`, nothing is pulled or pushed and the device keeps its weeks. It asks again when the app comes back to the front or online while Pro isn't known to be true, and on "I just bought it". Signing out forgets the answer.
+- Server: `has_pro()` (security definer, reads the caller's own row) is part of every `cadence_state` policy, so a client without Pro can't read or write a synced copy.
+- Settings → Sync, signed in without Pro: "Sync is part of Pro", Get Pro (the site's offer in the person's language, from `VITE_SITE_URL`), "I just bought it", and "Pro follows the email you bought with…" with the signed-in email. Header pill: "this device", grey dot.
+- Sign-in: "Continue with Google" / "Continue with Apple" (outlined, 44 px) above the email code, only for the providers in `VITE_AUTH_PROVIDERS`; the page leaves for the provider and comes back to the app signed in (implicit flow, same redirect URLs as the magic link). Without providers the form is as before.

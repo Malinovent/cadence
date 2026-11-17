@@ -9,7 +9,9 @@
 - `docs/SPEC.md` — spec: architecture, data model, behaviour, designs
 - `docs/PLAN.md` — task list and status
 - `docs/SUPABASE_SETUP.md` — click-through guide for the user: Supabase project, schema, auth emails, GitHub variables
-- `supabase/schema.sql` — sync backend: `cadence_state` table, RLS policies, `push_state` LWW function (idempotent; pasted into the Supabase SQL editor)
+- `docs/SIGNIN_SETUP.md` — guide for the user: Pro in the database, Google and Apple sign-in, the GitHub variables that switch them on
+- `docs/PADDLE_SETUP.md` — guide for the user: Paddle sandbox and live, product and price, tokens, webhook, secrets, test purchase
+- `supabase/schema.sql` — sync backend: `entitlements` (+ `pro`), `has_pro()`, `cadence_state` table with RLS policies that need Pro, `push_state` LWW function, `delete_my_account` (idempotent; pasted into the Supabase SQL editor)
 - `.env.example` — env keys (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`); copy to `.env.local` (gitignored) for dev
 - `legacy/cadence.html` — original single-file app; read-only reference
 - `handoff/cadence-export.html` — migration file: byte copy of `legacy/cadence.html` plus one marked block (`<!-- cadence-export:start/end -->`) adding an "↓ Export my data" button that downloads the five `cadence:*` keys as the export envelope; tested by `src/lib/legacyExport.test.ts`
@@ -48,7 +50,7 @@
 - `src/lib/words.ts` — S1.9 the English wording of src/lib (`LibWords`, `LIB_EN`), passed to the lib's text functions
 - `src/lib/words.fr.ts` — S1.9 the same in Canadian French (`LIB_FR`)
 - `src/lib/describe.ts` — S1.10 neutral sentences about last week's ticked time per area
-- `src/lib/earlyBird.ts` — S1.11 reading the entitlements row, matching emails, the remembered answer
+- `src/lib/earlyBird.ts` — S1.11 reading the entitlements row (early bird, and `parsePro`: Pro is sync), matching emails, the remembered answer
 - `src/lib/undo.ts` — when Undo is still offered after a week is replaced
 - `src/lib/onboarding.ts` — who sees the onboarding; default areas following a language change
 - `src/lib/guide.ts` — onboarding path 1 + checklist: the guided steps and what ends each, what each change to the data did for the checklist (`progress`), what's newly earned, the next open step and how to show it (toast, board or finale: `earned`, `nextItem`, `feedbackFor`), where a hint bubble sits, when its target needs scrolling

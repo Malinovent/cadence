@@ -36,6 +36,10 @@ export interface SyncClient {
   onAuthChange(cb: (session: SyncSession | null) => void): () => void;
   sendCode(email: string, redirectTo: string): Promise<void>;
   verifyCode(email: string, code: string): Promise<SyncSession>;
+  /** Google or Apple: leaves the page for the provider, which comes back to `redirectTo` signed in. */
+  signInWith(provider: OAuthProvider, redirectTo: string): Promise<void>;
+  /** Pro (sync) for the signed-in email: its `entitlements` row says pro or early_bird (read-own RLS). */
+  isPro(): Promise<boolean>;
   signOut(): Promise<void>;
   /** Deletes the signed-in account and its synced copy on the server (delete_my_account). */
   deleteAccount(): Promise<void>;
@@ -43,12 +47,17 @@ export interface SyncClient {
   push(data: CadenceData, updatedAt: number): Promise<RawRow>;
 }
 
-export type SyncStatus = "local" | "synced" | "syncing" | "offline" | "error";
+export type OAuthProvider = "google" | "apple";
+
+// "locked": signed in, but this email has no Pro, so nothing syncs (JP, 2026-11-17: Pro is sync)
+export type SyncStatus = "local" | "synced" | "syncing" | "offline" | "error" | "locked";
 export type SyncConflict = { local: ImportSummary; server: ImportSummary };
 export type SyncState = {
   configured: boolean; // false → no backend; the app is local-only and shows no account UI
   ready: boolean; // the saved session has been restored (or there was none)
   session: SyncSession | null;
+  /** the signed-in email has Pro (sync); null while not known yet (signed out, or still asking) */
+  pro: boolean | null;
   status: SyncStatus; // "local" whenever signed out; check `conflict` first when showing it
   conflict: SyncConflict | null; // first sign-in found different data on both sides; nothing syncs until resolved
 };
@@ -65,6 +74,9 @@ export interface SyncEngine {
   onOffline(): void;
   sendCode(email: string): Promise<AuthResult>;
   verifyCode(email: string, code: string): Promise<AuthResult>;
+  signInWith(provider: OAuthProvider): Promise<AuthResult>;
+  /** Asks the server again whether this email has Pro (after buying in another tab, say). */
+  recheckPro(): void;
   signOut(): Promise<void>;
   /** Deletes the account and its server copy; this device keeps its weeks, signed out. */
   deleteAccount(): Promise<AuthResult>;
@@ -98,6 +110,8 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
   const isOnline = opts.isOnline ?? defaultOnline;
 
   let session: SyncSession | null = null;
+  let pro: boolean | null = null; // Pro for this session's email; sync runs only when true
+  let checkingPro = false;
   let ready = false;
   let net: "ok" | "offline" | "error" = "ok"; // result of the last network attempt
   let conflictRow: ServerRow | null = null;
@@ -112,17 +126,18 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
   let unsubs: (() => void)[] = [];
 
   const listeners = new Set<() => void>();
-  let state: SyncState = { configured: true, ready: false, session: null, status: "local", conflict: null };
+  let state: SyncState = { configured: true, ready: false, session: null, pro: null, status: "local", conflict: null };
 
   const compute = (): SyncState => {
     const { data, meta } = store.getSnapshot();
     let status: SyncStatus;
     if (!session) status = "local";
-    else if (busy) status = "syncing";
+    else if (pro === false) status = "locked";
+    else if (busy || checkingPro) status = "syncing";
     else if (net !== "ok") status = net === "offline" ? "offline" : "error";
     else status = isDirty(meta) || uncommittedUser ? "syncing" : "synced";
     const conflict = conflictRow ? { local: summarize(data), server: summarize(conflictRow.data) } : null;
-    return { configured: true, ready, session, status, conflict };
+    return { configured: true, ready, session, pro: session ? pro : null, status, conflict };
   };
 
   const emit = () => {
@@ -130,6 +145,7 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
     const same =
       next.ready === state.ready &&
       next.session === state.session &&
+      next.pro === state.pro &&
       next.status === state.status &&
       jsonEqual(next.conflict, state.conflict);
     if (same) return;
@@ -148,7 +164,43 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
     if (!offline) console.warn("sync failed", e);
   };
 
-  const canSync = () => running && session !== null && conflictRow === null;
+  const canSync = () => running && session !== null && pro === true && conflictRow === null;
+
+  // Pro first (JP, 2026-11-17): nothing is pulled or pushed for an email without it. The server
+  // refuses too (has_pro() in supabase/schema.sql); this keeps the app from trying.
+  const checkPro = async () => {
+    if (!running || !session || checkingPro) return;
+    if (!isOnline()) {
+      net = "offline";
+      emit();
+      return;
+    }
+    const g = gen;
+    checkingPro = true;
+    emit();
+    let answer: boolean;
+    try {
+      answer = await client.isPro();
+    } catch (e) {
+      if (g === gen) {
+        checkingPro = false;
+        fail(e);
+        emit();
+      }
+      return;
+    }
+    if (g !== gen) return;
+    checkingPro = false;
+    net = "ok";
+    pro = answer;
+    emit();
+    if (answer) requestPull();
+  };
+  // a pull when Pro is known, otherwise ask about Pro first (it pulls if the answer is yes)
+  const refresh = () => {
+    if (pro === true) requestPull();
+    else void checkPro();
+  };
 
   // ---- operations (only ever called through run) ----
 
@@ -307,8 +359,10 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
     uncommittedUser = null;
     net = "ok";
     session = s;
+    pro = null;
+    checkingPro = false;
     emit();
-    if (s) requestPull(); // right after sign-in, and on launch after session restore
+    if (s) void checkPro(); // right after sign-in, and on launch after session restore; pulls if Pro
   };
 
   return {
@@ -345,8 +399,9 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
         listeners.delete(fn);
       };
     },
-    onVisible: requestPull,
-    onOnline: requestPull,
+    onVisible: refresh,
+    onOnline: refresh,
+    recheckPro: () => void checkPro(),
     onOffline() {
       if (!session || busy) return;
       net = "offline";
@@ -364,6 +419,14 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
       try {
         const s = await client.verifyCode(email.trim(), code.trim());
         if (running) setSession(s);
+        return { ok: true };
+      } catch (e) {
+        return { ok: false, reason: authReason(e) };
+      }
+    },
+    async signInWith(provider) {
+      try {
+        await client.signInWith(provider, redirectTo);
         return { ok: true };
       } catch (e) {
         return { ok: false, reason: authReason(e) };
