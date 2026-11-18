@@ -42,7 +42,7 @@ describe("French (Canada) wording of the lib", () => {
     expect(droppedLine(2, LIB_FR)).toBe("2 entrées ignorées : elles ne semblaient pas valides.");
     expect(statusBadge("synced", LIB_FR)?.label).toBe("synchronisé");
     expect(statusSentence("local", LIB_FR)).toBeNull();
-    expect(authErrorMessage("rate_limited", LIB_FR)).toMatch(/une heure/);
+    expect(authErrorMessage("rate_limited", LIB_FR)).toMatch(/une minute/);
     expect(replaceNote(4, LIB_FR)).toBe("Cela remplace les 4 blocs de la semaine 1.");
   });
   it("has every English key in French", () => {

@@ -22,10 +22,8 @@ export function detectLang(deviceLangs: readonly string[]): Lang {
   return "en";
 }
 
-export const resolveLang = (
-  choice: LangChoice,
-  deviceLangs: readonly string[],
-): Lang => (choice === "auto" ? detectLang(deviceLangs) : choice);
+export const resolveLang = (choice: LangChoice, deviceLangs: readonly string[]): Lang =>
+  choice === "auto" ? detectLang(deviceLangs) : choice;
 
 /** French off for now (JP, 2026-11-17): flip to true to bring it back; fr.ts stays up to date. */
 export const FRENCH_ON = false;
@@ -33,17 +31,12 @@ export const FRENCH_ON = false;
 export const LANGS_ON: readonly Lang[] = FRENCH_ON ? ["fr", "en"] : ["en"];
 
 /** The language to show: the choice or the device's, if it's on; otherwise the first one on. */
-export function pickLang(
-  choice: LangChoice,
-  deviceLangs: readonly string[],
-  on: readonly Lang[] = LANGS_ON,
-): Lang {
+export function pickLang(choice: LangChoice, deviceLangs: readonly string[], on: readonly Lang[] = LANGS_ON): Lang {
   const l = resolveLang(choice, deviceLangs);
   return on.includes(l) ? l : on[0];
 }
 
-export const parseChoice = (raw: string | null): LangChoice =>
-  raw === "fr" || raw === "en" ? raw : "auto";
+export const parseChoice = (raw: string | null): LangChoice => (raw === "fr" || raw === "en" ? raw : "auto");
 
 const KEY = "cadence:ui:lang";
 

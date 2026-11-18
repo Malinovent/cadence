@@ -42,9 +42,7 @@ export interface SyncClient {
    * Called with the current session whenever auth changes (including the initial one); `recovery`
    * is true when the person just arrived from a "choose a new password" link. Returns unsubscribe.
    */
-  onAuthChange(
-    cb: (session: SyncSession | null, recovery: boolean) => void,
-  ): () => void;
+  onAuthChange(cb: (session: SyncSession | null, recovery: boolean) => void): () => void;
   signInPassword(email: string, password: string): Promise<SyncSession>;
   /** Creates the account; it signs in only once its email is confirmed (link to `redirectTo`). */
   signUp(email: string, password: string, redirectTo: string): Promise<void>;
@@ -66,8 +64,7 @@ export interface SyncClient {
 export type OAuthProvider = "google" | "apple";
 
 // "locked": signed in, but this email has no Pro, so nothing syncs (JP, 2026-11-17: Pro is sync)
-export type SyncStatus =
-  "local" | "synced" | "syncing" | "offline" | "error" | "locked";
+export type SyncStatus = "local" | "synced" | "syncing" | "offline" | "error" | "locked";
 export type SyncConflict = { local: ImportSummary; server: ImportSummary };
 export type SyncState = {
   configured: boolean; // false → no backend; the app is local-only and shows no account UI
@@ -83,13 +80,7 @@ export type AuthResult =
   | { ok: true }
   | {
       ok: false;
-      reason:
-        | "offline"
-        | "rate_limited"
-        | "bad_credentials"
-        | "not_confirmed"
-        | "weak_password"
-        | "failed";
+      reason: "offline" | "rate_limited" | "bad_credentials" | "not_confirmed" | "weak_password" | "failed";
     };
 export type ConflictChoice = "local" | "server";
 
@@ -127,17 +118,11 @@ export type EngineOptions = {
 
 export const PUSH_DEBOUNCE_MS = 1500;
 
-const defaultOnline = () =>
-  typeof navigator === "undefined" || navigator.onLine !== false;
+const defaultOnline = () => typeof navigator === "undefined" || navigator.onLine !== false;
 
-const toRow = (raw: RawRow): ServerRow => ({
-  data: normalizeData(raw.data).data,
-  updatedAt: raw.updatedAt,
-});
+const toRow = (raw: RawRow): ServerRow => ({ data: normalizeData(raw.data).data, updatedAt: raw.updatedAt });
 
-const authReason = (
-  e: unknown,
-): Exclude<AuthResult, { ok: true }>["reason"] => {
+const authReason = (e: unknown): Exclude<AuthResult, { ok: true }>["reason"] => {
   if (!(e instanceof SyncError)) return "failed";
   return e.kind === "network" ? "offline" : e.kind;
 };
@@ -184,9 +169,7 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
     else if (busy || checkingPro) status = "syncing";
     else if (net !== "ok") status = net === "offline" ? "offline" : "error";
     else status = isDirty(meta) || uncommittedUser ? "syncing" : "synced";
-    const conflict = conflictRow
-      ? { local: summarize(data), server: summarize(conflictRow.data) }
-      : null;
+    const conflict = conflictRow ? { local: summarize(data), server: summarize(conflictRow.data) } : null;
     return {
       configured: true,
       ready,
@@ -218,14 +201,12 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
   };
 
   const fail = (e: unknown) => {
-    const offline =
-      !isOnline() || (e instanceof SyncError && e.kind === "network");
+    const offline = !isOnline() || (e instanceof SyncError && e.kind === "network");
     net = offline ? "offline" : "error";
     if (!offline) console.warn("sync failed", e);
   };
 
-  const canSync = () =>
-    running && session !== null && pro === true && conflictRow === null;
+  const canSync = () => running && session !== null && pro === true && conflictRow === null;
 
   // Pro first (JP, 2026-11-17): nothing is pulled or pushed for an email without it. The server
   // refuses too (has_pro() in supabase/schema.sql); this keeps the app from trying.
@@ -289,11 +270,7 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
       case "synced": {
         const commit = uncommittedUser;
         uncommittedUser = null;
-        store.setMeta((m) => ({
-          ...m,
-          syncedAt: d.syncedAt,
-          userId: commit ?? m.userId,
-        }));
+        store.setMeta((m) => ({ ...m, syncedAt: d.syncedAt, userId: commit ?? m.userId }));
         break;
       }
       case "apply":
@@ -339,12 +316,7 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
         break;
       case "markSynced":
         uncommittedUser = null;
-        store.setMeta((m) => ({
-          ...m,
-          updatedAt: d.updatedAt,
-          syncedAt: d.updatedAt,
-          userId,
-        }));
+        store.setMeta((m) => ({ ...m, updatedAt: d.updatedAt, syncedAt: d.updatedAt, userId }));
         break;
       case "conflict":
         uncommittedUser = null;
@@ -355,10 +327,7 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
       case "push":
         uncommittedUser = first ? userId : null;
         if (d.updatedAt > meta.updatedAt)
-          store.setMeta((m) => ({
-            ...m,
-            updatedAt: Math.max(m.updatedAt, d.updatedAt),
-          }));
+          store.setMeta((m) => ({ ...m, updatedAt: Math.max(m.updatedAt, d.updatedAt) }));
         await pushOp(g);
         return;
     }
@@ -572,10 +541,7 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
         return;
       }
       // keep this device's copy: stamp it later than the server's so the push wins
-      store.setMeta((m) => ({
-        ...m,
-        updatedAt: winningUpdatedAt(m, row, now()),
-      }));
+      store.setMeta((m) => ({ ...m, updatedAt: winningUpdatedAt(m, row, now()) }));
       uncommittedUser = userId;
       requestPush();
       emit();

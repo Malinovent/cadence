@@ -55,10 +55,7 @@ const STARTING: SyncState = {
 const NOT_CONFIGURED: AuthResult = { ok: false, reason: "failed" };
 
 // Starts sync for the app's store when Supabase is configured; otherwise a local-only no-op.
-export function useSync(
-  store: CadenceStore,
-  client: SyncClient | null = syncClient,
-): UseSync {
+export function useSync(store: CadenceStore, client: SyncClient | null = syncClient): UseSync {
   const engineRef = useRef<SyncEngine | null>(null);
   const [state, setState] = useState<SyncState>(client ? STARTING : LOCAL_ONLY);
 
@@ -92,24 +89,14 @@ export function useSync(
 
   const actions = useMemo<SyncActions>(
     () => ({
-      signIn: (email, password) =>
-        engineRef.current?.signIn(email, password) ??
-        Promise.resolve(NOT_CONFIGURED),
-      signUp: (email, password) =>
-        engineRef.current?.signUp(email, password) ??
-        Promise.resolve(NOT_CONFIGURED),
-      sendReset: (email) =>
-        engineRef.current?.sendReset(email) ?? Promise.resolve(NOT_CONFIGURED),
-      setPassword: (password) =>
-        engineRef.current?.setPassword(password) ??
-        Promise.resolve(NOT_CONFIGURED),
-      signInWith: (provider) =>
-        engineRef.current?.signInWith(provider) ??
-        Promise.resolve(NOT_CONFIGURED),
+      signIn: (email, password) => engineRef.current?.signIn(email, password) ?? Promise.resolve(NOT_CONFIGURED),
+      signUp: (email, password) => engineRef.current?.signUp(email, password) ?? Promise.resolve(NOT_CONFIGURED),
+      sendReset: (email) => engineRef.current?.sendReset(email) ?? Promise.resolve(NOT_CONFIGURED),
+      setPassword: (password) => engineRef.current?.setPassword(password) ?? Promise.resolve(NOT_CONFIGURED),
+      signInWith: (provider) => engineRef.current?.signInWith(provider) ?? Promise.resolve(NOT_CONFIGURED),
       recheckPro: () => engineRef.current?.recheckPro(),
       signOut: () => engineRef.current?.signOut() ?? Promise.resolve(),
-      deleteAccount: () =>
-        engineRef.current?.deleteAccount() ?? Promise.resolve(NOT_CONFIGURED),
+      deleteAccount: () => engineRef.current?.deleteAccount() ?? Promise.resolve(NOT_CONFIGURED),
       resolveConflict: (choice) => engineRef.current?.resolveConflict(choice),
     }),
     [],

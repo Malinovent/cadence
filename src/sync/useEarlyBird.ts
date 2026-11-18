@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  cachedEarlyBird,
-  entitlementEmail,
-  parseEarlyBird,
-} from "../lib/earlyBird";
+import { cachedEarlyBird, entitlementEmail, parseEarlyBird } from "../lib/earlyBird";
 import { supabase } from "./client";
 
 // S1.11: is the signed-in email an early bird? Remembered per device for that email
@@ -27,9 +23,7 @@ const writeCache = (email: string | null) => {
 };
 
 export function useEarlyBird(email: string | null): boolean {
-  const [fresh, setFresh] = useState<{ email: string; early: boolean } | null>(
-    null,
-  );
+  const [fresh, setFresh] = useState<{ email: string; early: boolean } | null>(null);
 
   useEffect(() => {
     if (!supabase || !email) return;
