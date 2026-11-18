@@ -156,7 +156,14 @@ Breakpoint: "phone" = viewport width < 900px (same as the Phase 2 stacking CSS).
 - SQL lives in `supabase/schema.sql` (idempotent: `create table if not exists`, `create or replace function`, `drop policy if exists` + create).
 - `data` = `{ schemaVersion: 2, cats, weeks, templates, history, streaks }` (same as the export envelope's data plus schemaVersion). Anything pulled goes through `normalizeData`.
 
-### Auth
+### Auth (changed 2026-11-17: sign-in first, passwords, no emailed codes)
+- The app opens on a full-screen sign-in page (`SignInPage`, intro-page card styles) when sync is configured, the session is known, nobody is signed in and this device hasn't chosen "Continue without an account" (`cadence:ui:signin-skipped`); rule in `src/lib/signInGate.ts`. Arriving from a reset link always shows it, on "Choose a new password". New people get the intro page after it; someone signing in to an account that already has weeks skips the intro.
+- Methods (`SignInForm`, also in Settings → Sync): Continue with Google / Apple (`VITE_AUTH_PROVIDERS`), then email + password: `signInWithPassword`; Create an account `signUp` (8+ characters, "Confirm email" on in Supabase: Pro follows the email, so an unconfirmed address must not sign in; same "check your email" answer whether or not the address already has an account); Forgot your password `resetPasswordForEmail(email, { redirectTo: <app url> })`, then the `PASSWORD_RECOVERY` event puts the engine in `recovery` until `updateUser({ password })` succeeds.
+- Errors: wrong email or password, email not confirmed yet, password too short, too many tries, offline.
+- Emailed codes (`signInWithOtp` / `verifyOtp`) are gone. People who used them set a password with "Forgot your password?" or use Google with the same address.
+- French is off for now (`FRENCH_ON = false` in `src/i18n/lang.ts`): everything shows in English and the language pickers are hidden; `fr.ts` is kept up to date.
+
+### Auth (before 2026-11-17, superseded above)
 - Supabase email OTP via `signInWithOtp({ email, options: { emailRedirectTo: <app url>, shouldCreateUser: true } })`.
 - iOS caveat: a home-screen PWA does not share storage with Safari, so a magic LINK opened from Mail signs in Safari, not the installed app. Therefore the email contains BOTH the link and a numeric code, 6–10 digits per project setting (custom email template using `{{ .Token }}`), and the app offers a code field (`verifyOtp({ email, token, type: "email" })`). The link still works on desktop/when opened in the same browser (`detectSessionInUrl`).
 - Session persisted by supabase-js in localStorage (key prefix `sb-`), auto refresh on.

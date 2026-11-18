@@ -39,7 +39,8 @@
 - `src/lib/syncLogic.ts` — pure sync decisions: `decideAfterPull`, `decideAfterPush`, `isEmptyData`, `contentEqual` / `jsonEqual` (key-order-insensitive), `winningUpdatedAt`
 - `src/lib/transfer.ts` — export envelope/filename, `parseImport`
 - `src/lib/format.ts` — UI sentence formatting: import summary line, skipped-entries line
-- `src/lib/syncUi.ts` — sync UI wording: header status label + dot colour, Settings status sentence, auth error messages, email / 6-digit code checks, `isRemoteApply` (data changed by a server copy)
+- `src/lib/signInGate.ts` — when the app opens on the sign-in page (`shouldShowSignIn`)
+- `src/lib/syncUi.ts` — sync UI wording: header status label + dot colour, Settings status sentence, auth error messages, email and password (8+) checks, `isRemoteApply` (data changed by a server copy)
 - `src/lib/download.ts` — browser-only `downloadText` (Blob + object URL + `<a download>`)
 - `src/lib/actions.ts` — pure state transitions on `CadenceData` (blocks, templates, categories, tasks)
 - `src/lib/stats.ts` — derived numbers: `weekBalance` (S1.2), `quotaStatus`, `completion`, `statsByCat`, `maxHours`, hour→minute conversions
@@ -76,6 +77,7 @@
 - `src/state/useCadence.ts` — `useCadence` hook: renders from the store (`useSyncExternalStore`); data, meta, bound user actions, `store`
 - `src/sync/useEarlyBird.ts` — S1.11 is the signed-in email an early bird? (entitlements, remembered per device)
 - `src/state/onboardingPrefs.ts` — per device: the purpose page was finished or skipped (`cadence:ui:onboarded`)
+- `src/state/signInPrefs.ts` — per device: "Continue without an account" on the sign-in page (`cadence:ui:signin-skipped`)
 - `src/state/checklistPrefs.ts` — per device: the getting-started checklist shown, closed, folded, and what's been done since it started (`cadence:ui:checklist`); `restartChecklist` for a replay; `checklistPrefs.test.ts`
 - `src/state/useOnboarding.ts` — `useOnboarding`: purpose page, the guided step in progress, the checklist and its "Show me" for each item, replay; steps just done (`earn`) and their feedback: toast news, board cross-offs, the finale
 - `src/state/welcomePrefs.ts` — per-device: the absence the welcome-back card was answered for (`cadence:ui:welcomeAnswered`)
@@ -108,7 +110,7 @@
 - `src/components/SlotMenu.tsx` — S1.6 the add window (desktop, beside the slot) / floating sheet (phone): one-tap grid of areas and the buffer
 - `src/components/WelcomeBack.tsx` — S1.7 "Welcome back. Start this week fresh from a template?" card
 - `src/components/UndoBar.tsx` — the Undo bar after a week is replaced
-- `src/components/PurposePage.tsx` — the purpose page for new people: what it's for, an example week, sign in, Skip / Show me how
+- `src/components/PurposePage.tsx` — the purpose page for new people: what it's for, an example week, Skip / Show me how
 - `src/components/Coach.tsx` — one guided hint: a ring around its `data-coach` target and a small bubble beside it; never blocks the page
 - `src/components/Checklist.tsx` — "Getting started": five items that tick themselves, "Show me" for each open one, fold and close; crosses off fresh steps when on screen and says whether it is
 - `src/components/QuestToast.tsx` — a step done away from the checklist: the toast at the top (check, strike, five squares, Next · Show me)
@@ -129,7 +131,9 @@
 - `src/components/GoalText.tsx` — an area's target, number first with its sign ("≥ 4 h at least"); the Areas list and Stats rows
 - `src/components/CategoriesView.tsx` — the Areas tab: a list (icon on colour, name, weekly goal); tap one to change its name, At least / At most / Between, hours and block length (− / ＋ in half hours), colour (palette or any), icon; delete asks first
 - `src/components/SettingsView.tsx` — "Your data": export / import with summary + confirm, download of the pre-guardrails copy, balanced-week rules, Your day (calendar hours), sounds, language; hosts "Account & sync" when sync is configured; About (what it is, show the introduction again, privacy and terms, help and feedback)
-- `src/components/AccountSync.tsx` — Settings "Account & sync": conflict card, signed-out email form → code entry, signed-in email + status + sign out, "Delete my account" (asked first)
+- `src/components/SignInPage.tsx` — what the app opens on when signed out (until skipped on this device): the sign-in form + "Continue without an account"
+- `src/components/SignInForm.tsx` — Google / Apple, email + password sign in, create an account, reset link, new password (sign-in page and Settings)
+- `src/components/AccountSync.tsx` — Settings "Account & sync": conflict card, signed-out SignInForm, signed-in email + status + sign out, "Delete my account" (asked first)
 - `src/lib/icons.ts` — the area icon names (`AREA_ICONS`, `isAreaIcon`)
 - `src/components/AreaIconView.tsx` — an area's icon (lucide) in its colour, or its colour dot (`AreaMark`)
 - `src/lib/templatePreview.ts` — what a template, starter or day template would do (`previewChange`), and the miniature's hours
@@ -143,3 +147,4 @@
 - `src/components/CrashScreen.tsx` — "Something went wrong": Reload, Download my data, Write to us, what happened
 - `.github/workflows/deploy.yml` — CI: test, lint, build, deploy to GitHub Pages
 - `handoff/INSTALL-IPHONE.md` — one-page install + sign-in note for the end user
+- `docs/superpowers/specs/2026-11-17-sign-in-first-design.md`, `docs/superpowers/plans/2026-11-17-sign-in-first.md` — sign-in first: design and build plan

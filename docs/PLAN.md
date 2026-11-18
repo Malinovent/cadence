@@ -194,3 +194,6 @@ Left: GitHub repo + Pages + rebalanceweek.com over HTTPS; repo variables (site `
 
 ### [ ] D1. Desktop app — Medium (JP, 2026-11-17)
 JP wants Rebalance as a proper desktop app, not a browser tab. Today it already installs from Chrome or Edge (install icon in the address bar) with its own window, icon and offline use. To decide with JP: is that install enough once it's easy to find (an "Install on this computer" button in the app and on the site), or a store app (Microsoft Store and Mac App Store, by packaging the web app with PWABuilder), or a native shell (Tauri)? Constraints: same address and `cadence:*` keys, so a packaged app must load https://malinovent.github.io/cadence/ (data is stored per address) or sync through the account.
+
+### [x] A1. Sign-in first, passwords, French off — Medium (JP, 2026-11-17)
+The app opens on sign-in when signed out (Google, or email + password; create an account; forgot password), with "Continue without an account" remembered per device. Emailed codes removed. French switched off by `FRENCH_ON` until JP asks for it back. Design and plan in `docs/superpowers/`. Left: JP checks the Supabase email settings and templates (`docs/SIGNIN_SETUP.md` part 5), then deploy.

@@ -1,6 +1,6 @@
 # Sign-in and Pro setup
 
-The email code keeps working as it is. Google and Apple are extra buttons that stay hidden until
+Sign-in is Google (and Apple), or an email and password account. Google and Apple are buttons that stay hidden until
 you finish their part and switch them on (part 4). Do Google first: it's free. Apple needs a paid
 Apple Developer account ($99 USD a year).
 
@@ -67,3 +67,22 @@ Then **Actions → Deploy to GitHub Pages → Run workflow**.
 - Signed in with an email that has Pro: "Everything's synced."
 - Signed in with an email without Pro: "Sync is part of Pro", a **Get Pro** button, and the hint
   to sign in with the email they bought with.
+
+## 6. Email and password accounts (2026-11-17)
+Supabase → **Authentication**:
+1. **Sign In / Providers → Email**: enabled, **Confirm email** ON (Pro follows the email: an address must be
+   confirmed before it can sign in), **Minimum password length** 8. Save.
+2. **Emails → Templates → Confirm signup**: subject `Confirm your Rebalance account`, body:
+   ```html
+   <h2>Confirm your Rebalance account</h2>
+   <p><a href="{{ .ConfirmationURL }}">Confirm my email</a></p>
+   <p>Then go back to Rebalance and sign in with your email and password.</p>
+   ```
+3. **Emails → Templates → Reset password**: subject `Choose a new Rebalance password`, body:
+   ```html
+   <h2>Choose a new password</h2>
+   <p><a href="{{ .ConfirmationURL }}">Choose a new password</a></p>
+   <p>Didn't ask for this? You can ignore this email.</p>
+   ```
+4. The old Magic Link template (with the code) is no longer used.
+5. **URL Configuration → Redirect URLs** still lists `https://malinovent.github.io/cadence/`.
