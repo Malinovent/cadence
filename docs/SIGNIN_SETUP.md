@@ -25,7 +25,7 @@ Never paste a secret (client secret, .p8 key) into a chat or a file.
    - **Audience → Publish app** so anyone can sign in, not only test users.
 3. **Clients** (or **Credentials → Create credentials → OAuth client ID**):
    - Type **Web application**, name `Rebalance web`.
-   - Authorized JavaScript origins: `https://malinovent.github.io`
+   - Authorized JavaScript origins: `https://rebalanceweek.com` and `https://malinovent.github.io` (the old address)
    - Authorized redirect URI: `https://qbivyiyclkpwecuruvst.supabase.co/auth/v1/callback`
    - **Create**, then copy the **Client ID** and **Client secret**.
 4. Supabase → **Authentication → Sign In / Providers → Google** → enable, paste both → **Save**.
@@ -85,4 +85,5 @@ Supabase → **Authentication**:
    <p>Didn't ask for this? You can ignore this email.</p>
    ```
 4. The old Magic Link template (with the code) is no longer used.
-5. **URL Configuration → Redirect URLs** still lists `https://malinovent.github.io/cadence/`.
+5. **URL Configuration**: Site URL `https://rebalanceweek.com/app/`; Redirect URLs list
+   `https://rebalanceweek.com/app/**` and still `https://malinovent.github.io/cadence/**` (see `docs/DOMAIN_MOVE.md`).

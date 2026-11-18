@@ -11,13 +11,14 @@
 - `docs/SUPABASE_SETUP.md` — click-through guide for the user: Supabase project, schema, auth emails, GitHub variables
 - `docs/SIGNIN_SETUP.md` — guide for the user: Pro in the database, Google and Apple sign-in, the GitHub variables that switch them on
 - `docs/PADDLE_SETUP.md` — guide for the user: Paddle sandbox and live, product and price, tokens, webhook, secrets, test purchase
+- `docs/DOMAIN_MOVE.md` — the app at rebalanceweek.com/app/: how the two repos build it, the going-live order, the old address's move card
 - `supabase/schema.sql` — sync backend: `entitlements` (+ `pro`), `has_pro()`, `cadence_state` table with RLS policies that need Pro, `push_state` LWW function, `delete_my_account` (idempotent; pasted into the Supabase SQL editor)
 - `.env.example` — env keys (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`); copy to `.env.local` (gitignored) for dev
 - `legacy/cadence.html` — original single-file app; read-only reference
 - `handoff/cadence-export.html` — migration file: byte copy of `legacy/cadence.html` plus one marked block (`<!-- cadence-export:start/end -->`) adding an "↓ Export my data" button that downloads the five `cadence:*` keys as the export envelope; tested by `src/lib/legacyExport.test.ts`
 - `package.json` — npm scripts and dependencies (`npm run icons` regenerates `public/` icons)
 - `index.html` — Vite entry HTML (title, favicons, apple-touch-icon, iOS/PWA meta tags, `viewport-fit=cover`, root div)
-- `vite.config.ts` — Vite + Vitest + `vite-plugin-pwa` config (`base: "/cadence/"`, web manifest, Workbox generateSW precache)
+- `vite.config.ts` — Vite + Vitest + `vite-plugin-pwa` config (base from `VITE_BASE`: `/cadence/` by default, `/app/` on rebalanceweek.com; web manifest, Workbox generateSW precache)
 - `assets/icon.svg` — app icon source art (180×180, opaque); edit this, then run `npm run icons`
 - `scripts/icons.mjs` — renders `assets/icon.svg` into the icons in `public/` (sharp)
 - `public/` — generated, committed icons copied as-is into the build: `favicon.ico`, `favicon.svg`, `apple-touch-icon-180x180.png`, `pwa-192x192.png`, `pwa-512x512.png`, `maskable-icon-512x512.png`
@@ -58,6 +59,7 @@
 - `src/lib/sheet.ts` — the phone block sheet: how far the keyboard covers the screen (`keyboardInset`), the header's day and time (`blockWhen`)
 - `src/lib/blockCount.ts` — visual B: an area's week as squares (one per block of its goal), blocks to go / left / over, rounded to halves, the status words
 - `src/lib/legal.ts` — links to the site's privacy policy and terms, by language; help and feedback (`helpLinks`: the site's FAQ, a mail to VITE_SUPPORT_EMAIL)
+- `src/lib/handoff.ts` — moving to rebalanceweek.com: the new address (`movedTo`), the old addresses accepted (`handoffOrigins`), the hand-off messages and the old side's states
 - `src/lib/crash.ts` — the crash screen's backup: the stored keys exactly as they are (`crashBackup`), importable
 - `src/lib/sounds.ts` — the sounds as tones (place, tick, untick, remove, step, finale), quiet and short
 - `src/lib/statsWeeks.ts` — Stats week by week: `weekSpan`, `shiftWeek`, `weekRows`, `weekGap` / `gapText`, `rowBar`, `areaTrends`, `areaLines` (trends), `monthStarts`
@@ -79,6 +81,7 @@
 - `src/state/onboardingPrefs.ts` — per device: the purpose page was finished or skipped (`cadence:ui:onboarded`)
 - `src/state/signInPrefs.ts` — per device: "Continue without an account" on the sign-in page (`cadence:ui:signin-skipped`)
 - `src/state/checklistPrefs.ts` — per device: the getting-started checklist shown, closed, folded, and what's been done since it started (`cadence:ui:checklist`); `restartChecklist` for a replay; `checklistPrefs.test.ts`
+- `src/state/useHandoffReceive.ts` — the new address's side of the move: opened as `#handoff`, says ready to the old address, holds what arrives until the person answers
 - `src/state/useOnboarding.ts` — `useOnboarding`: purpose page, the guided step in progress, the checklist and its "Show me" for each item, replay; steps just done (`earn`) and their feedback: toast news, board cross-offs, the finale
 - `src/state/welcomePrefs.ts` — per-device: the absence the welcome-back card was answered for (`cadence:ui:welcomeAnswered`)
 - `src/state/panelPrefs.ts` — read/write the per-device panel hidden / tray folded choice (`cadence:ui:trayHidden`)
@@ -102,6 +105,8 @@
 - `src/i18n/I18nProvider.tsx` — S1.9 `useI18n()`: the catalogue, language and locale for the app; keeps `<html lang>` and the title in step
 - `src/appName.ts` — the product name, in one place
 - `src/components/` — React view components
+- `src/components/MovedCard.tsx` — the old address only: "Rebalance has moved", Bring my weeks there (the hand-off), Download a copy
+- `src/components/HandoffCard.tsx` — the new address: weeks arriving from the old one, what's in them, Bring them here / Not now
 - `src/components/Header.tsx` — logo, tagline, nav buttons (`View` type); sync status line under the nav when signed in (opens Settings)
 - `src/components/AreasPanel.tsx` — S1.4 desktop left panel: area chips each with its block count, buffer, tasks, hide; shared `PanelProps`, `armHint`
 - `src/components/PhoneDock.tsx` — S1.4 phone tray docked at the bottom: Areas / Tasks tabs, fold to a slim "Show areas and tasks" bar, page spacer, `data-cadence-dock`

@@ -184,6 +184,10 @@ Done on branch `s1-finish`: "Last week" in Stats, one describing sentence per ar
 ### [x] S1.11 Early-bird badge
 Done on branch `s1-finish`: reads `entitlements.early_bird` for the signed-in email; badge by the logo, thank-you in Settings; remembered per device. Not checked against a live early-bird account yet (needs a real purchase row). Shipped to main 2026-11-04.
 
+### [~] D1. The app at rebalanceweek.com/app/ — Careful
+JP (2026-11-18): one proper website. The site at the root, the app at `/app/`, one deploy from the site repo (it builds the app from this repo with `VITE_BASE=/app/`); this repo's deploy asks it to rebuild (`SITE_DISPATCH_TOKEN`). The old address stays up with a "Rebalance has moved" card and a one-tap hand-off of the weeks (asks first on the new address; the file as fallback). Checked end to end in a headless browser across two local addresses: weeks arrive, Not now leaves both sides as they were, the old address keeps its copy; site pages stay outside the app's service worker.
+Left: push both repos, the site's `APP_*` variables, Supabase URL settings and Google origin (JP), then `VITE_MOVED_TO` on the cadence repo (`docs/DOMAIN_MOVE.md`). Later: the root becomes the app once Paddle approves.
+
 ### [~] P1. Pro is sync; Google and Apple sign-in — Careful
 JP (2026-11-17): Pro = sync between devices. The app asks for Pro after sign-in (`entitlements`: `pro` by hand or `early_bird` from the purchase) and syncs only with it; the database refuses too (`has_pro()` in the `cadence_state` policies). People who synced before keep Pro. Without Pro: "Sync is part of Pro", Get Pro (the site's offer), "I just bought it", and the hint to sign in with the email they paid with. Google and Apple buttons above the email code, shown once `VITE_AUTH_PROVIDERS` lists them. Tested (engine, links, provider switch).
 Left: JP runs `supabase/schema.sql`, follows `docs/SIGNIN_SETUP.md` (Google, optionally Apple), sets the GitHub variables; check sign-in with Google on a phone.

@@ -60,6 +60,14 @@ import type { Bounds } from "./lib/placement";
 import { useEarlyBird } from "./sync/useEarlyBird";
 import { FONT_IMPORT, S } from "./styles";
 import { useI18n } from "./i18n/I18nProvider";
+import MovedCard from "./components/MovedCard";
+import HandoffCard from "./components/HandoffCard";
+import { movedTo } from "./lib/handoff";
+import { useHandoffReceive } from "./state/useHandoffReceive";
+
+// the old address's build only (JP, 2026-11-18): where Rebalance lives now. That build shows the
+// move and the app as it was, without the sign-in and intro pages a new visitor would get.
+const MOVED_TO = movedTo(import.meta.env.VITE_MOVED_TO);
 
 export default function App() {
   const { data, actions, store } = useCadence();
@@ -238,14 +246,14 @@ export default function App() {
   });
   // sign-in first (JP, 2026-11-17): the app opens on sign-in until signed in or skipped on this device
   const [signInSkipped, setSignInSkipped] = useState(readSignInSkipped);
-  const showSignIn = shouldShowSignIn({
+  const showSignIn = !MOVED_TO && shouldShowSignIn({
     configured: sync.configured,
     ready: sync.ready,
     signedIn: sync.session !== null || sync.restoreFailed, // offline with a saved session: still signed in
     skipped: signInSkipped,
     recovery: sync.recovery,
   });
-  const showIntro = shouldShowIntro({
+  const showIntro = !MOVED_TO && shouldShowIntro({
     intro: onb.intro,
     signInShown: showSignIn,
     ready: sync.ready,
@@ -315,6 +323,18 @@ export default function App() {
     actions.replaceAll(next);
     setEditingId(null);
     changeWeek(0);
+  };
+
+  // weeks arriving from the old address (JP, 2026-11-18): in only once the person says so, and
+  // then straight to them: no sign-in or intro page in front (sign-in stays in Settings)
+  const handoff = useHandoffReceive();
+  const bringHandoff = () => {
+    const r = handoff.arrival?.result;
+    if (!r?.ok) return handoff.declined();
+    onReplace(r.data);
+    skipSignIn();
+    onb.notNew();
+    handoff.received();
   };
 
   // S1.5: as the clock passes the end of a block that wasn't ticked, its tasks go back to their
@@ -479,6 +499,7 @@ export default function App() {
         earlyBird={earlyBird}
         phone={isPhone}
       />
+      {MOVED_TO && <MovedCard to={MOVED_TO} data={data} />}
       {view === "calendar" && sync.conflict && (
         <div style={S.conflictBanner}>
           <span>{m.conflict.banner}</span>
@@ -682,6 +703,15 @@ export default function App() {
           sendReset={sync.sendReset}
           setPassword={sync.setPassword}
           signInWith={sync.signInWith}
+        />
+      )}
+      {handoff.arrival && (
+        <HandoffCard
+          summary={handoff.arrival.result.ok ? handoff.arrival.result.summary : null}
+          failed={!handoff.arrival.result.ok}
+          phone={isPhone}
+          onBring={bringHandoff}
+          onNotNow={handoff.declined}
         />
       )}
     </div>

@@ -13,6 +13,28 @@ export const fr: Messages = {
     earlyBird: "Lève-tôt",
   },
   conflict: { banner: "Cet appareil et votre compte ont chacun un horaire.", choose: "Choisir lequel garder →" },
+  moved: {
+    title: (host) => `Rebalance a déménagé à ${host}`,
+    body: "Vos semaines sont toujours ici. Apportez-les à la nouvelle adresse en un toucher; elles restent aussi ici.",
+    bring: "Apporter mes semaines",
+    opening: "Ouverture de la nouvelle adresse… Regardez l'onglet qui s'est ouvert.",
+    sent: "Envoyé. Acceptez dans le nouvel onglet pour les y mettre.",
+    done: "C'est fait. Vos semaines sont à la nouvelle adresse. Vous pouvez fermer cet onglet.",
+    declined: "Rien n'a été apporté. Vos semaines sont toujours ici; réessayez quand vous voulez.",
+    failed:
+      "Le nouvel onglet n'a pas répondu. Téléchargez une copie, puis à la nouvelle adresse, ouvrez Réglages → Importer un fichier.",
+    download: "Télécharger une copie",
+    open: (host) => `Ouvrir ${host}`,
+  },
+  handoff: {
+    title: "Apporter vos semaines ici?",
+    replaces: "Cela remplace ce qui est sur cet appareil. L'ancienne adresse garde sa copie.",
+    bring: "Les apporter ici",
+    notNow: "Pas maintenant",
+    failed:
+      "Ces semaines ne sont pas arrivées. À l'ancienne adresse, téléchargez une copie, puis importez-la ici dans Réglages.",
+    ok: "D'accord",
+  },
   week: {
     names: ["Semaine 1", "Semaine 2"],
     showPanel: "◂ Afficher domaines et tâches",

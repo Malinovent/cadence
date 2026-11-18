@@ -1,3 +1,6 @@
+# The old address, malinovent.github.io/cadence/ (JP, 2026-11-18). Rebalance itself is served at
+# rebalanceweek.com/app/, built from this repo by Malinovent/rebalance-site's deploy; this one keeps the
+# old address working so people can bring their weeks over (VITE_MOVED_TO shows the move card).
 name: Deploy to GitHub Pages
 
 on:
@@ -34,6 +37,8 @@ jobs:
           VITE_SITE_URL: ${{ vars.VITE_SITE_URL }}
           VITE_SUPPORT_EMAIL: ${{ vars.VITE_SUPPORT_EMAIL }}
           VITE_AUTH_PROVIDERS: ${{ vars.VITE_AUTH_PROVIDERS }}
+          # set to https://rebalanceweek.com/app/ once the new address works: the old one then shows the move
+          VITE_MOVED_TO: ${{ vars.VITE_MOVED_TO }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -48,3 +53,20 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # rebalanceweek.com/app/ is built by the site repo: ask it to rebuild with this app. Needs the
+  # SITE_DISPATCH_TOKEN secret (docs/DOMAIN_MOVE.md); without it, run the site's deploy by hand.
+  notify-site:
+    needs: deploy
+    runs-on: ubuntu-latest
+    env:
+      TOKEN: ${{ secrets.SITE_DISPATCH_TOKEN }}
+    steps:
+      - if: env.TOKEN != ''
+        run: |
+          curl -fsS -X POST https://api.github.com/repos/Malinovent/rebalance-site/dispatches \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -d '{"event_type":"app-updated"}'
+      - if: env.TOKEN == ''
+        run: echo "No SITE_DISPATCH_TOKEN; run Malinovent/rebalance-site's deploy to update rebalanceweek.com/app/."

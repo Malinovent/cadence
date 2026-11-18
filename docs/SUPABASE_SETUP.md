@@ -50,9 +50,10 @@ Cadence signs you in with your email, with no password. Each email has a sign-in
     - If there's an **Email OTP Length** setting, make sure it's **6**.
     - Click **Save** if you changed anything.
 14. Open **URL Configuration**:
-    - **Site URL**: `https://malinovent.github.io/cadence/`
-    - Under **Redirect URLs**, click **Add URL** and add each of these two (one at a time):
-      - `https://malinovent.github.io/cadence/**`
+    - **Site URL**: `https://rebalanceweek.com/app/` (the app's address since 2026-11-18, `docs/DOMAIN_MOVE.md`)
+    - Under **Redirect URLs**, click **Add URL** and add each of these (one at a time):
+      - `https://rebalanceweek.com/app/**`
+      - `https://malinovent.github.io/cadence/**` (the old address, while people move)
       - `http://localhost:5173/cadence/**`
     - Click **Save**.
 15. Open **Emails** (on older dashboards: **Email Templates**), then the **Templates** tab if there is one.
@@ -121,7 +122,7 @@ The live app is built by GitHub, so GitHub needs the two values from Part 2.
 ## How to check it worked
 
 - **Database:** in Supabase, open **Table Editor**. You should see a table named `cadence_state`, marked as protected by RLS (Row Level Security). It stays empty until you sign in for the first time.
-- **Sign-in:** open https://malinovent.github.io/cadence/, go to **Settings** → **Account & sync**, enter your email, and tap **Send me a code**. Within a minute you get an email with a link and a code. Typing the code signs you in, and the header shows **synced**. (The account screen ships in the next Cadence update. Until then, the site looks the same as before.)
+- **Sign-in:** open https://rebalanceweek.com/app/, go to **Settings** → **Account & sync**, enter your email, and tap **Send me a code**. Within a minute you get an email with a link and a code. Typing the code signs you in, and the header shows **synced**. (The account screen ships in the next Cadence update. Until then, the site looks the same as before.)
 - **Data arrived:** back in **Table Editor** → `cadence_state`, there's now one row: your schedule.
 - **Second device:** sign in on your phone with the same email. Your week appears. If the phone already had a different schedule, Cadence asks which one to keep.
 - **Something's off?**

@@ -1,6 +1,6 @@
 # Brief: Cadence 2.0, an installable web app (PWA) that syncs across devices
 
-> **2026-11-09:** the product is now called **Rebalance** (same in French); its site is **rebalanceweek.com**. This brief keeps the original wording. The app's address (`/cadence/`) and `cadence:*` storage keys stay so existing data survives.
+> **2026-11-09:** the product is now called **Rebalance** (same in French); its site is **rebalanceweek.com**. This brief keeps the original wording. The `cadence:*` storage keys stay so existing data survives. **2026-11-18:** the app moves to **rebalanceweek.com/app/**; the old address (`malinovent.github.io/cadence/`) stays up and hands people's weeks over (`docs/DOMAIN_MOVE.md`).
 
 ## Goal
 Turn **Cadence** (my weekly time-balancing app, currently `cadence.html` in this folder) into an installable web app (PWA) that one user, a friend of mine, can use on her **computer** and her **iPhone**, with her data **synced between the two**.

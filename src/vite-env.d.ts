@@ -11,6 +11,12 @@ interface ImportMetaEnv {
   readonly VITE_SUPPORT_EMAIL?: string;
   /** Google / Apple sign-in once set up in Supabase: "google,apple" */
   readonly VITE_AUTH_PROVIDERS?: string;
+  /** the old address's build only: where Rebalance lives now (src/lib/handoff.ts) */
+  readonly VITE_MOVED_TO?: string;
+  /** the old addresses the new one accepts weeks from; default https://malinovent.github.io */
+  readonly VITE_HANDOFF_FROM?: string;
+  /** where the app is served: /cadence/ (default) or /app/ (vite.config.ts) */
+  readonly VITE_BASE?: string;
 }
 
 interface ImportMeta {

@@ -12,6 +12,28 @@ export const en = {
     earlyBird: "Early bird",
   },
   conflict: { banner: "This device and your account both have a schedule.", choose: "Choose which to keep →" },
+  // the old address only (JP, 2026-11-18): Rebalance moved to rebalanceweek.com
+  moved: {
+    title: (host: string) => `Rebalance has moved to ${host}`,
+    body: "Your weeks are still here. Bring them to the new address in one tap; they stay here too.",
+    bring: "Bring my weeks there",
+    opening: "Opening the new address… Check the tab that opened.",
+    sent: "Sent. Say yes in the new tab to bring them in.",
+    done: "Done. Your weeks are at the new address. You can close this tab.",
+    declined: "Not brought over. Your weeks are still here; try again any time.",
+    failed: "The new tab didn't answer. Download a copy, then at the new address open Settings → Import from file.",
+    download: "Download a copy",
+    open: (host: string) => `Open ${host}`,
+  },
+  // the new address: weeks arriving from the old one
+  handoff: {
+    title: "Bring your weeks here?",
+    replaces: "This replaces what's on this device. The old address keeps its copy.",
+    bring: "Bring them here",
+    notNow: "Not now",
+    failed: "Those weeks didn't come through. At the old address, download a copy, then import it here in Settings.",
+    ok: "OK",
+  },
   week: {
     names: ["Week 1", "Week 2"] as [string, string],
     showPanel: "◂ Show areas and tasks",
