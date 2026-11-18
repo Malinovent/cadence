@@ -1,7 +1,8 @@
 // S1.9: the French (Canada) wording of src/lib (see words.ts). JP reviews the French.
 import type { DescribeWords, LibWords } from "./words";
 
-const plural = (n: number, one: string, many: string) => `${n} ${n <= 1 ? one : many}`;
+const plural = (n: number, one: string, many: string) =>
+  `${n} ${n <= 1 ? one : many}`;
 // durations arrive already written the French way: « 1,5 » on screen, « 1,5 h » in sentences
 
 const DESCRIBE_FR: DescribeWords = {
@@ -12,7 +13,8 @@ const DESCRIBE_FR: DescribeWords = {
   ceilingWithin: (n, d, max) => `${n} : dans la limite de ${max} (${d}).`,
   ceilingOver: (n, o, d, max) => `${n} : ${o} au-delà de ${max} (${d}).`,
   rangeIn: (n, d, min, max) => `${n} : entre ${min} et ${max} (${d}).`,
-  rangeShort: (n, d, min, max) => `${n} : sous les ${min} à ${max} visées (${d}).`,
+  rangeShort: (n, d, min, max) =>
+    `${n} : sous les ${min} à ${max} visées (${d}).`,
   rangeOver: (n, o, d, max) => `${n} : ${o} au-delà de ${max} (${d}).`,
 };
 
@@ -34,21 +36,34 @@ export const LIB_FR: LibWords = {
     sessions: (n) => plural(n, "séance notée", "séances notées"),
     streaks: (n) => plural(n, "série", "séries"),
     tasks: (n) => plural(n, "tâche", "tâches"),
-    dropped: (n) => `${plural(n, "entrée ignorée", "entrées ignorées")} : elles ne semblaient pas valides.`,
+    dropped: (n) =>
+      `${plural(n, "entrée ignorée", "entrées ignorées")} : elles ne semblaient pas valides.`,
   },
   sync: {
-    badge: { synced: "synchronisé", syncing: "synchro…", offline: "hors ligne", error: "erreur de synchro", locked: "cet appareil" },
+    badge: {
+      synced: "synchronisé",
+      syncing: "synchro…",
+      offline: "hors ligne",
+      error: "erreur de synchro",
+      locked: "cet appareil",
+    },
     sentence: {
       synced: "Tout est synchronisé.",
       syncing: "Enregistrement des changements…",
-      offline: "Hors ligne. Les changements sont gardés sur cet appareil et se synchroniseront plus tard.",
+      offline:
+        "Hors ligne. Les changements sont gardés sur cet appareil et se synchroniseront plus tard.",
       error:
         "Impossible de joindre votre compte. Les changements sont gardés sur cet appareil et se synchroniseront plus tard.",
-      locked: "Pas de synchro : elle fait partie de Pro. Vos semaines restent sur cet appareil.",
+      locked:
+        "Pas de synchro : elle fait partie de Pro. Vos semaines restent sur cet appareil.",
     },
     auth: {
-      invalid_code: "Ce code n'a pas fonctionné. Réessayez ou demandez-en un nouveau.",
-      rate_limited: "Trop de courriels pour l'instant. Réessayez dans une heure.",
+      bad_credentials: "Ce courriel et ce mot de passe ne correspondent pas.",
+      not_confirmed:
+        "Confirmez d'abord votre courriel : le lien est dans votre boîte de réception.",
+      weak_password: "Utilisez au moins 8 caractères.",
+      rate_limited:
+        "Trop d'essais pour l'instant. Attendez une minute et réessayez.",
       offline: "Vous êtes hors ligne. Connectez-vous et réessayez.",
       failed: "Quelque chose n'a pas fonctionné. Réessayez.",
     },
@@ -66,9 +81,15 @@ export const LIB_FR: LibWords = {
   now: {
     left: (d) => `encore ${d}`,
   },
-  panel: { untitled: "Sans nom", buffer: "Tampon", nextWeek: "semaine prochaine", backFrom: (d) => `revenue de ${d}` },
+  panel: {
+    untitled: "Sans nom",
+    buffer: "Tampon",
+    nextWeek: "semaine prochaine",
+    backFrom: (d) => `revenue de ${d}`,
+  },
   welcome: {
-    replaces: (n) => `Cela remplace ${n === 1 ? "le bloc" : `les ${n} blocs`} de la semaine 1.`,
+    replaces: (n) =>
+      `Cela remplace ${n === 1 ? "le bloc" : `les ${n} blocs`} de la semaine 1.`,
   },
   starters: {
     added: (list) => `Ajoute ${list} à vos domaines.`,
@@ -76,11 +97,13 @@ export const LIB_FR: LibWords = {
     names: {
       "starter-work": {
         name: "Semaine chargée au travail",
-        blurb: "Une pleine semaine de travail qui protège quand même les soirées et un après-midi de fin de semaine.",
+        blurb:
+          "Une pleine semaine de travail qui protège quand même les soirées et un après-midi de fin de semaine.",
       },
       "starter-family": {
         name: "Semaine en famille",
-        blurb: "Des journées de travail plus courtes, du temps avec vos proches après l'école et la fin de semaine.",
+        blurb:
+          "Des journées de travail plus courtes, du temps avec vos proches après l'école et la fin de semaine.",
       },
       "starter-recovery": {
         name: "Semaine de récupération",
@@ -88,7 +111,12 @@ export const LIB_FR: LibWords = {
           "Une semaine plus légère pour refaire le plein : moins de travail, plus de repos, du mouvement en douceur.",
       },
     },
-    areas: { work: "Travail", rest: "Repos", people: "Proches", exercise: "Exercice" },
+    areas: {
+      work: "Travail",
+      rest: "Repos",
+      people: "Proches",
+      exercise: "Exercice",
+    },
     labels: { windDown: "Décompresser", walk: "Marche" },
   },
 };

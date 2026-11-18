@@ -12,10 +12,14 @@ import {
 import { syncClient } from "./supabaseClient";
 
 export type SyncActions = {
-  /** Emails a sign-in link + numeric code. */
-  sendCode(email: string): Promise<AuthResult>;
-  /** Signs in with the numeric code from the email. */
-  verifyCode(email: string, code: string): Promise<AuthResult>;
+  /** Signs in with an email and password. */
+  signIn(email: string, password: string): Promise<AuthResult>;
+  /** Creates an account; it signs in once the email is confirmed. */
+  signUp(email: string, password: string): Promise<AuthResult>;
+  /** Emails a link to choose a new password. */
+  sendReset(email: string): Promise<AuthResult>;
+  /** Saves a new password (after the reset link). */
+  setPassword(password: string): Promise<AuthResult>;
   /** Google or Apple: leaves the page and comes back signed in. */
   signInWith(provider: OAuthProvider): Promise<AuthResult>;
   /** Asks again whether this email has Pro. */
@@ -30,12 +34,31 @@ export type SyncActions = {
 
 export type UseSync = SyncState & SyncActions;
 
-const LOCAL_ONLY: SyncState = { configured: false, ready: true, session: null, pro: null, status: "local", conflict: null };
-const STARTING: SyncState = { configured: true, ready: false, session: null, pro: null, status: "local", conflict: null };
+const LOCAL_ONLY: SyncState = {
+  configured: false,
+  ready: true,
+  session: null,
+  pro: null,
+  status: "local",
+  conflict: null,
+  recovery: false,
+};
+const STARTING: SyncState = {
+  configured: true,
+  ready: false,
+  session: null,
+  pro: null,
+  status: "local",
+  conflict: null,
+  recovery: false,
+};
 const NOT_CONFIGURED: AuthResult = { ok: false, reason: "failed" };
 
 // Starts sync for the app's store when Supabase is configured; otherwise a local-only no-op.
-export function useSync(store: CadenceStore, client: SyncClient | null = syncClient): UseSync {
+export function useSync(
+  store: CadenceStore,
+  client: SyncClient | null = syncClient,
+): UseSync {
   const engineRef = useRef<SyncEngine | null>(null);
   const [state, setState] = useState<SyncState>(client ? STARTING : LOCAL_ONLY);
 
@@ -69,12 +92,24 @@ export function useSync(store: CadenceStore, client: SyncClient | null = syncCli
 
   const actions = useMemo<SyncActions>(
     () => ({
-      sendCode: (email) => engineRef.current?.sendCode(email) ?? Promise.resolve(NOT_CONFIGURED),
-      verifyCode: (email, code) => engineRef.current?.verifyCode(email, code) ?? Promise.resolve(NOT_CONFIGURED),
-      signInWith: (provider) => engineRef.current?.signInWith(provider) ?? Promise.resolve(NOT_CONFIGURED),
+      signIn: (email, password) =>
+        engineRef.current?.signIn(email, password) ??
+        Promise.resolve(NOT_CONFIGURED),
+      signUp: (email, password) =>
+        engineRef.current?.signUp(email, password) ??
+        Promise.resolve(NOT_CONFIGURED),
+      sendReset: (email) =>
+        engineRef.current?.sendReset(email) ?? Promise.resolve(NOT_CONFIGURED),
+      setPassword: (password) =>
+        engineRef.current?.setPassword(password) ??
+        Promise.resolve(NOT_CONFIGURED),
+      signInWith: (provider) =>
+        engineRef.current?.signInWith(provider) ??
+        Promise.resolve(NOT_CONFIGURED),
       recheckPro: () => engineRef.current?.recheckPro(),
       signOut: () => engineRef.current?.signOut() ?? Promise.resolve(),
-      deleteAccount: () => engineRef.current?.deleteAccount() ?? Promise.resolve(NOT_CONFIGURED),
+      deleteAccount: () =>
+        engineRef.current?.deleteAccount() ?? Promise.resolve(NOT_CONFIGURED),
       resolveConflict: (choice) => engineRef.current?.resolveConflict(choice),
     }),
     [],

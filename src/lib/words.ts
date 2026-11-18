@@ -12,7 +12,12 @@ export type DescribeWords = {
   floorMet: (name: string, done: string, min: string) => string;
   floorShort: (name: string, done: string, min: string) => string;
   ceilingWithin: (name: string, done: string, max: string) => string;
-  ceilingOver: (name: string, over: string, done: string, max: string) => string;
+  ceilingOver: (
+    name: string,
+    over: string,
+    done: string,
+    max: string,
+  ) => string;
   rangeIn: (name: string, done: string, min: string, max: string) => string;
   rangeShort: (name: string, done: string, min: string, max: string) => string;
   rangeOver: (name: string, over: string, done: string, max: string) => string;
@@ -35,7 +40,11 @@ export type LibWords = {
   /** Mon..Sun, short */
   days: readonly [string, string, string, string, string, string, string];
   // weekly time per area (S1.2), in plain words: at least / at most / between (JP, 2026-11-07)
-  limit: { floor: (h: string) => string; ceiling: (h: string) => string; range: (lo: string, hi: string) => string };
+  limit: {
+    floor: (h: string) => string;
+    ceiling: (h: string) => string;
+    range: (lo: string, hi: string) => string;
+  };
   describe: DescribeWords;
   // import / conflict summaries
   summary: {
@@ -49,9 +58,28 @@ export type LibWords = {
   };
   // sync
   sync: {
-    badge: { synced: string; syncing: string; offline: string; error: string; locked: string };
-    sentence: { synced: string; syncing: string; offline: string; error: string; locked: string };
-    auth: { invalid_code: string; rate_limited: string; offline: string; failed: string };
+    badge: {
+      synced: string;
+      syncing: string;
+      offline: string;
+      error: string;
+      locked: string;
+    };
+    sentence: {
+      synced: string;
+      syncing: string;
+      offline: string;
+      error: string;
+      locked: string;
+    };
+    auth: {
+      bad_credentials: string;
+      not_confirmed: string;
+      weak_password: string;
+      rate_limited: string;
+      offline: string;
+      failed: string;
+    };
   };
   now: { left: (dur: string) => string };
   /** visual B: an area's week counted in its blocks */
@@ -69,7 +97,12 @@ export type LibWords = {
     reached: string;
     inRange: string;
   };
-  panel: { untitled: string; buffer: string; nextWeek: string; backFrom: (day: string) => string };
+  panel: {
+    untitled: string;
+    buffer: string;
+    nextWeek: string;
+    backFrom: (day: string) => string;
+  };
   welcome: { replaces: (n: number) => string };
   starters: {
     added: (list: string) => string;
@@ -80,7 +113,8 @@ export type LibWords = {
   };
 };
 
-const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+const plural = (n: number, one: string, many: string) =>
+  `${n} ${n === 1 ? one : many}`;
 
 /** "0.5 blocks", "1 block", "1.5 blocks" */
 
@@ -100,20 +134,31 @@ export const LIB_EN: LibWords = {
     sessions: (n) => plural(n, "logged session", "logged sessions"),
     streaks: (n) => plural(n, "streak", "streaks"),
     tasks: (n) => plural(n, "task", "tasks"),
-    dropped: (n) => `Skipped ${plural(n, "entry", "entries")} that didn't look right.`,
+    dropped: (n) =>
+      `Skipped ${plural(n, "entry", "entries")} that didn't look right.`,
   },
   sync: {
-    badge: { synced: "synced", syncing: "syncing…", offline: "offline", error: "sync error", locked: "this device" },
+    badge: {
+      synced: "synced",
+      syncing: "syncing…",
+      offline: "offline",
+      error: "sync error",
+      locked: "this device",
+    },
     sentence: {
       synced: "Everything's synced.",
       syncing: "Saving changes…",
       offline: "Offline. Changes are saved on this device and will sync later.",
-      error: "Couldn't reach your account. Changes are saved on this device and will sync later.",
-      locked: "Not syncing: sync is part of Pro. Your weeks stay on this device.",
+      error:
+        "Couldn't reach your account. Changes are saved on this device and will sync later.",
+      locked:
+        "Not syncing: sync is part of Pro. Your weeks stay on this device.",
     },
     auth: {
-      invalid_code: "That code didn't work. Try again or ask for a new one.",
-      rate_limited: "Too many emails for now. Try again in an hour.",
+      bad_credentials: "That email and password don't match.",
+      not_confirmed: "Confirm your email first: the link is in your inbox.",
+      weak_password: "Use at least 8 characters.",
+      rate_limited: "Too many tries for now. Wait a minute and try again.",
       offline: "You're offline. Connect and try again.",
       failed: "Something went wrong. Try again.",
     },
@@ -131,9 +176,15 @@ export const LIB_EN: LibWords = {
   now: {
     left: (d) => `${d} left`,
   },
-  panel: { untitled: "Untitled", buffer: "Buffer", nextWeek: "next week", backFrom: (d) => `back from ${d}` },
+  panel: {
+    untitled: "Untitled",
+    buffer: "Buffer",
+    nextWeek: "next week",
+    backFrom: (d) => `back from ${d}`,
+  },
   welcome: {
-    replaces: (n) => `It replaces the ${n === 1 ? "block" : `${n} blocks`} in Week 1.`,
+    replaces: (n) =>
+      `It replaces the ${n === 1 ? "block" : `${n} blocks`} in Week 1.`,
   },
   starters: {
     added: (list) => `Adds ${list} to your areas.`,
@@ -141,18 +192,26 @@ export const LIB_EN: LibWords = {
     names: {
       "starter-work": {
         name: "Work-heavy week",
-        blurb: "A full work week that still protects evenings and a weekend afternoon.",
+        blurb:
+          "A full work week that still protects evenings and a weekend afternoon.",
       },
       "starter-family": {
         name: "Family week",
-        blurb: "Shorter work days, time with your people after school and on the weekend.",
+        blurb:
+          "Shorter work days, time with your people after school and on the weekend.",
       },
       "starter-recovery": {
         name: "Recovery week",
-        blurb: "A lighter week to get your energy back: less work, more rest, gentle movement.",
+        blurb:
+          "A lighter week to get your energy back: less work, more rest, gentle movement.",
       },
     },
-    areas: { work: "Work", rest: "Rest", people: "People", exercise: "Exercise" },
+    areas: {
+      work: "Work",
+      rest: "Rest",
+      people: "People",
+      exercise: "Exercise",
+    },
     labels: { windDown: "Wind down", walk: "Walk" },
   },
 };

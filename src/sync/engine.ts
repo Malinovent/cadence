@@ -18,7 +18,13 @@ export type SyncSession = { userId: string; email: string | null };
 // a row as the server sends it: data not yet normalized, updatedAt in ms epoch
 export type RawRow = { data: unknown; updatedAt: number };
 
-export type SyncErrorKind = "network" | "rate_limited" | "invalid_code" | "failed";
+export type SyncErrorKind =
+  | "network"
+  | "rate_limited"
+  | "bad_credentials" // wrong email or password
+  | "not_confirmed" // the account's email isn't confirmed yet
+  | "weak_password"
+  | "failed";
 export class SyncError extends Error {
   constructor(
     readonly kind: SyncErrorKind,
@@ -32,10 +38,20 @@ export class SyncError extends Error {
 // Everything the engine needs from the backend. Implementations throw SyncError on failure.
 export interface SyncClient {
   getSession(): Promise<SyncSession | null>;
-  /** Called with the current session whenever auth changes (including the initial one). Returns unsubscribe. */
-  onAuthChange(cb: (session: SyncSession | null) => void): () => void;
-  sendCode(email: string, redirectTo: string): Promise<void>;
-  verifyCode(email: string, code: string): Promise<SyncSession>;
+  /**
+   * Called with the current session whenever auth changes (including the initial one); `recovery`
+   * is true when the person just arrived from a "choose a new password" link. Returns unsubscribe.
+   */
+  onAuthChange(
+    cb: (session: SyncSession | null, recovery: boolean) => void,
+  ): () => void;
+  signInPassword(email: string, password: string): Promise<SyncSession>;
+  /** Creates the account; it signs in only once its email is confirmed (link to `redirectTo`). */
+  signUp(email: string, password: string, redirectTo: string): Promise<void>;
+  /** Emails a link back to `redirectTo` to choose a new password. */
+  sendReset(email: string, redirectTo: string): Promise<void>;
+  /** Sets the signed-in account's password (after a reset link). */
+  setPassword(password: string): Promise<void>;
   /** Google or Apple: leaves the page for the provider, which comes back to `redirectTo` signed in. */
   signInWith(provider: OAuthProvider, redirectTo: string): Promise<void>;
   /** Pro (sync) for the signed-in email: its `entitlements` row says pro or early_bird (read-own RLS). */
@@ -50,7 +66,8 @@ export interface SyncClient {
 export type OAuthProvider = "google" | "apple";
 
 // "locked": signed in, but this email has no Pro, so nothing syncs (JP, 2026-11-17: Pro is sync)
-export type SyncStatus = "local" | "synced" | "syncing" | "offline" | "error" | "locked";
+export type SyncStatus =
+  "local" | "synced" | "syncing" | "offline" | "error" | "locked";
 export type SyncConflict = { local: ImportSummary; server: ImportSummary };
 export type SyncState = {
   configured: boolean; // false → no backend; the app is local-only and shows no account UI
@@ -60,8 +77,20 @@ export type SyncState = {
   pro: boolean | null;
   status: SyncStatus; // "local" whenever signed out; check `conflict` first when showing it
   conflict: SyncConflict | null; // first sign-in found different data on both sides; nothing syncs until resolved
+  recovery: boolean; // arrived from a reset link: ask for a new password until one is saved
 };
-export type AuthResult = { ok: true } | { ok: false; reason: "offline" | "rate_limited" | "invalid_code" | "failed" };
+export type AuthResult =
+  | { ok: true }
+  | {
+      ok: false;
+      reason:
+        | "offline"
+        | "rate_limited"
+        | "bad_credentials"
+        | "not_confirmed"
+        | "weak_password"
+        | "failed";
+    };
 export type ConflictChoice = "local" | "server";
 
 export interface SyncEngine {
@@ -72,8 +101,12 @@ export interface SyncEngine {
   onVisible(): void;
   onOnline(): void;
   onOffline(): void;
-  sendCode(email: string): Promise<AuthResult>;
-  verifyCode(email: string, code: string): Promise<AuthResult>;
+  signIn(email: string, password: string): Promise<AuthResult>;
+  /** Creates an account; the person confirms the email, then signs in. */
+  signUp(email: string, password: string): Promise<AuthResult>;
+  sendReset(email: string): Promise<AuthResult>;
+  /** Saves a new password after a reset link; ends `recovery`. */
+  setPassword(password: string): Promise<AuthResult>;
   signInWith(provider: OAuthProvider): Promise<AuthResult>;
   /** Asks the server again whether this email has Pro (after buying in another tab, say). */
   recheckPro(): void;
@@ -94,11 +127,17 @@ export type EngineOptions = {
 
 export const PUSH_DEBOUNCE_MS = 1500;
 
-const defaultOnline = () => typeof navigator === "undefined" || navigator.onLine !== false;
+const defaultOnline = () =>
+  typeof navigator === "undefined" || navigator.onLine !== false;
 
-const toRow = (raw: RawRow): ServerRow => ({ data: normalizeData(raw.data).data, updatedAt: raw.updatedAt });
+const toRow = (raw: RawRow): ServerRow => ({
+  data: normalizeData(raw.data).data,
+  updatedAt: raw.updatedAt,
+});
 
-const authReason = (e: unknown): Exclude<AuthResult, { ok: true }>["reason"] => {
+const authReason = (
+  e: unknown,
+): Exclude<AuthResult, { ok: true }>["reason"] => {
   if (!(e instanceof SyncError)) return "failed";
   return e.kind === "network" ? "offline" : e.kind;
 };
@@ -113,6 +152,7 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
   let pro: boolean | null = null; // Pro for this session's email; sync runs only when true
   let checkingPro = false;
   let ready = false;
+  let recovery = false; // arrived from a reset link; cleared once a new password is saved
   let net: "ok" | "offline" | "error" = "ok"; // result of the last network attempt
   let conflictRow: ServerRow | null = null;
   // first sign-in decided local is this account's copy; meta.userId is set once a push confirms it
@@ -126,7 +166,15 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
   let unsubs: (() => void)[] = [];
 
   const listeners = new Set<() => void>();
-  let state: SyncState = { configured: true, ready: false, session: null, pro: null, status: "local", conflict: null };
+  let state: SyncState = {
+    configured: true,
+    ready: false,
+    session: null,
+    pro: null,
+    status: "local",
+    conflict: null,
+    recovery: false,
+  };
 
   const compute = (): SyncState => {
     const { data, meta } = store.getSnapshot();
@@ -136,8 +184,18 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
     else if (busy || checkingPro) status = "syncing";
     else if (net !== "ok") status = net === "offline" ? "offline" : "error";
     else status = isDirty(meta) || uncommittedUser ? "syncing" : "synced";
-    const conflict = conflictRow ? { local: summarize(data), server: summarize(conflictRow.data) } : null;
-    return { configured: true, ready, session, pro: session ? pro : null, status, conflict };
+    const conflict = conflictRow
+      ? { local: summarize(data), server: summarize(conflictRow.data) }
+      : null;
+    return {
+      configured: true,
+      ready,
+      session,
+      pro: session ? pro : null,
+      status,
+      conflict,
+      recovery,
+    };
   };
 
   const emit = () => {
@@ -147,6 +205,7 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
       next.session === state.session &&
       next.pro === state.pro &&
       next.status === state.status &&
+      next.recovery === state.recovery &&
       jsonEqual(next.conflict, state.conflict);
     if (same) return;
     state = next;
@@ -159,12 +218,14 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
   };
 
   const fail = (e: unknown) => {
-    const offline = !isOnline() || (e instanceof SyncError && e.kind === "network");
+    const offline =
+      !isOnline() || (e instanceof SyncError && e.kind === "network");
     net = offline ? "offline" : "error";
     if (!offline) console.warn("sync failed", e);
   };
 
-  const canSync = () => running && session !== null && pro === true && conflictRow === null;
+  const canSync = () =>
+    running && session !== null && pro === true && conflictRow === null;
 
   // Pro first (JP, 2026-11-17): nothing is pulled or pushed for an email without it. The server
   // refuses too (has_pro() in supabase/schema.sql); this keeps the app from trying.
@@ -228,7 +289,11 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
       case "synced": {
         const commit = uncommittedUser;
         uncommittedUser = null;
-        store.setMeta((m) => ({ ...m, syncedAt: d.syncedAt, userId: commit ?? m.userId }));
+        store.setMeta((m) => ({
+          ...m,
+          syncedAt: d.syncedAt,
+          userId: commit ?? m.userId,
+        }));
         break;
       }
       case "apply":
@@ -274,7 +339,12 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
         break;
       case "markSynced":
         uncommittedUser = null;
-        store.setMeta((m) => ({ ...m, updatedAt: d.updatedAt, syncedAt: d.updatedAt, userId }));
+        store.setMeta((m) => ({
+          ...m,
+          updatedAt: d.updatedAt,
+          syncedAt: d.updatedAt,
+          userId,
+        }));
         break;
       case "conflict":
         uncommittedUser = null;
@@ -285,7 +355,10 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
       case "push":
         uncommittedUser = first ? userId : null;
         if (d.updatedAt > meta.updatedAt)
-          store.setMeta((m) => ({ ...m, updatedAt: Math.max(m.updatedAt, d.updatedAt) }));
+          store.setMeta((m) => ({
+            ...m,
+            updatedAt: Math.max(m.updatedAt, d.updatedAt),
+          }));
         await pushOp(g);
         return;
     }
@@ -359,6 +432,7 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
     uncommittedUser = null;
     net = "ok";
     session = s;
+    if (!s) recovery = false; // signed out: no new password to ask for
     pro = null;
     checkingPro = false;
     emit();
@@ -369,7 +443,17 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
     start() {
       if (running) return;
       running = true;
-      unsubs = [store.subscribe(onStoreChange), client.onAuthChange((s) => running && setSession(s))];
+      unsubs = [
+        store.subscribe(onStoreChange),
+        client.onAuthChange((s, rec) => {
+          if (!running) return;
+          if (rec && !recovery) {
+            recovery = true;
+            emit();
+          }
+          setSession(s);
+        }),
+      ];
       client
         .getSession()
         .then((s) => {
@@ -407,18 +491,36 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
       net = "offline";
       emit();
     },
-    async sendCode(email) {
+    async signIn(email, password) {
       try {
-        await client.sendCode(email.trim(), redirectTo);
+        const s = await client.signInPassword(email.trim(), password);
+        if (running) setSession(s);
         return { ok: true };
       } catch (e) {
         return { ok: false, reason: authReason(e) };
       }
     },
-    async verifyCode(email, code) {
+    async signUp(email, password) {
       try {
-        const s = await client.verifyCode(email.trim(), code.trim());
-        if (running) setSession(s);
+        await client.signUp(email.trim(), password, redirectTo);
+        return { ok: true };
+      } catch (e) {
+        return { ok: false, reason: authReason(e) };
+      }
+    },
+    async sendReset(email) {
+      try {
+        await client.sendReset(email.trim(), redirectTo);
+        return { ok: true };
+      } catch (e) {
+        return { ok: false, reason: authReason(e) };
+      }
+    },
+    async setPassword(password) {
+      try {
+        await client.setPassword(password);
+        recovery = false;
+        emit();
         return { ok: true };
       } catch (e) {
         return { ok: false, reason: authReason(e) };
@@ -470,7 +572,10 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
         return;
       }
       // keep this device's copy: stamp it later than the server's so the push wins
-      store.setMeta((m) => ({ ...m, updatedAt: winningUpdatedAt(m, row, now()) }));
+      store.setMeta((m) => ({
+        ...m,
+        updatedAt: winningUpdatedAt(m, row, now()),
+      }));
       uncommittedUser = userId;
       requestPush();
       emit();

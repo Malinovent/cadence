@@ -5,7 +5,14 @@ import { META_KEY } from "../lib/meta";
 import { defaultData, type CadenceData } from "../lib/model";
 import type { StorageLike } from "../lib/storage";
 import { createCadenceStore, type CadenceStore } from "../state/store";
-import { createSyncEngine, SyncError, type RawRow, type SyncClient, type SyncEngine, type SyncSession } from "./engine";
+import {
+  createSyncEngine,
+  SyncError,
+  type RawRow,
+  type SyncClient,
+  type SyncEngine,
+  type SyncSession,
+} from "./engine";
 
 const U1: SyncSession = { userId: "user-1", email: "me@example.com" };
 const U2: SyncSession = { userId: "user-2", email: "other@example.com" };
@@ -13,10 +20,17 @@ const REDIRECT = "https://example.test/cadence/";
 
 const memStorage = (init: Record<string, string> = {}): StorageLike => {
   const map = new Map(Object.entries(init));
-  return { getItem: (k) => map.get(k) ?? null, setItem: (k, v) => void map.set(k, v) };
+  return {
+    getItem: (k) => map.get(k) ?? null,
+    setItem: (k, v) => void map.set(k, v),
+  };
 };
 
-const withBlock = (d: CadenceData = defaultData(), id = "b1", day = 1): CadenceData =>
+const withBlock = (
+  d: CadenceData = defaultData(),
+  id = "b1",
+  day = 1,
+): CadenceData =>
   A.placeBlock(d, 0, "work", day, 9 * 60, undefined, { uid: () => id });
 
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v));
@@ -32,11 +46,15 @@ class FakeBackend implements SyncClient {
   pulls = 0;
   inFlight = 0;
   maxInFlight = 0;
-  sentCodes: { email: string; redirectTo: string }[] = [];
+  signUps: { email: string; redirectTo: string }[] = [];
+  resets: { email: string; redirectTo: string }[] = [];
+  passwordSet: string[] = [];
   pro = true; // the signed-in email has Pro (sync)
   proChecks = 0;
   oauth: { provider: string; redirectTo: string }[] = [];
-  private authCbs = new Set<(s: SyncSession | null) => void>();
+  private authCbs = new Set<
+    (s: SyncSession | null, recovery: boolean) => void
+  >();
   private held: (() => void)[] = [];
 
   release() {
@@ -44,9 +62,9 @@ class FakeBackend implements SyncClient {
     this.held = [];
     h.forEach((f) => f());
   }
-  emitAuth(s: SyncSession | null) {
+  emitAuth(s: SyncSession | null, recovery = false) {
     this.session = s;
-    this.authCbs.forEach((cb) => cb(s));
+    this.authCbs.forEach((cb) => cb(s, recovery));
   }
   private check() {
     if (!this.online) throw new SyncError("network", "Failed to fetch");
@@ -56,20 +74,29 @@ class FakeBackend implements SyncClient {
   async getSession() {
     return this.session;
   }
-  onAuthChange(cb: (s: SyncSession | null) => void) {
+  onAuthChange(cb: (s: SyncSession | null, recovery: boolean) => void) {
     this.authCbs.add(cb);
     return () => void this.authCbs.delete(cb);
   }
-  async sendCode(email: string, redirectTo: string) {
+  async signInPassword(email: string, password: string) {
     this.check();
-    this.sentCodes.push({ email, redirectTo });
-  }
-  async verifyCode(email: string, code: string) {
-    this.check();
-    if (code !== "123456") throw new SyncError("invalid_code", "Token has expired or is invalid");
+    if (password !== "correct horse")
+      throw new SyncError("bad_credentials", "Invalid login credentials");
     const s = email === U2.email ? U2 : U1;
     this.session = s;
     return s;
+  }
+  async signUp(email: string, _password: string, redirectTo: string) {
+    this.check();
+    this.signUps.push({ email, redirectTo });
+  }
+  async sendReset(email: string, redirectTo: string) {
+    this.check();
+    this.resets.push({ email, redirectTo });
+  }
+  async setPassword(password: string) {
+    this.check();
+    this.passwordSet.push(password);
   }
   async signInWith(provider: "google" | "apple", redirectTo: string) {
     this.check();
@@ -107,7 +134,8 @@ class FakeBackend implements SyncClient {
       this.pushes.push({ data: clone(data), updatedAt });
       const uid = this.session!.userId;
       const cur = this.rows.get(uid);
-      if (!cur || cur.updatedAt < updatedAt) this.rows.set(uid, { data: clone(data), updatedAt });
+      if (!cur || cur.updatedAt < updatedAt)
+        this.rows.set(uid, { data: clone(data), updatedAt });
       return clone(this.rows.get(uid)!);
     } finally {
       this.inFlight--;
@@ -121,10 +149,23 @@ let engine: SyncEngine;
 let clock: number;
 let online: boolean;
 
-const setup = (opts: { local?: CadenceData; meta?: object; session?: SyncSession | null } = {}) => {
+const setup = (
+  opts: {
+    local?: CadenceData;
+    meta?: object;
+    session?: SyncSession | null;
+  } = {},
+) => {
   const init: Record<string, string> = {};
   if (opts.local) {
-    for (const k of ["cats", "weeks", "templates", "history", "streaks", "tasks"] as const)
+    for (const k of [
+      "cats",
+      "weeks",
+      "templates",
+      "history",
+      "streaks",
+      "tasks",
+    ] as const)
       init[`cadence:${k}`] = JSON.stringify(opts.local[k]);
   }
   if (opts.meta) init[META_KEY] = JSON.stringify(opts.meta);
@@ -163,12 +204,43 @@ describe("sync engine: launch", () => {
     const opened = new Date(2026, 10, 6, 9); // Friday; the block below ended Tuesday
     const local: CadenceData = {
       ...defaultData(),
-      weeks: [[{ id: "b1", catIds: ["work"], day: 1, start: 540, mins: 60, label: "", desc: "", done: false }], []],
-      tasks: [{ id: "t", name: "t", catId: null, blockId: "b1", attachedAt: 1, done: false, order: 0, createdAt: 1 }],
+      weeks: [
+        [
+          {
+            id: "b1",
+            catIds: ["work"],
+            day: 1,
+            start: 540,
+            mins: 60,
+            label: "",
+            desc: "",
+            done: false,
+          },
+        ],
+        [],
+      ],
+      tasks: [
+        {
+          id: "t",
+          name: "t",
+          catId: null,
+          blockId: "b1",
+          attachedAt: 1,
+          done: false,
+          order: 0,
+          createdAt: 1,
+        },
+      ],
     };
-    const newer = { ...defaultData(), templates: [{ id: "tp", name: "From the laptop", blocks: [] }] };
+    const newer = {
+      ...defaultData(),
+      templates: [{ id: "tp", name: "From the laptop", blocks: [] }],
+    };
     backend.rows.set(U1.userId, { data: clone(newer), updatedAt: 900 });
-    setup({ local, meta: { updatedAt: 500, syncedAt: 500, userId: U1.userId } });
+    setup({
+      local,
+      meta: { updatedAt: 500, syncedAt: 500, userId: U1.userId },
+    });
     store.adjust((d) => T.returnEnded(d, opened)); // what the app does on opening, before the pull lands
     expect(store.getSnapshot().data.tasks[0].returnedFrom).toBe(1);
     await flush();
@@ -182,11 +254,39 @@ describe("sync engine: launch", () => {
     const opened = new Date(2026, 10, 6, 9);
     const local: CadenceData = {
       ...defaultData(),
-      weeks: [[{ id: "b1", catIds: ["work"], day: 1, start: 540, mins: 60, label: "", desc: "", done: false }], []],
-      tasks: [{ id: "t", name: "t", catId: null, blockId: "b1", attachedAt: 1, done: false, order: 0, createdAt: 1 }],
+      weeks: [
+        [
+          {
+            id: "b1",
+            catIds: ["work"],
+            day: 1,
+            start: 540,
+            mins: 60,
+            label: "",
+            desc: "",
+            done: false,
+          },
+        ],
+        [],
+      ],
+      tasks: [
+        {
+          id: "t",
+          name: "t",
+          catId: null,
+          blockId: "b1",
+          attachedAt: 1,
+          done: false,
+          order: 0,
+          createdAt: 1,
+        },
+      ],
     };
     backend.rows.set(U1.userId, { data: clone(local), updatedAt: 500 });
-    setup({ local, meta: { updatedAt: 500, syncedAt: 500, userId: U1.userId } });
+    setup({
+      local,
+      meta: { updatedAt: 500, syncedAt: 500, userId: U1.userId },
+    });
     await flush();
     store.adjust((d) => T.returnEnded(d, opened));
     await vi.advanceTimersByTimeAsync(5000);
@@ -196,13 +296,20 @@ describe("sync engine: launch", () => {
     await vi.advanceTimersByTimeAsync(1500);
     await flush();
     expect(backend.pushes).toHaveLength(1);
-    expect(backend.pushes[0].data.tasks.find((x) => x.id === "t")?.returnedFrom).toBe(1); // new tasks go on top
+    expect(
+      backend.pushes[0].data.tasks.find((x) => x.id === "t")?.returnedFrom,
+    ).toBe(1); // new tasks go on top
   });
 
   it("signed out: local only, nothing is sent", async () => {
     setup({ session: null });
     await flush();
-    expect(engine.getState()).toMatchObject({ configured: true, ready: true, session: null, status: "local" });
+    expect(engine.getState()).toMatchObject({
+      configured: true,
+      ready: true,
+      session: null,
+      status: "local",
+    });
     edit((d) => withBlock(d));
     await vi.advanceTimersByTimeAsync(5000);
     expect(backend.pulls).toBe(0);
@@ -210,28 +317,50 @@ describe("sync engine: launch", () => {
   });
 
   it("restores the session, pulls, and uploads local when the account has no row", async () => {
-    setup({ local: withBlock(), meta: { updatedAt: 500, syncedAt: null, userId: null } });
+    setup({
+      local: withBlock(),
+      meta: { updatedAt: 500, syncedAt: null, userId: null },
+    });
     await flush();
     expect(backend.pulls).toBe(1);
     expect(backend.pushes).toHaveLength(1);
     expect(backend.rows.get(U1.userId)!.updatedAt).toBe(500);
-    expect(store.getSnapshot().meta).toEqual({ updatedAt: 500, syncedAt: 500, userId: U1.userId });
-    expect(engine.getState()).toMatchObject({ ready: true, session: U1, status: "synced", conflict: null });
+    expect(store.getSnapshot().meta).toEqual({
+      updatedAt: 500,
+      syncedAt: 500,
+      userId: U1.userId,
+    });
+    expect(engine.getState()).toMatchObject({
+      ready: true,
+      session: U1,
+      status: "synced",
+      conflict: null,
+    });
   });
 
   it("applies a newer server copy on launch without counting it as an edit", async () => {
     const server = withBlock(defaultData(), "srv");
     backend.rows.set(U1.userId, { data: clone(server), updatedAt: 9_000_000 });
-    setup({ local: withBlock(), meta: { updatedAt: 500, syncedAt: 500, userId: U1.userId } });
+    setup({
+      local: withBlock(),
+      meta: { updatedAt: 500, syncedAt: 500, userId: U1.userId },
+    });
     await flush();
     expect(store.getSnapshot().data.weeks[0].map((b) => b.id)).toEqual(["srv"]);
-    expect(store.getSnapshot().meta).toEqual({ updatedAt: 9_000_000, syncedAt: 9_000_000, userId: U1.userId });
+    expect(store.getSnapshot().meta).toEqual({
+      updatedAt: 9_000_000,
+      syncedAt: 9_000_000,
+      userId: U1.userId,
+    });
     expect(backend.pushes).toHaveLength(0);
     expect(engine.getState().status).toBe("synced");
   });
 
   it("first sign-in with an empty device takes the account's schedule silently", async () => {
-    backend.rows.set(U1.userId, { data: clone(withBlock(defaultData(), "srv")), updatedAt: 10 });
+    backend.rows.set(U1.userId, {
+      data: clone(withBlock(defaultData(), "srv")),
+      updatedAt: 10,
+    });
     setup();
     await flush();
     expect(store.getSnapshot().data.weeks[0].map((b) => b.id)).toEqual(["srv"]);
@@ -259,7 +388,10 @@ describe("sync engine: pushing edits", () => {
     await vi.advanceTimersByTimeAsync(1);
     await flush();
     expect(backend.pushes).toHaveLength(1);
-    expect(backend.pushes[0].data.weeks[0].map((b) => b.id)).toEqual(["a", "b"]);
+    expect(backend.pushes[0].data.weeks[0].map((b) => b.id)).toEqual([
+      "a",
+      "b",
+    ]);
     expect(backend.pushes[0].updatedAt).toBe(clock);
     expect(store.getSnapshot().meta.syncedAt).toBe(clock);
     expect(engine.getState().status).toBe("synced");
@@ -267,13 +399,22 @@ describe("sync engine: pushing edits", () => {
 
   it("pushes a task edit like any other edit", async () => {
     await synced();
-    edit((d) => T.addTask(d, "Buy milk", { uid: () => "t1", now: () => clock }));
+    edit((d) =>
+      T.addTask(d, "Buy milk", { uid: () => "t1", now: () => clock }),
+    );
     expect(engine.getState().status).toBe("syncing");
     await vi.advanceTimersByTimeAsync(1500);
     await flush();
     expect(backend.pushes).toHaveLength(1);
     expect(backend.pushes[0].data.tasks).toEqual([
-      { id: "t1", name: "Buy milk", catId: null, done: false, order: 0, createdAt: clock },
+      {
+        id: "t1",
+        name: "Buy milk",
+        catId: null,
+        done: false,
+        order: 0,
+        createdAt: clock,
+      },
     ]);
     expect(engine.getState().status).toBe("synced");
     store.edit((d) => T.toggleTask(d, "missing"));
@@ -305,8 +446,14 @@ describe("sync engine: pushing edits", () => {
     await vi.advanceTimersByTimeAsync(1500);
     expect(backend.maxInFlight).toBe(1);
     expect(backend.pushes).toHaveLength(2); // coalesced: a, then a+b+c
-    expect(backend.pushes[1].data.weeks[0].map((b) => b.id)).toEqual(["a", "b", "c"]);
-    expect(store.getSnapshot().meta.syncedAt).toBe(store.getSnapshot().meta.updatedAt);
+    expect(backend.pushes[1].data.weeks[0].map((b) => b.id)).toEqual([
+      "a",
+      "b",
+      "c",
+    ]);
+    expect(store.getSnapshot().meta.syncedAt).toBe(
+      store.getSnapshot().meta.updatedAt,
+    );
     expect(engine.getState().status).toBe("synced");
   });
 
@@ -314,19 +461,30 @@ describe("sync engine: pushing edits", () => {
     await synced();
     edit((d) => withBlock(d, "mine", 0));
     // meanwhile another device wrote a later copy
-    backend.rows.set(U1.userId, { data: clone(withBlock(defaultData(), "theirs", 4)), updatedAt: clock + 60_000 });
+    backend.rows.set(U1.userId, {
+      data: clone(withBlock(defaultData(), "theirs", 4)),
+      updatedAt: clock + 60_000,
+    });
     await vi.advanceTimersByTimeAsync(1500);
     await flush();
     expect(backend.pushes).toHaveLength(1);
-    expect(store.getSnapshot().data.weeks[0].map((b) => b.id)).toEqual(["theirs"]);
-    expect(store.getSnapshot().meta).toMatchObject({ updatedAt: clock + 60_000, syncedAt: clock + 60_000 });
+    expect(store.getSnapshot().data.weeks[0].map((b) => b.id)).toEqual([
+      "theirs",
+    ]);
+    expect(store.getSnapshot().meta).toMatchObject({
+      updatedAt: clock + 60_000,
+      syncedAt: clock + 60_000,
+    });
     expect(engine.getState().status).toBe("synced");
     // the next edit beats that copy even though the local clock is behind it
     edit((d) => withBlock(d, "after", 5));
     await vi.advanceTimersByTimeAsync(1500);
     await flush();
     expect(backend.rows.get(U1.userId)!.data).toMatchObject({
-      weeks: [expect.arrayContaining([expect.objectContaining({ id: "after" })]), []],
+      weeks: [
+        expect.arrayContaining([expect.objectContaining({ id: "after" })]),
+        [],
+      ],
     });
   });
 
@@ -364,15 +522,22 @@ describe("sync engine: pushing edits", () => {
     await vi.advanceTimersByTimeAsync(1500);
     await flush();
     expect(engine.getState().status).toBe("synced");
-    expect(backend.rows.get(U1.userId)!.data).toMatchObject({ weeks: [[{ id: "a" }, { id: "b" }], []] });
+    expect(backend.rows.get(U1.userId)!.data).toMatchObject({
+      weeks: [[{ id: "a" }, { id: "b" }], []],
+    });
   });
 
   it("pulls on visibility and applies what another device saved", async () => {
     await synced();
-    backend.rows.set(U1.userId, { data: clone(withBlock(defaultData(), "phone")), updatedAt: 700 });
+    backend.rows.set(U1.userId, {
+      data: clone(withBlock(defaultData(), "phone")),
+      updatedAt: 700,
+    });
     engine.onVisible();
     await flush();
-    expect(store.getSnapshot().data.weeks[0].map((b) => b.id)).toEqual(["phone"]);
+    expect(store.getSnapshot().data.weeks[0].map((b) => b.id)).toEqual([
+      "phone",
+    ]);
   });
 
   it("coalesces pull triggers that arrive while busy", async () => {
@@ -388,8 +553,14 @@ describe("sync engine: pushing edits", () => {
 
 describe("sync engine: first sign-in conflict", () => {
   const conflicted = async () => {
-    backend.rows.set(U1.userId, { data: clone(withBlock(defaultData(), "srv", 4)), updatedAt: 800 });
-    setup({ local: withBlock(defaultData(), "loc", 0), meta: { updatedAt: 900, syncedAt: null, userId: null } });
+    backend.rows.set(U1.userId, {
+      data: clone(withBlock(defaultData(), "srv", 4)),
+      updatedAt: 800,
+    });
+    setup({
+      local: withBlock(defaultData(), "loc", 0),
+      meta: { updatedAt: 900, syncedAt: null, userId: null },
+    });
     await flush();
   };
 
@@ -397,8 +568,22 @@ describe("sync engine: first sign-in conflict", () => {
     await conflicted();
     const st = engine.getState();
     expect(st.conflict).toEqual({
-      local: { categories: 4, blocks: 1, templates: 0, sessions: 0, streaks: 0, tasks: 0 },
-      server: { categories: 4, blocks: 1, templates: 0, sessions: 0, streaks: 0, tasks: 0 },
+      local: {
+        categories: 4,
+        blocks: 1,
+        templates: 0,
+        sessions: 0,
+        streaks: 0,
+        tasks: 0,
+      },
+      server: {
+        categories: 4,
+        blocks: 1,
+        templates: 0,
+        sessions: 0,
+        streaks: 0,
+        tasks: 0,
+      },
     });
     const pulls = backend.pulls;
     edit((d) => withBlock(d, "loc2", 2));
@@ -413,16 +598,30 @@ describe("sync engine: first sign-in conflict", () => {
   });
 
   it("keep this device's: pushes local and wins even though the server copy was newer", async () => {
-    backend.rows.set(U1.userId, { data: clone(withBlock(defaultData(), "srv", 4)), updatedAt: 5_000_000 });
-    setup({ local: withBlock(defaultData(), "loc", 0), meta: { updatedAt: 900, syncedAt: null, userId: null } });
+    backend.rows.set(U1.userId, {
+      data: clone(withBlock(defaultData(), "srv", 4)),
+      updatedAt: 5_000_000,
+    });
+    setup({
+      local: withBlock(defaultData(), "loc", 0),
+      meta: { updatedAt: 900, syncedAt: null, userId: null },
+    });
     await flush();
     expect(engine.getState().conflict).not.toBeNull();
     engine.resolveConflict("local");
     await flush();
     expect(backend.pushes).toHaveLength(1);
-    expect(backend.rows.get(U1.userId)!.data).toMatchObject({ weeks: [[{ id: "loc" }], []] });
-    expect(store.getSnapshot().meta).toMatchObject({ userId: U1.userId, syncedAt: 5_000_001 });
-    expect(engine.getState()).toMatchObject({ conflict: null, status: "synced" });
+    expect(backend.rows.get(U1.userId)!.data).toMatchObject({
+      weeks: [[{ id: "loc" }], []],
+    });
+    expect(store.getSnapshot().meta).toMatchObject({
+      userId: U1.userId,
+      syncedAt: 5_000_001,
+    });
+    expect(engine.getState()).toMatchObject({
+      conflict: null,
+      status: "synced",
+    });
   });
 
   it("use my account's: replaces local with the server copy", async () => {
@@ -430,53 +629,122 @@ describe("sync engine: first sign-in conflict", () => {
     engine.resolveConflict("server");
     await flush();
     expect(store.getSnapshot().data.weeks[0].map((b) => b.id)).toEqual(["srv"]);
-    expect(store.getSnapshot().meta).toEqual({ updatedAt: 800, syncedAt: 800, userId: U1.userId });
+    expect(store.getSnapshot().meta).toEqual({
+      updatedAt: 800,
+      syncedAt: 800,
+      userId: U1.userId,
+    });
     expect(backend.pushes).toHaveLength(0);
-    expect(engine.getState()).toMatchObject({ conflict: null, status: "synced" });
+    expect(engine.getState()).toMatchObject({
+      conflict: null,
+      status: "synced",
+    });
   });
 
   it("an empty account copy (another device's untouched defaults) is overwritten without asking", async () => {
-    backend.rows.set(U1.userId, { data: clone(defaultData()), updatedAt: 5_000_000 });
-    setup({ local: withBlock(), meta: { updatedAt: 900, syncedAt: null, userId: null } });
+    backend.rows.set(U1.userId, {
+      data: clone(defaultData()),
+      updatedAt: 5_000_000,
+    });
+    setup({
+      local: withBlock(),
+      meta: { updatedAt: 900, syncedAt: null, userId: null },
+    });
     await flush();
     expect(engine.getState().conflict).toBeNull();
-    expect(backend.rows.get(U1.userId)!.data).toMatchObject({ weeks: [[{ id: "b1" }], []] });
+    expect(backend.rows.get(U1.userId)!.data).toMatchObject({
+      weeks: [[{ id: "b1" }], []],
+    });
     expect(store.getSnapshot().meta.userId).toBe(U1.userId);
   });
 
   it("identical content on both sides just marks synced", async () => {
     backend.rows.set(U1.userId, { data: clone(withBlock()), updatedAt: 300 });
-    setup({ local: withBlock(), meta: { updatedAt: 900, syncedAt: null, userId: null } });
+    setup({
+      local: withBlock(),
+      meta: { updatedAt: 900, syncedAt: null, userId: null },
+    });
     await flush();
-    expect(engine.getState()).toMatchObject({ conflict: null, status: "synced" });
-    expect(store.getSnapshot().meta).toEqual({ updatedAt: 300, syncedAt: 300, userId: U1.userId });
+    expect(engine.getState()).toMatchObject({
+      conflict: null,
+      status: "synced",
+    });
+    expect(store.getSnapshot().meta).toEqual({
+      updatedAt: 300,
+      syncedAt: 300,
+      userId: U1.userId,
+    });
     expect(backend.pushes).toHaveLength(0);
   });
 });
 
 describe("sync engine: auth", () => {
-  it("sendCode passes the redirect URL; verifyCode signs in and pulls", async () => {
+  it("signIn with a password signs in and pulls; a wrong one says so", async () => {
     setup({ session: null, local: withBlock() });
     await flush();
-    expect(await engine.sendCode("  me@example.com ")).toEqual({ ok: true });
-    expect(backend.sentCodes).toEqual([{ email: "me@example.com", redirectTo: REDIRECT }]);
-    expect(await engine.verifyCode("me@example.com", "000000")).toEqual({ ok: false, reason: "invalid_code" });
+    expect(await engine.signIn("me@example.com", "nope")).toEqual({
+      ok: false,
+      reason: "bad_credentials",
+    });
     expect(engine.getState().session).toBeNull();
-    expect(await engine.verifyCode("me@example.com", "123456")).toEqual({ ok: true });
+    expect(await engine.signIn("  me@example.com ", "correct horse")).toEqual({
+      ok: true,
+    });
     await flush();
     expect(engine.getState().session).toEqual(U1);
     expect(backend.pulls).toBe(1);
     expect(backend.rows.get(U1.userId)).toBeDefined(); // first upload
   });
 
-  it("reports offline and rate limits from sendCode", async () => {
+  it("signUp passes the redirect URL and doesn't sign in (the email is confirmed first)", async () => {
     setup({ session: null });
     await flush();
+    expect(await engine.signUp(" new@example.com ", "correct horse")).toEqual({
+      ok: true,
+    });
+    expect(backend.signUps).toEqual([
+      { email: "new@example.com", redirectTo: REDIRECT },
+    ]);
+    expect(engine.getState().session).toBeNull();
+  });
+
+  it("sendReset passes the redirect URL; reports offline and rate limits", async () => {
+    setup({ session: null });
+    await flush();
+    expect(await engine.sendReset("me@example.com")).toEqual({ ok: true });
+    expect(backend.resets).toEqual([
+      { email: "me@example.com", redirectTo: REDIRECT },
+    ]);
     backend.online = false;
-    expect(await engine.sendCode("me@example.com")).toEqual({ ok: false, reason: "offline" });
+    expect(await engine.sendReset("me@example.com")).toEqual({
+      ok: false,
+      reason: "offline",
+    });
     backend.online = true;
     backend.failWith = new SyncError("rate_limited", "too many");
-    expect(await engine.sendCode("me@example.com")).toEqual({ ok: false, reason: "rate_limited" });
+    expect(await engine.sendReset("me@example.com")).toEqual({
+      ok: false,
+      reason: "rate_limited",
+    });
+  });
+
+  it("arriving from a reset link sets recovery until a new password is saved", async () => {
+    setup({ session: null });
+    await flush();
+    expect(engine.getState().recovery).toBe(false);
+    backend.emitAuth(U1, true);
+    await flush();
+    expect(engine.getState()).toMatchObject({ recovery: true, session: U1 });
+    backend.failWith = new SyncError("weak_password", "weak");
+    expect(await engine.setPassword("short")).toEqual({
+      ok: false,
+      reason: "weak_password",
+    });
+    expect(engine.getState().recovery).toBe(true);
+    backend.failWith = null;
+    expect(await engine.setPassword("correct horse")).toEqual({ ok: true });
+    expect(backend.passwordSet).toEqual(["correct horse"]);
+    expect(engine.getState().recovery).toBe(false);
   });
 
   it("a magic-link sign-in (auth event) triggers a pull once, even if repeated", async () => {
@@ -500,7 +768,10 @@ describe("sync engine: auth", () => {
     expect(backend.deleted).toEqual([U1.userId]);
     expect(engine.getState()).toMatchObject({ session: null, status: "local" });
     expect(store.getSnapshot().data.weeks[0]).toHaveLength(1);
-    expect(store.getSnapshot().meta).toMatchObject({ userId: null, syncedAt: null });
+    expect(store.getSnapshot().meta).toMatchObject({
+      userId: null,
+      syncedAt: null,
+    });
     edit((d) => withBlock(d, "x", 3));
     await vi.advanceTimersByTimeAsync(5000);
     expect(backend.rows.has(U1.userId)).toBe(false); // nothing re-creates it
@@ -524,7 +795,10 @@ describe("sync engine: auth", () => {
     await flush();
     expect(engine.getState()).toMatchObject({ session: null, status: "local" });
     expect(store.getSnapshot().data.weeks[0]).toHaveLength(1);
-    expect(store.getSnapshot().meta).toMatchObject({ userId: null, syncedAt: null });
+    expect(store.getSnapshot().meta).toMatchObject({
+      userId: null,
+      syncedAt: null,
+    });
     const pushes = backend.pushes.length;
     edit((d) => withBlock(d, "x", 3));
     await vi.advanceTimersByTimeAsync(5000);
@@ -534,15 +808,22 @@ describe("sync engine: auth", () => {
   });
 
   it("switching to another account is treated as a first sign-in", async () => {
-    backend.rows.set(U2.userId, { data: clone(withBlock(defaultData(), "u2", 5)), updatedAt: 100 });
+    backend.rows.set(U2.userId, {
+      data: clone(withBlock(defaultData(), "u2", 5)),
+      updatedAt: 100,
+    });
     setup({ local: withBlock() });
     await flush();
     await engine.signOut();
-    expect(await engine.verifyCode(U2.email!, "123456")).toEqual({ ok: true });
+    expect(await engine.signIn(U2.email!, "correct horse")).toEqual({
+      ok: true,
+    });
     await flush();
     expect(engine.getState().session).toEqual(U2);
     expect(engine.getState().conflict).not.toBeNull(); // not silently overwritten by timestamps
-    expect(backend.rows.get(U2.userId)!.data).toMatchObject({ weeks: [[{ id: "u2" }], []] });
+    expect(backend.rows.get(U2.userId)!.data).toMatchObject({
+      weeks: [[{ id: "u2" }], []],
+    });
   });
 
   it("drops results of requests that finish after the session ended", async () => {
@@ -556,7 +837,10 @@ describe("sync engine: auth", () => {
     await engine.signOut();
     backend.release();
     await flush();
-    expect(store.getSnapshot().meta).toMatchObject({ userId: null, syncedAt: null });
+    expect(store.getSnapshot().meta).toMatchObject({
+      userId: null,
+      syncedAt: null,
+    });
     expect(engine.getState().status).toBe("local");
   });
 
@@ -573,20 +857,36 @@ describe("sync engine: auth", () => {
 describe("sync engine: Pro is sync (JP, 2026-11-17)", () => {
   it("an email without Pro: signed in, locked, nothing pulled or pushed; local edits stay", async () => {
     backend.pro = false;
-    backend.rows.set(U1.userId, { data: clone(withBlock(defaultData(), "srv")), updatedAt: 9_000_000 });
-    setup({ local: withBlock(), meta: { updatedAt: 500, syncedAt: null, userId: null } });
+    backend.rows.set(U1.userId, {
+      data: clone(withBlock(defaultData(), "srv")),
+      updatedAt: 9_000_000,
+    });
+    setup({
+      local: withBlock(),
+      meta: { updatedAt: 500, syncedAt: null, userId: null },
+    });
     await flush();
-    expect(engine.getState()).toMatchObject({ session: U1, pro: false, status: "locked" });
+    expect(engine.getState()).toMatchObject({
+      session: U1,
+      pro: false,
+      status: "locked",
+    });
     edit((d) => withBlock(d, "b2", 2));
     await vi.advanceTimersByTimeAsync(5000);
     expect(backend.pulls).toBe(0);
     expect(backend.pushes).toHaveLength(0);
-    expect(store.getSnapshot().data.weeks[0].map((b) => b.id)).toEqual(["b1", "b2"]);
+    expect(store.getSnapshot().data.weeks[0].map((b) => b.id)).toEqual([
+      "b1",
+      "b2",
+    ]);
   });
 
   it("buying later: asking again (or coming back to the app) turns sync on", async () => {
     backend.pro = false;
-    setup({ local: withBlock(), meta: { updatedAt: 500, syncedAt: null, userId: null } });
+    setup({
+      local: withBlock(),
+      meta: { updatedAt: 500, syncedAt: null, userId: null },
+    });
     await flush();
     backend.pro = true;
     engine.onVisible();
@@ -621,19 +921,32 @@ describe("sync engine: Pro is sync (JP, 2026-11-17)", () => {
     setup();
     await flush();
     await engine.signOut();
-    expect(engine.getState()).toMatchObject({ session: null, pro: null, status: "local" });
+    expect(engine.getState()).toMatchObject({
+      session: null,
+      pro: null,
+      status: "local",
+    });
     backend.pro = false;
     backend.emitAuth(U2);
     await flush();
-    expect(engine.getState()).toMatchObject({ session: U2, pro: false, status: "locked" });
+    expect(engine.getState()).toMatchObject({
+      session: U2,
+      pro: false,
+      status: "locked",
+    });
   });
 
   it("Google or Apple: hands the provider the app's address to come back to", async () => {
     setup({ session: null });
     await flush();
     expect(await engine.signInWith("google")).toEqual({ ok: true });
-    expect(backend.oauth).toEqual([{ provider: "google", redirectTo: REDIRECT }]);
+    expect(backend.oauth).toEqual([
+      { provider: "google", redirectTo: REDIRECT },
+    ]);
     backend.online = false;
-    expect(await engine.signInWith("apple")).toEqual({ ok: false, reason: "offline" });
+    expect(await engine.signInWith("apple")).toEqual({
+      ok: false,
+      reason: "offline",
+    });
   });
 });
