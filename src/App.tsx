@@ -246,13 +246,20 @@ export default function App() {
   });
   // sign-in first (JP, 2026-11-17): the app opens on sign-in until signed in or skipped on this device
   const [signInSkipped, setSignInSkipped] = useState(readSignInSkipped);
-  const showSignIn = !MOVED_TO && shouldShowSignIn({
+  // Settings → Sync → Sign in: the same page, with "Back to Settings"; it closes once signed in
+  const [signInAsked, setSignInAsked] = useState(false);
+  useEffect(() => {
+    if (sync.session) setSignInAsked(false);
+  }, [sync.session]);
+  const signInGate = !MOVED_TO && shouldShowSignIn({
     configured: sync.configured,
     ready: sync.ready,
     signedIn: sync.session !== null || sync.restoreFailed, // offline with a saved session: still signed in
     skipped: signInSkipped,
     recovery: sync.recovery,
   });
+  // asked for from Settings, on any address; on its own, never on the old address (it shows the move)
+  const showSignIn = (signInAsked && !sync.session) || signInGate;
   const showIntro = !MOVED_TO && shouldShowIntro({
     intro: onb.intro,
     signInShown: showSignIn,
@@ -489,6 +496,39 @@ export default function App() {
     );
   })();
 
+  // weeks arriving from the old address: above whatever shows, the sign-in page included
+  const handoffCard = handoff.arrival && (
+    <HandoffCard
+      summary={handoff.arrival.result.ok ? handoff.arrival.result.summary : null}
+      failed={!handoff.arrival.result.ok}
+      phone={isPhone}
+      onBring={bringHandoff}
+      onNotNow={handoff.declined}
+    />
+  );
+
+  // the sign-in page is a page of its own (JP, 2026-11-18: "a proper page, not a popup"): the app
+  // isn't drawn behind it; signing in, continuing without an account, or Back opens the app
+  if (showSignIn)
+    return (
+      <div style={{ ...S.root, ...S.signInRoot }}>
+        <style>{FONT_IMPORT}</style>
+        <SignInPage
+          phone={isPhone}
+          providers={PROVIDERS}
+          recovery={sync.recovery}
+          onSkip={skipSignIn}
+          onBack={signInAsked && !signInGate ? () => setSignInAsked(false) : undefined}
+          signIn={sync.signIn}
+          signUp={sync.signUp}
+          sendReset={sync.sendReset}
+          setPassword={sync.setPassword}
+          signInWith={sync.signInWith}
+        />
+        {handoffCard}
+      </div>
+    );
+
   return (
     <div style={S.root}>
       <style>{FONT_IMPORT}</style>
@@ -660,7 +700,7 @@ export default function App() {
         <SettingsView
           data={data}
           onReplace={onReplace}
-          sync={sync.configured ? sync : null}
+          sync={sync.configured ? { ...sync, onSignIn: () => setSignInAsked(true) } : null}
           earlyBird={earlyBird}
           onReplayIntro={onb.replay}
           dayHours={dayHours}
@@ -692,28 +732,7 @@ export default function App() {
       {showIntro && (
         <PurposePage phone={isPhone} onStart={onb.startTour} onSkip={onb.skipIntro} />
       )}
-      {showSignIn && (
-        <SignInPage
-          phone={isPhone}
-          providers={PROVIDERS}
-          recovery={sync.recovery}
-          onSkip={skipSignIn}
-          signIn={sync.signIn}
-          signUp={sync.signUp}
-          sendReset={sync.sendReset}
-          setPassword={sync.setPassword}
-          signInWith={sync.signInWith}
-        />
-      )}
-      {handoff.arrival && (
-        <HandoffCard
-          summary={handoff.arrival.result.ok ? handoff.arrival.result.summary : null}
-          failed={!handoff.arrival.result.ok}
-          phone={isPhone}
-          onBring={bringHandoff}
-          onNotNow={handoff.declined}
-        />
-      )}
+      {handoffCard}
     </div>
   );
 }

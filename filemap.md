@@ -136,9 +136,9 @@
 - `src/components/GoalText.tsx` — an area's target, number first with its sign ("≥ 4 h at least"); the Areas list and Stats rows
 - `src/components/CategoriesView.tsx` — the Areas tab: a list (icon on colour, name, weekly goal); tap one to change its name, At least / At most / Between, hours and block length (− / ＋ in half hours), colour (palette or any), icon; delete asks first
 - `src/components/SettingsView.tsx` — "Your data": export / import with summary + confirm, download of the pre-guardrails copy, balanced-week rules, Your day (calendar hours), sounds, language; hosts "Account & sync" when sync is configured; About (what it is, show the introduction again, privacy and terms, help and feedback)
-- `src/components/SignInPage.tsx` — what the app opens on when signed out (until skipped on this device): the sign-in form + "Continue without an account"
+- `src/components/SignInPage.tsx` — the sign-in page, a page of its own (the app isn't drawn behind it): what the app opens on when signed out (until skipped on this device), and where Settings → Sync → Sign in leads; the sign-in form + "Continue without an account" or "Back to Settings"
 - `src/components/SignInForm.tsx` — Google / Apple, email + password sign in, create an account, reset link, new password (sign-in page and Settings)
-- `src/components/AccountSync.tsx` — Settings "Account & sync": conflict card, signed-out SignInForm, signed-in email + status + sign out, "Delete my account" (asked first)
+- `src/components/AccountSync.tsx` — Settings "Account & sync": conflict card, signed out a Sign in link to the sign-in page, signed-in email + status + sign out, "Delete my account" (asked first)
 - `src/lib/icons.ts` — the area icon names (`AREA_ICONS`, `isAreaIcon`)
 - `src/components/AreaIconView.tsx` — an area's icon (lucide) in its colour, or its colour dot (`AreaMark`)
 - `src/lib/templatePreview.ts` — what a template, starter or day template would do (`previewChange`), and the miniature's hours

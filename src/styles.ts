@@ -1175,6 +1175,26 @@ export const S = {
     padding: "18px 16px",
     borderRadius: 14
   },
+  // the sign-in page (JP, 2026-11-18): a page of its own, the app's paper and header, no card over the app
+  signInRoot: {
+    minHeight: "100dvh",
+    boxSizing: "border-box"
+  },
+  signInMain: {
+    width: "100%",
+    maxWidth: 440,
+    margin: "clamp(12px, 7vh, 64px) auto 0",
+    display: "flex",
+    flexDirection: "column",
+    gap: 18
+  },
+  signInFoot: {
+    display: "flex",
+    flexDirection: "column",
+    marginTop: 4,
+    paddingTop: 14,
+    borderTop: `1px dashed ${line}`
+  },
   onboardTop: {
     display: "flex",
     alignItems: "center",

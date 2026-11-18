@@ -257,6 +257,7 @@ export const fr: Messages = {
     line: "Planifiez une semaine qui garde de la place pour votre vie.",
     skip: "Continuer sans compte",
     skipNote: "Vos semaines restent sur cet appareil.",
+    back: "Retour aux réglages",
   },
   guide: {
     drag: {

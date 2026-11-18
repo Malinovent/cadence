@@ -267,6 +267,7 @@ export const en = {
     line: "Plan a week that keeps room for your life.",
     skip: "Continue without an account",
     skipNote: "Your weeks stay on this device.",
+    back: "Back to Settings",
   },
   guide: {
     drag: {

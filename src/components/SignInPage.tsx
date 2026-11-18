@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react";
 import { APP_NAME } from "../appName";
 import { useI18n } from "../i18n/I18nProvider";
 import { S } from "../styles";
@@ -12,68 +11,49 @@ type Props = SignInActions & {
   recovery: boolean;
   /** "Continue without an account": the app on this device, sign-in stays in Settings */
   onSkip: () => void;
+  /** opened from Settings → Sync: back to Settings instead of "Continue without an account" */
+  onBack?: () => void;
 };
 
-const FOCUSABLE = "button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex='-1'])";
-
 /**
- * Sign-in first (JP, 2026-11-17): what the app opens on when nobody is signed in, until this
- * device continues without an account. Same full-screen card as the intro page.
+ * Sign-in first (JP, 2026-11-17), as a page of its own (JP, 2026-11-18: "it should instead be a
+ * proper page, not a popup"): what the app opens on when nobody is signed in, until this device
+ * continues without an account, and where Settings → Sync → Sign in leads. The app isn't drawn
+ * behind it; signing in (or continuing) opens the app.
  */
-export default function SignInPage({ phone, providers, recovery, onSkip, ...actions }: Props) {
+export default function SignInPage({ phone, providers, recovery, onSkip, onBack, ...actions }: Props) {
   const { m } = useI18n();
-  const ref = useRef<HTMLDivElement>(null);
-
-  // Tab stays inside; the page behind doesn't scroll
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Tab" || !ref.current) return;
-      const els = Array.from(ref.current.querySelectorAll<HTMLElement>(FOCUSABLE));
-      if (els.length === 0) return;
-      const first = els[0];
-      const last = els[els.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    const overflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = overflow;
-    };
-  }, []);
-
   return (
-    <div style={S.onboardBackdrop}>
-      <div
-        ref={ref}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="signin-title"
-        style={{ ...S.onboardCard, ...(phone ? S.onboardCardPhone : {}) }}
-      >
+    <>
+      <header style={{ ...S.header, ...(phone ? S.headerPhone : {}) }}>
+        <div>
+          <h1 style={{ ...S.logo, ...(phone ? S.logoPhone : {}) }}>{APP_NAME}</h1>
+          {!phone && <p style={S.tagline}>{m.header.tagline}</p>}
+        </div>
+      </header>
+      <main aria-labelledby="signin-title" style={S.signInMain}>
         <h2 id="signin-title" style={S.onboardTitle}>
-          {APP_NAME}
+          {m.signInPage.line}
         </h2>
-        <p style={S.onboardLead}>{m.signInPage.line}</p>
 
         <SignInForm providers={providers} recovery={recovery} autoFocus={!phone} {...actions} />
 
-        {!recovery && (
-          <div style={{ marginTop: 18 }}>
-            <button type="button" style={{ ...S.onboardQuiet, alignSelf: "flex-start" }} onClick={onSkip}>
-              {m.signInPage.skip}
-            </button>
-            <p style={{ ...S.introPromise, marginTop: 4 }}>{m.signInPage.skipNote}</p>
-          </div>
-        )}
-      </div>
-    </div>
+        {!recovery &&
+          (onBack ? (
+            <div style={S.signInFoot}>
+              <button type="button" style={{ ...S.onboardQuiet, alignSelf: "flex-start" }} onClick={onBack}>
+                {m.signInPage.back}
+              </button>
+            </div>
+          ) : (
+            <div style={S.signInFoot}>
+              <button type="button" style={{ ...S.onboardQuiet, alignSelf: "flex-start" }} onClick={onSkip}>
+                {m.signInPage.skip}
+              </button>
+              <p style={{ ...S.introPromise, marginTop: 4 }}>{m.signInPage.skipNote}</p>
+            </div>
+          ))}
+      </main>
+    </>
   );
 }

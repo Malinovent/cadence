@@ -5,7 +5,7 @@ import { proLink } from "../lib/legal";
 import type { AuthResult, ConflictChoice, SyncConflict, SyncSession, SyncStatus } from "../sync/engine";
 import { ink, S } from "../styles";
 import SetRow from "./SetRow";
-import SignInForm, { type SignInActions } from "./SignInForm";
+import type { SignInActions } from "./SignInForm";
 import { useI18n } from "../i18n/I18nProvider";
 
 export type AccountSyncProps = SignInActions & {
@@ -15,6 +15,8 @@ export type AccountSyncProps = SignInActions & {
   status: SyncStatus;
   conflict: SyncConflict | null;
   recovery: boolean;
+  /** Sign in: the app's sign-in page (App.tsx), not a form inside Settings */
+  onSignIn(): void;
   recheckPro(): void;
   signOut(): Promise<void>;
   deleteAccount(): Promise<AuthResult>;
@@ -48,7 +50,6 @@ export default function AccountSync({ children, ...p }: AccountSyncProps & { chi
   // delete my account: asked first, then said plainly once it's done (JP, 2026-11-07)
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleted, setDeleted] = useState(false);
-  const [open, setOpen] = useState(false); // the sign-in form, opened from the Sync row
 
   const onSignOut = async () => {
     if (busy) return;
@@ -70,7 +71,6 @@ export default function AccountSync({ children, ...p }: AccountSyncProps & { chi
   };
 
   const sentence = statusSentence(p.status, m.lib);
-  const signInOpen = open;
 
   // Settings → Data and account: one Sync row; signing in opens under it; Delete my account last and quiet
   return (
@@ -139,27 +139,12 @@ export default function AccountSync({ children, ...p }: AccountSyncProps & { chi
       )}
       {p.session ? null : (
         <>
+          {/* the sign-in page, the same one the app opens on (JP, 2026-11-18: a page, not a popup) */}
           <SetRow label={m.account.title} hint={deleted ? m.account.deletedNote : m.account.hint}>
-            {!signInOpen && (
-              <button type="button" aria-expanded={false} style={S.setLink} onClick={() => setOpen(true)}>
-                {m.account.start}
-              </button>
-            )}
+            <button type="button" style={S.setLink} onClick={p.onSignIn}>
+              {m.account.start}
+            </button>
           </SetRow>
-          {signInOpen && (
-            <div style={S.setPanel}>
-              <SignInForm
-                providers={PROVIDERS}
-                recovery={false}
-                autoFocus
-                signIn={p.signIn}
-                signUp={p.signUp}
-                sendReset={p.sendReset}
-                setPassword={p.setPassword}
-                signInWith={p.signInWith}
-              />
-            </div>
-          )}
         </>
       )}
 
