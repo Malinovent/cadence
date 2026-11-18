@@ -237,9 +237,14 @@ export const en = {
     exampleLabel: "An example of a balanced week",
     example: ["Rest · ≥ 10h at least", "People · ≥ 4h at least", "Work · ≤ 40h at most"],
     promise: "Nothing moves unless you move it. Your weeks stay on this device unless you sign in to sync them.",
-    signIn: "Already use it on another device? Sign in instead",
     skip: "Skip",
     start: "Show me how",
+  },
+  // sign-in first (JP, 2026-11-17)
+  signInPage: {
+    line: "Plan a week that keeps room for your life.",
+    skip: "Continue without an account",
+    skipNote: "Your weeks stay on this device.",
   },
   guide: {
     drag: {

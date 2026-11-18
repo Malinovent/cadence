@@ -196,9 +196,9 @@ export function useOnboarding({
       leaveIntro();
       setCheck((c) => ({ ...c, shown: true }));
     },
-    signIn: () => {
-      leaveIntro();
-      go.settings();
+    /** signed in from the sign-in page into an account that already has weeks: no intro */
+    notNew: () => {
+      if (intro) leaveIntro();
     },
     /** Settings → About: the purpose page again, and the checklist back, starting over at 0 */
     replay: () => {

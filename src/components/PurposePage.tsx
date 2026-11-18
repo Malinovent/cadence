@@ -5,10 +5,8 @@ import { S } from "../styles";
 
 type Props = {
   phone: boolean;
-  canSignIn: boolean; // sync is set up and nobody is signed in
   onStart: () => void; // "Show me how": the guided first block
   onSkip: () => void; // "Skip", Escape: the checklist stays for later
-  onSignIn: () => void; // "Already use it on another device?"
 };
 
 const FOCUSABLE = "button:not([disabled]), a[href], input, [tabindex]:not([tabindex='-1'])";
@@ -56,7 +54,7 @@ const EXAMPLE_COLORS = [REST, PEOPLE, WORK];
  * Onboarding, first screen (JP, 2026-11-07): the purpose, with an example of a balanced week.
  * Then the app teaches one thing at a time in the real calendar. New people only; skippable.
  */
-export default function PurposePage({ phone, canSignIn, onStart, onSkip, onSignIn }: Props) {
+export default function PurposePage({ phone, onStart, onSkip }: Props) {
   const { m, lang, setChoice } = useI18n();
   const ref = useRef<HTMLDivElement>(null);
   const skipRef = useRef(onSkip);
@@ -168,11 +166,6 @@ export default function PurposePage({ phone, canSignIn, onStart, onSkip, onSignI
         </figure>
 
         <p style={S.introPromise}>{m.intro.promise}</p>
-        {canSignIn && (
-          <button type="button" style={{ ...S.onboardQuiet, alignSelf: "flex-start" }} onClick={onSignIn}>
-            {m.intro.signIn}
-          </button>
-        )}
 
         <div style={S.onboardActions}>
           <button type="button" style={S.onboardQuiet} onClick={onSkip}>

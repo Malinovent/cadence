@@ -11,6 +11,11 @@ import WeekGrid from "./components/WeekGrid";
 import WelcomeBack from "./components/WelcomeBack";
 import UndoBar from "./components/UndoBar";
 import PurposePage from "./components/PurposePage";
+import SignInPage from "./components/SignInPage";
+import { PROVIDERS } from "./components/AccountSync";
+import { shouldShowSignIn } from "./lib/signInGate";
+import { isEmptyData } from "./lib/syncLogic";
+import { readSignInSkipped, writeSignInSkipped } from "./state/signInPrefs";
 import Coach, { type CoachAction } from "./components/Coach";
 import Checklist from "./components/Checklist";
 import QuestToast from "./components/QuestToast";
@@ -230,6 +235,23 @@ export default function App() {
       day: (d) => setPhoneDay(d),
     },
   });
+  // sign-in first (JP, 2026-11-17): the app opens on sign-in until signed in or skipped on this device
+  const [signInSkipped, setSignInSkipped] = useState(readSignInSkipped);
+  const showSignIn = shouldShowSignIn({
+    configured: sync.configured,
+    ready: sync.ready,
+    signedIn: sync.session !== null,
+    skipped: signInSkipped,
+    recovery: sync.recovery,
+  });
+  const skipSignIn = () => {
+    writeSignInSkipped();
+    setSignInSkipped(true);
+  };
+  // signed in to an account that already has weeks (a new device): straight to the week, no intro
+  useEffect(() => {
+    if (!showSignIn && sync.session && onb.intro && !isEmptyData(data)) onb.notNew();
+  }, [showSignIn, sync.session, onb, data]);
   const areaName = (id: string) => data.cats.find((c) => c.id === id)?.name || m.lib.panel.untitled;
   const device = isPhone ? "phone" : "desktop";
   const coachFor = (g: Guide): { target: string; title: string; body?: string; actions: CoachAction[] } => {
@@ -638,13 +660,20 @@ export default function App() {
       {onb.finale && !onb.guide && !onb.intro && (
         <QuestFinale colors={data.cats.map((c) => c.color)} onClose={onb.endFinale} phone={isPhone} />
       )}
-      {onb.intro && (
-        <PurposePage
+      {onb.intro && !showSignIn && (
+        <PurposePage phone={isPhone} onStart={onb.startTour} onSkip={onb.skipIntro} />
+      )}
+      {showSignIn && (
+        <SignInPage
           phone={isPhone}
-          canSignIn={sync.configured && !sync.session}
-          onStart={onb.startTour}
-          onSkip={onb.skipIntro}
-          onSignIn={onb.signIn}
+          providers={PROVIDERS}
+          recovery={sync.recovery}
+          onSkip={skipSignIn}
+          signIn={sync.signIn}
+          signUp={sync.signUp}
+          sendReset={sync.sendReset}
+          setPassword={sync.setPassword}
+          signInWith={sync.signInWith}
         />
       )}
     </div>

@@ -228,9 +228,13 @@ export const fr: Messages = {
     example: ["Repos · ≥ 10 h au moins", "Proches · ≥ 4 h au moins", "Travail · ≤ 40 h au plus"],
     promise:
       "Rien ne bouge à moins que vous ne le déplaciez. Vos semaines restent sur cet appareil, sauf si vous vous connectez pour les synchroniser.",
-    signIn: "Vous l'utilisez déjà sur un autre appareil? Connectez-vous plutôt",
     skip: "Passer",
     start: "Montrez-moi",
+  },
+  signInPage: {
+    line: "Planifiez une semaine qui garde de la place pour votre vie.",
+    skip: "Continuer sans compte",
+    skipNote: "Vos semaines restent sur cet appareil.",
   },
   guide: {
     drag: {
