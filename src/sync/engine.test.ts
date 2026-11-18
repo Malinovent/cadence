@@ -697,6 +697,29 @@ describe("sync engine: Pro is sync (JP, 2026-11-17)", () => {
     expect(engine.getState()).toMatchObject({ pro: true, status: "synced" });
   });
 
+  it("a session that can't be restored offline isn't treated as signed out (no sign-in page)", async () => {
+    backend.getSession = async () => {
+      throw new SyncError("network", "Failed to fetch");
+    };
+    setup();
+    await flush();
+    expect(engine.getState()).toMatchObject({ ready: true, session: null, restoreFailed: true });
+    backend.emitAuth(U1); // back online: auth-js refreshes the token
+    await flush();
+    expect(engine.getState()).toMatchObject({ restoreFailed: false, session: U1 });
+  });
+
+  it("a failed restore that turns out signed out clears restoreFailed", async () => {
+    backend.getSession = async () => {
+      throw new SyncError("network", "Failed to fetch");
+    };
+    setup();
+    await flush();
+    backend.emitAuth(null);
+    await flush();
+    expect(engine.getState()).toMatchObject({ restoreFailed: false, session: null });
+  });
+
   it("signing out forgets Pro; the next account is asked afresh", async () => {
     setup();
     await flush();

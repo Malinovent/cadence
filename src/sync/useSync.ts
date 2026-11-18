@@ -42,6 +42,7 @@ const LOCAL_ONLY: SyncState = {
   status: "local",
   conflict: null,
   recovery: false,
+  restoreFailed: false,
 };
 const STARTING: SyncState = {
   configured: true,
@@ -51,6 +52,7 @@ const STARTING: SyncState = {
   status: "local",
   conflict: null,
   recovery: false,
+  restoreFailed: false,
 };
 const NOT_CONFIGURED: AuthResult = { ok: false, reason: "failed" };
 

@@ -75,6 +75,8 @@ export type SyncState = {
   status: SyncStatus; // "local" whenever signed out; check `conflict` first when showing it
   conflict: SyncConflict | null; // first sign-in found different data on both sides; nothing syncs until resolved
   recovery: boolean; // arrived from a reset link: ask for a new password until one is saved
+  /** a saved session couldn't be restored (offline, token to refresh): someone is signed in here, not signed out */
+  restoreFailed: boolean;
 };
 export type AuthResult =
   | { ok: true }
@@ -138,6 +140,7 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
   let checkingPro = false;
   let ready = false;
   let recovery = false; // arrived from a reset link; cleared once a new password is saved
+  let restoreFailed = false; // getSession failed at launch; cleared by the next auth change
   let net: "ok" | "offline" | "error" = "ok"; // result of the last network attempt
   let conflictRow: ServerRow | null = null;
   // first sign-in decided local is this account's copy; meta.userId is set once a push confirms it
@@ -159,6 +162,7 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
     status: "local",
     conflict: null,
     recovery: false,
+    restoreFailed: false,
   };
 
   const compute = (): SyncState => {
@@ -178,6 +182,7 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
       status,
       conflict,
       recovery,
+      restoreFailed,
     };
   };
 
@@ -189,6 +194,7 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
       next.pro === state.pro &&
       next.status === state.status &&
       next.recovery === state.recovery &&
+      next.restoreFailed === state.restoreFailed &&
       jsonEqual(next.conflict, state.conflict);
     if (same) return;
     state = next;
@@ -386,6 +392,10 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
   };
 
   const setSession = (s: SyncSession | null) => {
+    if (restoreFailed) {
+      restoreFailed = false; // auth answered: signed in or out for real
+      emit();
+    }
     if (s && session && s.userId === session.userId) {
       if (s.email !== session.email) {
         session = s;
@@ -434,6 +444,7 @@ export function createSyncEngine(opts: EngineOptions): SyncEngine {
         .catch((e) => {
           if (!running) return;
           ready = true;
+          restoreFailed = true; // only a stored session can fail to restore
           fail(e);
           emit();
         });

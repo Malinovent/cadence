@@ -14,6 +14,7 @@ import PurposePage from "./components/PurposePage";
 import SignInPage from "./components/SignInPage";
 import { PROVIDERS } from "./components/AccountSync";
 import { shouldShowSignIn } from "./lib/signInGate";
+import { shouldShowIntro } from "./lib/introGate";
 import { isEmptyData } from "./lib/syncLogic";
 import { readSignInSkipped, writeSignInSkipped } from "./state/signInPrefs";
 import Coach, { type CoachAction } from "./components/Coach";
@@ -240,9 +241,16 @@ export default function App() {
   const showSignIn = shouldShowSignIn({
     configured: sync.configured,
     ready: sync.ready,
-    signedIn: sync.session !== null,
+    signedIn: sync.session !== null || sync.restoreFailed, // offline with a saved session: still signed in
     skipped: signInSkipped,
     recovery: sync.recovery,
+  });
+  const showIntro = shouldShowIntro({
+    intro: onb.intro,
+    signInShown: showSignIn,
+    ready: sync.ready,
+    signedIn: sync.session !== null,
+    syncing: sync.status === "syncing",
   });
   const skipSignIn = () => {
     writeSignInSkipped();
@@ -660,7 +668,7 @@ export default function App() {
       {onb.finale && !onb.guide && !onb.intro && (
         <QuestFinale colors={data.cats.map((c) => c.color)} onClose={onb.endFinale} phone={isPhone} />
       )}
-      {onb.intro && !showSignIn && (
+      {showIntro && (
         <PurposePage phone={isPhone} onStart={onb.startTour} onSkip={onb.skipIntro} />
       )}
       {showSignIn && (

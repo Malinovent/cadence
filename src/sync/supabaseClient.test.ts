@@ -1,4 +1,4 @@
-import { AuthApiError, AuthRetryableFetchError } from "@supabase/supabase-js";
+import { AuthApiError, AuthRetryableFetchError, AuthWeakPasswordError } from "@supabase/supabase-js";
 import { describe, expect, it } from "vitest";
 import { authError } from "./supabaseClient";
 
@@ -14,6 +14,11 @@ describe("authError: what a Supabase auth error means for the person", () => {
     expect(authError(new AuthApiError("slow down", 429, "over_request_rate_limit")).kind).toBe("rate_limited");
     expect(authError(new AuthApiError("emails", 400, "over_email_send_rate_limit")).kind).toBe("rate_limited");
     expect(authError(new AuthRetryableFetchError("Failed to fetch", 0)).kind).toBe("network");
+  });
+  it("Supabase's own weak-password error (not an AuthApiError) says so too", () => {
+    expect(authError(new AuthWeakPasswordError("Password is known to be weak", 422, ["pwned"])).kind).toBe(
+      "weak_password",
+    );
   });
   it("anything else is a plain failure", () => {
     expect(authError(new AuthApiError("odd", 400, "something_else")).kind).toBe("failed");

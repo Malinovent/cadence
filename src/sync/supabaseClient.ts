@@ -1,5 +1,5 @@
 // SyncClient backed by supabase-js: email + password and Google / Apple auth, the cadence_state row, the push_state RPC.
-import { isAuthApiError, isAuthRetryableFetchError, type Session, type SupabaseClient } from "@supabase/supabase-js";
+import { isAuthApiError, isAuthRetryableFetchError, isAuthWeakPasswordError, type Session, type SupabaseClient } from "@supabase/supabase-js";
 import { parsePro } from "../lib/earlyBird";
 import type { CadenceData } from "../lib/model";
 import { supabase } from "./client";
@@ -19,6 +19,7 @@ const KNOWN: Record<string, SyncErrorKind> = {
 export const authError = (e: unknown): SyncError => {
   const message = e instanceof Error ? e.message : String(e);
   if (isAuthRetryableFetchError(e)) return new SyncError("network", message);
+  if (isAuthWeakPasswordError(e)) return new SyncError("weak_password", message); // not an AuthApiError
   if (isAuthApiError(e)) {
     if (e.status === 429 || RATE_LIMITS.includes(e.code ?? "")) return new SyncError("rate_limited", message);
     const kind = KNOWN[e.code ?? ""];
