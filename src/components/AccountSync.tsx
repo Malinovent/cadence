@@ -1,21 +1,20 @@
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { importSummaryLine } from "../lib/format";
-import { authErrorMessage, authProviders, isValidCode, isValidEmail, statusSentence } from "../lib/syncUi";
+import { authProviders, statusSentence } from "../lib/syncUi";
 import { proLink } from "../lib/legal";
-import type { AuthResult, ConflictChoice, OAuthProvider, SyncConflict, SyncSession, SyncStatus } from "../sync/engine";
+import type { AuthResult, ConflictChoice, SyncConflict, SyncSession, SyncStatus } from "../sync/engine";
 import { ink, S } from "../styles";
 import SetRow from "./SetRow";
+import SignInForm, { type SignInActions } from "./SignInForm";
 import { useI18n } from "../i18n/I18nProvider";
 
-export type AccountSyncProps = {
+export type AccountSyncProps = SignInActions & {
   session: SyncSession | null;
   /** the email has Pro (sync); null while not known */
   pro: boolean | null;
   status: SyncStatus;
   conflict: SyncConflict | null;
-  sendCode(email: string): Promise<AuthResult>;
-  verifyCode(email: string, code: string): Promise<AuthResult>;
-  signInWith(provider: OAuthProvider): Promise<AuthResult>;
+  recovery: boolean;
   recheckPro(): void;
   signOut(): Promise<void>;
   deleteAccount(): Promise<AuthResult>;
@@ -34,81 +33,22 @@ const errorLine = {
   color: "var(--c-danger)",
   marginTop: 10,
 } as const;
-const smallTextBtn = {
-  ...S.textBtn,
-  fontSize: 12,
-  fontWeight: 400,
-  color: "var(--c-muted)",
-} as const;
 const off = (disabled: boolean) => (disabled ? { opacity: 0.5, cursor: "default" } : {});
-const input = { ...S.tplNameInput, flex: "1 1 220px", maxWidth: 320 } as const;
 
-type Step = { kind: "email" } | { kind: "code"; email: string };
-
-// the providers set up in Supabase (docs/SIGNIN_SETUP.md); none: the email code only
-const PROVIDERS = authProviders(import.meta.env.VITE_AUTH_PROVIDERS);
+// the providers set up in Supabase (docs/SIGNIN_SETUP.md); none: email and password only
+export const PROVIDERS = authProviders(import.meta.env.VITE_AUTH_PROVIDERS);
 
 // Settings → Data and account → Sync (SPEC "Phase 4 design: sync" → "UI"). Rendered only when sync is configured.
 /** `children`: the rows that sit between Sync and the quiet Delete my account (export, import). */
 export default function AccountSync({ children, ...p }: AccountSyncProps & { children?: ReactNode }) {
   const { m, lang } = useI18n();
   const buyPro = proLink(import.meta.env.VITE_SITE_URL, lang);
-  const [step, setStep] = useState<Step>({ kind: "email" });
-  const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [busy, setBusy] = useState<"send" | "verify" | "signout" | "delete" | OAuthProvider | null>(null);
+  const [busy, setBusy] = useState<"signout" | "delete" | null>(null);
   const [error, setError] = useState<string | null>(null);
   // delete my account: asked first, then said plainly once it's done (JP, 2026-11-07)
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleted, setDeleted] = useState(false);
   const [open, setOpen] = useState(false); // the sign-in form, opened from the Sync row
-
-  const onSend = async (e: FormEvent) => {
-    e.preventDefault();
-    if (busy) return;
-    const addr = email.trim();
-    if (!isValidEmail(addr)) return; // the button stays disabled until the address looks right
-    setError(null);
-    setBusy("send");
-    const r = await p.sendCode(addr);
-    setBusy(null);
-    if (r.ok) {
-      setCode("");
-      setStep({ kind: "code", email: addr });
-    } else setError(authErrorMessage(r.reason, m.lib));
-  };
-
-  const onVerify = async (e: FormEvent) => {
-    e.preventDefault();
-    if (busy || step.kind !== "code") return;
-    if (!isValidCode(code)) return; // the button stays disabled until a full code is typed
-    setError(null);
-    setBusy("verify");
-    const r = await p.verifyCode(step.email, code.trim());
-    setBusy(null);
-    if (r.ok) {
-      setStep({ kind: "email" });
-      setCode("");
-    } else setError(authErrorMessage(r.reason, m.lib));
-  };
-
-  // Google / Apple: the page leaves for the provider and comes back signed in; busy until it does
-  const onProvider = async (provider: OAuthProvider) => {
-    if (busy) return;
-    setError(null);
-    setBusy(provider);
-    const r = await p.signInWith(provider);
-    if (!r.ok) {
-      setBusy(null);
-      setError(authErrorMessage(r.reason, m.lib));
-    }
-  };
-  const onDifferentEmail = () => {
-    setStep({ kind: "email" });
-    setEmail("");
-    setCode("");
-    setError(null);
-  };
 
   const onSignOut = async () => {
     if (busy) return;
@@ -130,7 +70,7 @@ export default function AccountSync({ children, ...p }: AccountSyncProps & { chi
   };
 
   const sentence = statusSentence(p.status, m.lib);
-  const signInOpen = open || step.kind === "code";
+  const signInOpen = open;
 
   // Settings → Data and account: one Sync row; signing in opens under it; Delete my account last and quiet
   return (
@@ -208,98 +148,16 @@ export default function AccountSync({ children, ...p }: AccountSyncProps & { chi
           </SetRow>
           {signInOpen && (
             <div style={S.setPanel}>
-              {step.kind === "email" ? (
-                <>
-                  {PROVIDERS.length > 0 && (
-                    <div style={row}>
-                      {PROVIDERS.map((provider) => (
-                        <button
-                          key={provider}
-                          type="button"
-                          style={{
-                            ...S.resetCancel,
-                            minHeight: 44,
-                            ...off(busy !== null),
-                          }}
-                          onClick={() => onProvider(provider)}
-                          disabled={busy !== null}
-                        >
-                          {provider === "google" ? m.account.withGoogle : m.account.withApple}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  <div
-                    style={{
-                      ...S.catIntro,
-                      marginTop: PROVIDERS.length > 0 ? 14 : 0,
-                    }}
-                  >
-                    {PROVIDERS.length > 0 ? m.account.orEmail : m.account.emailOnly}
-                  </div>
-                  <form style={{ ...row, marginTop: 10 }} onSubmit={onSend} noValidate>
-                    <input
-                      style={input}
-                      type="email"
-                      autoComplete="email"
-                      autoFocus
-                      placeholder={m.account.emailPlaceholder}
-                      aria-label={m.account.email}
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      disabled={busy !== null}
-                    />
-                    <button
-                      type="submit"
-                      style={{
-                        ...S.catAdd,
-                        marginTop: 0,
-                        ...off(busy !== null || !isValidEmail(email)),
-                      }}
-                      disabled={busy !== null || !isValidEmail(email)}
-                    >
-                      {busy === "send" ? m.account.sending : m.account.sendCode}
-                    </button>
-                  </form>
-                </>
-              ) : (
-                <>
-                  <div style={{ ...S.catIntro, marginTop: 0 }}>{m.account.checkEmail}</div>
-                  <form style={{ ...row, marginTop: 10 }} onSubmit={onVerify} noValidate>
-                    <input
-                      style={{
-                        ...input,
-                        flex: "0 1 140px",
-                        fontFamily: "'Spline Sans Mono', monospace",
-                        letterSpacing: "0.2em",
-                      }}
-                      inputMode="numeric"
-                      autoComplete="one-time-code"
-                      maxLength={10}
-                      aria-label={m.account.code}
-                      value={code}
-                      onChange={(e) => setCode(e.target.value)}
-                      disabled={busy !== null}
-                    />
-                    <button
-                      type="submit"
-                      style={{
-                        ...S.resetConfirm,
-                        background: "var(--c-done)",
-                        ...off(busy !== null || !isValidCode(code)),
-                      }}
-                      disabled={busy !== null || !isValidCode(code)}
-                    >
-                      {busy === "verify" ? m.account.signingIn : m.account.signIn}
-                    </button>
-                  </form>
-                  <div style={{ marginTop: 10 }}>
-                    <button style={smallTextBtn} onClick={onDifferentEmail} disabled={busy !== null}>
-                      {m.account.differentEmail}
-                    </button>
-                  </div>
-                </>
-              )}
+              <SignInForm
+                providers={PROVIDERS}
+                recovery={false}
+                autoFocus
+                signIn={p.signIn}
+                signUp={p.signUp}
+                sendReset={p.sendReset}
+                setPassword={p.setPassword}
+                signInWith={p.signInWith}
+              />
             </div>
           )}
         </>
