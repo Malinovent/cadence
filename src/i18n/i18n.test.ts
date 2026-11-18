@@ -57,3 +57,17 @@ describe("language", () => {
     expect(parseChoice(null)).toBe("auto");
   });
 });
+
+describe("French off for now (JP, 2026-11-17)", () => {
+  it("is off, so only English is on", async () => {
+    const { FRENCH_ON, LANGS_ON } = await import("./lang");
+    expect(FRENCH_ON).toBe(false);
+    expect(LANGS_ON).toEqual(["en"]);
+  });
+  it("shows English even on a French device or with French chosen", async () => {
+    const { pickLang } = await import("./lang");
+    expect(pickLang("fr", ["fr-CA"])).toBe("en");
+    expect(pickLang("auto", ["fr-CA"])).toBe("en");
+    expect(pickLang("auto", ["fr-CA"], ["fr", "en"])).toBe("fr");
+  });
+});

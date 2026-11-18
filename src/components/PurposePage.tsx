@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useI18n } from "../i18n/I18nProvider";
-import type { Lang } from "../i18n/lang";
+import { LANGS_ON } from "../i18n/lang";
 import { S } from "../styles";
 
 type Props = {
@@ -11,8 +11,8 @@ type Props = {
   onSignIn: () => void; // "Already use it on another device?"
 };
 
-const LANGS: Lang[] = ["fr", "en"];
-const FOCUSABLE = "button:not([disabled]), a[href], input, [tabindex]:not([tabindex='-1'])";
+const FOCUSABLE =
+  "button:not([disabled]), a[href], input, [tabindex]:not([tabindex='-1'])";
 
 // the example week: [area colour, block heights in px] per day, Mon..Sun
 const WORK = "#3C6FE8";
@@ -57,7 +57,13 @@ const EXAMPLE_COLORS = [REST, PEOPLE, WORK];
  * Onboarding, first screen (JP, 2026-11-07): the purpose, with an example of a balanced week.
  * Then the app teaches one thing at a time in the real calendar. New people only; skippable.
  */
-export default function PurposePage({ phone, canSignIn, onStart, onSkip, onSignIn }: Props) {
+export default function PurposePage({
+  phone,
+  canSignIn,
+  onStart,
+  onSkip,
+  onSignIn,
+}: Props) {
   const { m, lang, setChoice } = useI18n();
   const ref = useRef<HTMLDivElement>(null);
   const skipRef = useRef(onSkip);
@@ -67,14 +73,18 @@ export default function PurposePage({ phone, canSignIn, onStart, onSkip, onSignI
 
   // starts on "Show me how"; Escape skips; Tab stays inside; the page behind doesn't scroll
   useEffect(() => {
-    ref.current?.querySelector<HTMLElement>("[data-intro-primary]")?.focus({ preventScroll: true });
+    ref.current
+      ?.querySelector<HTMLElement>("[data-intro-primary]")
+      ?.focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         skipRef.current();
         return;
       }
       if (e.key !== "Tab" || !ref.current) return;
-      const els = Array.from(ref.current.querySelectorAll<HTMLElement>(FOCUSABLE));
+      const els = Array.from(
+        ref.current.querySelectorAll<HTMLElement>(FOCUSABLE),
+      );
       if (els.length === 0) return;
       const first = els[0];
       const last = els[els.length - 1];
@@ -106,21 +116,30 @@ export default function PurposePage({ phone, canSignIn, onStart, onSkip, onSignI
       >
         <div style={S.onboardTop}>
           <span style={{ flex: 1 }} />
-          <span style={S.onboardLang} role="group" aria-label={m.intro.language}>
-            {LANGS.map((l) => (
-              <button
-                key={l}
-                type="button"
-                lang={l}
-                aria-pressed={lang === l}
-                aria-label={m.settings.langNames[l]}
-                onClick={() => setChoice(l)}
-                style={{ ...S.onboardLangBtn, ...(lang === l ? S.onboardLangOn : {}) }}
-              >
-                {l.toUpperCase()}
-              </button>
-            ))}
-          </span>
+          {LANGS_ON.length > 1 && (
+            <span
+              style={S.onboardLang}
+              role="group"
+              aria-label={m.intro.language}
+            >
+              {LANGS_ON.map((l) => (
+                <button
+                  key={l}
+                  type="button"
+                  lang={l}
+                  aria-pressed={lang === l}
+                  aria-label={m.settings.langNames[l]}
+                  onClick={() => setChoice(l)}
+                  style={{
+                    ...S.onboardLangBtn,
+                    ...(lang === l ? S.onboardLangOn : {}),
+                  }}
+                >
+                  {l.toUpperCase()}
+                </button>
+              ))}
+            </span>
+          )}
         </div>
 
         <h2 id="intro-title" style={S.onboardTitle}>
@@ -153,7 +172,12 @@ export default function PurposePage({ phone, canSignIn, onStart, onSkip, onSignI
             {m.intro.example.map((t, i) => (
               <span key={t} style={S.introChip}>
                 <span
-                  style={{ ...S.dot, ...S.taskDot, marginRight: 0, background: EXAMPLE_COLORS[i] }}
+                  style={{
+                    ...S.dot,
+                    ...S.taskDot,
+                    marginRight: 0,
+                    background: EXAMPLE_COLORS[i],
+                  }}
                   aria-hidden="true"
                 />
                 <span>{t}</span>
@@ -165,7 +189,11 @@ export default function PurposePage({ phone, canSignIn, onStart, onSkip, onSignI
 
         <p style={S.introPromise}>{m.intro.promise}</p>
         {canSignIn && (
-          <button type="button" style={{ ...S.onboardQuiet, alignSelf: "flex-start" }} onClick={onSignIn}>
+          <button
+            type="button"
+            style={{ ...S.onboardQuiet, alignSelf: "flex-start" }}
+            onClick={onSignIn}
+          >
             {m.intro.signIn}
           </button>
         )}
@@ -174,7 +202,12 @@ export default function PurposePage({ phone, canSignIn, onStart, onSkip, onSignI
           <button type="button" style={S.onboardQuiet} onClick={onSkip}>
             {m.intro.skip}
           </button>
-          <button type="button" data-intro-primary="" style={S.onboardPrimary} onClick={onStart}>
+          <button
+            type="button"
+            data-intro-primary=""
+            style={S.onboardPrimary}
+            onClick={onStart}
+          >
             {m.intro.start}
           </button>
         </div>

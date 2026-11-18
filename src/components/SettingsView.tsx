@@ -14,13 +14,24 @@ import {
   parseImport,
   type ImportResult,
 } from "../lib/transfer";
-import { clampRules, DEFAULT_RULES, type BalanceRules } from "../lib/balancedWeeks";
+import {
+  clampRules,
+  DEFAULT_RULES,
+  type BalanceRules,
+} from "../lib/balancedWeeks";
 import { readBalanceRules, writeBalanceRules } from "../state/balanceRules";
 import { helpLinks, legalLinks } from "../lib/legal";
 import { playSound, setSoundVolume, soundVolume } from "../state/sound";
 import { applyTheme, readTheme, writeTheme } from "../state/themePrefs";
 import { readDoneStyle, writeDoneStyle } from "../state/doneStylePrefs";
-import { DONE_STYLES, SOFT_TINT, SOLID_TEXT, SOLID_TEXT_SOFT, SOLID_TICK, type DoneStyle } from "../lib/doneStyle";
+import {
+  DONE_STYLES,
+  SOFT_TINT,
+  SOLID_TEXT,
+  SOLID_TEXT_SOFT,
+  SOLID_TICK,
+  type DoneStyle,
+} from "../lib/doneStyle";
 import { withAlpha } from "../lib/gesture";
 import type { Category } from "../lib/model";
 import { fmtDur } from "../lib/time";
@@ -32,7 +43,7 @@ import { fmtTime } from "../lib/time";
 import { APP_NAME } from "../appName";
 import { S } from "../styles";
 import { useI18n } from "../i18n/I18nProvider";
-import type { LangChoice } from "../i18n/lang";
+import { LANGS_ON, type LangChoice } from "../i18n/lang";
 
 const BEFORE_UPDATES = [
   {
@@ -86,7 +97,10 @@ export default function SettingsView({
 
   const onExport = () => {
     if (status.kind !== "pending") setStatus({ kind: "idle" });
-    downloadText(JSON.stringify(buildExport(data), null, 2), exportFilename(new Date()));
+    downloadText(
+      JSON.stringify(buildExport(data), null, 2),
+      exportFilename(new Date()),
+    );
   };
 
   const onPickClick = () => {
@@ -107,7 +121,11 @@ export default function SettingsView({
       return;
     }
     const result = parseImport(text);
-    setStatus(result.ok ? { kind: "pending", result } : { kind: "error", message: result.error });
+    setStatus(
+      result.ok
+        ? { kind: "pending", result }
+        : { kind: "error", message: result.error },
+    );
   };
 
   const onConfirm = () => {
@@ -116,14 +134,25 @@ export default function SettingsView({
     setStatus({ kind: "success" });
   };
 
-  const dropped = status.kind === "pending" ? droppedLine(status.result.dropped, m.lib) : null;
+  const dropped =
+    status.kind === "pending"
+      ? droppedLine(status.result.dropped, m.lib)
+      : null;
   // the lib reports import errors in English; show them in the person's language
   const errorText = (msg: string) =>
-    msg === NOT_A_BACKUP ? m.settings.notBackup : msg === NEWER_VERSION ? m.settings.newerVersion : msg;
+    msg === NOT_A_BACKUP
+      ? m.settings.notBackup
+      : msg === NEWER_VERSION
+        ? m.settings.newerVersion
+        : msg;
   // untouched copies kept before an update migrated the saved data (S1.2 guardrails, S1.5 tasks)
   const [copies] = useState(() =>
-    BEFORE_UPDATES.map((c) => ({ ...c, text: loadPremigrationCopy(c.key) })).filter(
-      (c): c is (typeof BEFORE_UPDATES)[number] & { text: string } => c.text !== null,
+    BEFORE_UPDATES.map((c) => ({
+      ...c,
+      text: loadPremigrationCopy(c.key),
+    })).filter(
+      (c): c is (typeof BEFORE_UPDATES)[number] & { text: string } =>
+        c.text !== null,
     ),
   );
 
@@ -142,40 +171,76 @@ export default function SettingsView({
           ↑
         </span>
       </button>
-      <input ref={fileRef} type="file" accept=".json,application/json" style={{ display: "none" }} onChange={onFile} />
+      <input
+        ref={fileRef}
+        type="file"
+        accept=".json,application/json"
+        style={{ display: "none" }}
+        onChange={onFile}
+      />
       <ResetStatsRow onReset={onResetStats} />
       {(copies.length > 0 || status.kind !== "idle") && (
         <div style={S.setPanel}>
           {copies.map((c) => (
-            <div key={c.key} style={{ ...note, color: "var(--c-muted)", marginTop: 8 }}>
+            <div
+              key={c.key}
+              style={{ ...note, color: "var(--c-muted)", marginTop: 8 }}
+            >
               {m.settings[c.line]}{" "}
-              <button style={S.textLink} onClick={() => downloadText(c.text, c.file)}>
+              <button
+                style={S.textLink}
+                onClick={() => downloadText(c.text, c.file)}
+              >
                 {m.settings.download}
               </button>
             </div>
           ))}
           {status.kind === "pending" && (
-            <div style={{ ...S.streakCard, textAlign: "left", padding: 14, marginTop: 8 }}>
-              <div style={S.catIntro}>{importSummaryLine(status.result.summary, m.lib)}</div>
-              {dropped && <div style={{ ...note, color: "var(--c-faint)", marginTop: 4 }}>{dropped}</div>}
-              <div style={{ ...S.resetWarn, marginTop: 8 }}>{m.settings.replaceWarn}</div>
+            <div
+              style={{
+                ...S.streakCard,
+                textAlign: "left",
+                padding: 14,
+                marginTop: 8,
+              }}
+            >
+              <div style={S.catIntro}>
+                {importSummaryLine(status.result.summary, m.lib)}
+              </div>
+              {dropped && (
+                <div style={{ ...note, color: "var(--c-faint)", marginTop: 4 }}>
+                  {dropped}
+                </div>
+              )}
+              <div style={{ ...S.resetWarn, marginTop: 8 }}>
+                {m.settings.replaceWarn}
+              </div>
               <div style={{ ...row, marginTop: 10 }}>
                 <button style={S.resetConfirm} onClick={onConfirm}>
                   {m.settings.replaceYes}
                 </button>
-                <button style={S.resetCancel} onClick={() => setStatus({ kind: "idle" })}>
+                <button
+                  style={S.resetCancel}
+                  onClick={() => setStatus({ kind: "idle" })}
+                >
                   {m.settings.keepData}
                 </button>
               </div>
             </div>
           )}
           {status.kind === "error" && (
-            <div role="alert" style={{ ...note, color: "var(--c-danger)", marginTop: 8 }}>
+            <div
+              role="alert"
+              style={{ ...note, color: "var(--c-danger)", marginTop: 8 }}
+            >
               {errorText(status.message)}
             </div>
           )}
           {status.kind === "success" && (
-            <div role="status" style={{ ...note, color: "var(--c-done)", marginTop: 8 }}>
+            <div
+              role="status"
+              style={{ ...note, color: "var(--c-done)", marginTop: 8 }}
+            >
               {m.settings.imported}
             </div>
           )}
@@ -198,7 +263,7 @@ export default function SettingsView({
           <LookRow />
           <DoneStyleRow cats={data.cats} />
           <SoundRow />
-          <LanguageRow />
+          {LANGS_ON.length > 1 && <LanguageRow />}
         </div>
         <p style={S.setFoot}>{m.settings.savedHere}</p>
       </SettingsGroup>
@@ -210,7 +275,9 @@ export default function SettingsView({
             <span>{m.settings.earlyThanks}</span>
           </div>
         )}
-        <div style={S.setCard}>{sync ? <AccountSync {...sync}>{dataRows}</AccountSync> : dataRows}</div>
+        <div style={S.setCard}>
+          {sync ? <AccountSync {...sync}>{dataRows}</AccountSync> : dataRows}
+        </div>
       </SettingsGroup>
 
       <SettingsGroup id="help" title={m.settings.groups.help}>
@@ -259,7 +326,10 @@ function ResetStatsRow({ onReset }: { onReset: () => void }) {
                 >
                   {m.stats.resetYes}
                 </button>
-                <button style={S.resetCancel} onClick={() => setConfirming(false)}>
+                <button
+                  style={S.resetCancel}
+                  onClick={() => setConfirming(false)}
+                >
                   {m.stats.keep}
                 </button>
               </div>
@@ -272,7 +342,15 @@ function ResetStatsRow({ onReset }: { onReset: () => void }) {
 }
 
 /** One group of Settings: its title, then its card of rows. */
-function SettingsGroup({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
+function SettingsGroup({
+  id,
+  title,
+  children,
+}: {
+  id: string;
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <section aria-labelledby={`settings-${id}-title`} style={S.setGroup}>
       <h2 id={`settings-${id}-title`} style={S.setGroupTitle}>
@@ -293,11 +371,21 @@ function BalanceRulesRow() {
     setRules(next);
     writeBalanceRules(next);
   };
-  const changed = rules.floorPct !== DEFAULT_RULES.floorPct || rules.ceilingOverPct !== DEFAULT_RULES.ceilingOverPct;
+  const changed =
+    rules.floorPct !== DEFAULT_RULES.floorPct ||
+    rules.ceilingOverPct !== DEFAULT_RULES.ceilingOverPct;
   return (
     <>
-      <SetRow label={m.settings.rulesTitle} hint={m.settings.rulesSummary(rules.floorPct, rules.ceilingOverPct)}>
-        <button type="button" aria-expanded={open} style={S.setLink} onClick={() => setOpen(!open)}>
+      <SetRow
+        label={m.settings.rulesTitle}
+        hint={m.settings.rulesSummary(rules.floorPct, rules.ceilingOverPct)}
+      >
+        <button
+          type="button"
+          aria-expanded={open}
+          style={S.setLink}
+          onClick={() => setOpen(!open)}
+        >
           {open ? m.settings.close : m.settings.edit}
         </button>
       </SetRow>
@@ -342,9 +430,16 @@ function BalanceRulesRow() {
  * The hours the calendar shows (JP, 2026-11-07): 7:00 to 23:00 unless chosen, at least four hours.
  * Blocks outside them still show (the calendar grows to hold them). Saved on this device.
  */
-function DayHoursRows({ hours, onHours }: { hours: Bounds; onHours: (h: Bounds) => void }) {
+function DayHoursRows({
+  hours,
+  onHours,
+}: {
+  hours: Bounds;
+  onHours: (h: Bounds) => void;
+}) {
   const { m, lang } = useI18n();
-  const label = (t: number) => (t === 0 || t === 24 * 60 ? m.settings.midnight : fmtTime(t, lang));
+  const label = (t: number) =>
+    t === 0 || t === 24 * 60 ? m.settings.midnight : fmtTime(t, lang);
   return (
     <>
       <SetRow label={m.settings.dayStart} field>
@@ -361,7 +456,11 @@ function DayHoursRows({ hours, onHours }: { hours: Bounds; onHours: (h: Bounds) 
         </select>
       </SetRow>
       <SetRow label={m.settings.dayEnd} field>
-        <select value={hours[1]} onChange={(e) => onHours(withEnd(hours, Number(e.target.value)))} style={S.setSelect}>
+        <select
+          value={hours[1]}
+          onChange={(e) => onHours(withEnd(hours, Number(e.target.value)))}
+          style={S.setSelect}
+        >
           {endChoices(hours[0]).map((t) => (
             <option key={t} value={t}>
               {label(t)}
@@ -386,7 +485,11 @@ function Choice<T extends string>({
   onChoose: (v: T) => void;
 }) {
   return (
-    <div style={{ ...S.kindGroup, flexWrap: "wrap" }} role="group" aria-label={label}>
+    <div
+      style={{ ...S.kindGroup, flexWrap: "wrap" }}
+      role="group"
+      aria-label={label}
+    >
       {options.map((o) => (
         <button
           key={o.value}
@@ -394,7 +497,11 @@ function Choice<T extends string>({
           lang={o.lang}
           aria-pressed={value === o.value}
           onClick={() => onChoose(o.value)}
-          style={{ ...S.kindBtn, ...S.setSeg, ...(value === o.value ? S.kindBtnActive : {}) }}
+          style={{
+            ...S.kindBtn,
+            ...S.setSeg,
+            ...(value === o.value ? S.kindBtnActive : {}),
+          }}
         >
           {o.label}
         </button>
@@ -412,7 +519,10 @@ function LookRow() {
       <Choice
         label={m.settings.lookTitle}
         value={choice}
-        options={THEME_CHOICES.map((c) => ({ value: c, label: m.settings.looks[c] }))}
+        options={THEME_CHOICES.map((c) => ({
+          value: c,
+          label: m.settings.looks[c],
+        }))}
         onChoose={(c) => {
           setChoice(c);
           writeTheme(c);
@@ -438,7 +548,10 @@ function DoneStyleRow({ cats }: { cats: Category[] }) {
         <Choice
           label={m.settings.doneTitle}
           value={style}
-          options={DONE_STYLES.map((s) => ({ value: s, label: m.settings.doneStyles[s] }))}
+          options={DONE_STYLES.map((s) => ({
+            value: s,
+            label: m.settings.doneStyles[s],
+          }))}
           onChoose={(s) => {
             setStyle(s);
             writeDoneStyle(s);
@@ -446,7 +559,10 @@ function DoneStyleRow({ cats }: { cats: Category[] }) {
         />
       </SetRow>
       {sample.length > 0 && (
-        <div style={{ ...S.setPanel, display: "flex", gap: 8, flexWrap: "wrap" }} aria-hidden="true">
+        <div
+          style={{ ...S.setPanel, display: "flex", gap: 8, flexWrap: "wrap" }}
+          aria-hidden="true"
+        >
           {sample.map((c, i) => {
             const solid = style === "solid";
             return (
@@ -461,11 +577,29 @@ function DoneStyleRow({ cats }: { cats: Category[] }) {
                   color: solid ? SOLID_TEXT : "var(--c-ink)",
                 }}
               >
-                <span style={{ ...S.placedName, display: "flex", alignItems: "center", gap: 4, minWidth: 0 }}>
+                <span
+                  style={{
+                    ...S.placedName,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                    minWidth: 0,
+                  }}
+                >
                   {c.icon && <AreaIconView icon={c.icon} size={12} />}
-                  <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</span>
+                  <span
+                    style={{ overflow: "hidden", textOverflow: "ellipsis" }}
+                  >
+                    {c.name}
+                  </span>
                 </span>
-                <span style={{ ...S.placedDur, color: solid ? SOLID_TEXT_SOFT : c.color, marginLeft: "auto" }}>
+                <span
+                  style={{
+                    ...S.placedDur,
+                    color: solid ? SOLID_TEXT_SOFT : c.color,
+                    marginLeft: "auto",
+                  }}
+                >
                   {fmtDur([60, 90, 120][i], lang)}
                 </span>
                 <span
@@ -496,7 +630,15 @@ function SoundRow() {
   const text = vol === 0 ? m.settings.soundOff : `${vol}%`;
   return (
     <SetRow label={m.settings.soundTitle} field>
-      <span style={{ display: "flex", alignItems: "center", gap: 10, flex: "1 1 180px", maxWidth: 260 }}>
+      <span
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          flex: "1 1 180px",
+          maxWidth: 260,
+        }}
+      >
         <input
           type="range"
           min={0}
@@ -574,10 +716,20 @@ function HelpRows({ onReplayIntro }: { onReplayIntro: () => void }) {
       </button>
       {links && (
         <div style={S.setRow}>
-          <a href={links.privacy} target="_blank" rel="noreferrer" style={S.aboutLink}>
+          <a
+            href={links.privacy}
+            target="_blank"
+            rel="noreferrer"
+            style={S.aboutLink}
+          >
             {m.settings.privacy}
           </a>
-          <a href={links.terms} target="_blank" rel="noreferrer" style={S.aboutLink}>
+          <a
+            href={links.terms}
+            target="_blank"
+            rel="noreferrer"
+            style={S.aboutLink}
+          >
             {m.settings.terms}
           </a>
         </div>

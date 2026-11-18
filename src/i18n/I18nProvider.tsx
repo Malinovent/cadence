@@ -5,7 +5,7 @@ import {
   LOCALE,
   MESSAGES,
   readLangChoice,
-  resolveLang,
+  pickLang,
   writeLangChoice,
   type Lang,
   type LangChoice,
@@ -30,7 +30,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     window.addEventListener("languagechange", onChange);
     return () => window.removeEventListener("languagechange", onChange);
   }, []);
-  const lang = resolveLang(choice, device);
+  const lang = pickLang(choice, device);
   useEffect(() => {
     document.documentElement.lang = LOCALE[lang];
     document.title = MESSAGES[lang].docTitle;
